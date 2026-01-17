@@ -9,6 +9,7 @@ import { SessionCounter } from './SessionCounter';
 import { BreathingAnimation } from './BreathingAnimation';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
+import { useTheme } from '@/hooks/useTheme';
 import {
   TIMER_DURATIONS,
   LONG_BREAK_INTERVAL,
@@ -132,6 +133,9 @@ export function Timer() {
   // Sound notification
   const { play: playSound } = useSound();
 
+  // Theme management
+  const { toggleTheme } = useTheme();
+
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number) => {
     dispatch({ type: 'SET_TIME', time: remaining });
@@ -179,12 +183,12 @@ export function Timer() {
     }
   }, [state.isRunning, state.isBreathing, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
 
-  // Hide celebration after animation
+  // Hide celebration after 3 seconds (auto-transition delay)
   useEffect(() => {
     if (state.showCelebration) {
       const timeout = setTimeout(() => {
         dispatch({ type: 'HIDE_CELEBRATION' });
-      }, 2000);
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [state.showCelebration]);
@@ -215,12 +219,15 @@ export function Timer() {
         case 's':
           dispatch({ type: 'COMPLETE' });
           break;
+        case 'd':
+          toggleTheme();
+          break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused]);
+  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme]);
 
   const handleStart = useCallback(() => {
     if (state.mode === 'work' && !state.isPaused) {

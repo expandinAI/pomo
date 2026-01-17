@@ -41,7 +41,12 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
+    <button
+      type="button"
+      onClick={onComplete}
+      className="flex flex-col items-center justify-center gap-6 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-3xl p-4 -m-4"
+      aria-label="Skip breathing exercise"
+    >
       {/* Breathing circle */}
       <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
         <motion.div
@@ -95,6 +100,16 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
       >
         {phase === 'inhale' ? 'Breathe in...' : 'Breathe out...'}
       </motion.p>
-    </div>
+
+      {/* Skip hint */}
+      <motion.span
+        className="text-sm text-tertiary dark:text-tertiary-dark"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        transition={{ duration: 0.5, delay: 1 }}
+      >
+        Tap to skip
+      </motion.span>
+    </button>
   );
 }
