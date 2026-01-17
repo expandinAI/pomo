@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useReducer, useCallback } from 'react';
+import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
 import { SessionType as SessionTypeComponent } from './SessionType';
 import { SessionCounter } from './SessionCounter';
 import { BreathingAnimation } from './BreathingAnimation';
+import { useTimerWorker } from '@/hooks/useTimerWorker';
+import { useSound } from '@/hooks/useSound';
 import {
   TIMER_DURATIONS,
   LONG_BREAK_INTERVAL,
@@ -30,7 +32,7 @@ type TimerAction =
   | { type: 'START' }
   | { type: 'PAUSE' }
   | { type: 'RESET' }
-  | { type: 'TICK' }
+  | { type: 'SET_TIME'; time: number }
   | { type: 'COMPLETE' }
   | { type: 'SET_MODE'; mode: SessionType }
   | { type: 'START_BREATHING' }
@@ -64,11 +66,8 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         isBreathing: false,
       };
 
-    case 'TICK':
-      if (state.timeRemaining <= 0) {
-        return state;
-      }
-      return { ...state, timeRemaining: state.timeRemaining - 1 };
+    case 'SET_TIME':
+      return { ...state, timeRemaining: action.time };
 
     case 'COMPLETE': {
       const isWorkSession = state.mode === 'work';
@@ -127,6 +126,36 @@ const initialState: TimerState = {
 export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
+  // Track elapsed time for pause/resume
+  const elapsedRef = useRef(0);
+
+  // Sound notification
+  const { play: playSound } = useSound();
+
+  // Handle timer tick from worker
+  const handleTick = useCallback((remaining: number) => {
+    dispatch({ type: 'SET_TIME', time: remaining });
+  }, []);
+
+  // Handle timer completion from worker
+  const handleComplete = useCallback(() => {
+    const wasWorkSession = state.mode === 'work';
+    dispatch({ type: 'COMPLETE' });
+    elapsedRef.current = 0;
+    // Play sound on completion
+    playSound(wasWorkSession ? 'completion' : 'break');
+  }, [playSound, state.mode]);
+
+  // Initialize Web Worker timer
+  const {
+    start: workerStart,
+    pause: workerPause,
+    reset: workerReset,
+  } = useTimerWorker(TIMER_DURATIONS[state.mode], {
+    onTick: handleTick,
+    onComplete: handleComplete,
+  });
+
   // Update tab title
   useEffect(() => {
     if (state.isRunning) {
@@ -138,23 +167,17 @@ export function Timer() {
     }
   }, [state.isRunning, state.isPaused, state.timeRemaining, state.mode]);
 
-  // Timer tick
+  // Sync worker with running state
   useEffect(() => {
-    if (!state.isRunning || state.isBreathing) return;
-
-    const interval = setInterval(() => {
-      dispatch({ type: 'TICK' });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [state.isRunning, state.isBreathing]);
-
-  // Check for completion
-  useEffect(() => {
-    if (state.timeRemaining === 0 && state.isRunning) {
-      dispatch({ type: 'COMPLETE' });
+    if (state.isRunning && !state.isBreathing) {
+      const duration = TIMER_DURATIONS[state.mode];
+      const elapsed = duration - state.timeRemaining;
+      workerStart(duration, elapsed);
+    } else if (!state.isRunning && state.isPaused) {
+      workerPause();
+      elapsedRef.current = TIMER_DURATIONS[state.mode] - state.timeRemaining;
     }
-  }, [state.timeRemaining, state.isRunning]);
+  }, [state.isRunning, state.isBreathing, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
 
   // Hide celebration after animation
   useEffect(() => {
@@ -213,11 +236,15 @@ export function Timer() {
 
   const handleReset = useCallback(() => {
     dispatch({ type: 'RESET' });
-  }, []);
+    workerReset(TIMER_DURATIONS[state.mode]);
+    elapsedRef.current = 0;
+  }, [workerReset, state.mode]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode });
-  }, []);
+    workerReset(TIMER_DURATIONS[mode]);
+    elapsedRef.current = 0;
+  }, [workerReset]);
 
   const handleBreathingComplete = useCallback(() => {
     dispatch({ type: 'END_BREATHING' });
