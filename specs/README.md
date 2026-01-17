@@ -29,16 +29,31 @@ Lokales Backlog-System für das Pomo Projekt.
 | [POMO-016](./POMO-016-web-worker.md) | Web Worker for background timer | DONE | P0 | Technical Foundation |
 | [POMO-017](./POMO-017-wake-lock.md) | Wake Lock API integration | TODO | P1 | Technical Foundation |
 | [POMO-018](./POMO-018-performance.md) | Performance optimization | TODO | P1 | Technical Foundation |
+| [POMO-019](./POMO-019-custom-timer.md) | Custom Timer Lengths | DONE | P0 | Premium Features |
+| [POMO-020](./POMO-020-session-history.md) | Session History | DONE | P0 | Premium Features |
+| [POMO-021](./POMO-021-sound-pack.md) | Premium Sound Pack | DONE | P1 | Premium Features |
+| [POMO-022](./POMO-022-color-themes.md) | Color Themes | DONE | P1 | Premium Features |
 
-## Sprint 1 Scope (P0)
+## Konzepte & Strategie
+
+| Dokument | Beschreibung |
+|----------|--------------|
+| [Premium Roadmap](./CONCEPT-premium-roadmap.md) | Monetarisierungsstrategie & Feature-Priorisierung |
+
+## Sprint 1 Scope (P0) - DONE
 - POMO-001, POMO-002, POMO-003, POMO-004
 - POMO-007, POMO-008, POMO-009
 - POMO-015, POMO-016
 
 **Total: 22 Points**
 
+## Sprint 2 Scope (Premium Foundation)
+- POMO-019, POMO-020, POMO-021, POMO-022
+
+**Total: 10 Points**
+
 ## Statistik
-- **P0 (Urgent):** 9 Stories
-- **P1 (High):** 7 Stories
+- **P0 (Urgent):** 11 Stories
+- **P1 (High):** 9 Stories
 - **P2 (Medium):** 2 Stories
-- **Gesamt:** 18 Stories, 43 Points
+- **Gesamt:** 22 Stories, 53 Points
