@@ -1,0 +1,17 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFF5F3" />
+      <stop offset="100%" stop-color="#FAFAF9" />
+    </linearGradient>
+    <linearGradient id="sunriseGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFAB91" />
+      <stop offset="50%" stop-color="#FF6B6B" />
+      <stop offset="100%" stop-color="#E85A4F" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+  <rect x="460" y="175" width="280" height="280" rx="64" fill="url(#sunriseGrad)" />
+  <text x="600" y="540" text-anchor="middle" fill="#1C1917" font-size="48" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Pomo</text>
+  <text x="600" y="585" text-anchor="middle" fill="#78716C" font-size="24" font-family="system-ui, -apple-system, sans-serif">Focus Timer</text>
+</svg>
