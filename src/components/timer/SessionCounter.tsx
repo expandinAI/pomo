@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Circle, CircleCheck } from 'lucide-react';
+import { Circle, CheckCircle2 } from 'lucide-react';
 import { LONG_BREAK_INTERVAL, SPRING } from '@/styles/design-tokens';
 
 interface SessionCounterProps {
@@ -35,7 +35,7 @@ export function SessionCounter({ count }: SessionCounterProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ type: 'spring', ...SPRING.bouncy }}
                   >
-                    <CircleCheck className="w-5 h-5 text-accent dark:text-accent-dark" />
+                    <CheckCircle2 className="w-5 h-5 text-accent dark:text-accent-dark" />
                   </motion.div>
                 ) : (
                   <motion.div
