@@ -9,14 +9,16 @@ import { SessionCounter } from './SessionCounter';
 import { BreathingAnimation } from './BreathingAnimation';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
+import { useTheme } from '@/hooks/useTheme';
+import { useTimerSettings, type TimerDurations } from '@/hooks/useTimerSettings';
 import {
-  TIMER_DURATIONS,
   LONG_BREAK_INTERVAL,
   type SessionType,
   SESSION_LABELS,
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime } from '@/lib/utils';
+import { addSession } from '@/lib/session-storage';
 
 interface TimerState {
   mode: SessionType;
@@ -31,17 +33,14 @@ interface TimerState {
 type TimerAction =
   | { type: 'START' }
   | { type: 'PAUSE' }
-  | { type: 'RESET' }
+  | { type: 'RESET'; durations: TimerDurations }
   | { type: 'SET_TIME'; time: number }
-  | { type: 'COMPLETE' }
-  | { type: 'SET_MODE'; mode: SessionType }
+  | { type: 'COMPLETE'; durations: TimerDurations }
+  | { type: 'SET_MODE'; mode: SessionType; durations: TimerDurations }
   | { type: 'START_BREATHING' }
   | { type: 'END_BREATHING' }
-  | { type: 'HIDE_CELEBRATION' };
-
-function getInitialTime(mode: SessionType): number {
-  return TIMER_DURATIONS[mode];
-}
+  | { type: 'HIDE_CELEBRATION' }
+  | { type: 'SYNC_DURATIONS'; durations: TimerDurations };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
@@ -60,7 +59,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     case 'RESET':
       return {
         ...state,
-        timeRemaining: getInitialTime(state.mode),
+        timeRemaining: action.durations[state.mode],
         isRunning: false,
         isPaused: false,
         isBreathing: false,
@@ -87,7 +86,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       return {
         ...state,
         mode: nextMode,
-        timeRemaining: getInitialTime(nextMode),
+        timeRemaining: action.durations[nextMode],
         isRunning: false,
         isPaused: false,
         completedPomodoros: newCompletedPomodoros,
@@ -99,11 +98,21 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       return {
         ...state,
         mode: action.mode,
-        timeRemaining: getInitialTime(action.mode),
+        timeRemaining: action.durations[action.mode],
         isRunning: false,
         isPaused: false,
         isBreathing: false,
       };
+
+    case 'SYNC_DURATIONS':
+      // Only update time if timer is not running or paused
+      if (!state.isRunning && !state.isPaused) {
+        return {
+          ...state,
+          timeRemaining: action.durations[state.mode],
+        };
+      }
+      return state;
 
     case 'HIDE_CELEBRATION':
       return { ...state, showCelebration: false };
@@ -113,9 +122,16 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
   }
 }
 
+// Default durations for initial state
+const DEFAULT_DURATIONS: TimerDurations = {
+  work: 25 * 60,
+  shortBreak: 5 * 60,
+  longBreak: 15 * 60,
+};
+
 const initialState: TimerState = {
   mode: 'work',
-  timeRemaining: TIMER_DURATIONS.work,
+  timeRemaining: DEFAULT_DURATIONS.work,
   isRunning: false,
   isPaused: false,
   isBreathing: false,
@@ -126,11 +142,28 @@ const initialState: TimerState = {
 export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
+  // Custom timer settings
+  const { durations, isLoaded } = useTimerSettings();
+
+  // Ref to always have current durations
+  const durationsRef = useRef(durations);
+  durationsRef.current = durations;
+
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
 
   // Sound notification
   const { play: playSound } = useSound();
+
+  // Theme management
+  const { toggleTheme } = useTheme();
+
+  // Sync durations when settings load or change
+  useEffect(() => {
+    if (isLoaded) {
+      dispatch({ type: 'SYNC_DURATIONS', durations });
+    }
+  }, [durations, isLoaded]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number) => {
@@ -139,8 +172,14 @@ export function Timer() {
 
   // Handle timer completion from worker
   const handleComplete = useCallback(() => {
-    const wasWorkSession = state.mode === 'work';
-    dispatch({ type: 'COMPLETE' });
+    const sessionMode = state.mode;
+    const sessionDuration = durationsRef.current[sessionMode];
+
+    // Save completed session to history
+    addSession(sessionMode, sessionDuration);
+
+    const wasWorkSession = sessionMode === 'work';
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current });
     elapsedRef.current = 0;
     // Play sound on completion
     playSound(wasWorkSession ? 'completion' : 'break');
@@ -151,7 +190,7 @@ export function Timer() {
     start: workerStart,
     pause: workerPause,
     reset: workerReset,
-  } = useTimerWorker(TIMER_DURATIONS[state.mode], {
+  } = useTimerWorker(durations[state.mode], {
     onTick: handleTick,
     onComplete: handleComplete,
   });
@@ -170,21 +209,21 @@ export function Timer() {
   // Sync worker with running state
   useEffect(() => {
     if (state.isRunning && !state.isBreathing) {
-      const duration = TIMER_DURATIONS[state.mode];
+      const duration = durationsRef.current[state.mode];
       const elapsed = duration - state.timeRemaining;
       workerStart(duration, elapsed);
     } else if (!state.isRunning && state.isPaused) {
       workerPause();
-      elapsedRef.current = TIMER_DURATIONS[state.mode] - state.timeRemaining;
+      elapsedRef.current = durationsRef.current[state.mode] - state.timeRemaining;
     }
   }, [state.isRunning, state.isBreathing, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
 
-  // Hide celebration after animation
+  // Hide celebration after 3 seconds (auto-transition delay)
   useEffect(() => {
     if (state.showCelebration) {
       const timeout = setTimeout(() => {
         dispatch({ type: 'HIDE_CELEBRATION' });
-      }, 2000);
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [state.showCelebration]);
@@ -210,17 +249,20 @@ export function Timer() {
           }
           break;
         case 'r':
-          dispatch({ type: 'RESET' });
+          dispatch({ type: 'RESET', durations: durationsRef.current });
           break;
         case 's':
-          dispatch({ type: 'COMPLETE' });
+          dispatch({ type: 'COMPLETE', durations: durationsRef.current });
+          break;
+        case 'd':
+          toggleTheme();
           break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused]);
+  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme]);
 
   const handleStart = useCallback(() => {
     if (state.mode === 'work' && !state.isPaused) {
@@ -235,14 +277,14 @@ export function Timer() {
   }, []);
 
   const handleReset = useCallback(() => {
-    dispatch({ type: 'RESET' });
-    workerReset(TIMER_DURATIONS[state.mode]);
+    dispatch({ type: 'RESET', durations: durationsRef.current });
+    workerReset(durationsRef.current[state.mode]);
     elapsedRef.current = 0;
   }, [workerReset, state.mode]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
-    dispatch({ type: 'SET_MODE', mode });
-    workerReset(TIMER_DURATIONS[mode]);
+    dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
+    workerReset(durationsRef.current[mode]);
     elapsedRef.current = 0;
   }, [workerReset]);
 

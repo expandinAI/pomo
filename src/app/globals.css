@@ -10,8 +10,12 @@
     --color-text-primary: 28 25 23; /* #1C1917 */
     --color-text-secondary: 120 113 108; /* #78716C */
     --color-text-tertiary: 168 162 158; /* #A8A29E */
-    --color-accent: 13 148 136; /* #0D9488 */
     --color-accent-soft: 204 251 241; /* #CCFBF1 */
+
+    /* Dynamic accent colors (set by theme) */
+    --color-accent: #0D9488;
+    --color-accent-hover: #0F766E;
+    --color-accent-light: #14B8A6;
 
     /* Motion */
     --duration-fast: 150ms;
@@ -27,8 +31,12 @@
     --color-text-primary: 250 250 249; /* #FAFAF9 */
     --color-text-secondary: 168 162 158; /* #A8A29E */
     --color-text-tertiary: 120 113 108; /* #78716C */
-    --color-accent: 45 212 191; /* #2DD4BF */
     --color-accent-soft: 19 78 74; /* #134E4A */
+
+    /* Dynamic accent colors for dark mode (set by theme) */
+    --color-accent-dark: #2DD4BF;
+    --color-accent-dark-hover: #5EEAD4;
+    --color-accent-dark-light: #14B8A6;
   }
 
   /* System font smoothing */

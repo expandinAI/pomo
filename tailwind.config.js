@@ -18,11 +18,11 @@ module.exports = {
           DEFAULT: '#FFFFFF',
           dark: '#1C1917',
         },
-        // Accent - Teal
+        // Accent - Dynamic via CSS variables
         accent: {
-          DEFAULT: '#0D9488',
+          DEFAULT: 'var(--color-accent)',
           soft: '#CCFBF1',
-          dark: '#2DD4BF',
+          dark: 'var(--color-accent-dark)',
           'dark-soft': '#134E4A',
         },
         // Text colors using stone palette
