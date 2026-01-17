@@ -8,6 +8,7 @@ import { SessionType as SessionTypeComponent } from './SessionType';
 import { SessionCounter } from './SessionCounter';
 import { BreathingAnimation } from './BreathingAnimation';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
+import { useSound } from '@/hooks/useSound';
 import {
   TIMER_DURATIONS,
   LONG_BREAK_INTERVAL,
@@ -128,6 +129,9 @@ export function Timer() {
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
 
+  // Sound notification
+  const { play: playSound } = useSound();
+
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number) => {
     dispatch({ type: 'SET_TIME', time: remaining });
@@ -135,9 +139,12 @@ export function Timer() {
 
   // Handle timer completion from worker
   const handleComplete = useCallback(() => {
+    const wasWorkSession = state.mode === 'work';
     dispatch({ type: 'COMPLETE' });
     elapsedRef.current = 0;
-  }, []);
+    // Play sound on completion
+    playSound(wasWorkSession ? 'completion' : 'break');
+  }, [playSound, state.mode]);
 
   // Initialize Web Worker timer
   const {
