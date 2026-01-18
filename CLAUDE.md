@@ -2,6 +2,28 @@
 
 This file provides guidance to Claude Code when working with the Pomo codebase.
 
+## Projekt-Management (vault/)
+
+Dieses Projekt nutzt `vault/` für lokales Projekt-Management (ersetzt Linear):
+
+```
+vault/
+├── ideas/            # Rohe Ideen
+├── features/         # PRDs/Feature-Specs
+├── stories/          # User Stories (backlog/, active/, done/)
+├── decisions/        # Architecture Decision Records
+├── ROADMAP.md        # Übersicht
+└── CHANGELOG.md      # Historie
+```
+
+**Skill:** Nutze den `product-owner` Skill (`.claude/skills/product-owner/SKILL.md`) für:
+- "Neue Idee: [Beschreibung]" → Erstellt `vault/ideas/...`
+- "Was steht an?" → Zeigt Backlog
+- "Erstell Stories für Feature X" → Generiert User Stories
+- "Story X ist fertig" → Verschiebt nach done/, updated CHANGELOG
+
+---
+
 ## Project Overview
 
 **Pomo** is an Apple Design Award-worthy Pomodoro timer web app. The goal is to create a "sanctuary of calm" for focused work—beautiful, minimal, and premium-feeling.
