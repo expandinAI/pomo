@@ -22,6 +22,7 @@ export function ThemeToggle() {
         initial={false}
         animate={{ rotate: isDark ? 180 : 0, opacity: 1 }}
         transition={{ type: 'spring', ...SPRING.gentle }}
+        aria-hidden="true"
       >
         {isDark ? (
           <Moon className="w-5 h-5" />

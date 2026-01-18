@@ -21,14 +21,14 @@ Lokales Backlog-System für das Pomo Projekt.
 | [POMO-008](./POMO-008-button-component.md) | Button component with all states | DONE | P0 | Premium Feel |
 | [POMO-009](./POMO-009-dark-light-mode.md) | Dark/Light mode with system detection | DONE | P0 | Premium Feel |
 | [POMO-010](./POMO-010-timer-animation.md) | Timer animation (start/complete) | DONE | P1 | Premium Feel |
-| [POMO-011](./POMO-011-loading-states.md) | Loading/skeleton states | TODO | P1 | Premium Feel |
+| [POMO-011](./POMO-011-loading-states.md) | Loading/skeleton states | DONE | P1 | Premium Feel |
 | [POMO-012](./POMO-012-breathing-animation.md) | "The Breath" breathing animation | DONE | P1 | Signature Moments |
 | [POMO-013](./POMO-013-completion-celebration.md) | Completion celebration animation | DONE | P1 | Signature Moments |
-| [POMO-014](./POMO-014-sound-design.md) | Sound design (completion chime) | TODO | P2 | Signature Moments |
+| [POMO-014](./POMO-014-sound-design.md) | Sound design (completion chime) | DONE | P2 | Signature Moments |
 | [POMO-015](./POMO-015-pwa-manifest.md) | PWA manifest and service worker | DONE | P0 | Technical Foundation |
 | [POMO-016](./POMO-016-web-worker.md) | Web Worker for background timer | DONE | P0 | Technical Foundation |
-| [POMO-017](./POMO-017-wake-lock.md) | Wake Lock API integration | TODO | P1 | Technical Foundation |
-| [POMO-018](./POMO-018-performance.md) | Performance optimization | TODO | P1 | Technical Foundation |
+| [POMO-017](./POMO-017-wake-lock.md) | Wake Lock API integration | DONE | P1 | Technical Foundation |
+| [POMO-018](./POMO-018-performance.md) | Performance optimization | DONE | P1 | Technical Foundation |
 | [POMO-019](./POMO-019-custom-timer.md) | Custom Timer Lengths | DONE | P0 | Premium Features |
 | [POMO-020](./POMO-020-session-history.md) | Session History | DONE | P0 | Premium Features |
 | [POMO-021](./POMO-021-sound-pack.md) | Premium Sound Pack | DONE | P1 | Premium Features |
@@ -37,8 +37,8 @@ Lokales Backlog-System für das Pomo Projekt.
 | [POMO-024](./POMO-024-haptic-feedback.md) | Haptic Feedback System | DONE | P1 | Premium Feel |
 | [POMO-025](./POMO-025-sound-refinements.md) | Sound Refinements | DONE | P1 | Premium Feel |
 | [POMO-026](./POMO-026-ambient-soundscapes.md) | Ambient Soundscapes | DONE | P1 | Premium Features |
-| [POMO-027](./POMO-027-keyboard-shortcuts-extended.md) | Extended Keyboard Shortcuts | TODO | P1 | Accessibility |
-| [POMO-028](./POMO-028-screen-reader.md) | Screen Reader Optimization | TODO | P1 | Accessibility |
+| [POMO-027](./POMO-027-keyboard-shortcuts-extended.md) | Extended Keyboard Shortcuts | DONE | P1 | Accessibility |
+| [POMO-028](./POMO-028-screen-reader.md) | Screen Reader Optimization | DONE | P1 | Accessibility |
 
 ## Konzepte & Strategie
 
@@ -70,7 +70,7 @@ Lokales Backlog-System für das Pomo Projekt.
 
 **Total: 8 Points**
 
-## Sprint 5 Scope (Accessibility)
+## Sprint 5 Scope (Accessibility) - DONE
 - POMO-027: Extended Keyboard Shortcuts (2 points)
 - POMO-028: Screen Reader Optimization (3 points)
 

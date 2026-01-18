@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer, useCallback, useRef } from 'react';
+import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
@@ -13,6 +13,9 @@ import { useTheme } from '@/hooks/useTheme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useAmbientSound } from '@/hooks/useAmbientSound';
 import { useTimerSettings, type TimerDurations } from '@/hooks/useTimerSettings';
+import { useSoundSettings } from '@/hooks/useSoundSettings';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { TimerSkeleton } from '@/components/ui/Skeleton';
 import {
   LONG_BREAK_INTERVAL,
   type SessionType,
@@ -42,7 +45,8 @@ type TimerAction =
   | { type: 'START_BREATHING' }
   | { type: 'END_BREATHING' }
   | { type: 'HIDE_CELEBRATION' }
-  | { type: 'SYNC_DURATIONS'; durations: TimerDurations };
+  | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
+  | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
@@ -119,6 +123,15 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     case 'HIDE_CELEBRATION':
       return { ...state, showCelebration: false };
 
+    case 'ADJUST_TIME': {
+      // Only allow adjustment when paused or idle (not running)
+      if (state.isRunning) return state;
+      const minTime = 60; // Minimum 1 minute
+      const maxTime = action.durations[state.mode];
+      const newTime = Math.max(minTime, Math.min(maxTime, state.timeRemaining + action.delta));
+      return { ...state, timeRemaining: newTime };
+    }
+
     default:
       return state;
   }
@@ -168,7 +181,20 @@ export function Timer() {
     play: playAmbient,
     stop: stopAmbient,
     type: ambientType,
+    setType: setAmbientType,
+    presets: ambientPresets,
   } = useAmbientSound();
+
+  // Sound settings for mute toggle
+  const { toggleMute, muted } = useSoundSettings();
+
+  // Wake lock to prevent screen from sleeping during active sessions
+  const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
+
+  // Screen reader announcements
+  const [statusAnnouncement, setStatusAnnouncement] = useState('');
+  const [timerAnnouncement, setTimerAnnouncement] = useState('');
+  const lastAnnouncedMinute = useRef<number | null>(null);
 
   // Sync durations when settings load or change
   useEffect(() => {
@@ -254,6 +280,82 @@ export function Timer() {
     }
   }, [state.isRunning, state.mode, ambientType, playAmbient, stopAmbient]);
 
+  // Wake lock: prevent screen from sleeping during active sessions
+  useEffect(() => {
+    if (state.isRunning) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+  }, [state.isRunning, requestWakeLock, releaseWakeLock]);
+
+  // Screen reader: Announce timer every 5 minutes
+  useEffect(() => {
+    if (!state.isRunning) {
+      lastAnnouncedMinute.current = null;
+      return;
+    }
+
+    const minutes = Math.floor(state.timeRemaining / 60);
+    // Announce at 5-minute intervals (25, 20, 15, 10, 5) and at 1 minute
+    const shouldAnnounce =
+      (minutes > 0 && minutes % 5 === 0 && lastAnnouncedMinute.current !== minutes) ||
+      (minutes === 1 && lastAnnouncedMinute.current !== 1);
+
+    if (shouldAnnounce) {
+      lastAnnouncedMinute.current = minutes;
+      const label = minutes === 1 ? '1 minute remaining' : `${minutes} minutes remaining`;
+      setTimerAnnouncement(label);
+      // Clear after announcement
+      setTimeout(() => setTimerAnnouncement(''), 1000);
+    }
+  }, [state.timeRemaining, state.isRunning]);
+
+  // Screen reader: Announce status changes
+  const prevRunningRef = useRef(state.isRunning);
+  const prevModeRef = useRef(state.mode);
+  useEffect(() => {
+    const wasRunning = prevRunningRef.current;
+    const prevMode = prevModeRef.current;
+    prevRunningRef.current = state.isRunning;
+    prevModeRef.current = state.mode;
+
+    // Session started
+    if (state.isRunning && !wasRunning && !state.isPaused) {
+      const minutes = Math.floor(durationsRef.current[state.mode] / 60);
+      setStatusAnnouncement(`${SESSION_LABELS[state.mode]} started, ${minutes} minutes`);
+    }
+    // Session paused
+    else if (!state.isRunning && wasRunning && state.isPaused) {
+      setStatusAnnouncement('Session paused');
+    }
+    // Session resumed
+    else if (state.isRunning && !wasRunning && state.isPaused) {
+      setStatusAnnouncement('Session resumed');
+    }
+    // Session completed (mode changed)
+    else if (state.mode !== prevMode && !state.isRunning) {
+      if (state.showCelebration) {
+        setStatusAnnouncement('Focus session complete. Well done!');
+      } else if (prevMode !== 'work') {
+        setStatusAnnouncement('Break complete. Ready for focus.');
+      }
+    }
+
+    // Clear announcement after delay
+    if (statusAnnouncement) {
+      const timeout = setTimeout(() => setStatusAnnouncement(''), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [state.isRunning, state.isPaused, state.mode, state.showCelebration, statusAnnouncement]);
+
+  // Cycle to next ambient type
+  const cycleAmbientType = useCallback(() => {
+    const currentIndex = ambientPresets.findIndex((p) => p.id === ambientType);
+    const nextIndex = (currentIndex + 1) % ambientPresets.length;
+    setAmbientType(ambientPresets[nextIndex].id);
+  }, [ambientType, ambientPresets, setAmbientType]);
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -262,7 +364,7 @@ export function Timer() {
         return;
       }
 
-      switch (e.key.toLowerCase()) {
+      switch (e.key) {
         case ' ':
           e.preventDefault();
           if (state.isBreathing) return;
@@ -275,20 +377,61 @@ export function Timer() {
           }
           break;
         case 'r':
+        case 'R':
           dispatch({ type: 'RESET', durations: durationsRef.current });
           break;
         case 's':
+        case 'S':
           dispatch({ type: 'COMPLETE', durations: durationsRef.current });
           break;
         case 'd':
+        case 'D':
           toggleTheme();
+          break;
+        // Session type switching
+        case '1':
+          if (!state.isRunning && !state.isBreathing) {
+            dispatch({ type: 'SET_MODE', mode: 'work', durations: durationsRef.current });
+          }
+          break;
+        case '2':
+          if (!state.isRunning && !state.isBreathing) {
+            dispatch({ type: 'SET_MODE', mode: 'shortBreak', durations: durationsRef.current });
+          }
+          break;
+        case '3':
+          if (!state.isRunning && !state.isBreathing) {
+            dispatch({ type: 'SET_MODE', mode: 'longBreak', durations: durationsRef.current });
+          }
+          break;
+        // Time adjustment (only when not running)
+        case 'ArrowUp':
+          if (!state.isRunning) {
+            e.preventDefault();
+            dispatch({ type: 'ADJUST_TIME', delta: 60, durations: durationsRef.current });
+          }
+          break;
+        case 'ArrowDown':
+          if (!state.isRunning) {
+            e.preventDefault();
+            dispatch({ type: 'ADJUST_TIME', delta: -60, durations: durationsRef.current });
+          }
+          break;
+        // Sound controls
+        case 'm':
+        case 'M':
+          toggleMute();
+          break;
+        case 'a':
+        case 'A':
+          cycleAmbientType();
           break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme]);
+  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -320,6 +463,11 @@ export function Timer() {
   const handleBreathingComplete = useCallback(() => {
     dispatch({ type: 'END_BREATHING' });
   }, []);
+
+  // Show skeleton while settings are loading to prevent layout shift
+  if (!isLoaded) {
+    return <TimerSkeleton />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-8 w-full max-w-lg mx-auto">
@@ -361,10 +509,29 @@ export function Timer() {
         onStart={handleStart}
         onPause={handlePause}
         onReset={handleReset}
+        mode={state.mode}
       />
 
       {/* Session counter */}
       <SessionCounter count={state.completedPomodoros} />
+
+      {/* Screen reader live regions */}
+      <div
+        role="status"
+        aria-live="assertive"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {statusAnnouncement}
+      </div>
+      <div
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {timerAnnouncement}
+      </div>
     </div>
   );
 }

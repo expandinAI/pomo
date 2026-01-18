@@ -1,6 +1,6 @@
 # POMO-028: Screen Reader Optimization
 
-**Status:** TODO
+**Status:** DONE
 **Priority:** P1 - High
 **Estimate:** 3 points
 **Epic:** Accessibility

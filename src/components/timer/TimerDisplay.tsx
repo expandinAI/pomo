@@ -69,6 +69,13 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
   const [justStarted, setJustStarted] = useState(false);
   const reducedMotion = prefersReducedMotion();
 
+  // Generate accessible time label
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = timeRemaining % 60;
+  const ariaTimeLabel = minutes > 0
+    ? `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''} remaining`
+    : `${seconds} second${seconds !== 1 ? 's' : ''} remaining`;
+
   // Detect when timer starts and trigger scale animation
   useEffect(() => {
     if (isRunning && !prevIsRunning.current) {
@@ -83,7 +90,12 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
   const characters = formattedTime.split('');
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div
+      className="relative flex items-center justify-center"
+      role="timer"
+      aria-label={ariaTimeLabel}
+      aria-live="off"
+    >
       {/* Celebration glow effect */}
       <AnimatePresence>
         {showCelebration && (
@@ -93,6 +105,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
             animate={{ opacity: 1, scale: 1.2 }}
             exit={{ opacity: 0, scale: 1.4 }}
             transition={{ duration: 0.6 }}
+            aria-hidden="true"
           />
         )}
       </AnimatePresence>
@@ -127,6 +140,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
+              aria-hidden="true"
             />
           )}
         </AnimatePresence>

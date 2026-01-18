@@ -5,13 +5,46 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Keyboard } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 
-const SHORTCUTS = [
-  { key: 'Space', description: 'Start / Pause' },
-  { key: 'R', description: 'Reset' },
-  { key: 'S', description: 'Skip' },
-  { key: 'D', description: 'Dark mode' },
-  { key: '?', description: 'Shortcuts' },
-] as const;
+interface ShortcutGroup {
+  title: string;
+  shortcuts: { key: string; description: string }[];
+}
+
+const SHORTCUT_GROUPS: ShortcutGroup[] = [
+  {
+    title: 'Timer',
+    shortcuts: [
+      { key: 'Space', description: 'Start / Pause' },
+      { key: 'R', description: 'Reset' },
+      { key: 'S', description: 'Skip session' },
+      { key: '↑ / ↓', description: '+/- 1 min (paused)' },
+    ],
+  },
+  {
+    title: 'Sessions',
+    shortcuts: [
+      { key: '1', description: 'Focus mode' },
+      { key: '2', description: 'Short break' },
+      { key: '3', description: 'Long break' },
+    ],
+  },
+  {
+    title: 'Sound',
+    shortcuts: [
+      { key: 'M', description: 'Mute / Unmute' },
+      { key: 'A', description: 'Cycle ambient' },
+    ],
+  },
+  {
+    title: 'General',
+    shortcuts: [
+      { key: 'D', description: 'Dark / Light mode' },
+      { key: '⌘ ,', description: 'Open settings' },
+      { key: 'Esc', description: 'Close modal' },
+      { key: '?', description: 'This help' },
+    ],
+  },
+];
 
 export function ShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,24 +115,33 @@ export function ShortcutsHelp() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -8 }}
               transition={{ type: 'spring', ...SPRING.gentle }}
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 min-w-[160px]"
+              className="absolute bottom-full left-0 mb-2 z-50 min-w-[220px]"
             >
-              <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-lg border border-tertiary/10 dark:border-tertiary-dark/10 p-3">
-                <h3 className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider mb-2">
-                  Shortcuts
+              <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-lg border border-tertiary/10 dark:border-tertiary-dark/10 p-4">
+                <h3 className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider mb-3">
+                  Keyboard Shortcuts
                 </h3>
-                <ul className="space-y-1.5">
-                  {SHORTCUTS.map(({ key, description }) => (
-                    <li key={key} className="flex items-center justify-between gap-4 text-sm">
-                      <span className="text-secondary dark:text-secondary-dark">
-                        {description}
-                      </span>
-                      <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background dark:bg-background-dark rounded border border-tertiary/20 dark:border-tertiary-dark/20 text-tertiary dark:text-tertiary-dark">
-                        {key}
-                      </kbd>
-                    </li>
+                <div className="space-y-3">
+                  {SHORTCUT_GROUPS.map((group) => (
+                    <div key={group.title}>
+                      <h4 className="text-xs font-medium text-tertiary/70 dark:text-tertiary-dark/70 mb-1.5">
+                        {group.title}
+                      </h4>
+                      <ul className="space-y-1">
+                        {group.shortcuts.map(({ key, description }) => (
+                          <li key={key} className="flex items-center justify-between gap-3 text-sm">
+                            <span className="text-secondary dark:text-secondary-dark">
+                              {description}
+                            </span>
+                            <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background dark:bg-background-dark rounded border border-tertiary/20 dark:border-tertiary-dark/20 text-tertiary dark:text-tertiary-dark whitespace-nowrap">
+                              {key}
+                            </kbd>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </motion.div>
           </>

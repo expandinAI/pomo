@@ -1,6 +1,6 @@
 # POMO-027: Extended Keyboard Shortcuts
 
-**Status:** TODO
+**Status:** DONE
 **Priority:** P1 - High
 **Estimate:** 2 points
 **Epic:** Accessibility

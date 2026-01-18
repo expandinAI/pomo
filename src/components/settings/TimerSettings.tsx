@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
@@ -51,6 +51,11 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
   const [isOpen, setIsOpen] = useState(false);
   const { durations, updateDuration, applyPreset, currentPreset, isLoaded } = useTimerSettings();
 
+  // Focus management refs
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   const toggleOpen = useCallback(() => {
     if (!disabled) {
       setIsOpen((prev) => !prev);
@@ -69,6 +74,62 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  // Listen for custom event to open settings (from Cmd+, shortcut)
+  useEffect(() => {
+    function handleOpenSettings() {
+      if (!disabled) {
+        setIsOpen(true);
+      }
+    }
+
+    window.addEventListener('pomo:open-settings', handleOpenSettings);
+    return () => window.removeEventListener('pomo:open-settings', handleOpenSettings);
+  }, [disabled]);
+
+  // Focus management: save focus on open, restore on close
+  useEffect(() => {
+    if (isOpen) {
+      // Save current focus
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Focus close button after modal animation
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+    } else if (previousFocusRef.current) {
+      // Restore focus when closing
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [isOpen]);
+
+  // Focus trap within modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Tab' || !modalRef.current) return;
+
+      const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusableElements.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
       }
     }
 
@@ -112,18 +173,25 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                 className="w-[90vw] max-w-sm max-h-[85vh]"
                 onClick={(e) => e.stopPropagation()}
               >
-              <div className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh]">
+              <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="settings-title"
+                className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh]"
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10">
-                  <h2 className="text-base font-semibold text-primary dark:text-primary-dark">
+                  <h2 id="settings-title" className="text-base font-semibold text-primary dark:text-primary-dark">
                     Timer Settings
                   </h2>
                   <button
+                    ref={closeButtonRef}
                     onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     aria-label="Close settings"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
 

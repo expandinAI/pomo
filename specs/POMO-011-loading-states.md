@@ -1,6 +1,6 @@
 # POMO-011: Loading/skeleton states
 
-**Status:** TODO
+**Status:** DONE
 **Priority:** P1 - High
 **Estimate:** 2 points
 **Epic:** Premium Feel Foundation

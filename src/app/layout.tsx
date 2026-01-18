@@ -66,6 +66,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-background text-primary min-h-screen`}
       >
+        {/* Skip to main content link for keyboard/screen reader users */}
+        <a
+          href="#main-timer"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-surface dark:focus:bg-surface-dark focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-primary dark:focus:text-primary-dark focus:ring-2 focus:ring-accent focus:outline-none"
+        >
+          Skip to timer
+        </a>
         {/* Script to prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
