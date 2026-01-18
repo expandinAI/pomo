@@ -33,6 +33,12 @@ Lokales Backlog-System für das Pomo Projekt.
 | [POMO-020](./POMO-020-session-history.md) | Session History | DONE | P0 | Premium Features |
 | [POMO-021](./POMO-021-sound-pack.md) | Premium Sound Pack | DONE | P1 | Premium Features |
 | [POMO-022](./POMO-022-color-themes.md) | Color Themes | DONE | P1 | Premium Features |
+| [POMO-023](./POMO-023-micro-animations.md) | Micro-Animations | DONE | P1 | Premium Feel |
+| [POMO-024](./POMO-024-haptic-feedback.md) | Haptic Feedback System | DONE | P1 | Premium Feel |
+| [POMO-025](./POMO-025-sound-refinements.md) | Sound Refinements | DONE | P1 | Premium Feel |
+| [POMO-026](./POMO-026-ambient-soundscapes.md) | Ambient Soundscapes | DONE | P1 | Premium Features |
+| [POMO-027](./POMO-027-keyboard-shortcuts-extended.md) | Extended Keyboard Shortcuts | TODO | P1 | Accessibility |
+| [POMO-028](./POMO-028-screen-reader.md) | Screen Reader Optimization | TODO | P1 | Accessibility |
 
 ## Konzepte & Strategie
 
@@ -47,13 +53,31 @@ Lokales Backlog-System für das Pomo Projekt.
 
 **Total: 22 Points**
 
-## Sprint 2 Scope (Premium Foundation)
+## Sprint 2 Scope (Premium Foundation) - DONE
 - POMO-019, POMO-020, POMO-021, POMO-022
 
 **Total: 10 Points**
 
+## Sprint 3 Scope (Micro-Interactions & Haptics) - DONE
+- POMO-023: Micro-Animations (5 points)
+- POMO-024: Haptic Feedback (3 points)
+- POMO-025: Sound Refinements (3 points)
+
+**Total: 11 Points**
+
+## Sprint 4 Scope (Ambient Soundscapes) - DONE
+- POMO-026: Ambient Soundscapes (8 points)
+
+**Total: 8 Points**
+
+## Sprint 5 Scope (Accessibility)
+- POMO-027: Extended Keyboard Shortcuts (2 points)
+- POMO-028: Screen Reader Optimization (3 points)
+
+**Total: 5 Points**
+
 ## Statistik
 - **P0 (Urgent):** 11 Stories
-- **P1 (High):** 9 Stories
+- **P1 (High):** 15 Stories
 - **P2 (Medium):** 2 Stories
-- **Gesamt:** 22 Stories, 53 Points
+- **Gesamt:** 28 Stories, 77 Points

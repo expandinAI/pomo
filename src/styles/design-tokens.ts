@@ -27,7 +27,22 @@ export const SPRING = {
   default: { stiffness: 400, damping: 30 },
   gentle: { stiffness: 300, damping: 40 },
   bouncy: { stiffness: 500, damping: 25 },
+  snappy: { stiffness: 500, damping: 35 },
 } as const;
+
+// Micro-animation presets for premium feel (no `as const` for Framer Motion compatibility)
+export const MICRO_ANIMATION = {
+  // Subtle colon blink for timer tick (1 second cycle)
+  colonBlink: {
+    opacity: [1, 0.4, 1],
+    transition: { duration: 1, ease: 'easeInOut' as const, repeat: Infinity },
+  },
+  // Celebration scale pulse
+  celebrationPulse: {
+    scale: [1, 1.02, 1],
+    transition: { duration: 0.6, ease: 'easeOut' as const },
+  },
+};
 
 // Colors (for use in JS/TS, e.g., Framer Motion)
 export const COLORS = {
