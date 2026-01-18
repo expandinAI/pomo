@@ -1,18 +1,29 @@
 'use client';
 
-import { Volume2, VolumeX, Check } from 'lucide-react';
+import { Volume2, VolumeX, Check, Waves } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSoundSettings, SOUND_PRESETS, type SoundOption } from '@/hooks/useSoundSettings';
-import { useSound } from '@/hooks/useSound';
+import { useAmbientSound } from '@/hooks/useAmbientSound';
+import { type AmbientType } from '@/lib/ambientGenerators';
 import { SPRING } from '@/styles/design-tokens';
 
-export function SoundSettings() {
-  const { selectedSound, setSound, volume, setVolume, muted, toggleMute } = useSoundSettings();
-  const { preview } = useSound();
+// Icon mapping for ambient types
+const AMBIENT_ICONS: Record<AmbientType, string> = {
+  silence: '',
+  rain: '',
+  forest: '',
+  cafe: '',
+  white: '',
+  ocean: '',
+};
 
-  const handleSelect = (soundId: SoundOption) => {
-    setSound(soundId);
-    preview(soundId);
+export function AmbientSettings() {
+  const { type, volume, setType, setVolume, preview, presets } = useAmbientSound();
+
+  const handleSelect = (ambientType: AmbientType) => {
+    setType(ambientType);
+    if (ambientType !== 'silence') {
+      preview(ambientType);
+    }
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,6 +31,7 @@ export function SoundSettings() {
   };
 
   const volumePercent = Math.round(volume * 100);
+  const isMuted = type === 'silence';
 
   return (
     <div className="space-y-4">
@@ -27,24 +39,26 @@ export function SoundSettings() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider">
-            Volume
+            Ambient Volume
           </label>
           <span className="text-xs text-secondary dark:text-secondary-dark tabular-nums">
             {volumePercent}%
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleMute}
+          <div
             className={`p-1.5 rounded-md transition-colors ${
-              muted
-                ? 'bg-accent/10 dark:bg-accent-dark/10 text-accent dark:text-accent-dark'
-                : 'text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark'
+              isMuted
+                ? 'text-tertiary dark:text-tertiary-dark'
+                : 'text-accent dark:text-accent-dark'
             }`}
-            aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
           >
-            {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
+            {isMuted ? (
+              <VolumeX className="w-4 h-4" />
+            ) : (
+              <Waves className="w-4 h-4" />
+            )}
+          </div>
           <input
             type="range"
             min="0"
@@ -52,9 +66,9 @@ export function SoundSettings() {
             step="0.05"
             value={volume}
             onChange={handleVolumeChange}
-            disabled={muted}
+            disabled={isMuted}
             className={`flex-1 h-1.5 rounded-full appearance-none cursor-pointer
-              ${muted ? 'opacity-50' : ''}
+              ${isMuted ? 'opacity-50' : ''}
               bg-tertiary/20 dark:bg-tertiary-dark/20
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-3.5
@@ -72,7 +86,7 @@ export function SoundSettings() {
               [&::-moz-range-thumb]:dark:bg-accent-dark
               [&::-moz-range-thumb]:border-0
             `}
-            aria-label="Volume"
+            aria-label="Ambient sound volume"
           />
         </div>
       </div>
@@ -80,11 +94,11 @@ export function SoundSettings() {
       {/* Sound Selection */}
       <div className="space-y-2">
         <label className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider">
-          Completion Sound
+          Ambient Sound
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {SOUND_PRESETS.map((preset) => {
-            const isSelected = selectedSound === preset.id;
+          {presets.map((preset) => {
+            const isSelected = type === preset.id;
             return (
               <motion.button
                 key={preset.id}
@@ -97,13 +111,17 @@ export function SoundSettings() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', ...SPRING.default }}
               >
-                <Volume2
-                  className={`w-4 h-4 flex-shrink-0 ${
-                    isSelected
-                      ? 'text-accent dark:text-accent-dark'
-                      : 'text-tertiary dark:text-tertiary-dark'
-                  }`}
-                />
+                <span className="text-lg flex-shrink-0" aria-hidden="true">
+                  {AMBIENT_ICONS[preset.id] || (
+                    <Volume2
+                      className={`w-4 h-4 ${
+                        isSelected
+                          ? 'text-accent dark:text-accent-dark'
+                          : 'text-tertiary dark:text-tertiary-dark'
+                      }`}
+                    />
+                  )}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p
                     className={`text-sm font-medium truncate ${
@@ -125,6 +143,9 @@ export function SoundSettings() {
             );
           })}
         </div>
+        <p className="text-xs text-tertiary dark:text-tertiary-dark mt-2">
+          Plays during focus sessions only
+        </p>
       </div>
     </div>
   );

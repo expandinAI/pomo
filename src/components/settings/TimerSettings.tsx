@@ -7,6 +7,7 @@ import { SPRING } from '@/styles/design-tokens';
 import { useTimerSettings, TIMER_PRESETS, type TimerDurations } from '@/hooks/useTimerSettings';
 import { SoundSettings } from './SoundSettings';
 import { ThemeSettings } from './ThemeSettings';
+import { AmbientSettings } from './AmbientSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -177,6 +178,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Sound Settings */}
                   <SoundSettings />
+
+                  {/* Ambient Sound Settings */}
+                  <AmbientSettings />
 
                   {/* Theme Settings */}
                   <ThemeSettings />

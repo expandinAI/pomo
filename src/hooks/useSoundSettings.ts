@@ -20,46 +20,105 @@ export const SOUND_PRESETS: SoundPreset[] = [
 ];
 
 const STORAGE_KEY = 'pomo_sound_settings';
+const VOLUME_KEY = 'pomo_sound_volume';
+const MUTED_KEY = 'pomo_sound_muted';
+
 const DEFAULT_SOUND: SoundOption = 'default';
+const DEFAULT_VOLUME = 0.75;
 
-function loadSoundSetting(): SoundOption {
-  if (typeof window === 'undefined') return DEFAULT_SOUND;
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && SOUND_PRESETS.some((p) => p.id === stored)) {
-      return stored as SoundOption;
-    }
-  } catch {
-    // Ignore errors
-  }
-  return DEFAULT_SOUND;
+interface SoundSettings {
+  sound: SoundOption;
+  volume: number;
+  muted: boolean;
 }
 
-function saveSoundSetting(sound: SoundOption): void {
+function loadSettings(): SoundSettings {
+  if (typeof window === 'undefined') {
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false };
+  }
+
+  try {
+    const storedSound = localStorage.getItem(STORAGE_KEY);
+    const storedVolume = localStorage.getItem(VOLUME_KEY);
+    const storedMuted = localStorage.getItem(MUTED_KEY);
+
+    return {
+      sound: storedSound && SOUND_PRESETS.some((p) => p.id === storedSound)
+        ? (storedSound as SoundOption)
+        : DEFAULT_SOUND,
+      volume: storedVolume !== null ? parseFloat(storedVolume) : DEFAULT_VOLUME,
+      muted: storedMuted === 'true',
+    };
+  } catch {
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false };
+  }
+}
+
+function saveSettings(settings: Partial<SoundSettings>): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, sound);
+
+  if (settings.sound !== undefined) {
+    localStorage.setItem(STORAGE_KEY, settings.sound);
+  }
+  if (settings.volume !== undefined) {
+    localStorage.setItem(VOLUME_KEY, String(settings.volume));
+  }
+  if (settings.muted !== undefined) {
+    localStorage.setItem(MUTED_KEY, String(settings.muted));
+  }
 }
 
 export function useSoundSettings() {
   const [selectedSound, setSelectedSound] = useState<SoundOption>(DEFAULT_SOUND);
+  const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
+  const [muted, setMutedState] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load setting on mount
+  // Load settings on mount
   useEffect(() => {
-    setSelectedSound(loadSoundSetting());
+    const settings = loadSettings();
+    setSelectedSound(settings.sound);
+    setVolumeState(settings.volume);
+    setMutedState(settings.muted);
     setIsLoaded(true);
   }, []);
 
   // Change sound
   const setSound = useCallback((sound: SoundOption) => {
     setSelectedSound(sound);
-    saveSoundSetting(sound);
+    saveSettings({ sound });
+  }, []);
+
+  // Change volume (0-1)
+  const setVolume = useCallback((vol: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, vol));
+    setVolumeState(clampedVolume);
+    saveSettings({ volume: clampedVolume });
+  }, []);
+
+  // Toggle mute
+  const toggleMute = useCallback(() => {
+    setMutedState((prev) => {
+      const next = !prev;
+      saveSettings({ muted: next });
+      return next;
+    });
+  }, []);
+
+  // Set mute directly
+  const setMuted = useCallback((isMuted: boolean) => {
+    setMutedState(isMuted);
+    saveSettings({ muted: isMuted });
   }, []);
 
   return {
     selectedSound,
     setSound,
+    volume,
+    setVolume,
+    muted,
+    toggleMute,
+    setMuted,
     isLoaded,
     presets: SOUND_PRESETS,
   };

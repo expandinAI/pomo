@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, prefersReducedMotion } from '@/lib/utils';
-import { SPRING, ANIMATION } from '@/styles/design-tokens';
+import { SPRING, ANIMATION, MICRO_ANIMATION } from '@/styles/design-tokens';
 
 interface TimerDisplayProps {
   timeRemaining: number;
@@ -14,20 +14,30 @@ interface TimerDisplayProps {
 // Animated digit component for smooth number transitions
 const AnimatedDigit = memo(function AnimatedDigit({
   char,
-  index
+  index,
+  isRunning,
 }: {
   char: string;
   index: number;
+  isRunning: boolean;
 }) {
   const isColon = char === ':';
   const reducedMotion = prefersReducedMotion();
 
-  // Don't animate the colon
+  // Animate the colon with a subtle blink when running
   if (isColon) {
     return (
-      <span className="inline-block" style={{ width: '0.3em' }}>
+      <motion.span
+        className="inline-block"
+        style={{ width: '0.3em' }}
+        animate={
+          isRunning && !reducedMotion
+            ? MICRO_ANIMATION.colonBlink
+            : { opacity: 1 }
+        }
+      >
         {char}
-      </span>
+      </motion.span>
     );
   }
 
@@ -128,7 +138,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
           transition={{ duration: 0.6, type: 'spring', ...SPRING.gentle }}
         >
           {characters.map((char, index) => (
-            <AnimatedDigit key={index} char={char} index={index} />
+            <AnimatedDigit key={index} char={char} index={index} isRunning={isRunning} />
           ))}
         </motion.div>
 

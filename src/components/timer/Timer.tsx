@@ -10,6 +10,8 @@ import { BreathingAnimation } from './BreathingAnimation';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
 import { useTheme } from '@/hooks/useTheme';
+import { useHaptics } from '@/hooks/useHaptics';
+import { useAmbientSound } from '@/hooks/useAmbientSound';
 import { useTimerSettings, type TimerDurations } from '@/hooks/useTimerSettings';
 import {
   LONG_BREAK_INTERVAL,
@@ -158,6 +160,16 @@ export function Timer() {
   // Theme management
   const { toggleTheme } = useTheme();
 
+  // Haptic feedback
+  const { vibrate } = useHaptics();
+
+  // Ambient sound
+  const {
+    play: playAmbient,
+    stop: stopAmbient,
+    type: ambientType,
+  } = useAmbientSound();
+
   // Sync durations when settings load or change
   useEffect(() => {
     if (isLoaded) {
@@ -181,9 +193,13 @@ export function Timer() {
     const wasWorkSession = sessionMode === 'work';
     dispatch({ type: 'COMPLETE', durations: durationsRef.current });
     elapsedRef.current = 0;
+
+    // Haptic feedback on completion
+    vibrate('medium');
+
     // Play sound on completion
     playSound(wasWorkSession ? 'completion' : 'break');
-  }, [playSound, state.mode]);
+  }, [playSound, state.mode, vibrate]);
 
   // Initialize Web Worker timer
   const {
@@ -228,6 +244,16 @@ export function Timer() {
     }
   }, [state.showCelebration]);
 
+  // Control ambient sound based on timer state
+  // Plays during work sessions only, stops on pause/break/completion
+  useEffect(() => {
+    if (state.isRunning && state.mode === 'work' && ambientType !== 'silence') {
+      playAmbient();
+    } else {
+      stopAmbient();
+    }
+  }, [state.isRunning, state.mode, ambientType, playAmbient, stopAmbient]);
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -265,22 +291,25 @@ export function Timer() {
   }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme]);
 
   const handleStart = useCallback(() => {
+    vibrate('light');
     if (state.mode === 'work' && !state.isPaused) {
       dispatch({ type: 'START_BREATHING' });
     } else {
       dispatch({ type: 'START' });
     }
-  }, [state.mode, state.isPaused]);
+  }, [state.mode, state.isPaused, vibrate]);
 
   const handlePause = useCallback(() => {
+    vibrate('double');
     dispatch({ type: 'PAUSE' });
-  }, []);
+  }, [vibrate]);
 
   const handleReset = useCallback(() => {
+    vibrate('heavy');
     dispatch({ type: 'RESET', durations: durationsRef.current });
     workerReset(durationsRef.current[state.mode]);
     elapsedRef.current = 0;
-  }, [workerReset, state.mode]);
+  }, [workerReset, state.mode, vibrate]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
