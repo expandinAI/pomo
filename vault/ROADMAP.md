@@ -9,7 +9,7 @@ High-level Überblick über Features und Milestones.
 > MVP Feature-Complete - Ready for Analytics & Monetization
 
 **Ziel:** Analytics Foundation + Premium Gate
-**Status:** Sprints 1-5 abgeschlossen, 28 Stories done
+**Status:** Sprints 1-5 abgeschlossen, 30 Stories done
 
 ---
 
@@ -33,12 +33,12 @@ High-level Überblick über Features und Milestones.
 
 Analytics Foundation - transformiere Session-Daten in Insights
 
-| Feature | ID | Priorität | Aufwand |
-|---------|-----|-----------|---------|
-| Weekly Focus Report | POMO-029 | P1 | M |
-| Focus Heatmap | POMO-030 | P1 | M |
-| Total Hours Counter | POMO-031 | P1 | S |
-| Export Data (CSV) | POMO-032 | P2 | S |
+| Feature | ID | Priorität | Aufwand | Status |
+|---------|-----|-----------|---------|--------|
+| Weekly Focus Report | POMO-029 | P1 | M | ✅ Done |
+| Focus Heatmap | POMO-030 | P1 | M | ✅ Done |
+| Total Hours Counter | POMO-031 | P1 | S | Backlog |
+| Export Data (CSV) | POMO-032 | P2 | S | Backlog |
 
 ---
 
@@ -95,8 +95,8 @@ Parked ideas:
 - [x] Performance <100KB
 
 ### v1.0 - Premium Launch
-- [ ] Weekly Focus Report
-- [ ] Focus Heatmap
+- [x] Weekly Focus Report
+- [x] Focus Heatmap
 - [ ] Premium paywall
 - [ ] Payment integration
 - [ ] License system

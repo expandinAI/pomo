@@ -19,6 +19,14 @@ const SessionHistory = dynamic(
   () => import('@/components/insights/SessionHistory').then(mod => ({ default: mod.SessionHistory })),
   { ssr: false }
 );
+const WeeklyReport = dynamic(
+  () => import('@/components/insights/WeeklyReport').then(mod => ({ default: mod.WeeklyReport })),
+  { ssr: false }
+);
+const FocusHeatmap = dynamic(
+  () => import('@/components/insights/FocusHeatmap').then(mod => ({ default: mod.FocusHeatmap })),
+  { ssr: false }
+);
 
 export default function Home() {
   // Initialize color theme on page load
@@ -49,8 +57,10 @@ export default function Home() {
       tabIndex={-1}
       className="relative min-h-screen flex flex-col items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom focus:outline-none"
     >
-      {/* Settings and Theme toggle in top-right corner */}
+      {/* Analytics, Settings and Theme toggle in top-right corner */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
+        <FocusHeatmap />
+        <WeeklyReport />
         <SessionHistory />
         <TimerSettings />
         <ThemeToggle />

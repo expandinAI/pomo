@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: analytics
 created: 2026-01-18
 updated: 2026-01-18
-done_date: null
+done_date: 2026-01-18
 tags: [analytics, insights, premium]
 ---
 
