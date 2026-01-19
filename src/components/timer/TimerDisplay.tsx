@@ -101,7 +101,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
       <AnimatePresence>
         {showCelebration && (
           <motion.div
-            className="absolute inset-0 bg-accent/20 blur-3xl"
+            className="absolute inset-0 bg-accent/20 light:bg-accent-dark/20 blur-3xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1.2 }}
             exit={{ opacity: 0, scale: 1.4 }}
@@ -150,7 +150,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
       <AnimatePresence>
         {showCelebration && (
           <motion.p
-            className="mt-8 text-lg font-medium text-accent"
+            className="mt-8 text-lg font-medium text-accent light:text-accent-dark"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

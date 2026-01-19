@@ -71,7 +71,7 @@ export function ParticleBurst({ isActive, particleCount = 30 }: ParticleBurstPro
             return (
               <motion.div
                 key={particle.id}
-                className="absolute rounded-full bg-accent"
+                className="absolute rounded-full bg-accent light:bg-accent-dark"
                 style={{
                   width: `${particle.size}px`,
                   height: `${particle.size}px`,

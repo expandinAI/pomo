@@ -46,7 +46,7 @@ export const MICRO_ANIMATION = {
   },
 };
 
-// Colors (for use in JS/TS, e.g., Framer Motion) - Monochrome + Blue accent
+// Colors (for use in JS/TS, e.g., Framer Motion) - Pure Monochrome
 // Dark mode is the default/primary theme
 export const COLORS = {
   // Dark is now the default (pure black immersive)
@@ -58,10 +58,10 @@ export const COLORS = {
     textPrimary: '#FAFAFA',
     textSecondary: '#808080',
     textTertiary: '#4A4A4A',
-    accent: '#4F6EF7',
-    accentHover: '#6B85F9',
-    accentSoft: 'rgba(79, 110, 247, 0.15)',
-    accentGlow: 'rgba(79, 110, 247, 0.2)',
+    accent: '#FFFFFF',
+    accentHover: '#E5E5E5',
+    accentSoft: 'rgba(255, 255, 255, 0.12)',
+    accentGlow: 'rgba(255, 255, 255, 0.15)',
   },
   // Light mode is now the alternative theme
   light: {
@@ -72,10 +72,10 @@ export const COLORS = {
     textPrimary: '#171717',
     textSecondary: '#525252',
     textTertiary: '#A3A3A3',
-    accent: '#4F6EF7',
-    accentHover: '#3B5BDB',
-    accentSoft: 'rgba(79, 110, 247, 0.1)',
-    accentGlow: 'rgba(79, 110, 247, 0.1)',
+    accent: '#171717',
+    accentHover: '#000000',
+    accentSoft: 'rgba(0, 0, 0, 0.08)',
+    accentGlow: 'rgba(0, 0, 0, 0.08)',
   },
 } as const;
 

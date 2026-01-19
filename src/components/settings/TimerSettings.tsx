@@ -209,7 +209,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                           onClick={() => applyPreset(preset.name)}
                           className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                             currentPreset === preset.name
-                              ? 'bg-accent light:bg-accent-dark text-white'
+                              ? 'bg-accent light:bg-accent-dark text-background light:text-background-light'
                               : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-secondary light:text-secondary-dark hover:bg-tertiary/20 light:hover:bg-tertiary-dark/20'
                           }`}
                         >

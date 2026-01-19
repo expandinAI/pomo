@@ -24,18 +24,19 @@ module.exports = {
           DEFAULT: '#1A1A1A',
           light: '#E5E5E5',
         },
-        // Accent - Single blue accent
+        // Accent - Monochrome (white for dark, black for light)
         accent: {
-          DEFAULT: '#4F6EF7',
-          hover: '#6B85F9',
-          soft: 'rgba(79, 110, 247, 0.15)',
-          glow: 'rgba(79, 110, 247, 0.2)',
-          'light-hover': '#3B5BDB',
-          'light-soft': 'rgba(79, 110, 247, 0.1)',
+          DEFAULT: '#FFFFFF',
+          hover: '#E5E5E5',
+          soft: 'rgba(255, 255, 255, 0.12)',
+          glow: 'rgba(255, 255, 255, 0.15)',
+          dark: '#171717',
+          'dark-hover': '#000000',
+          'dark-soft': 'rgba(0, 0, 0, 0.08)',
         },
-        // Warm glow for break sessions
+        // Warm glow for break sessions (now monochrome)
         warm: {
-          glow: 'rgba(247, 186, 79, 0.15)',
+          glow: 'rgba(255, 255, 255, 0.1)',
         },
         // Text colors - Dark first
         primary: {
@@ -92,8 +93,8 @@ module.exports = {
         md: '0 4px 8px rgba(0, 0, 0, 0.4)',
         lg: '0 8px 16px rgba(0, 0, 0, 0.5)',
         xl: '0 12px 24px rgba(0, 0, 0, 0.5)',
-        glow: '0 0 20px rgba(79, 110, 247, 0.3)',
-        'glow-sm': '0 0 10px rgba(79, 110, 247, 0.2)',
+        glow: '0 0 20px rgba(255, 255, 255, 0.2)',
+        'glow-sm': '0 0 10px rgba(255, 255, 255, 0.15)',
       },
       animation: {
         'breathe-in': 'breatheIn 1.5s ease-out forwards',
