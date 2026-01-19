@@ -135,6 +135,31 @@ pnpm test         # Run tests
 - `src/lib/timer-worker.ts` - Web Worker for timer
 - `tailwind.config.js` - Design tokens
 
+## Timer Business Logic
+
+### COMPLETE vs. SKIP Actions
+
+Der Timer unterscheidet zwischen **natürlicher Completion** und **manuellem Skip** (S-Taste):
+
+| Aspekt | COMPLETE | SKIP |
+|--------|----------|------|
+| Session Counter | +1 bei Work | Keine Änderung |
+| Celebration | Ja bei Work | Nein |
+| Gespeicherte Zeit | Volle Session-Dauer | Tatsächlich elapsed |
+| Mindest-Schwelle | Keine | >60 Sekunden |
+| Visual Feedback | "Well done!" Animation | "Skipped to [Mode]" Text |
+
+**Wichtig:** Diese Unterscheidung ist bewusst so designed:
+- Skip zählt nicht als vollständige Session (kein Counter-Increment)
+- Skip speichert nur die tatsächlich gearbeitete Zeit
+- Sessions < 60s werden bei Skip nicht gespeichert (nicht sinnvoll)
+- Keine Celebration bei Skip (User hat nicht "fertig" gemacht)
+
+**Code-Location:** `src/components/timer/Timer.tsx`
+- `COMPLETE` Action: Zeile ~76-100
+- `SKIP` Action: Zeile ~102-126
+- `handleSkip` Callback: Zeile ~455-488
+
 ## Anti-Patterns to Avoid
 
 - **No gamification** - No points, badges, streaks

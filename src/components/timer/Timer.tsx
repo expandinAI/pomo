@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
 import { PresetSelector } from './PresetSelector';
@@ -33,6 +34,7 @@ interface TimerState {
   isPaused: boolean;
   completedPomodoros: number;
   showCelebration: boolean;
+  showSkipMessage: boolean;
   currentTask: string;
   estimatedPomodoros: number | null;
 }
@@ -43,8 +45,10 @@ type TimerAction =
   | { type: 'RESET'; durations: TimerDurations }
   | { type: 'SET_TIME'; time: number }
   | { type: 'COMPLETE'; durations: TimerDurations; sessionsUntilLong: number }
+  | { type: 'SKIP'; durations: TimerDurations; sessionsUntilLong: number }
   | { type: 'SET_MODE'; mode: SessionType; durations: TimerDurations }
   | { type: 'HIDE_CELEBRATION' }
+  | { type: 'HIDE_SKIP_MESSAGE' }
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
   | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations }
   | { type: 'SET_TASK'; task: string }
@@ -96,6 +100,32 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       };
     }
 
+    case 'SKIP': {
+      const isWorkSession = state.mode === 'work';
+
+      // Determine next mode (same logic as COMPLETE, but don't increment counter)
+      let nextMode: SessionType;
+      if (isWorkSession) {
+        // Use current count + 1 for break calculation, but don't actually increment
+        nextMode = (state.completedPomodoros + 1) % action.sessionsUntilLong === 0
+          ? 'longBreak'
+          : 'shortBreak';
+      } else {
+        nextMode = 'work';
+      }
+
+      return {
+        ...state,
+        mode: nextMode,
+        timeRemaining: action.durations[nextMode],
+        isRunning: false,
+        isPaused: false,
+        // NO completedPomodoros increment
+        // NO showCelebration
+        showSkipMessage: true,
+      };
+    }
+
     case 'SET_MODE':
       return {
         ...state,
@@ -117,6 +147,9 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
     case 'HIDE_CELEBRATION':
       return { ...state, showCelebration: false };
+
+    case 'HIDE_SKIP_MESSAGE':
+      return { ...state, showSkipMessage: false };
 
     case 'ADJUST_TIME': {
       // Only allow adjustment when paused or idle (not running)
@@ -155,6 +188,7 @@ const initialState: TimerState = {
   isPaused: false,
   completedPomodoros: 0,
   showCelebration: false,
+  showSkipMessage: false,
   currentTask: '',
   estimatedPomodoros: null,
 };
@@ -309,6 +343,16 @@ export function Timer() {
     }
   }, [state.showCelebration]);
 
+  // Hide skip message after 2 seconds
+  useEffect(() => {
+    if (state.showSkipMessage) {
+      const timeout = setTimeout(() => {
+        dispatch({ type: 'HIDE_SKIP_MESSAGE' });
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [state.showSkipMessage]);
+
   // Control ambient sound based on timer state
   // Plays during work sessions only, stops on pause/break/completion
   useEffect(() => {
@@ -387,6 +431,8 @@ export function Timer() {
     else if (state.mode !== prevMode && !state.isRunning) {
       if (state.showCelebration) {
         setStatusAnnouncement('Focus session complete. Well done!');
+      } else if (state.showSkipMessage) {
+        setStatusAnnouncement(`Session skipped. Starting ${SESSION_LABELS[state.mode]}.`);
       } else if (prevMode !== 'work') {
         setStatusAnnouncement('Break complete. Ready for focus.');
       }
@@ -397,7 +443,7 @@ export function Timer() {
       const timeout = setTimeout(() => setStatusAnnouncement(''), 2000);
       return () => clearTimeout(timeout);
     }
-  }, [state.isRunning, state.isPaused, state.mode, state.showCelebration, statusAnnouncement]);
+  }, [state.isRunning, state.isPaused, state.mode, state.showCelebration, state.showSkipMessage, statusAnnouncement]);
 
   // Cycle to next ambient type
   const cycleAmbientType = useCallback(() => {
@@ -405,6 +451,41 @@ export function Timer() {
     const nextIndex = (currentIndex + 1) % ambientPresets.length;
     setAmbientType(ambientPresets[nextIndex].id);
   }, [ambientType, ambientPresets, setAmbientType]);
+
+  // Skip session (complete early with actual elapsed time)
+  const handleSkip = useCallback(() => {
+    const sessionMode = state.mode;
+    const fullDuration = durationsRef.current[sessionMode];
+    const elapsedTime = fullDuration - state.timeRemaining;
+
+    // Only save if > 60 seconds elapsed (minimum threshold)
+    if (elapsedTime > 60) {
+      const wasWorkSession = sessionMode === 'work';
+      const taskData = {
+        ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+        presetId: activePresetIdRef.current,
+      };
+
+      // Save ACTUAL elapsed time, not full duration
+      addSession(sessionMode, elapsedTime, taskData);
+    }
+
+    // Dispatch SKIP action (not COMPLETE!)
+    dispatch({
+      type: 'SKIP',
+      durations: durationsRef.current,
+      sessionsUntilLong: sessionsUntilLongRef.current,
+    });
+
+    elapsedRef.current = 0;
+    playSound('break');
+    vibrate('light');
+
+    // Clear task when skipping work session
+    if (sessionMode === 'work') {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
+  }, [state.mode, state.timeRemaining, state.currentTask, playSound, vibrate]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -429,7 +510,7 @@ export function Timer() {
           break;
         case 's':
         case 'S':
-          dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
+          handleSkip();
           break;
         case 'd':
         case 'D':
@@ -491,7 +572,7 @@ export function Timer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType, applyPreset]);
+  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -515,12 +596,6 @@ export function Timer() {
     workerReset(durationsRef.current[mode]);
     elapsedRef.current = 0;
   }, [workerReset]);
-
-  // Skip session (complete early)
-  const handleSkip = useCallback(() => {
-    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
-    elapsedRef.current = 0;
-  }, []);
 
   // Open settings via custom event
   const handleOpenSettings = useCallback(() => {
@@ -576,6 +651,21 @@ export function Timer() {
         isRunning={state.isRunning}
         showCelebration={state.showCelebration}
       />
+
+      {/* Skip feedback message */}
+      <AnimatePresence>
+        {state.showSkipMessage && (
+          <motion.p
+            className="mt-4 text-sm text-secondary light:text-secondary-dark"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            Skipped to {SESSION_LABELS[state.mode]}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Task input (only for work sessions) */}
       {state.mode === 'work' && (
