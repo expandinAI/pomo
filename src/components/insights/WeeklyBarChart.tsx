@@ -8,17 +8,33 @@ import { prefersReducedMotion } from '@/lib/utils';
 interface WeeklyBarChartProps {
   dailyStats: DailyStats[];
   bestDay: DailyStats | null;
+  /** Goal line in hours (default: 4h based on Cal Newport's recommendation) */
+  goalHours?: number;
+  /** Whether to show the goal line */
+  showGoal?: boolean;
 }
 
 /**
  * Minimal bar chart for weekly focus data
  * Linia-inspired: clean lines, generous spacing, data as art
  */
-export function WeeklyBarChart({ dailyStats, bestDay }: WeeklyBarChartProps) {
+export function WeeklyBarChart({
+  dailyStats,
+  bestDay,
+  goalHours = 4,
+  showGoal = false,
+}: WeeklyBarChartProps) {
   const reducedMotion = prefersReducedMotion();
 
-  // Find max for scaling (minimum 1 to prevent division by zero)
-  const maxSeconds = Math.max(...dailyStats.map(d => d.totalSeconds), 1);
+  // Convert goal to seconds for comparison
+  const goalSeconds = goalHours * 3600;
+
+  // Find max for scaling - include goal if shown (minimum 1 to prevent division by zero)
+  const dataMax = Math.max(...dailyStats.map(d => d.totalSeconds), 1);
+  const maxSeconds = showGoal ? Math.max(dataMax, goalSeconds * 1.1) : dataMax;
+
+  // Calculate goal line position as percentage
+  const goalPercent = showGoal ? (goalSeconds / maxSeconds) * 100 : 0;
 
   // Build aria label for screen readers
   const ariaLabel = dailyStats
@@ -35,11 +51,26 @@ export function WeeklyBarChart({ dailyStats, bestDay }: WeeklyBarChartProps) {
       aria-label={`Weekly focus chart: ${ariaLabel}`}
       className="flex flex-col items-center"
     >
-      {/* Bars container */}
+      {/* Bars container with goal line */}
       <div
-        className="flex items-end justify-center gap-3 h-[120px]"
+        className="flex items-end justify-center gap-3 h-[120px] relative"
         aria-hidden="true"
       >
+        {/* Goal line */}
+        {showGoal && goalPercent > 0 && (
+          <motion.div
+            className="absolute left-0 right-0 flex items-center pointer-events-none"
+            style={{ bottom: `${goalPercent}%` }}
+            initial={reducedMotion ? { opacity: 1 } : { opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 0.3, duration: 0.3 }}
+          >
+            <div className="flex-1 h-px bg-accent/30 light:bg-accent-dark/30 border-dashed" />
+            <span className="ml-2 text-[10px] text-accent/60 light:text-accent-dark/60 font-medium whitespace-nowrap">
+              {goalHours}h
+            </span>
+          </motion.div>
+        )}
         {dailyStats.map((day, index) => {
           const isBestDay = bestDay && day.date === bestDay.date;
           const heightPercent = day.totalSeconds > 0

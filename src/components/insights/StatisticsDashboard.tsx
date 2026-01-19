@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, Clock, Flame, BarChart3 } from 'lucide-react';
+import { X, Zap, Clock, Flame } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { prefersReducedMotion } from '@/lib/utils';
@@ -10,11 +10,15 @@ import { loadSessions, type CompletedSession } from '@/lib/session-storage';
 import {
   filterSessionsByTimeRange,
   calculateDeepWorkMinutes,
+  calculateWeeklyStats,
+  formatHoursDecimal,
+  formatTrendMessage,
   type TimeRange,
 } from '@/lib/session-analytics';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { MetricCard } from './MetricCard';
 import { SessionTimeline } from './SessionTimeline';
+import { WeeklyBarChart } from './WeeklyBarChart';
 
 interface StatisticsDashboardProps {
   refreshTrigger?: number;
@@ -70,6 +74,14 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
   const workSessionsCount = useMemo(() => {
     return filteredSessions.filter(s => s.type === 'work').length;
   }, [filteredSessions]);
+
+  // Calculate weekly stats for the chart (always show current week)
+  // Note: calculateWeeklyStats loads sessions internally from localStorage
+  const weeklyStats = useMemo(() => {
+    if (!isOpen) return null;
+    return calculateWeeklyStats(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, refreshTrigger]);
 
   // Close on Escape
   useEffect(() => {
@@ -182,22 +194,40 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     />
                   </div>
 
-                  {/* Chart Placeholder */}
+                  {/* Weekly Chart */}
                   <motion.div
                     initial={reducedMotion ? {} : { opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={reducedMotion ? { duration: 0 } : { delay: 0.1 }}
-                    className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-6 mb-4"
+                    className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-4 mb-4"
                   >
-                    <div className="flex flex-col items-center justify-center py-6 text-center">
-                      <BarChart3 className="w-10 h-10 text-tertiary/40 light:text-tertiary-dark/40 mb-3" />
-                      <p className="text-sm text-tertiary light:text-tertiary-dark">
-                        Weekly chart coming soon
-                      </p>
-                      <p className="text-xs text-tertiary/70 light:text-tertiary-dark/70 mt-1">
-                        Visualize your focus patterns
-                      </p>
-                    </div>
+                    <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3 text-center">
+                      This Week
+                    </h3>
+                    {weeklyStats && (
+                      <>
+                        <WeeklyBarChart
+                          dailyStats={weeklyStats.dailyStats}
+                          bestDay={weeklyStats.bestDay}
+                          showGoal={true}
+                          goalHours={4}
+                        />
+                        {/* Week summary */}
+                        <div className="mt-4 pt-3 border-t border-tertiary/10 light:border-tertiary-dark/10 flex items-center justify-center gap-4 text-xs">
+                          <span className="text-secondary light:text-secondary-dark">
+                            <span className="font-medium text-primary light:text-primary-dark">
+                              {formatHoursDecimal(weeklyStats.totalSeconds)}h
+                            </span>
+                            {' '}this week
+                          </span>
+                          {formatTrendMessage(weeklyStats) && (
+                            <span className={`${weeklyStats.trend === 'up' ? 'text-accent light:text-accent-dark' : 'text-tertiary light:text-tertiary-dark'}`}>
+                              {formatTrendMessage(weeklyStats)}
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </motion.div>
 
                   {/* Session Timeline */}
