@@ -24,6 +24,8 @@ import {
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime } from '@/lib/utils';
 import { addSession } from '@/lib/session-storage';
+import { addRecentTask } from '@/lib/task-storage';
+import { QuickTaskInput } from '@/components/task';
 
 interface TimerState {
   mode: SessionType;
@@ -32,6 +34,8 @@ interface TimerState {
   isPaused: boolean;
   completedPomodoros: number;
   showCelebration: boolean;
+  currentTask: string;
+  estimatedPomodoros: number | null;
 }
 
 type TimerAction =
@@ -43,7 +47,10 @@ type TimerAction =
   | { type: 'SET_MODE'; mode: SessionType; durations: TimerDurations }
   | { type: 'HIDE_CELEBRATION' }
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
-  | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations };
+  | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations }
+  | { type: 'SET_TASK'; task: string }
+  | { type: 'SET_ESTIMATE'; estimate: number | null }
+  | { type: 'CLEAR_TASK' };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
@@ -121,6 +128,15 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       return { ...state, timeRemaining: newTime };
     }
 
+    case 'SET_TASK':
+      return { ...state, currentTask: action.task };
+
+    case 'SET_ESTIMATE':
+      return { ...state, estimatedPomodoros: action.estimate };
+
+    case 'CLEAR_TASK':
+      return { ...state, currentTask: '', estimatedPomodoros: null };
+
     default:
       return state;
   }
@@ -140,6 +156,8 @@ const initialState: TimerState = {
   isPaused: false,
   completedPomodoros: 0,
   showCelebration: false,
+  currentTask: '',
+  estimatedPomodoros: null,
 };
 
 export function Timer() {
@@ -187,6 +205,9 @@ export function Timer() {
   const [timerAnnouncement, setTimerAnnouncement] = useState('');
   const lastAnnouncedMinute = useRef<number | null>(null);
 
+  // Task input ref for T shortcut
+  const taskInputRef = useRef<HTMLInputElement>(null);
+
   // Sync durations when settings load or change
   useEffect(() => {
     if (isLoaded) {
@@ -203,20 +224,41 @@ export function Timer() {
   const handleComplete = useCallback(() => {
     const sessionMode = state.mode;
     const sessionDuration = durationsRef.current[sessionMode];
-
-    // Save completed session to history
-    addSession(sessionMode, sessionDuration);
-
     const wasWorkSession = sessionMode === 'work';
+
+    // Save completed session to history with task data (only for work sessions)
+    const taskData = wasWorkSession && state.currentTask
+      ? {
+          task: state.currentTask,
+          estimatedPomodoros: state.estimatedPomodoros ?? undefined,
+        }
+      : undefined;
+
+    addSession(sessionMode, sessionDuration, taskData);
+
+    // Save task to recent tasks (only for work sessions with a task)
+    if (wasWorkSession && state.currentTask) {
+      addRecentTask({
+        text: state.currentTask,
+        lastUsed: new Date().toISOString(),
+        estimatedPomodoros: state.estimatedPomodoros ?? undefined,
+      });
+    }
+
     dispatch({ type: 'COMPLETE', durations: durationsRef.current });
     elapsedRef.current = 0;
+
+    // Clear task after completion (only for work sessions)
+    if (wasWorkSession) {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
 
     // Haptic feedback on completion
     vibrate('medium');
 
     // Play sound on completion
     playSound(wasWorkSession ? 'completion' : 'break');
-  }, [playSound, state.mode, vibrate]);
+  }, [playSound, state.mode, state.currentTask, state.estimatedPomodoros, vibrate]);
 
   // Initialize Web Worker timer
   const {
@@ -425,6 +467,14 @@ export function Timer() {
         case 'A':
           cycleAmbientType();
           break;
+        // Task input focus (only when idle and in work mode)
+        case 't':
+        case 'T':
+          if (!state.isRunning && state.mode === 'work') {
+            e.preventDefault();
+            taskInputRef.current?.focus();
+          }
+          break;
       }
     }
 
@@ -466,6 +516,22 @@ export function Timer() {
     window.dispatchEvent(new CustomEvent('pomo:open-settings'));
   }, []);
 
+  // Task handlers
+  const handleTaskChange = useCallback((task: string) => {
+    dispatch({ type: 'SET_TASK', task });
+  }, []);
+
+  const handleEstimateChange = useCallback((estimate: number | null) => {
+    dispatch({ type: 'SET_ESTIMATE', estimate });
+  }, []);
+
+  // Start session when pressing Enter in task input
+  const handleTaskEnter = useCallback(() => {
+    if (!state.isRunning && !state.isPaused) {
+      handleStart();
+    }
+  }, [state.isRunning, state.isPaused, handleStart]);
+
   // Show skeleton while settings are loading to prevent layout shift
   if (!isLoaded) {
     return <TimerSkeleton />;
@@ -500,6 +566,19 @@ export function Timer() {
         isRunning={state.isRunning}
         showCelebration={state.showCelebration}
       />
+
+      {/* Task input (only for work sessions) */}
+      {state.mode === 'work' && (
+        <QuickTaskInput
+          value={state.currentTask}
+          onChange={handleTaskChange}
+          estimatedPomodoros={state.estimatedPomodoros}
+          onEstimateChange={handleEstimateChange}
+          disabled={state.isRunning}
+          onEnter={handleTaskEnter}
+          inputRef={taskInputRef}
+        />
+      )}
 
       {/* Controls */}
       <TimerControls

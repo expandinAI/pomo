@@ -158,6 +158,9 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                               {daySessions.map((session) => {
                                 const Icon = SESSION_ICONS[session.type];
                                 const isWork = session.type === 'work';
+                                const displayName = isWork && session.task
+                                  ? session.task
+                                  : SESSION_LABELS[session.type];
 
                                 return (
                                   <div
@@ -165,7 +168,7 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                                     className="flex items-center gap-3 py-1.5"
                                   >
                                     <div
-                                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                      className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                                         isWork
                                           ? 'bg-accent/10 light:bg-accent-dark/10 text-accent light:text-accent-dark'
                                           : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-tertiary light:text-tertiary-dark'
@@ -175,9 +178,14 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm text-primary light:text-primary-dark truncate">
-                                        {SESSION_LABELS[session.type]}
+                                        {displayName}
                                       </p>
                                     </div>
+                                    {session.estimatedPomodoros && (
+                                      <span className="text-xs text-tertiary light:text-tertiary-dark">
+                                        ~{session.estimatedPomodoros}
+                                      </span>
+                                    )}
                                     <span className="text-xs text-tertiary light:text-tertiary-dark tabular-nums">
                                       {formatDuration(session.duration)}
                                     </span>

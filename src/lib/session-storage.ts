@@ -1,10 +1,12 @@
-import { type SessionType } from '@/styles/design-tokens';
+import type { SessionType } from '@/styles/design-tokens';
 
 export interface CompletedSession {
   id: string;
   type: SessionType;
   duration: number; // in seconds
   completedAt: string; // ISO date string
+  task?: string; // Task description
+  estimatedPomodoros?: number; // 1-4+ pomodoros
 }
 
 const STORAGE_KEY = 'pomo_session_history';
@@ -36,15 +38,23 @@ export function saveSessions(sessions: CompletedSession[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
 
+export interface TaskData {
+  task?: string;
+  estimatedPomodoros?: number;
+}
+
 export function addSession(
   type: SessionType,
-  duration: number
+  duration: number,
+  taskData?: TaskData
 ): CompletedSession {
   const session: CompletedSession = {
     id: generateId(),
     type,
     duration,
     completedAt: new Date().toISOString(),
+    ...(taskData?.task && { task: taskData.task }),
+    ...(taskData?.estimatedPomodoros && { estimatedPomodoros: taskData.estimatedPomodoros }),
   };
 
   const sessions = loadSessions();
