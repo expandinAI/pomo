@@ -20,6 +20,11 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Tooltips mit wissenschaftlicher Erklärung zu jedem Preset
   - Command Palette Integration (Switch to Pomodoro/Deep Work/90-Min/Custom)
   - presetId wird bei Session-Completion gespeichert für spätere Stats
+- **Particle Pause/Freeze (POMO-094)**:
+  - Partikel frieren bei Timer-Pause an aktueller Position ein
+  - Bei Resume setzen Partikel Bewegung nahtlos fort
+  - CSS animation-play-state für flüssige Übergänge
+  - isPaused State im AmbientEffectsContext
 - **Glasmorphismus UI-Effekt (POMO-093)**:
   - Partikel fließen visuell "unter" SessionType und QuickTaskInput
   - Glaseffekt mit backdrop-blur für matte Oberflächen
@@ -86,7 +91,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-057-fuzzy-search]]
 - [[stories/done/POMO-058-keyboard-navigation]]
 - [[stories/done/POMO-059-recent-commands]]
-- [[stories/done/POMO-060-command-registry]] 
+- [[stories/done/POMO-060-command-registry]]
+- [[stories/done/POMO-094-particle-pause-freeze]]
 
 ---
 
