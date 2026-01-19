@@ -15,6 +15,7 @@ import { useSoundSettings } from '@/hooks/useSoundSettings';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { TimerSkeleton } from '@/components/ui/Skeleton';
+import { CommandRegistration } from '@/components/command';
 import {
   LONG_BREAK_INTERVAL,
   type SessionType,
@@ -454,6 +455,17 @@ export function Timer() {
     elapsedRef.current = 0;
   }, [workerReset]);
 
+  // Skip session (complete early)
+  const handleSkip = useCallback(() => {
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current });
+    elapsedRef.current = 0;
+  }, []);
+
+  // Open settings via custom event
+  const handleOpenSettings = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('pomo:open-settings'));
+  }, []);
+
   // Show skeleton while settings are loading to prevent layout shift
   if (!isLoaded) {
     return <TimerSkeleton />;
@@ -461,6 +473,20 @@ export function Timer() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-8 w-full max-w-lg mx-auto">
+      {/* Command Palette Registration */}
+      <CommandRegistration
+        timerIsRunning={state.isRunning}
+        timerIsPaused={state.isPaused}
+        isMuted={muted}
+        onStart={handleStart}
+        onPause={handlePause}
+        onReset={handleReset}
+        onSkip={handleSkip}
+        onToggleTheme={toggleTheme}
+        onOpenSettings={handleOpenSettings}
+        onToggleMute={toggleMute}
+      />
+
       {/* Session type selector */}
       <SessionTypeComponent
         currentMode={state.mode}

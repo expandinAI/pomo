@@ -20,6 +20,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Visual Mode Selector (Minimal | Ambient | Auto)
   - Adaptive Partikelanzahl (10-20 basierend auf Device)
   - Verbesserte Grain-Textur (soft-light blend, 15% opacity)
+- **Command Palette (POMO-056 bis POMO-060, 18 SP)**:
+  - Cmd+K / Ctrl+K öffnet Command Palette
+  - Fuzzy Search mit fuse.js
+  - Keyboard Navigation (↑↓ Enter Escape)
+  - Recent Commands mit LocalStorage
+  - Kategorisierte Commands (Timer, Navigation, Settings)
+  - Commands: Start/Pause, Reset, Skip, Toggle Theme, Toggle Mute, Open Settings
 
 ### Changed
 - ROADMAP.md aktualisiert mit v0.2.0 UI Transformation Milestone
@@ -49,7 +56,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-055-dark-shadows]]
 - [[stories/done/POMO-090-immersive-dark-foundation]]
 - [[stories/done/POMO-091-ambient-effects]]
-- [[stories/done/POMO-092-adaptive-quality-visual-modes]] 
+- [[stories/done/POMO-092-adaptive-quality-visual-modes]]
+- [[stories/done/POMO-056-command-palette-ui]]
+- [[stories/done/POMO-057-fuzzy-search]]
+- [[stories/done/POMO-058-keyboard-navigation]]
+- [[stories/done/POMO-059-recent-commands]]
+- [[stories/done/POMO-060-command-registry]] 
 
 ---
 

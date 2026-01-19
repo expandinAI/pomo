@@ -4,6 +4,8 @@ import { NoiseOverlay, Vignette, AmbientEffects } from '@/components/effects';
 import { AmbientEffectsProvider } from '@/contexts/AmbientEffectsContext';
 import { TimerSettingsProvider } from '@/contexts/TimerSettingsContext';
 import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
+import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
+import { CommandPaletteWrapper } from '@/components/command';
 import './globals.css';
 
 const inter = Inter({
@@ -117,11 +119,15 @@ export default function RootLayout({
         <TimerSettingsProvider>
           <AmbientSoundProvider>
             <AmbientEffectsProvider>
-              {/* Visual effects for immersive dark experience */}
-              <NoiseOverlay />
-              <Vignette />
-              <AmbientEffects />
-              {children}
+              <CommandPaletteProvider>
+                {/* Visual effects for immersive dark experience */}
+                <NoiseOverlay />
+                <Vignette />
+                <AmbientEffects />
+                {/* Command Palette (Cmd+K) */}
+                <CommandPaletteWrapper />
+                {children}
+              </CommandPaletteProvider>
             </AmbientEffectsProvider>
           </AmbientSoundProvider>
         </TimerSettingsProvider>

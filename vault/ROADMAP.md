@@ -36,8 +36,8 @@ High-level Überblick über Features und Milestones.
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
 | [[features/design-system-update]] | POMO-050 bis 055 | 13 | ✅ Done |
-| **[[features/immersive-visual-experience]]** | **POMO-090 bis 092** | **21** | **Backlog** |
-| [[features/command-palette]] | POMO-056 bis 060 | 18 | Backlog |
+| [[features/immersive-visual-experience]] | POMO-090 bis 092 | 21 | ✅ Done |
+| [[features/command-palette]] | POMO-056 bis 060 | 18 | ✅ Done |
 | [[features/quick-task-system]] | POMO-061 bis 065 | 12 | Backlog |
 | [[features/extended-presets]] | POMO-066 bis 071 | 12 | Backlog |
 | [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | Backlog |
@@ -113,8 +113,8 @@ Parked ideas:
 
 ### v0.2.0 - UI Transformation 🚧
 - [x] Design System Update (monochrome, sharper)
-- [ ] **Immersive Visual Experience** (Dark-first, Particles, Grain, Endel-inspired)
-- [ ] Command Palette (Cmd+K)
+- [x] **Immersive Visual Experience** (Dark-first, Particles, Grain, Endel-inspired)
+- [x] Command Palette (Cmd+K)
 - [ ] Quick Task System
 - [ ] Extended Presets (52/17, 90min)
 - [ ] Keyboard-First UX (G-prefix)
