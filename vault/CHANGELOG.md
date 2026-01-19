@@ -20,6 +20,20 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Tooltips mit wissenschaftlicher Erklärung zu jedem Preset
   - Command Palette Integration (Switch to Pomodoro/Deep Work/90-Min/Custom)
   - presetId wird bei Session-Completion gespeichert für spätere Stats
+- **Keyboard-First UX (POMO-072 bis POMO-077, 14 SP)**:
+  - Focus Trap für alle Modals (Tab-Navigation bleibt im Modal)
+  - Erweiterte Timer-Shortcuts (Shift+↑/↓ für ±5 Min, E für End Confirmation)
+  - G-Prefix Navigation (G+T Timer, G+S Stats, G+H History, G+, Settings)
+  - Erweitertes Help Modal mit Kategorien und Suche
+  - Keyboard Hints neben Buttons (optional)
+  - Vim Navigation (J/K) in Command Palette
+- **Quick Task System (POMO-061 bis POMO-065, 12 SP)**:
+  - QuickTaskInput Komponente unter Timer
+  - Pomodoro-Schätzung (1-4 Pomodoros)
+  - Recent Tasks Autocomplete mit Pfeiltasten-Navigation
+  - Tasks werden in Session History angezeigt
+  - T-Shortcut fokussiert Task-Feld
+  - Enter im Task-Feld startet Session
 - **Particle Pause/Freeze (POMO-094)**:
   - Partikel frieren bei Timer-Pause an aktueller Position ein
   - Bei Resume setzen Partikel Bewegung nahtlos fort
@@ -92,6 +106,17 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-058-keyboard-navigation]]
 - [[stories/done/POMO-059-recent-commands]]
 - [[stories/done/POMO-060-command-registry]]
+- [[stories/done/POMO-061-task-input]]
+- [[stories/done/POMO-062-pomodoro-estimate]]
+- [[stories/done/POMO-063-recent-tasks]]
+- [[stories/done/POMO-064-task-history]]
+- [[stories/done/POMO-065-deep-shallow-tag]]
+- [[stories/done/POMO-072-g-prefix-navigation]]
+- [[stories/done/POMO-073-shortcut-hints]]
+- [[stories/done/POMO-074-help-modal]]
+- [[stories/done/POMO-075-timer-shortcuts]]
+- [[stories/done/POMO-076-focus-trap]]
+- [[stories/done/POMO-077-vim-navigation]]
 - [[stories/done/POMO-094-particle-pause-freeze]]
 
 ---

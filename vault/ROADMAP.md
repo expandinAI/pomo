@@ -38,9 +38,9 @@ High-level Überblick über Features und Milestones.
 | [[features/design-system-update]] | POMO-050 bis 055 | 13 | ✅ Done |
 | [[features/immersive-visual-experience]] | POMO-090 bis 092 | 21 | ✅ Done |
 | [[features/command-palette]] | POMO-056 bis 060 | 18 | ✅ Done |
-| [[features/quick-task-system]] | POMO-061 bis 065 | 12 | Backlog |
-| [[features/extended-presets]] | POMO-066 bis 071 | 12 | Backlog |
-| [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | Backlog |
+| [[features/quick-task-system]] | POMO-061 bis 065 | 12 | ✅ Done |
+| [[features/extended-presets]] | POMO-066 bis 071 | 12 | ✅ Done |
+| [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | ✅ Done |
 | [[features/system-integrations]] | POMO-078 bis 082 | 29 | Backlog |
 | [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | Backlog |
 
@@ -115,9 +115,9 @@ Parked ideas:
 - [x] Design System Update (monochrome, sharper)
 - [x] **Immersive Visual Experience** (Dark-first, Particles, Grain, Endel-inspired)
 - [x] Command Palette (Cmd+K)
-- [ ] Quick Task System
-- [ ] Extended Presets (52/17, 90min)
-- [ ] Keyboard-First UX (G-prefix)
+- [x] Quick Task System
+- [x] Extended Presets (52/17, 90min)
+- [x] Keyboard-First UX (G-prefix, Focus Trap, Vim Nav)
 - [ ] System Integrations (DND, Blocking)
 - [ ] Statistics Dashboard
 

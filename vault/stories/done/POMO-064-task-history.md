@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 2
 feature: "[[features/quick-task-system]]"
 created: 2026-01-19
 updated: 2026-01-19
-done_date: null
+done_date: 2026-01-19
 tags: [tasks, history, p0]
 ---
 
