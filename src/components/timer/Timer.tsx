@@ -457,17 +457,27 @@ export function Timer() {
     const sessionMode = state.mode;
     const fullDuration = durationsRef.current[sessionMode];
     const elapsedTime = fullDuration - state.timeRemaining;
+    const isWorkSession = sessionMode === 'work';
 
     // Only save if > 60 seconds elapsed (minimum threshold)
     if (elapsedTime > 60) {
-      const wasWorkSession = sessionMode === 'work';
       const taskData = {
-        ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+        ...(isWorkSession && state.currentTask && { task: state.currentTask }),
         presetId: activePresetIdRef.current,
       };
 
       // Save ACTUAL elapsed time, not full duration
       addSession(sessionMode, elapsedTime, taskData);
+    }
+
+    // Calculate next mode (same logic as reducer)
+    let nextMode: SessionType;
+    if (isWorkSession) {
+      nextMode = (state.completedPomodoros + 1) % sessionsUntilLongRef.current === 0
+        ? 'longBreak'
+        : 'shortBreak';
+    } else {
+      nextMode = 'work';
     }
 
     // Dispatch SKIP action (not COMPLETE!)
@@ -477,15 +487,18 @@ export function Timer() {
       sessionsUntilLong: sessionsUntilLongRef.current,
     });
 
+    // Reset worker to new session duration
+    workerReset(durationsRef.current[nextMode]);
     elapsedRef.current = 0;
+
     playSound('break');
     vibrate('light');
 
     // Clear task when skipping work session
-    if (sessionMode === 'work') {
+    if (isWorkSession) {
       dispatch({ type: 'CLEAR_TASK' });
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, playSound, vibrate]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, playSound, vibrate, workerReset]);
 
   // Keyboard shortcuts
   useEffect(() => {
