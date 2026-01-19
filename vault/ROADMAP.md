@@ -31,7 +31,24 @@ High-level Überblick über Features und Milestones.
 
 ## Now (Nächste Iteration)
 
-Analytics Foundation - transformiere Session-Daten in Insights
+**UI Transformation** - Von "Guter Timer" zu "Das schärfste Deep-Work-Tool"
+
+| Feature | Stories | Points | Status |
+|---------|---------|--------|--------|
+| [[features/design-system-update]] | POMO-050 bis 055 | 13 | ✅ Done |
+| **[[features/immersive-visual-experience]]** | **POMO-090 bis 092** | **21** | **Backlog** |
+| [[features/command-palette]] | POMO-056 bis 060 | 18 | Backlog |
+| [[features/quick-task-system]] | POMO-061 bis 065 | 12 | Backlog |
+| [[features/extended-presets]] | POMO-066 bis 071 | 12 | Backlog |
+| [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | Backlog |
+| [[features/system-integrations]] | POMO-078 bis 082 | 29 | Backlog |
+| [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | Backlog |
+
+**P0 Total: ~118 Story Points (43 Stories)**
+
+---
+
+## Remaining Analytics
 
 | Feature | ID | Priorität | Aufwand | Status |
 |---------|-----|-----------|---------|--------|
@@ -94,6 +111,18 @@ Parked ideas:
 - [x] PWA installable
 - [x] Performance <100KB
 
+### v0.2.0 - UI Transformation 🚧
+- [x] Design System Update (monochrome, sharper)
+- [ ] **Immersive Visual Experience** (Dark-first, Particles, Grain, Endel-inspired)
+- [ ] Command Palette (Cmd+K)
+- [ ] Quick Task System
+- [ ] Extended Presets (52/17, 90min)
+- [ ] Keyboard-First UX (G-prefix)
+- [ ] System Integrations (DND, Blocking)
+- [ ] Statistics Dashboard
+
+**Stories:** POMO-050 bis POMO-092 (43 total)
+
 ### v1.0 - Premium Launch
 - [x] Weekly Focus Report
 - [x] Focus Heatmap
@@ -140,7 +169,6 @@ Parked ideas:
 │ Alles aus Free, plus:                                   │
 │ ✓ Custom Timer Lengths                                  │
 │ ✓ Premium Sounds (6 Chimes)                            │
-│ ✓ Color Themes (Sunrise, Ocean, Forest, Midnight)      │
 │ ✓ Ambient Soundscapes (Rain, Forest, Cafe, Ocean...)   │
 │ ✓ Weekly Focus Report                                   │
 │ ✓ Focus Heatmap                                         │
@@ -151,4 +179,4 @@ Parked ideas:
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-18*
+*Zuletzt aktualisiert: 2026-01-19*
