@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
 import { SessionType as SessionTypeComponent } from './SessionType';
 import { SessionCounter } from './SessionCounter';
-import { BreathingAnimation } from './BreathingAnimation';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
 import { useTheme } from '@/hooks/useTheme';
 import { useHaptics } from '@/hooks/useHaptics';
-import { useAmbientSound } from '@/hooks/useAmbientSound';
-import { useTimerSettings, type TimerDurations } from '@/hooks/useTimerSettings';
+import { useAmbientSoundContext } from '@/contexts/AmbientSoundContext';
+import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
 import { useSoundSettings } from '@/hooks/useSoundSettings';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { TimerSkeleton } from '@/components/ui/Skeleton';
 import {
   LONG_BREAK_INTERVAL,
@@ -30,7 +29,6 @@ interface TimerState {
   timeRemaining: number;
   isRunning: boolean;
   isPaused: boolean;
-  isBreathing: boolean;
   completedPomodoros: number;
   showCelebration: boolean;
 }
@@ -42,20 +40,12 @@ type TimerAction =
   | { type: 'SET_TIME'; time: number }
   | { type: 'COMPLETE'; durations: TimerDurations }
   | { type: 'SET_MODE'; mode: SessionType; durations: TimerDurations }
-  | { type: 'START_BREATHING' }
-  | { type: 'END_BREATHING' }
   | { type: 'HIDE_CELEBRATION' }
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
   | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
-    case 'START_BREATHING':
-      return { ...state, isBreathing: true };
-
-    case 'END_BREATHING':
-      return { ...state, isBreathing: false, isRunning: true, isPaused: false };
-
     case 'START':
       return { ...state, isRunning: true, isPaused: false };
 
@@ -68,7 +58,6 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         timeRemaining: action.durations[state.mode],
         isRunning: false,
         isPaused: false,
-        isBreathing: false,
       };
 
     case 'SET_TIME':
@@ -107,7 +96,6 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         timeRemaining: action.durations[action.mode],
         isRunning: false,
         isPaused: false,
-        isBreathing: false,
       };
 
     case 'SYNC_DURATIONS':
@@ -149,7 +137,6 @@ const initialState: TimerState = {
   timeRemaining: DEFAULT_DURATIONS.work,
   isRunning: false,
   isPaused: false,
-  isBreathing: false,
   completedPomodoros: 0,
   showCelebration: false,
 };
@@ -157,8 +144,8 @@ const initialState: TimerState = {
 export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
-  // Custom timer settings
-  const { durations, isLoaded } = useTimerSettings();
+  // Custom timer settings (shared context)
+  const { durations, isLoaded } = useTimerSettingsContext();
 
   // Ref to always have current durations
   const durationsRef = useRef(durations);
@@ -176,20 +163,23 @@ export function Timer() {
   // Haptic feedback
   const { vibrate } = useHaptics();
 
-  // Ambient sound
+  // Ambient sound (shared context)
   const {
     play: playAmbient,
     stop: stopAmbient,
     type: ambientType,
     setType: setAmbientType,
     presets: ambientPresets,
-  } = useAmbientSound();
+  } = useAmbientSoundContext();
 
   // Sound settings for mute toggle
   const { toggleMute, muted } = useSoundSettings();
 
   // Wake lock to prevent screen from sleeping during active sessions
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
+
+  // Ambient visual effects
+  const { setVisualState } = useAmbientEffects();
 
   // Screen reader announcements
   const [statusAnnouncement, setStatusAnnouncement] = useState('');
@@ -250,7 +240,7 @@ export function Timer() {
 
   // Sync worker with running state
   useEffect(() => {
-    if (state.isRunning && !state.isBreathing) {
+    if (state.isRunning) {
       const duration = durationsRef.current[state.mode];
       const elapsed = duration - state.timeRemaining;
       workerStart(duration, elapsed);
@@ -258,7 +248,7 @@ export function Timer() {
       workerPause();
       elapsedRef.current = durationsRef.current[state.mode] - state.timeRemaining;
     }
-  }, [state.isRunning, state.isBreathing, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
+  }, [state.isRunning, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
 
   // Hide celebration after 3 seconds (auto-transition delay)
   useEffect(() => {
@@ -288,6 +278,17 @@ export function Timer() {
       releaseWakeLock();
     }
   }, [state.isRunning, requestWakeLock, releaseWakeLock]);
+
+  // Sync visual effects state with timer state
+  useEffect(() => {
+    if (state.showCelebration) {
+      setVisualState('completed');
+    } else if (state.isRunning) {
+      setVisualState(state.mode === 'work' ? 'focus' : 'break');
+    } else {
+      setVisualState('idle');
+    }
+  }, [state.isRunning, state.mode, state.showCelebration, setVisualState]);
 
   // Screen reader: Announce timer every 5 minutes
   useEffect(() => {
@@ -367,11 +368,8 @@ export function Timer() {
       switch (e.key) {
         case ' ':
           e.preventDefault();
-          if (state.isBreathing) return;
           if (state.isRunning) {
             dispatch({ type: 'PAUSE' });
-          } else if (state.mode === 'work' && !state.isPaused) {
-            dispatch({ type: 'START_BREATHING' });
           } else {
             dispatch({ type: 'START' });
           }
@@ -390,17 +388,17 @@ export function Timer() {
           break;
         // Session type switching
         case '1':
-          if (!state.isRunning && !state.isBreathing) {
+          if (!state.isRunning) {
             dispatch({ type: 'SET_MODE', mode: 'work', durations: durationsRef.current });
           }
           break;
         case '2':
-          if (!state.isRunning && !state.isBreathing) {
+          if (!state.isRunning) {
             dispatch({ type: 'SET_MODE', mode: 'shortBreak', durations: durationsRef.current });
           }
           break;
         case '3':
-          if (!state.isRunning && !state.isBreathing) {
+          if (!state.isRunning) {
             dispatch({ type: 'SET_MODE', mode: 'longBreak', durations: durationsRef.current });
           }
           break;
@@ -431,16 +429,12 @@ export function Timer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.isBreathing, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType]);
+  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
-    if (state.mode === 'work' && !state.isPaused) {
-      dispatch({ type: 'START_BREATHING' });
-    } else {
-      dispatch({ type: 'START' });
-    }
-  }, [state.mode, state.isPaused, vibrate]);
+    dispatch({ type: 'START' });
+  }, [vibrate]);
 
   const handlePause = useCallback(() => {
     vibrate('double');
@@ -460,10 +454,6 @@ export function Timer() {
     elapsedRef.current = 0;
   }, [workerReset]);
 
-  const handleBreathingComplete = useCallback(() => {
-    dispatch({ type: 'END_BREATHING' });
-  }, []);
-
   // Show skeleton while settings are loading to prevent layout shift
   if (!isLoaded) {
     return <TimerSkeleton />;
@@ -475,37 +465,20 @@ export function Timer() {
       <SessionTypeComponent
         currentMode={state.mode}
         onModeChange={handleModeChange}
-        disabled={state.isRunning || state.isBreathing}
+        disabled={state.isRunning}
       />
 
-      {/* Timer display with breathing animation overlay */}
-      <div className="relative">
-        <AnimatePresence mode="wait">
-          {state.isBreathing ? (
-            <BreathingAnimation key="breathing" onComplete={handleBreathingComplete} />
-          ) : (
-            <motion.div
-              key="timer"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-            >
-              <TimerDisplay
-                timeRemaining={state.timeRemaining}
-                isRunning={state.isRunning}
-                showCelebration={state.showCelebration}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Timer display */}
+      <TimerDisplay
+        timeRemaining={state.timeRemaining}
+        isRunning={state.isRunning}
+        showCelebration={state.showCelebration}
+      />
 
       {/* Controls */}
       <TimerControls
         isRunning={state.isRunning}
         isPaused={state.isPaused}
-        isBreathing={state.isBreathing}
         onStart={handleStart}
         onPause={handlePause}
         onReset={handleReset}

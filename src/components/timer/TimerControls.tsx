@@ -9,7 +9,6 @@ import { SPRING, type SessionType, SESSION_LABELS } from '@/styles/design-tokens
 interface TimerControlsProps {
   isRunning: boolean;
   isPaused: boolean;
-  isBreathing: boolean;
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
@@ -19,7 +18,6 @@ interface TimerControlsProps {
 export function TimerControls({
   isRunning,
   isPaused,
-  isBreathing,
   onStart,
   onPause,
   onReset,
@@ -43,7 +41,6 @@ export function TimerControls({
       <IconButton
         label="Reset timer to beginning"
         onClick={onReset}
-        disabled={isBreathing}
         size="lg"
       >
         <RotateCcw className="w-full h-full" />
@@ -54,7 +51,6 @@ export function TimerControls({
         variant="primary"
         size="lg"
         onClick={isRunning ? onPause : onStart}
-        disabled={isBreathing}
         className="min-w-[120px] gap-2"
         aria-label={isRunning ? pauseLabel : startLabel}
       >
