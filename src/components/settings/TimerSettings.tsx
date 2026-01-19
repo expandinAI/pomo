@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X } from 'lucide-react';
 import { SPRING, PRESETS, getPresetLabel } from '@/styles/design-tokens';
 import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { SoundSettings } from './SoundSettings';
 import { AmbientSettings } from './AmbientSettings';
 import { VisualEffectsSettings } from './VisualEffectsSettings';
@@ -21,8 +22,10 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
   // Focus management refs
   const modalRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus trap hook
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
 
   const toggleOpen = useCallback(() => {
     if (!disabled) {
@@ -61,49 +64,6 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
     return () => window.removeEventListener('pomo:open-settings', handleOpenSettings);
   }, [disabled]);
 
-  // Focus management: save focus on open, restore on close
-  useEffect(() => {
-    if (isOpen) {
-      // Save current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      // Focus close button after modal animation
-      setTimeout(() => {
-        closeButtonRef.current?.focus();
-      }, 100);
-    } else if (previousFocusRef.current) {
-      // Restore focus when closing
-      previousFocusRef.current.focus();
-      previousFocusRef.current = null;
-    }
-  }, [isOpen]);
-
-  // Focus trap within modal
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key !== 'Tab' || !modalRef.current) return;
-
-      const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusableElements.length) return;
-
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-
-      if (e.shiftKey && document.activeElement === firstElement) {
-        e.preventDefault();
-        lastElement.focus();
-      } else if (!e.shiftKey && document.activeElement === lastElement) {
-        e.preventDefault();
-        firstElement.focus();
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
 
   // Preset order for display
   const presetIds = ['pomodoro', 'deepWork', 'ultradian', 'custom'] as const;

@@ -1,0 +1,99 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+interface GPrefixCallbacks {
+  onTimer: () => void;
+  onStats: () => void;
+  onHistory: () => void;
+  onSettings: () => void;
+}
+
+/**
+ * Hook for G-prefix (vim-like) navigation shortcuts
+ *
+ * G T = Go to Timer (close all modals)
+ * G S = Open Statistics (WeeklyReport)
+ * G H = Open History (SessionHistory)
+ * G , = Open Settings
+ *
+ * After pressing G, user has 1 second to press the second key
+ */
+export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed: boolean } {
+  const [isGPressed, setIsGPressed] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearGTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Ignore if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Ignore if any modifier keys are pressed
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
+      // First key: G
+      if (e.key === 'g' && !isGPressed) {
+        setIsGPressed(true);
+        clearGTimeout();
+
+        // Reset after 1 second if no second key is pressed
+        timeoutRef.current = setTimeout(() => {
+          setIsGPressed(false);
+        }, 1000);
+        return;
+      }
+
+      // Second key after G
+      if (isGPressed) {
+        clearGTimeout();
+        setIsGPressed(false);
+
+        switch (e.key) {
+          case 't':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onTimer();
+            break;
+          case 's':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onStats();
+            break;
+          case 'h':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onHistory();
+            break;
+          case ',':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onSettings();
+            break;
+          default:
+            // Any other key resets the G state
+            break;
+        }
+      }
+    }
+
+    // Use capture phase to intercept before other handlers
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      clearGTimeout();
+    };
+  }, [isGPressed, callbacks, clearGTimeout]);
+
+  return { isGPressed };
+}

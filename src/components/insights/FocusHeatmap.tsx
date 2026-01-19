@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Grid3X3, X, Star } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { buildHeatmap, type HeatmapData } from '@/lib/session-analytics';
 import { HeatmapGrid } from './HeatmapGrid';
 import { prefersReducedMotion } from '@/lib/utils';
@@ -21,6 +22,11 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
   const [data, setData] = useState<HeatmapData | null>(null);
 
   const reducedMotion = prefersReducedMotion();
+
+  // Focus management
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
 
   const toggleOpen = useCallback(() => {
     setIsOpen(prev => !prev);
@@ -84,7 +90,10 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                 className="w-[90vw] max-w-md"
                 onClick={e => e.stopPropagation()}
               >
-                <div className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden">
+                <div
+                  ref={modalRef}
+                  className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden"
+                >
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
                     <h2
@@ -94,8 +103,9 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                       Your Focus Pattern
                     </h2>
                     <button
+                      ref={closeButtonRef}
                       onClick={() => setIsOpen(false)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label="Close heatmap"
                     >
                       <X className="w-4 h-4" />

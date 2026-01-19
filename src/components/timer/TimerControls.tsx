@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
+import { KeyboardHint } from '@/components/ui/KeyboardHint';
 import { SPRING, type SessionType, SESSION_LABELS } from '@/styles/design-tokens';
 
 interface TimerControlsProps {
@@ -51,18 +52,20 @@ export function TimerControls({
         variant="primary"
         size="lg"
         onClick={isRunning ? onPause : onStart}
-        className="min-w-[120px] gap-2"
+        className="group min-w-[140px] gap-2"
         aria-label={isRunning ? pauseLabel : startLabel}
       >
         {isRunning ? (
           <>
             <Pause className="w-5 h-5" aria-hidden="true" />
             Pause
+            <KeyboardHint shortcut="Space" className="ml-1" />
           </>
         ) : (
           <>
             <Play className="w-5 h-5" aria-hidden="true" />
             {isPaused ? 'Resume' : 'Start'}
+            <KeyboardHint shortcut="Space" className="ml-1" />
           </>
         )}
       </Button>

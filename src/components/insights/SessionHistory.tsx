@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart3, X, Coffee, Zap } from 'lucide-react';
 import { SPRING, SESSION_LABELS, type SessionType } from '@/styles/design-tokens';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
   loadSessions,
   getSessionsFromDays,
@@ -28,6 +29,11 @@ interface SessionHistoryProps {
 export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [sessions, setSessions] = useState<CompletedSession[]>([]);
+
+  // Focus management
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
 
   const toggleOpen = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -60,6 +66,16 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
+
+  // Listen for external open event (G H navigation)
+  useEffect(() => {
+    function handleOpenHistory() {
+      setIsOpen(true);
+    }
+
+    window.addEventListener('pomo:open-history', handleOpenHistory);
+    return () => window.removeEventListener('pomo:open-history', handleOpenHistory);
+  }, []);
 
   return (
     <div className="relative">
@@ -96,15 +112,22 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 className="w-[90vw] max-w-sm max-h-[80vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-              <div className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full">
+              <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="session-history-title"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full"
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
-                  <h2 className="text-base font-semibold text-primary light:text-primary-dark">
+                  <h2 id="session-history-title" className="text-base font-semibold text-primary light:text-primary-dark">
                     Session History
                   </h2>
                   <button
+                    ref={closeButtonRef}
                     onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     aria-label="Close history"
                   >
                     <X className="w-4 h-4" />

@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -28,6 +30,29 @@ const FocusHeatmap = dynamic(
 );
 
 export default function Home() {
+  // G-prefix navigation callbacks
+  const gPrefixCallbacks = useMemo(
+    () => ({
+      onTimer: () => {
+        // Close all modals by dispatching close events
+        // The modals handle their own Escape key, but this is for "go to timer"
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      },
+      onStats: () => {
+        window.dispatchEvent(new CustomEvent('pomo:open-stats'));
+      },
+      onHistory: () => {
+        window.dispatchEvent(new CustomEvent('pomo:open-history'));
+      },
+      onSettings: () => {
+        window.dispatchEvent(new CustomEvent('pomo:open-settings'));
+      },
+    }),
+    []
+  );
+
+  const { isGPressed } = useGPrefixNavigation(gPrefixCallbacks);
+
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -68,6 +93,26 @@ export default function Home() {
       <div className="absolute bottom-4 left-4">
         <ShortcutsHelp />
       </div>
+
+      {/* G-prefix indicator */}
+      <AnimatePresence>
+        {isGPressed && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed bottom-4 right-4 px-3 py-1.5 bg-surface/90 light:bg-surface-dark/90 backdrop-blur-sm rounded-lg border border-tertiary/20 light:border-tertiary-dark/20 shadow-lg z-50"
+          >
+            <span className="text-sm font-medium text-secondary light:text-secondary-dark">
+              G...
+            </span>
+            <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
+              t/s/h/,
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

@@ -103,18 +103,22 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     [onClose]
   );
 
-  // Keyboard navigation
+  // Keyboard navigation (Arrow keys + vim-style J/K)
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       switch (e.key) {
         case 'ArrowDown':
+        case 'j':
+        case 'J':
           e.preventDefault();
           setSelectedIndex((prev) => (prev + 1) % totalItems || 0);
           break;
 
         case 'ArrowUp':
+        case 'k':
+        case 'K':
           e.preventDefault();
           setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems || 0);
           break;

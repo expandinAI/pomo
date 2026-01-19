@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import type { Command } from '@/lib/commandRegistry';
@@ -11,11 +12,24 @@ interface CommandItemProps {
 }
 
 export function CommandItem({ command, isSelected, onSelect }: CommandItemProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const isDisabled =
     typeof command.disabled === 'function' ? command.disabled() : command.disabled;
 
+  // Scroll into view when selected
+  useEffect(() => {
+    if (isSelected && buttonRef.current) {
+      buttonRef.current.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
+  }, [isSelected]);
+
   return (
     <motion.button
+      ref={buttonRef}
       onClick={() => !isDisabled && onSelect(command)}
       disabled={isDisabled}
       className={`

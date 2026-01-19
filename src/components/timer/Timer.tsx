@@ -6,6 +6,7 @@ import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
 import { PresetSelector } from './PresetSelector';
 import { SessionCounter } from './SessionCounter';
+import { EndConfirmationModal } from './EndConfirmationModal';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
 import { useTheme } from '@/hooks/useTheme';
@@ -245,6 +246,9 @@ export function Timer() {
   const [statusAnnouncement, setStatusAnnouncement] = useState('');
   const [timerAnnouncement, setTimerAnnouncement] = useState('');
   const lastAnnouncedMinute = useRef<number | null>(null);
+
+  // End confirmation modal
+  const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
@@ -551,16 +555,28 @@ export function Timer() {
           }
           break;
         // Time adjustment (only when not running)
+        // ↑ = +1 min, Shift+↑ = +5 min
         case 'ArrowUp':
           if (!state.isRunning) {
             e.preventDefault();
-            dispatch({ type: 'ADJUST_TIME', delta: 60, durations: durationsRef.current });
+            const deltaUp = e.shiftKey ? 5 * 60 : 60;
+            dispatch({ type: 'ADJUST_TIME', delta: deltaUp, durations: durationsRef.current });
           }
           break;
+        // ↓ = -1 min, Shift+↓ = -5 min
         case 'ArrowDown':
           if (!state.isRunning) {
             e.preventDefault();
-            dispatch({ type: 'ADJUST_TIME', delta: -60, durations: durationsRef.current });
+            const deltaDown = e.shiftKey ? -5 * 60 : -60;
+            dispatch({ type: 'ADJUST_TIME', delta: deltaDown, durations: durationsRef.current });
+          }
+          break;
+        // E = End session early (with confirmation)
+        case 'e':
+        case 'E':
+          if (state.isRunning) {
+            e.preventDefault();
+            setShowEndConfirmation(true);
           }
           break;
         // Sound controls
@@ -631,6 +647,16 @@ export function Timer() {
     }
   }, [state.isRunning, state.isPaused, handleStart]);
 
+  // Handle end confirmation (must be before early return to follow hooks rules)
+  const handleEndConfirm = useCallback(() => {
+    handleSkip();
+    setShowEndConfirmation(false);
+  }, [handleSkip]);
+
+  const handleEndCancel = useCallback(() => {
+    setShowEndConfirmation(false);
+  }, []);
+
   // Show skeleton while settings are loading to prevent layout shift
   if (!isLoaded) {
     return <TimerSkeleton />;
@@ -638,6 +664,13 @@ export function Timer() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-8 w-full max-w-lg mx-auto">
+      {/* End Confirmation Modal */}
+      <EndConfirmationModal
+        isOpen={showEndConfirmation}
+        onConfirm={handleEndConfirm}
+        onCancel={handleEndCancel}
+      />
+
       {/* Command Palette Registration */}
       <CommandRegistration
         timerIsRunning={state.isRunning}
