@@ -61,11 +61,11 @@ export function HeatmapGrid({ data }: HeatmapGridProps) {
   }, [data.grid]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto flex justify-center">
       <div
         role="grid"
         aria-label={ariaLabel}
-        className="inline-block min-w-max"
+        className="inline-block"
       >
         {/* Hour labels row */}
         <div className="flex mb-1" role="row" aria-hidden="true">

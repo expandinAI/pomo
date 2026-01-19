@@ -113,7 +113,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-4 pt-5">
                     {data?.isEmpty ? (
                       /* Empty State */
                       <motion.div
@@ -149,7 +149,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                             initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={reducedMotion ? { duration: 0 } : { delay: 0.3 }}
-                            className="flex items-center gap-2 text-sm mb-4"
+                            className="flex items-center justify-center gap-2 text-sm mb-4"
                           >
                             <Star className="w-4 h-4 text-accent light:text-accent-dark flex-shrink-0" />
                             <span className="text-secondary light:text-secondary-dark">
@@ -166,7 +166,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                           initial={reducedMotion ? {} : { opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={reducedMotion ? { duration: 0 } : { delay: 0.4 }}
-                          className="flex items-center justify-center gap-1 text-[10px] text-tertiary light:text-tertiary-dark"
+                          className="flex items-center justify-center gap-1.5 text-[10px] text-tertiary light:text-tertiary-dark"
                         >
                           <span>Less</span>
                           <div className="flex gap-0.5">
@@ -183,8 +183,8 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                   </div>
 
                   {/* Footer with context */}
-                  <div className="px-4 pb-4">
-                    <p className="text-[10px] text-tertiary light:text-tertiary-dark text-center">
+                  <div className="px-4 pb-4 pt-2">
+                    <p className="text-[10px] text-tertiary/70 light:text-tertiary-dark/70 text-center">
                       Based on your last 30 days of focus sessions
                     </p>
                   </div>

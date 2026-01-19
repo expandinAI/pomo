@@ -1,6 +1,41 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code when working with the Pomo codebase.
+This file provides guidance to Claude Code when working with the **Particle** codebase.
+
+> **Wichtig:** Lies `VISION.md` und `BRAND.md` für die vollständige Philosophie und Markenidentität.
+
+---
+
+## Die Seele von Particle
+
+**Particle ist keine Pomodoro-App. Particle ist der Raum, in dem Menschen ihr Lebenswerk schaffen.**
+
+### Kernprinzip
+> Die Arbeit eines Lebens besteht aus vielen Partikeln.
+
+### Bei jeder Entscheidung frage:
+
+1. **Ist es reduziert genug?** – Jedes Pixel muss seinen Platz verdienen
+2. **Dreht es sich um Partikel?** – Nicht "Sessions", nicht "Pomodoros" – **Partikel**
+3. **Erzeugt es Stolz statt Schuld?** – Keine Streak-Verluste, keine roten Badges
+4. **Ist es Keyboard-first?** – Alle Kernfunktionen per Tastatur
+5. **Hat es emotionale Tiefe?** – Animationen wie Magie, nicht wie Gimmicks
+
+### Naming Convention
+- Der offizielle Name ist **Particle** (mit 'e')
+- Session-Einheit: `Particle` (Singular), `Particles` (Plural)
+- Variable: `particle`, nicht `pomo` oder `pomodoro`
+- Counter: "Du hast 12 Partikel gesammelt" – nicht "12 Sessions"
+
+### Apple Design Award Anspruch
+Wir bauen nicht einfach eine App. Jede Entscheidung wird gemessen an:
+- **Reduktion** – Weißer Punkt auf Schwarz
+- **Emotion** – Stolz statt Schuld
+- **Storytelling** – Ein Partikel, das mit dir spricht
+- **Craft** – Animationen wie Magie
+- **Philosophie** – Tiefe hinter der Oberfläche
+
+---
 
 ## Projekt-Management (vault/)
 
@@ -26,9 +61,9 @@ vault/
 
 ## Project Overview
 
-**Pomo** is an Apple Design Award-worthy Pomodoro timer web app. The goal is to create a "sanctuary of calm" for focused work—beautiful, minimal, and premium-feeling.
+**Particle** is an Apple Design Award-worthy focus app. The goal is to create a "sanctuary of calm" for focused work—beautiful, minimal, and premium-feeling.
 
-**Key philosophy:** Subtract, don't add. Every feature must earn its place.
+**Key philosophy:** Subtract, don't add. Every feature must earn its place. Every Pixel must serve the Particle.
 
 ## Tech Stack
 
@@ -55,8 +90,10 @@ src/
 
 1. **The 70% Rule** - Timer owns 70% of the viewport. It's the hero.
 2. **Progressive Disclosure** - Controls invisible until needed
-3. **Premium Feel** - Generous spacing, spring animations, warm colors
+3. **Premium Feel** - Generous spacing, spring animations, black & white
 4. **Calm Over Anxiety** - No streaks, no guilt, no gamification
+5. **Partikel als Währung** - Alles dreht sich um Partikel: sammeln, visualisieren, teilen
+6. **Emotionale Tiefe** - Animationen, die sich anfühlen wie Magie
 
 ## Code Guidelines
 
@@ -162,11 +199,13 @@ Der Timer unterscheidet zwischen **natürlicher Completion** und **manuellem Ski
 
 ## Anti-Patterns to Avoid
 
-- **No gamification** - No points, badges, streaks
+- **No gamification** - No points, badges, streaks – aber Partikel sammeln ist erlaubt (das ist Bedeutung, kein Spiel)
 - **No social features** - Focus is personal
-- **No feature creep** - If it doesn't serve the timer, skip it
+- **No feature creep** - If it doesn't serve the Particle, skip it
 - **No guilt mechanics** - Missing a session is fine
 - **No aggressive upsells** - Premium feels generous
+- **No colors** - Schwarz und Weiß. Farbe muss verdient werden.
+- **No noise** - Jedes UI-Element muss seinen Platz verdienen
 
 ## Testing
 
@@ -192,3 +231,18 @@ Der Timer unterscheidet zwischen **natürlicher Completion** und **manuellem Ski
 3. Test keyboard navigation
 4. Check performance (Lighthouse 95+)
 5. Test on mobile viewport
+6. **Die Prüffrage:** "Würde ein einzelner weißer Punkt auf schwarzem Grund stolz sein, Teil davon zu sein?"
+
+---
+
+## Referenzdokumente
+
+- `VISION.md` – Das vollständige Manifest und die Philosophie
+- `BRAND.md` – Brand Guidelines, Voice & Tone, visuelle Identität
+- Dieter Rams – "Weniger, aber besser"
+- Linear – Vorbild für Reduktion und Craft in Software
+- Endel – Vorbild für emotionales Sound-/Visualisierungs-Design
+
+---
+
+*Particle – Where focus becomes visible.*
