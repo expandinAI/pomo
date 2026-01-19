@@ -1,5 +1,71 @@
 import { loadSessions, getSessionsFromDays, type CompletedSession } from './session-storage';
 
+// =============================================================================
+// DATE FILTERING UTILITIES
+// =============================================================================
+
+/**
+ * Check if a date is today
+ */
+export function isToday(date: Date): boolean {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
+/**
+ * Check if a date is in the current week (Monday-Sunday)
+ */
+export function isThisWeek(date: Date): boolean {
+  const now = new Date();
+  const { start, end } = getWeekBoundaries(0);
+  return date >= start && date <= end;
+}
+
+/**
+ * Check if a date is in the current month
+ */
+export function isThisMonth(date: Date): boolean {
+  const today = new Date();
+  return (
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
+export type TimeRange = 'day' | 'week' | 'month' | 'all';
+
+/**
+ * Filter sessions by time range
+ */
+export function filterSessionsByTimeRange(
+  sessions: CompletedSession[],
+  range: TimeRange
+): CompletedSession[] {
+  switch (range) {
+    case 'day':
+      return sessions.filter(s => isToday(new Date(s.completedAt)));
+    case 'week':
+      return sessions.filter(s => isThisWeek(new Date(s.completedAt)));
+    case 'month':
+      return sessions.filter(s => isThisMonth(new Date(s.completedAt)));
+    case 'all':
+      return sessions;
+  }
+}
+
+/**
+ * Calculate deep work minutes from sessions
+ */
+export function calculateDeepWorkMinutes(sessions: CompletedSession[]): number {
+  return sessions
+    .filter(s => s.type === 'work')
+    .reduce((sum, s) => sum + s.duration, 0) / 60;
+}
+
 /**
  * Statistics for a single day
  */

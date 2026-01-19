@@ -20,8 +20,8 @@ const SessionHistory = dynamic(
   () => import('@/components/insights/SessionHistory').then(mod => ({ default: mod.SessionHistory })),
   { ssr: false }
 );
-const WeeklyReport = dynamic(
-  () => import('@/components/insights/WeeklyReport').then(mod => ({ default: mod.WeeklyReport })),
+const StatisticsDashboard = dynamic(
+  () => import('@/components/insights/StatisticsDashboard').then(mod => ({ default: mod.StatisticsDashboard })),
   { ssr: false }
 );
 const FocusHeatmap = dynamic(
@@ -39,7 +39,7 @@ export default function Home() {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
       },
       onStats: () => {
-        window.dispatchEvent(new CustomEvent('pomo:open-stats'));
+        window.dispatchEvent(new CustomEvent('pomo:open-dashboard'));
       },
       onHistory: () => {
         window.dispatchEvent(new CustomEvent('pomo:open-history'));
@@ -81,11 +81,13 @@ export default function Home() {
       {/* Analytics, Settings and Theme toggle in top-right corner */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <FocusHeatmap />
-        <WeeklyReport />
         <SessionHistory />
         <TimerSettings />
         <ThemeToggle />
       </div>
+
+      {/* Statistics Dashboard (opened via G+S keyboard shortcut) */}
+      <StatisticsDashboard />
 
       <Timer />
 

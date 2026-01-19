@@ -13,7 +13,7 @@ interface GPrefixCallbacks {
  * Hook for G-prefix (vim-like) navigation shortcuts
  *
  * G T = Go to Timer (close all modals)
- * G S = Open Statistics (WeeklyReport)
+ * G S = Open Statistics Dashboard
  * G H = Open History (SessionHistory)
  * G , = Open Settings
  *
