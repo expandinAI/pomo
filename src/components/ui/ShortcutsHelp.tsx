@@ -17,6 +17,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { key: 'Space', description: 'Start / Pause' },
       { key: 'R', description: 'Reset' },
       { key: 'S', description: 'Skip session' },
+      { key: 'T', description: 'Focus task input' },
       { key: '↑ / ↓', description: '+/- 1 min (paused)' },
     ],
   },
