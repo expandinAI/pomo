@@ -9,44 +9,61 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Light mode colors
+        // Background colors - Dark first (pure black immersive)
         background: {
-          DEFAULT: '#FAFAF9',
-          dark: '#0C0A09',
+          DEFAULT: '#000000',
+          elevated: '#080808',
+          light: '#FAFAFA',
+          'light-elevated': '#FFFFFF',
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          dark: '#1C1917',
+          DEFAULT: '#0C0C0C',
+          light: '#F5F5F5',
         },
-        // Accent - Dynamic via CSS variables
+        border: {
+          DEFAULT: '#1A1A1A',
+          light: '#E5E5E5',
+        },
+        // Accent - Single blue accent
         accent: {
-          DEFAULT: 'var(--color-accent)',
-          soft: '#CCFBF1',
-          dark: 'var(--color-accent-dark)',
-          'dark-soft': '#134E4A',
+          DEFAULT: '#4F6EF7',
+          hover: '#6B85F9',
+          soft: 'rgba(79, 110, 247, 0.15)',
+          glow: 'rgba(79, 110, 247, 0.2)',
+          'light-hover': '#3B5BDB',
+          'light-soft': 'rgba(79, 110, 247, 0.1)',
         },
-        // Text colors using stone palette
+        // Text colors - Dark first
         primary: {
-          DEFAULT: '#1C1917',
-          dark: '#FAFAF9',
+          DEFAULT: '#FAFAFA',
+          light: '#171717',
         },
         secondary: {
-          DEFAULT: '#78716C',
-          dark: '#A8A29E',
+          DEFAULT: '#808080',
+          light: '#525252',
         },
         tertiary: {
-          DEFAULT: '#A8A29E',
-          dark: '#78716C',
+          DEFAULT: '#4A4A4A',
+          light: '#A3A3A3',
         },
       },
       fontFamily: {
         sans: [
+          'var(--font-inter)',
           'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
           'Segoe UI',
           'Roboto',
           'sans-serif',
+        ],
+        mono: [
+          'var(--font-mono)',
+          'JetBrains Mono',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'monospace',
         ],
       },
       fontSize: {
@@ -58,14 +75,21 @@ module.exports = {
         22: '5.5rem',
       },
       borderRadius: {
-        sm: '8px',
-        md: '12px',
-        lg: '16px',
+        sm: '4px',
+        DEFAULT: '6px',
+        md: '6px',
+        lg: '8px',
+        xl: '12px',
+        full: '9999px',
       },
       boxShadow: {
-        soft: '0 1px 2px 0 rgb(28 25 23 / 0.05)',
-        medium: '0 4px 6px -1px rgb(28 25 23 / 0.07), 0 2px 4px -2px rgb(28 25 23 / 0.05)',
-        large: '0 10px 15px -3px rgb(28 25 23 / 0.08), 0 4px 6px -4px rgb(28 25 23 / 0.05)',
+        sm: '0 1px 2px rgba(0, 0, 0, 0.3)',
+        DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.4)',
+        md: '0 4px 8px rgba(0, 0, 0, 0.4)',
+        lg: '0 8px 16px rgba(0, 0, 0, 0.5)',
+        xl: '0 12px 24px rgba(0, 0, 0, 0.5)',
+        glow: '0 0 20px rgba(79, 110, 247, 0.3)',
+        'glow-sm': '0 0 10px rgba(79, 110, 247, 0.2)',
       },
       animation: {
         'breathe-in': 'breatheIn 1.5s ease-out forwards',
@@ -103,9 +127,9 @@ module.exports = {
         },
       },
       transitionDuration: {
-        fast: '150ms',
-        normal: '300ms',
-        slow: '500ms',
+        fast: '100ms',
+        normal: '150ms',
+        slow: '300ms',
       },
       transitionTimingFunction: {
         'out-custom': 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -113,5 +137,10 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Add light: variant for dark-first design system
+    function({ addVariant }) {
+      addVariant('light', '.light &');
+    },
+  ],
 };

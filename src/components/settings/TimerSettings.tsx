@@ -6,7 +6,6 @@ import { Settings, X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useTimerSettings, TIMER_PRESETS, type TimerDurations } from '@/hooks/useTimerSettings';
 import { SoundSettings } from './SoundSettings';
-import { ThemeSettings } from './ThemeSettings';
 import { AmbientSettings } from './AmbientSettings';
 
 interface TimerSettingsProps {
@@ -28,10 +27,10 @@ function SliderRow({ label, value, min, max, onChange }: SliderRowProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-secondary dark:text-secondary-dark">
+        <label className="text-sm font-medium text-secondary light:text-secondary-dark">
           {label}
         </label>
-        <span className="text-sm font-mono text-accent dark:text-accent-dark tabular-nums">
+        <span className="text-sm font-mono text-accent light:text-accent-dark tabular-nums">
           {minutes} min
         </span>
       </div>
@@ -41,7 +40,7 @@ function SliderRow({ label, value, min, max, onChange }: SliderRowProps) {
         max={max}
         value={minutes}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-tertiary/20 dark:bg-tertiary-dark/20 rounded-full appearance-none cursor-pointer accent-accent dark:accent-accent-dark [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent dark:[&::-webkit-slider-thumb]:bg-accent-dark [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent dark:[&::-moz-range-thumb]:bg-accent-dark [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
+        className="w-full h-2 bg-tertiary/20 light:bg-tertiary-dark/20 rounded-full appearance-none cursor-pointer accent-accent light:accent-accent-dark [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent light:[&::-webkit-slider-thumb]:bg-accent-dark [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent light:[&::-moz-range-thumb]:bg-accent-dark [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
       />
     </div>
   );
@@ -142,7 +141,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
       <motion.button
         onClick={toggleOpen}
         disabled={disabled}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label="Timer settings"
         aria-expanded={isOpen}
         whileHover={disabled ? {} : { scale: 1.05 }}
@@ -161,7 +160,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 dark:bg-black/40"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 light:bg-black/40"
               onClick={() => setIsOpen(false)}
             >
               {/* Modal Content */}
@@ -178,17 +177,17 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="settings-title"
-                className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh]"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh]"
               >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10">
-                  <h2 id="settings-title" className="text-base font-semibold text-primary dark:text-primary-dark">
+                <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
+                  <h2 id="settings-title" className="text-base font-semibold text-primary light:text-primary-dark">
                     Timer Settings
                   </h2>
                   <button
                     ref={closeButtonRef}
                     onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     aria-label="Close settings"
                   >
                     <X className="w-4 h-4" aria-hidden="true" />
@@ -199,7 +198,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                 <div className="p-4 space-y-5 overflow-y-auto flex-1">
                   {/* Presets */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider">
+                    <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
                       Presets
                     </label>
                     <div className="flex gap-2">
@@ -209,8 +208,8 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                           onClick={() => applyPreset(preset.name)}
                           className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                             currentPreset === preset.name
-                              ? 'bg-accent dark:bg-accent-dark text-white'
-                              : 'bg-tertiary/10 dark:bg-tertiary-dark/10 text-secondary dark:text-secondary-dark hover:bg-tertiary/20 dark:hover:bg-tertiary-dark/20'
+                              ? 'bg-accent light:bg-accent-dark text-white'
+                              : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-secondary light:text-secondary-dark hover:bg-tertiary/20 light:hover:bg-tertiary-dark/20'
                           }`}
                         >
                           {preset.label}
@@ -249,14 +248,11 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Ambient Sound Settings */}
                   <AmbientSettings />
-
-                  {/* Theme Settings */}
-                  <ThemeSettings />
                 </div>
 
                 {/* Footer hint */}
                 <div className="px-4 pb-4">
-                  <p className="text-xs text-center text-tertiary dark:text-tertiary-dark">
+                  <p className="text-xs text-center text-tertiary light:text-tertiary-dark">
                     Settings are saved automatically
                   </p>
                 </div>

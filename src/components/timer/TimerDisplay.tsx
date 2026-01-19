@@ -11,35 +11,34 @@ interface TimerDisplayProps {
   showCelebration: boolean;
 }
 
+// Custom colon component with two stacked dots for better vertical alignment
+const TimerColon = memo(function TimerColon({ isRunning }: { isRunning: boolean }) {
+  const reducedMotion = prefersReducedMotion();
+
+  return (
+    <motion.span
+      className="flex flex-col items-center justify-center gap-3 mx-2 sm:mx-3"
+      animate={
+        isRunning && !reducedMotion
+          ? MICRO_ANIMATION.colonBlink
+          : { opacity: 1 }
+      }
+    >
+      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-current" />
+      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-current" />
+    </motion.span>
+  );
+});
+
 // Animated digit component for smooth number transitions
 const AnimatedDigit = memo(function AnimatedDigit({
   char,
   index,
-  isRunning,
 }: {
   char: string;
   index: number;
-  isRunning: boolean;
 }) {
-  const isColon = char === ':';
   const reducedMotion = prefersReducedMotion();
-
-  // Animate the colon with a subtle blink when running
-  if (isColon) {
-    return (
-      <motion.span
-        className="inline-block"
-        style={{ width: '0.3em' }}
-        animate={
-          isRunning && !reducedMotion
-            ? MICRO_ANIMATION.colonBlink
-            : { opacity: 1 }
-        }
-      >
-        {char}
-      </motion.span>
-    );
-  }
 
   return (
     <span className="inline-block overflow-hidden relative" style={{ width: '0.6em' }}>
@@ -86,12 +85,14 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
     prevIsRunning.current = isRunning;
   }, [isRunning]);
 
-  // Split time into individual characters for animation
-  const characters = formattedTime.split('');
+  // Split time into minutes and seconds for rendering with custom colon
+  const [minutePart, secondPart] = formattedTime.split(':');
+  const minuteChars = minutePart.split('');
+  const secondChars = secondPart.split('');
 
   return (
     <div
-      className="relative flex items-center justify-center"
+      className="relative flex flex-col items-center justify-center"
       role="timer"
       aria-label={ariaTimeLabel}
       aria-live="off"
@@ -100,7 +101,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
       <AnimatePresence>
         {showCelebration && (
           <motion.div
-            className="absolute inset-0 rounded-full bg-accent/20 dark:bg-accent-dark/20 blur-3xl"
+            className="absolute inset-0 bg-accent/20 blur-3xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1.2 }}
             exit={{ opacity: 0, scale: 1.4 }}
@@ -110,9 +111,9 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
         )}
       </AnimatePresence>
 
-      {/* Timer circle background with scale on start */}
+      {/* Floating timer display (no circle) */}
       <motion.div
-        className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full flex items-center justify-center bg-surface dark:bg-surface-dark shadow-large"
+        className="relative flex items-center justify-center"
         animate={
           reducedMotion
             ? {}
@@ -124,53 +125,41 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
         }
         transition={{ type: 'spring', ...SPRING.gentle }}
       >
-        {/* Pulse effect when running */}
-        <AnimatePresence>
-          {isRunning && (
-            <motion.div
-              className="absolute inset-2 rounded-full border-2 border-accent/30 dark:border-accent-dark/30"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{
-                opacity: [0.3, 0.6, 0.3],
-                scale: [0.98, 1, 0.98],
-              }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              aria-hidden="true"
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Time display with animated digits */}
+        {/* Time display with animated digits and custom colon */}
         <motion.div
-          className="timer-display text-timer sm:text-timer-lg font-light text-primary dark:text-primary-dark flex items-center justify-center"
+          className="timer-display font-mono font-semibold tabular-nums text-timer sm:text-timer-lg text-primary light:text-primary-light flex items-center justify-center"
           animate={showCelebration && !reducedMotion ? { scale: [1, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.6, type: 'spring', ...SPRING.gentle }}
         >
-          {characters.map((char, index) => (
-            <AnimatedDigit key={index} char={char} index={index} isRunning={isRunning} />
+          {/* Minutes */}
+          {minuteChars.map((char, index) => (
+            <AnimatedDigit key={`m-${index}`} char={char} index={index} />
+          ))}
+
+          {/* Custom Colon */}
+          <TimerColon isRunning={isRunning} />
+
+          {/* Seconds */}
+          {secondChars.map((char, index) => (
+            <AnimatedDigit key={`s-${index}`} char={char} index={minuteChars.length + index} />
           ))}
         </motion.div>
-
-        {/* Well done message during celebration */}
-        <AnimatePresence>
-          {showCelebration && (
-            <motion.p
-              className="absolute bottom-8 sm:bottom-12 text-lg font-medium text-accent dark:text-accent-dark"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ type: 'spring', ...SPRING.gentle, delay: 0.2 }}
-            >
-              Well done!
-            </motion.p>
-          )}
-        </AnimatePresence>
       </motion.div>
+
+      {/* Well done message during celebration */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.p
+            className="mt-8 text-lg font-medium text-accent"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ type: 'spring', ...SPRING.gentle, delay: 0.2 }}
+          >
+            Well done!
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

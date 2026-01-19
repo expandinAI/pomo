@@ -23,7 +23,7 @@ export function SessionType({ currentMode, onModeChange, disabled }: SessionType
     <div
       role="radiogroup"
       aria-label="Session type"
-      className="flex items-center gap-1 p-1 rounded-lg bg-surface dark:bg-surface-dark shadow-soft"
+      className="flex items-center gap-1 p-1 rounded-lg bg-surface light:bg-surface-dark shadow-sm"
     >
       {modes.map((mode) => (
         <button
@@ -38,14 +38,14 @@ export function SessionType({ currentMode, onModeChange, disabled }: SessionType
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
             currentMode === mode
-              ? 'text-primary dark:text-primary-dark'
-              : 'text-secondary dark:text-secondary-dark hover:text-primary dark:hover:text-primary-dark'
+              ? 'text-primary light:text-primary-dark'
+              : 'text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark'
           )}
         >
           {currentMode === mode && (
             <motion.div
               layoutId="activeSessionType"
-              className="absolute inset-0 bg-tertiary/20 dark:bg-tertiary-dark/20 rounded-md"
+              className="absolute inset-0 bg-tertiary/20 light:bg-tertiary-dark/20 rounded-md"
               transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               aria-hidden="true"
             />

@@ -66,10 +66,10 @@ export function WeeklyBarChart({ dailyStats, bestDay }: WeeklyBarChartProps) {
                   className={`
                     absolute bottom-0 w-full rounded-t-md
                     ${isBestDay
-                      ? 'bg-accent dark:bg-accent-dark'
+                      ? 'bg-accent light:bg-accent-dark'
                       : day.totalSeconds > 0
-                        ? 'bg-accent/40 dark:bg-accent-dark/40'
-                        : 'bg-tertiary/20 dark:bg-tertiary-dark/20'
+                        ? 'bg-accent/40 light:bg-accent-dark/40'
+                        : 'bg-tertiary/20 light:bg-tertiary-dark/20'
                     }
                   `}
                   style={{ height: `${visualHeight}%` }}
@@ -104,8 +104,8 @@ export function WeeklyBarChart({ dailyStats, bestDay }: WeeklyBarChartProps) {
               className={`
                 w-6 text-center text-xs
                 ${isBestDay
-                  ? 'text-accent dark:text-accent-dark font-medium'
-                  : 'text-tertiary dark:text-tertiary-dark'
+                  ? 'text-accent light:text-accent-dark font-medium'
+                  : 'text-tertiary light:text-tertiary-dark'
                 }
               `}
             >
@@ -120,7 +120,7 @@ export function WeeklyBarChart({ dailyStats, bestDay }: WeeklyBarChartProps) {
         {dailyStats.map(day => (
           <div
             key={`hours-${day.date}`}
-            className="w-6 text-center text-[10px] text-tertiary dark:text-tertiary-dark tabular-nums"
+            className="w-6 text-center text-[10px] text-tertiary light:text-tertiary-dark tabular-nums"
           >
             {day.totalSeconds > 0 ? formatHoursDecimal(day.totalSeconds) : ''}
           </div>

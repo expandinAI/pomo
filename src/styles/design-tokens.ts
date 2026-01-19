@@ -13,21 +13,23 @@ export const TIMER_DURATIONS = {
 // Number of pomodoros before a long break
 export const LONG_BREAK_INTERVAL = 4;
 
-// Animation durations in milliseconds
+// Animation durations in milliseconds (snappier feel)
 export const ANIMATION = {
-  fast: 150,
-  normal: 300,
-  slow: 500,
+  instant: 0,
+  fast: 100,
+  normal: 150,
+  moderate: 200,
+  slow: 300, // MAX for UI interactions
   breath: 1500, // Duration of one breath phase (in/out)
-  celebration: 600,
+  celebration: 400,
 } as const;
 
-// Spring configurations for Framer Motion
+// Spring configurations for Framer Motion (snappier springs)
 export const SPRING = {
-  default: { stiffness: 400, damping: 30 },
-  gentle: { stiffness: 300, damping: 40 },
-  bouncy: { stiffness: 500, damping: 25 },
-  snappy: { stiffness: 500, damping: 35 },
+  default: { stiffness: 500, damping: 30 },
+  gentle: { stiffness: 400, damping: 35 },
+  bouncy: { stiffness: 600, damping: 25 },
+  snappy: { stiffness: 600, damping: 35 },
 } as const;
 
 // Micro-animation presets for premium feel (no `as const` for Framer Motion compatibility)
@@ -44,25 +46,36 @@ export const MICRO_ANIMATION = {
   },
 };
 
-// Colors (for use in JS/TS, e.g., Framer Motion)
+// Colors (for use in JS/TS, e.g., Framer Motion) - Monochrome + Blue accent
+// Dark mode is the default/primary theme
 export const COLORS = {
-  light: {
-    background: '#FAFAF9',
-    surface: '#FFFFFF',
-    textPrimary: '#1C1917',
-    textSecondary: '#78716C',
-    textTertiary: '#A8A29E',
-    accent: '#0D9488',
-    accentSoft: '#CCFBF1',
-  },
+  // Dark is now the default (pure black immersive)
   dark: {
-    background: '#0C0A09',
-    surface: '#1C1917',
-    textPrimary: '#FAFAF9',
-    textSecondary: '#A8A29E',
-    textTertiary: '#78716C',
-    accent: '#2DD4BF',
-    accentSoft: '#134E4A',
+    background: '#000000',
+    backgroundElevated: '#080808',
+    surface: '#0C0C0C',
+    border: '#1A1A1A',
+    textPrimary: '#FAFAFA',
+    textSecondary: '#808080',
+    textTertiary: '#4A4A4A',
+    accent: '#4F6EF7',
+    accentHover: '#6B85F9',
+    accentSoft: 'rgba(79, 110, 247, 0.15)',
+    accentGlow: 'rgba(79, 110, 247, 0.2)',
+  },
+  // Light mode is now the alternative theme
+  light: {
+    background: '#FAFAFA',
+    backgroundElevated: '#FFFFFF',
+    surface: '#F5F5F5',
+    border: '#E5E5E5',
+    textPrimary: '#171717',
+    textSecondary: '#525252',
+    textTertiary: '#A3A3A3',
+    accent: '#4F6EF7',
+    accentHover: '#3B5BDB',
+    accentSoft: 'rgba(79, 110, 247, 0.1)',
+    accentGlow: 'rgba(79, 110, 247, 0.1)',
   },
 } as const;
 

@@ -35,7 +35,7 @@ export function SessionCounter({ count }: SessionCounterProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ type: 'spring', ...SPRING.bouncy }}
                   >
-                    <CheckCircle2 className="w-5 h-5 text-accent dark:text-accent-dark" />
+                    <CheckCircle2 className="w-5 h-5 text-accent light:text-accent-dark" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -44,7 +44,7 @@ export function SessionCounter({ count }: SessionCounterProps) {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.5, opacity: 0 }}
                   >
-                    <Circle className="w-5 h-5 text-tertiary dark:text-tertiary-dark" />
+                    <Circle className="w-5 h-5 text-tertiary light:text-tertiary-dark" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -54,15 +54,15 @@ export function SessionCounter({ count }: SessionCounterProps) {
       </div>
 
       {/* Total count */}
-      <p className="text-sm text-secondary dark:text-secondary-dark">
+      <p className="text-sm text-secondary light:text-secondary-dark">
         {count === 0 ? (
           'Start your first focus session'
         ) : (
           <>
-            <span className="font-medium text-primary dark:text-primary-dark">{count}</span>
+            <span className="font-medium text-primary light:text-primary-dark">{count}</span>
             {count === 1 ? ' session' : ' sessions'} completed
             {completedSets > 0 && (
-              <span className="text-tertiary dark:text-tertiary-dark">
+              <span className="text-tertiary light:text-tertiary-dark">
                 {' '}
                 ({completedSets} {completedSets === 1 ? 'set' : 'sets'})
               </span>

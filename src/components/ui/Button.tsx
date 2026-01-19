@@ -14,14 +14,14 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variants = {
   primary: 'bg-accent text-white hover:opacity-90',
   secondary:
-    'bg-surface dark:bg-surface-dark border border-tertiary/20 dark:border-tertiary-dark/20 hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10',
-  ghost: 'bg-transparent hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10',
+    'bg-surface light:bg-surface-dark border border-tertiary/20 light:border-tertiary-dark/20 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+  ghost: 'bg-transparent hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
 };
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
+  sm: 'h-8 px-3 text-sm',      // 32px height
+  md: 'h-9 px-4 text-sm',      // 36px height
+  lg: 'h-10 px-6 text-base',   // 40px height (touch target)
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

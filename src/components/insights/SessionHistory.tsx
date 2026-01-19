@@ -65,7 +65,7 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
     <div className="relative">
       <motion.button
         onClick={toggleOpen}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Session history"
         aria-expanded={isOpen}
         whileHover={{ scale: 1.05 }}
@@ -84,7 +84,7 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 dark:bg-black/40"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 light:bg-black/40"
               onClick={() => setIsOpen(false)}
             >
               {/* Modal Content */}
@@ -96,15 +96,15 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 className="w-[90vw] max-w-sm max-h-[80vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-              <div className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full">
+              <div className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10 flex-shrink-0">
-                  <h2 className="text-base font-semibold text-primary dark:text-primary-dark">
+                <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
+                  <h2 className="text-base font-semibold text-primary light:text-primary-dark">
                     Session History
                   </h2>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors"
                     aria-label="Close history"
                   >
                     <X className="w-4 h-4" />
@@ -112,12 +112,12 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 </div>
 
                 {/* Summary */}
-                <div className="p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10 flex-shrink-0">
+                <div className="p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-accent dark:text-accent-dark">
+                    <p className="text-3xl font-bold text-accent light:text-accent-dark">
                       {formatDuration(totalWorkTime)}
                     </p>
-                    <p className="text-sm text-tertiary dark:text-tertiary-dark mt-1">
+                    <p className="text-sm text-tertiary light:text-tertiary-dark mt-1">
                       Focus time in the last 30 days
                     </p>
                   </div>
@@ -127,10 +127,10 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 <div className="flex-1 overflow-y-auto p-4">
                   {sessions.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-tertiary dark:text-tertiary-dark">
+                      <p className="text-tertiary light:text-tertiary-dark">
                         No sessions yet
                       </p>
-                      <p className="text-sm text-tertiary dark:text-tertiary-dark mt-1">
+                      <p className="text-sm text-tertiary light:text-tertiary-dark mt-1">
                         Complete a focus session to see it here
                       </p>
                     </div>
@@ -145,10 +145,10 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                           <div key={date}>
                             {/* Date header */}
                             <div className="flex items-center justify-between mb-2">
-                              <h3 className="text-sm font-medium text-secondary dark:text-secondary-dark">
+                              <h3 className="text-sm font-medium text-secondary light:text-secondary-dark">
                                 {formatDate(daySessions[0].completedAt)}
                               </h3>
-                              <span className="text-xs text-tertiary dark:text-tertiary-dark">
+                              <span className="text-xs text-tertiary light:text-tertiary-dark">
                                 {formatDuration(dayWorkTime)} focus
                               </span>
                             </div>
@@ -167,21 +167,21 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                                     <div
                                       className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                         isWork
-                                          ? 'bg-accent/10 dark:bg-accent-dark/10 text-accent dark:text-accent-dark'
-                                          : 'bg-tertiary/10 dark:bg-tertiary-dark/10 text-tertiary dark:text-tertiary-dark'
+                                          ? 'bg-accent/10 light:bg-accent-dark/10 text-accent light:text-accent-dark'
+                                          : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-tertiary light:text-tertiary-dark'
                                       }`}
                                     >
                                       <Icon className="w-3.5 h-3.5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-primary dark:text-primary-dark truncate">
+                                      <p className="text-sm text-primary light:text-primary-dark truncate">
                                         {SESSION_LABELS[session.type]}
                                       </p>
                                     </div>
-                                    <span className="text-xs text-tertiary dark:text-tertiary-dark tabular-nums">
+                                    <span className="text-xs text-tertiary light:text-tertiary-dark tabular-nums">
                                       {formatDuration(session.duration)}
                                     </span>
-                                    <span className="text-xs text-tertiary dark:text-tertiary-dark tabular-nums w-16 text-right">
+                                    <span className="text-xs text-tertiary light:text-tertiary-dark tabular-nums w-16 text-right">
                                       {formatTime(session.completedAt)}
                                     </span>
                                   </div>

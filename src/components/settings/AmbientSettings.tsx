@@ -38,10 +38,10 @@ export function AmbientSettings() {
       {/* Volume Control */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider">
+          <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
             Ambient Volume
           </label>
-          <span className="text-xs text-secondary dark:text-secondary-dark tabular-nums">
+          <span className="text-xs text-secondary light:text-secondary-dark tabular-nums">
             {volumePercent}%
           </span>
         </div>
@@ -49,8 +49,8 @@ export function AmbientSettings() {
           <div
             className={`p-1.5 rounded-md transition-colors ${
               isMuted
-                ? 'text-tertiary dark:text-tertiary-dark'
-                : 'text-accent dark:text-accent-dark'
+                ? 'text-tertiary light:text-tertiary-dark'
+                : 'text-accent light:text-accent-dark'
             }`}
           >
             {isMuted ? (
@@ -69,13 +69,13 @@ export function AmbientSettings() {
             disabled={isMuted}
             className={`flex-1 h-1.5 rounded-full appearance-none cursor-pointer
               ${isMuted ? 'opacity-50' : ''}
-              bg-tertiary/20 dark:bg-tertiary-dark/20
+              bg-tertiary/20 light:bg-tertiary-dark/20
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-3.5
               [&::-webkit-slider-thumb]:h-3.5
               [&::-webkit-slider-thumb]:rounded-full
               [&::-webkit-slider-thumb]:bg-accent
-              [&::-webkit-slider-thumb]:dark:bg-accent-dark
+              [&::-webkit-slider-thumb]:light:bg-accent-dark
               [&::-webkit-slider-thumb]:shadow-sm
               [&::-webkit-slider-thumb]:transition-transform
               [&::-webkit-slider-thumb]:hover:scale-110
@@ -83,7 +83,7 @@ export function AmbientSettings() {
               [&::-moz-range-thumb]:h-3.5
               [&::-moz-range-thumb]:rounded-full
               [&::-moz-range-thumb]:bg-accent
-              [&::-moz-range-thumb]:dark:bg-accent-dark
+              [&::-moz-range-thumb]:light:bg-accent-dark
               [&::-moz-range-thumb]:border-0
             `}
             aria-label="Ambient sound volume"
@@ -93,7 +93,7 @@ export function AmbientSettings() {
 
       {/* Sound Selection */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider">
+        <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
           Ambient Sound
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -105,8 +105,8 @@ export function AmbientSettings() {
                 onClick={() => handleSelect(preset.id)}
                 className={`relative flex items-center gap-2 p-3 rounded-lg text-left transition-colors ${
                   isSelected
-                    ? 'bg-accent/10 dark:bg-accent-dark/10 ring-1 ring-accent dark:ring-accent-dark'
-                    : 'bg-tertiary/5 dark:bg-tertiary-dark/5 hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10'
+                    ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+                    : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
                 }`}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', ...SPRING.default }}
@@ -116,8 +116,8 @@ export function AmbientSettings() {
                     <Volume2
                       className={`w-4 h-4 ${
                         isSelected
-                          ? 'text-accent dark:text-accent-dark'
-                          : 'text-tertiary dark:text-tertiary-dark'
+                          ? 'text-accent light:text-accent-dark'
+                          : 'text-tertiary light:text-tertiary-dark'
                       }`}
                     />
                   )}
@@ -126,24 +126,24 @@ export function AmbientSettings() {
                   <p
                     className={`text-sm font-medium truncate ${
                       isSelected
-                        ? 'text-accent dark:text-accent-dark'
-                        : 'text-secondary dark:text-secondary-dark'
+                        ? 'text-accent light:text-accent-dark'
+                        : 'text-secondary light:text-secondary-dark'
                     }`}
                   >
                     {preset.name}
                   </p>
-                  <p className="text-xs text-tertiary dark:text-tertiary-dark truncate">
+                  <p className="text-xs text-tertiary light:text-tertiary-dark truncate">
                     {preset.description}
                   </p>
                 </div>
                 {isSelected && (
-                  <Check className="w-4 h-4 text-accent dark:text-accent-dark flex-shrink-0" />
+                  <Check className="w-4 h-4 text-accent light:text-accent-dark flex-shrink-0" />
                 )}
               </motion.button>
             );
           })}
         </div>
-        <p className="text-xs text-tertiary dark:text-tertiary-dark mt-2">
+        <p className="text-xs text-tertiary light:text-tertiary-dark mt-2">
           Plays during focus sessions only
         </p>
       </div>

@@ -86,7 +86,7 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
       {/* Trigger Button */}
       <motion.button
         onClick={toggleOpen}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Weekly focus report"
         aria-expanded={isOpen}
         whileHover={{ scale: 1.05 }}
@@ -105,7 +105,7 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: reducedMotion ? 0 : 0.15 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 dark:bg-black/40"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 light:bg-black/40"
               onClick={() => setIsOpen(false)}
               role="dialog"
               aria-modal="true"
@@ -120,18 +120,18 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                 className="w-[90vw] max-w-sm"
                 onClick={e => e.stopPropagation()}
               >
-                <div className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden">
+                <div className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden">
                   {/* Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10">
+                  <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
                     <h2
                       id="weekly-report-title"
-                      className="text-base font-semibold text-primary dark:text-primary-dark"
+                      className="text-base font-semibold text-primary light:text-primary-dark"
                     >
                       Your Week in Focus
                     </h2>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors"
                       aria-label="Close report"
                     >
                       <X className="w-4 h-4" />
@@ -148,11 +148,11 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                         transition={reducedMotion ? { duration: 0 } : { delay: 0.1 }}
                         className="text-center py-8"
                       >
-                        <CalendarDays className="w-12 h-12 mx-auto text-tertiary/40 dark:text-tertiary-dark/40 mb-4" />
-                        <p className="text-secondary dark:text-secondary-dark font-medium">
+                        <CalendarDays className="w-12 h-12 mx-auto text-tertiary/40 light:text-tertiary-dark/40 mb-4" />
+                        <p className="text-secondary light:text-secondary-dark font-medium">
                           No focus time this week yet
                         </p>
-                        <p className="text-sm text-tertiary dark:text-tertiary-dark mt-2">
+                        <p className="text-sm text-tertiary light:text-tertiary-dark mt-2">
                           Complete a focus session to see your progress
                         </p>
                       </motion.div>
@@ -167,10 +167,10 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                           className="text-center mb-8"
                           aria-label={`${heroNumber} hours of focus time this week`}
                         >
-                          <p className="text-5xl font-bold text-accent dark:text-accent-dark tracking-tight">
+                          <p className="text-5xl font-bold text-accent light:text-accent-dark tracking-tight">
                             {heroNumber}
                           </p>
-                          <p className="text-sm text-tertiary dark:text-tertiary-dark mt-1">
+                          <p className="text-sm text-tertiary light:text-tertiary-dark mt-1">
                             hours of deep work
                           </p>
                         </motion.div>
@@ -198,10 +198,10 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                           {/* Best Day */}
                           {bestDayMessage && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Star className="w-4 h-4 text-accent dark:text-accent-dark flex-shrink-0" />
-                              <span className="text-secondary dark:text-secondary-dark">
+                              <Star className="w-4 h-4 text-accent light:text-accent-dark flex-shrink-0" />
+                              <span className="text-secondary light:text-secondary-dark">
                                 Best day:{' '}
-                                <span className="text-primary dark:text-primary-dark font-medium">
+                                <span className="text-primary light:text-primary-dark font-medium">
                                   {bestDayMessage}
                                 </span>
                               </span>
@@ -212,11 +212,11 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                           {trendMessage && (
                             <div className="flex items-center gap-2 text-sm">
                               {stats!.trend === 'up' ? (
-                                <TrendingUp className="w-4 h-4 text-accent dark:text-accent-dark flex-shrink-0" />
+                                <TrendingUp className="w-4 h-4 text-accent light:text-accent-dark flex-shrink-0" />
                               ) : stats!.trend === 'down' ? (
-                                <TrendingDown className="w-4 h-4 text-tertiary dark:text-tertiary-dark flex-shrink-0" />
+                                <TrendingDown className="w-4 h-4 text-tertiary light:text-tertiary-dark flex-shrink-0" />
                               ) : null}
-                              <span className="text-secondary dark:text-secondary-dark">
+                              <span className="text-secondary light:text-secondary-dark">
                                 {trendMessage}
                               </span>
                             </div>

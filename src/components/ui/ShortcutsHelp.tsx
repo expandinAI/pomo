@@ -86,7 +86,7 @@ export function ShortcutsHelp() {
     <div className="relative">
       <motion.button
         onClick={toggleOpen}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Show keyboard shortcuts"
         aria-expanded={isOpen}
         whileHover={{ scale: 1.05 }}
@@ -117,23 +117,23 @@ export function ShortcutsHelp() {
               transition={{ type: 'spring', ...SPRING.gentle }}
               className="absolute bottom-full left-0 mb-2 z-50 min-w-[220px]"
             >
-              <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-lg border border-tertiary/10 dark:border-tertiary-dark/10 p-4">
-                <h3 className="text-xs font-medium text-tertiary dark:text-tertiary-dark uppercase tracking-wider mb-3">
+              <div className="bg-surface light:bg-surface-dark rounded-xl shadow-lg border border-tertiary/10 light:border-tertiary-dark/10 p-4">
+                <h3 className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider mb-3">
                   Keyboard Shortcuts
                 </h3>
                 <div className="space-y-3">
                   {SHORTCUT_GROUPS.map((group) => (
                     <div key={group.title}>
-                      <h4 className="text-xs font-medium text-tertiary/70 dark:text-tertiary-dark/70 mb-1.5">
+                      <h4 className="text-xs font-medium text-tertiary/70 light:text-tertiary-dark/70 mb-1.5">
                         {group.title}
                       </h4>
                       <ul className="space-y-1">
                         {group.shortcuts.map(({ key, description }) => (
                           <li key={key} className="flex items-center justify-between gap-3 text-sm">
-                            <span className="text-secondary dark:text-secondary-dark">
+                            <span className="text-secondary light:text-secondary-dark">
                               {description}
                             </span>
-                            <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background dark:bg-background-dark rounded border border-tertiary/20 dark:border-tertiary-dark/20 text-tertiary dark:text-tertiary-dark whitespace-nowrap">
+                            <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background light:bg-background-dark rounded border border-tertiary/20 light:border-tertiary-dark/20 text-tertiary light:text-tertiary-dark whitespace-nowrap">
                               {key}
                             </kbd>
                           </li>

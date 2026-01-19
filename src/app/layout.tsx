@@ -1,11 +1,19 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import { NoiseOverlay, Vignette } from '@/components/effects';
 import './globals.css';
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -42,8 +50,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FAFAF9' },
-    { media: '(prefers-color-scheme: dark)', color: '#0C0A09' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+    { media: '(prefers-color-scheme: light)', color: '#FAFAFA' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -64,25 +72,26 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-background text-primary min-h-screen`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-primary min-h-screen`}
       >
         {/* Skip to main content link for keyboard/screen reader users */}
         <a
           href="#main-timer"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-surface dark:focus:bg-surface-dark focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-primary dark:focus:text-primary-dark focus:ring-2 focus:ring-accent focus:outline-none"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-surface light:focus:bg-surface-light focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-primary light:focus:text-primary-light focus:ring-2 focus:ring-accent focus:outline-none"
         >
           Skip to timer
         </a>
-        {/* Script to prevent flash of wrong theme */}
+        {/* Script to prevent flash of wrong theme - Dark is default */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 const theme = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
 
-                if (theme === 'dark' || (!theme && prefersDark)) {
-                  document.documentElement.classList.add('dark');
+                // Light mode adds .light class, dark mode is the default (no class needed)
+                if (theme === 'light' || (!theme && prefersLight)) {
+                  document.documentElement.classList.add('light');
                 }
               })();
             `,
@@ -102,6 +111,9 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Visual effects for immersive dark experience */}
+        <NoiseOverlay />
+        <Vignette />
         {children}
       </body>
     </html>

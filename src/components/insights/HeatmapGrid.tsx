@@ -20,11 +20,11 @@ const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 // Intensity classes for each level (0-4)
 const INTENSITY_CLASSES = [
-  'bg-tertiary/5 dark:bg-tertiary-dark/5',      // 0 - empty
-  'bg-accent/20 dark:bg-accent-dark/20',         // 1 - low
-  'bg-accent/40 dark:bg-accent-dark/40',         // 2 - medium
-  'bg-accent/70 dark:bg-accent-dark/70',         // 3 - high
-  'bg-accent dark:bg-accent-dark',               // 4 - peak
+  'bg-tertiary/5 light:bg-tertiary-dark/5',      // 0 - empty
+  'bg-accent/20 light:bg-accent-dark/20',         // 1 - low
+  'bg-accent/40 light:bg-accent-dark/40',         // 2 - medium
+  'bg-accent/70 light:bg-accent-dark/70',         // 3 - high
+  'bg-accent light:bg-accent-dark',               // 4 - peak
 ] as const;
 
 /**
@@ -82,7 +82,7 @@ export function HeatmapGrid({ data }: HeatmapGridProps) {
                   className="w-3.5 h-3.5 flex items-center justify-center"
                 >
                   {showLabel && (
-                    <span className="text-[8px] text-tertiary dark:text-tertiary-dark tabular-nums">
+                    <span className="text-[8px] text-tertiary light:text-tertiary-dark tabular-nums">
                       {cell.hour}
                     </span>
                   )}
@@ -100,7 +100,7 @@ export function HeatmapGrid({ data }: HeatmapGridProps) {
               className="w-6 flex-shrink-0 flex items-center"
               aria-hidden="true"
             >
-              <span className="text-[10px] text-tertiary dark:text-tertiary-dark font-medium">
+              <span className="text-[10px] text-tertiary light:text-tertiary-dark font-medium">
                 {DAY_LABELS[dayIndex]}
               </span>
             </div>
@@ -161,7 +161,7 @@ function HeatmapCellComponent({
       className={`
         w-3.5 h-3.5 rounded-sm cursor-default transition-colors
         ${INTENSITY_CLASSES[level]}
-        ${isPeak ? 'ring-1 ring-accent dark:ring-accent-dark ring-offset-1 ring-offset-surface dark:ring-offset-surface-dark' : ''}
+        ${isPeak ? 'ring-1 ring-accent light:ring-accent-dark ring-offset-1 ring-offset-surface light:ring-offset-surface-dark' : ''}
       `}
       initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
       animate={{ opacity: 1 }}

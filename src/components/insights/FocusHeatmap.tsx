@@ -50,7 +50,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
       {/* Trigger Button */}
       <motion.button
         onClick={toggleOpen}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+        className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Focus pattern heatmap"
         aria-expanded={isOpen}
         whileHover={{ scale: 1.05 }}
@@ -69,7 +69,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: reducedMotion ? 0 : 0.15 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 dark:bg-black/40"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 light:bg-black/40"
               onClick={() => setIsOpen(false)}
               role="dialog"
               aria-modal="true"
@@ -84,18 +84,18 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                 className="w-[90vw] max-w-md"
                 onClick={e => e.stopPropagation()}
               >
-                <div className="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 dark:border-tertiary-dark/10 overflow-hidden">
+                <div className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden">
                   {/* Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-tertiary/10 dark:border-tertiary-dark/10">
+                  <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
                     <h2
                       id="heatmap-title"
-                      className="text-base font-semibold text-primary dark:text-primary-dark"
+                      className="text-base font-semibold text-primary light:text-primary-dark"
                     >
                       Your Focus Pattern
                     </h2>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary dark:text-tertiary-dark hover:text-secondary dark:hover:text-secondary-dark hover:bg-tertiary/10 dark:hover:bg-tertiary-dark/10 transition-colors"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors"
                       aria-label="Close heatmap"
                     >
                       <X className="w-4 h-4" />
@@ -112,11 +112,11 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                         transition={reducedMotion ? { duration: 0 } : { delay: 0.1 }}
                         className="text-center py-8"
                       >
-                        <Grid3X3 className="w-12 h-12 mx-auto text-tertiary/40 dark:text-tertiary-dark/40 mb-4" />
-                        <p className="text-secondary dark:text-secondary-dark font-medium">
+                        <Grid3X3 className="w-12 h-12 mx-auto text-tertiary/40 light:text-tertiary-dark/40 mb-4" />
+                        <p className="text-secondary light:text-secondary-dark font-medium">
                           No focus patterns yet
                         </p>
-                        <p className="text-sm text-tertiary dark:text-tertiary-dark mt-2">
+                        <p className="text-sm text-tertiary light:text-tertiary-dark mt-2">
                           Complete sessions to discover your peak focus times
                         </p>
                       </motion.div>
@@ -141,10 +141,10 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                             transition={reducedMotion ? { duration: 0 } : { delay: 0.3 }}
                             className="flex items-center gap-2 text-sm mb-4"
                           >
-                            <Star className="w-4 h-4 text-accent dark:text-accent-dark flex-shrink-0" />
-                            <span className="text-secondary dark:text-secondary-dark">
+                            <Star className="w-4 h-4 text-accent light:text-accent-dark flex-shrink-0" />
+                            <span className="text-secondary light:text-secondary-dark">
                               Peak focus:{' '}
-                              <span className="text-primary dark:text-primary-dark font-medium">
+                              <span className="text-primary light:text-primary-dark font-medium">
                                 {data.peakLabel}
                               </span>
                             </span>
@@ -156,15 +156,15 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                           initial={reducedMotion ? {} : { opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={reducedMotion ? { duration: 0 } : { delay: 0.4 }}
-                          className="flex items-center justify-center gap-1 text-[10px] text-tertiary dark:text-tertiary-dark"
+                          className="flex items-center justify-center gap-1 text-[10px] text-tertiary light:text-tertiary-dark"
                         >
                           <span>Less</span>
                           <div className="flex gap-0.5">
-                            <div className="w-3 h-3 rounded-sm bg-tertiary/5 dark:bg-tertiary-dark/5" />
-                            <div className="w-3 h-3 rounded-sm bg-accent/20 dark:bg-accent-dark/20" />
-                            <div className="w-3 h-3 rounded-sm bg-accent/40 dark:bg-accent-dark/40" />
-                            <div className="w-3 h-3 rounded-sm bg-accent/70 dark:bg-accent-dark/70" />
-                            <div className="w-3 h-3 rounded-sm bg-accent dark:bg-accent-dark" />
+                            <div className="w-3 h-3 rounded-sm bg-tertiary/5 light:bg-tertiary-dark/5" />
+                            <div className="w-3 h-3 rounded-sm bg-accent/20 light:bg-accent-dark/20" />
+                            <div className="w-3 h-3 rounded-sm bg-accent/40 light:bg-accent-dark/40" />
+                            <div className="w-3 h-3 rounded-sm bg-accent/70 light:bg-accent-dark/70" />
+                            <div className="w-3 h-3 rounded-sm bg-accent light:bg-accent-dark" />
                           </div>
                           <span>More</span>
                         </motion.div>
@@ -174,7 +174,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
 
                   {/* Footer with context */}
                   <div className="px-4 pb-4">
-                    <p className="text-[10px] text-tertiary dark:text-tertiary-dark text-center">
+                    <p className="text-[10px] text-tertiary light:text-tertiary-dark text-center">
                       Based on your last 30 days of focus sessions
                     </p>
                   </div>

@@ -50,7 +50,7 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
       {/* Breathing circle */}
       <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
         <motion.div
-          className="absolute inset-0 rounded-full bg-accent/20 dark:bg-accent-dark/20"
+          className="absolute inset-0 rounded-full bg-accent/20 light:bg-accent-dark/20"
           initial={{ scale: 1, opacity: 0.3 }}
           animate={{
             scale: phase === 'inhale' ? 1.3 : 1,
@@ -63,7 +63,7 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
         />
 
         <motion.div
-          className="absolute inset-8 rounded-full bg-accent/30 dark:bg-accent-dark/30"
+          className="absolute inset-8 rounded-full bg-accent/30 light:bg-accent-dark/30"
           initial={{ scale: 1, opacity: 0.4 }}
           animate={{
             scale: phase === 'inhale' ? 1.25 : 1,
@@ -77,7 +77,7 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
         />
 
         <motion.div
-          className="w-32 h-32 rounded-full bg-accent dark:bg-accent-dark flex items-center justify-center"
+          className="w-32 h-32 rounded-full bg-accent light:bg-accent-dark flex items-center justify-center"
           initial={{ scale: 1 }}
           animate={{
             scale: phase === 'inhale' ? 1.2 : 1,
@@ -92,7 +92,7 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
 
       {/* Instruction text */}
       <motion.p
-        className="text-lg font-medium text-primary dark:text-primary-dark"
+        className="text-lg font-medium text-primary light:text-primary-dark"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -103,7 +103,7 @@ export function BreathingAnimation({ onComplete }: BreathingAnimationProps) {
 
       {/* Skip hint */}
       <motion.span
-        className="text-sm text-tertiary dark:text-tertiary-dark"
+        className="text-sm text-tertiary light:text-tertiary-dark"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.6 }}
         transition={{ duration: 0.5, delay: 1 }}
