@@ -240,7 +240,7 @@ export function Timer() {
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
 
   // Ambient visual effects
-  const { setVisualState } = useAmbientEffects();
+  const { setVisualState, setIsPaused: setParticlesPaused } = useAmbientEffects();
 
   // Screen reader announcements
   const [statusAnnouncement, setStatusAnnouncement] = useState('');
@@ -380,12 +380,20 @@ export function Timer() {
   useEffect(() => {
     if (state.showCelebration) {
       setVisualState('completed');
+      setParticlesPaused(false);
     } else if (state.isRunning) {
       setVisualState(state.mode === 'work' ? 'focus' : 'break');
+      setParticlesPaused(false);
+    } else if (state.isPaused) {
+      // Keep visual state active but pause particles (freeze in place)
+      setVisualState(state.mode === 'work' ? 'focus' : 'break');
+      setParticlesPaused(true);
     } else {
+      // Truly idle (reset, initial state)
       setVisualState('idle');
+      setParticlesPaused(false);
     }
-  }, [state.isRunning, state.mode, state.showCelebration, setVisualState]);
+  }, [state.isRunning, state.isPaused, state.mode, state.showCelebration, setVisualState, setParticlesPaused]);
 
   // Screen reader: Announce timer every 5 minutes
   useEffect(() => {

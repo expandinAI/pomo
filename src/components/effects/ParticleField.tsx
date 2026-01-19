@@ -5,6 +5,7 @@ import { prefersReducedMotion } from '@/lib/utils';
 
 interface ParticleFieldProps {
   isActive: boolean;
+  isPaused?: boolean;
   speed?: 'normal' | 'slow';
   particleCount?: number;
 }
@@ -27,7 +28,7 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, speed = 'normal', particleCount = 20 }: ParticleFieldProps) {
+export function ParticleField({ isActive, isPaused = false, speed = 'normal', particleCount = 20 }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
 
   // Generate particles with random properties (memoized for stability)
@@ -70,6 +71,7 @@ export function ParticleField({ isActive, speed = 'normal', particleCount = 20 }
             height: `${particle.size}px`,
             boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
             filter: particle.blur ? 'blur(1px)' : 'none',
+            animationPlayState: isPaused ? 'paused' : 'running',
             '--particle-duration': `${particle.duration}s`,
             '--particle-delay': `${particle.delay}s`,
             '--particle-drift': `${particle.drift}px`,

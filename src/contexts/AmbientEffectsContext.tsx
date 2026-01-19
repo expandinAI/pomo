@@ -12,6 +12,10 @@ interface AmbientEffectsContextValue {
   visualState: VisualState;
   setVisualState: (state: VisualState) => void;
 
+  // Pause state (freeze particles without unmounting)
+  isPaused: boolean;
+  setIsPaused: (paused: boolean) => void;
+
   // Effects toggle
   effectsEnabled: boolean;
   setEffectsEnabled: (enabled: boolean) => void;
@@ -40,6 +44,7 @@ interface AmbientEffectsProviderProps {
 
 export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps) {
   const [visualState, setVisualStateInternal] = useState<VisualState>('idle');
+  const [isPaused, setIsPausedInternal] = useState(false);
   const { effectsEnabled, setEffectsEnabled, toggleEffects, isLoaded: settingsLoaded } = useAmbientEffectsSettings();
   const {
     visualMode,
@@ -56,6 +61,10 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     setVisualStateInternal(state);
   }, []);
 
+  const setIsPaused = useCallback((paused: boolean) => {
+    setIsPausedInternal(paused);
+  }, []);
+
   // Both settings must be loaded before we consider the context ready
   const isLoaded = settingsLoaded && qualityLoaded;
 
@@ -63,6 +72,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     () => ({
       visualState,
       setVisualState,
+      isPaused,
+      setIsPaused,
       effectsEnabled,
       setEffectsEnabled,
       toggleEffects,
@@ -78,6 +89,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     [
       visualState,
       setVisualState,
+      isPaused,
+      setIsPaused,
       effectsEnabled,
       setEffectsEnabled,
       toggleEffects,

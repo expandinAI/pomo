@@ -23,6 +23,7 @@ import { ParticleBurst } from './ParticleBurst';
 export function AmbientEffects() {
   const {
     visualState,
+    isPaused,
     effectsEnabled,
     isLoaded,
     particleCount,
@@ -49,6 +50,7 @@ export function AmbientEffects() {
       {showParticles && (
         <ParticleField
           isActive={true}
+          isPaused={isPaused}
           speed={particleSpeed}
           particleCount={particleCount}
         />

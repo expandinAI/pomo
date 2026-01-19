@@ -118,12 +118,12 @@ const useGPrefixNavigation = () => {
 
 ## Akzeptanzkriterien
 
-- [ ] G-Prefix funktioniert mit 1s Timeout
-- [ ] Visual Feedback bei G-Press
-- [ ] Shortcut Hints neben allen Buttons
-- [ ] Help Modal zeigt alle Shortcuts kategorisiert
-- [ ] Focus bleibt in offenen Modals (Focus Trap)
-- [ ] 90% aller Aktionen ohne Maus ausführbar
+- [x] G-Prefix funktioniert mit 1s Timeout
+- [x] Visual Feedback bei G-Press
+- [x] Shortcut Hints neben allen Buttons
+- [x] Help Modal zeigt alle Shortcuts kategorisiert
+- [x] Focus bleibt in offenen Modals (Focus Trap)
+- [x] 90% aller Aktionen ohne Maus ausführbar
 
 ## Metriken & Erfolgsmessung
 
