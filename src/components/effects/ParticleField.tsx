@@ -56,7 +56,7 @@ export function ParticleField({ isActive, speed = 'normal', particleCount = 20 }
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-30 overflow-hidden light:opacity-0"
+      className="pointer-events-none fixed inset-0 z-10 overflow-hidden light:opacity-0"
       aria-hidden="true"
     >
       {particles.map((particle) => (

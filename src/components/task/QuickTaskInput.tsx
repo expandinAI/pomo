@@ -128,10 +128,11 @@ export function QuickTaskInput({
     <div ref={containerRef} className="relative w-full max-w-md">
       <motion.div
         className={`
-          relative flex items-center gap-2 px-4 py-3
-          bg-surface light:bg-surface-dark
-          border border-tertiary/10 light:border-tertiary-dark/10
-          rounded-xl
+          relative z-20 flex items-center gap-2 px-4 py-3
+          bg-surface/70 light:bg-surface-dark/70
+          backdrop-blur-md
+          border border-white/[0.08] light:border-black/[0.05]
+          rounded-xl shadow-lg
           transition-colors duration-fast
           ${isFocused ? 'border-accent/30 light:border-accent-dark/30' : ''}
           ${disabled ? 'opacity-60' : ''}

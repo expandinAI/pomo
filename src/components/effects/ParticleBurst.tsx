@@ -60,7 +60,7 @@ export function ParticleBurst({ isActive, particleCount = 30 }: ParticleBurstPro
     <AnimatePresence>
       {showBurst && (
         <div
-          className="pointer-events-none fixed inset-0 z-30 flex items-center justify-center light:opacity-0"
+          className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center light:opacity-0"
           aria-hidden="true"
         >
           {particles.map((particle) => {

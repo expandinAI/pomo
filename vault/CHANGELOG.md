@@ -7,6 +7,11 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Glasmorphismus UI-Effekt (POMO-093)**:
+  - Partikel fließen visuell "unter" SessionType und QuickTaskInput
+  - Glaseffekt mit backdrop-blur für matte Oberflächen
+  - Neue Z-Index Hierarchie (Partikel z-10, Glasflächen z-20)
+  - Funktioniert in Dark und Light Mode
 - **UI Transformation Backlog** - 7 Feature-Specs, 40 Stories (POMO-050 bis POMO-089)
   - Design System Update (monochrome, sharper borders)
   - Command Palette (Cmd+K)
@@ -48,6 +53,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-093-glassmorphismus-effekt]]
 - [[stories/done/POMO-050-monochrome-palette]]
 - [[stories/done/POMO-051-border-radii]]
 - [[stories/done/POMO-052-monospace-font]]
