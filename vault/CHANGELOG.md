@@ -7,6 +7,19 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Extended Presets System (POMO-066 bis POMO-071, 12 SP)**:
+  - PresetSelector Komponente ersetzt SessionType mit 4 Presets
+  - Pomodoro (25/5/15, 4 Sessions) - Classic Francesco Cirillo Technik
+  - Deep Work (52/17/30, 2 Sessions) - Basiert auf DeskTime Studie
+  - 90-Min (90/20/30, 2 Sessions) - Basiert auf Kleitman's Ultradian Rhythmus
+  - Custom Preset mit persistenten Benutzereinstellungen
+  - Keyboard Shortcuts 1-4 für schnellen Preset-Wechsel
+  - CustomPresetEditor mit Slidern für alle Parameter
+  - SessionCounter passt sich an sessionsUntilLong des aktiven Presets an
+  - Preset-Info unter Tabs zeigt aktuelle Break-Dauer
+  - Tooltips mit wissenschaftlicher Erklärung zu jedem Preset
+  - Command Palette Integration (Switch to Pomodoro/Deep Work/90-Min/Custom)
+  - presetId wird bei Session-Completion gespeichert für spätere Stats
 - **Glasmorphismus UI-Effekt (POMO-093)**:
   - Partikel fließen visuell "unter" SessionType und QuickTaskInput
   - Glaseffekt mit backdrop-blur für matte Oberflächen
@@ -53,6 +66,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-066-preset-selector]]
+- [[stories/done/POMO-067-deep-work-preset]]
+- [[stories/done/POMO-068-ultradian-preset]]
+- [[stories/done/POMO-069-custom-preset]]
+- [[stories/done/POMO-070-session-counter]]
+- [[stories/done/POMO-071-preset-stats]]
 - [[stories/done/POMO-093-glassmorphismus-effekt]]
 - [[stories/done/POMO-050-monochrome-palette]]
 - [[stories/done/POMO-051-border-radii]]

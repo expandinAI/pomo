@@ -2,22 +2,23 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Circle, CheckCircle2 } from 'lucide-react';
-import { LONG_BREAK_INTERVAL, SPRING } from '@/styles/design-tokens';
+import { SPRING } from '@/styles/design-tokens';
 
 interface SessionCounterProps {
   count: number;
+  sessionsUntilLong: number;
 }
 
-export function SessionCounter({ count }: SessionCounterProps) {
-  // Show up to LONG_BREAK_INTERVAL indicators, then reset
-  const displayCount = count % LONG_BREAK_INTERVAL;
-  const completedSets = Math.floor(count / LONG_BREAK_INTERVAL);
+export function SessionCounter({ count, sessionsUntilLong }: SessionCounterProps) {
+  // Show up to sessionsUntilLong indicators, then reset
+  const displayCount = count % sessionsUntilLong;
+  const completedSets = Math.floor(count / sessionsUntilLong);
 
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Pomodoro indicators */}
       <div className="flex items-center gap-2">
-        {Array.from({ length: LONG_BREAK_INTERVAL }).map((_, index) => {
+        {Array.from({ length: sessionsUntilLong }).map((_, index) => {
           const isCompleted = index < displayCount;
           return (
             <motion.div

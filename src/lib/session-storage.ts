@@ -7,6 +7,7 @@ export interface CompletedSession {
   completedAt: string; // ISO date string
   task?: string; // Task description
   estimatedPomodoros?: number; // 1-4+ pomodoros
+  presetId?: string; // ID of the preset used for this session
 }
 
 const STORAGE_KEY = 'pomo_session_history';
@@ -41,6 +42,7 @@ export function saveSessions(sessions: CompletedSession[]): void {
 export interface TaskData {
   task?: string;
   estimatedPomodoros?: number;
+  presetId?: string;
 }
 
 export function addSession(
@@ -55,6 +57,7 @@ export function addSession(
     completedAt: new Date().toISOString(),
     ...(taskData?.task && { task: taskData.task }),
     ...(taskData?.estimatedPomodoros && { estimatedPomodoros: taskData.estimatedPomodoros }),
+    ...(taskData?.presetId && { presetId: taskData.presetId }),
   };
 
   const sessions = loadSessions();

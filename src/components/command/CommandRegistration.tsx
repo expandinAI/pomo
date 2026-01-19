@@ -10,6 +10,8 @@ import {
   Settings,
   VolumeX,
   Volume2,
+  Timer,
+  Clock,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -24,6 +26,7 @@ interface CommandRegistrationProps {
   onToggleTheme: () => void;
   onOpenSettings: () => void;
   onToggleMute: () => void;
+  onPresetChange?: (presetId: string) => void;
 }
 
 export function CommandRegistration({
@@ -37,6 +40,7 @@ export function CommandRegistration({
   onToggleTheme,
   onOpenSettings,
   onToggleMute,
+  onPresetChange,
 }: CommandRegistrationProps) {
   useEffect(() => {
     const commands: Command[] = [
@@ -100,6 +104,50 @@ export function CommandRegistration({
         keywords: ['sound', 'audio', 'volume', 'mute', 'unmute'],
       },
 
+      // Preset commands
+      ...(onPresetChange ? [
+        {
+          id: 'preset-pomodoro',
+          label: 'Switch to Pomodoro (25/5)',
+          shortcut: '1',
+          category: 'presets',
+          action: () => onPresetChange('pomodoro'),
+          icon: <Timer className="w-4 h-4" />,
+          keywords: ['classic', 'traditional', '25', 'pomodoro'],
+          disabled: () => timerIsRunning,
+        },
+        {
+          id: 'preset-deepwork',
+          label: 'Switch to Deep Work (52/17)',
+          shortcut: '2',
+          category: 'presets',
+          action: () => onPresetChange('deepWork'),
+          icon: <Timer className="w-4 h-4" />,
+          keywords: ['deep', 'work', '52', 'desktime'],
+          disabled: () => timerIsRunning,
+        },
+        {
+          id: 'preset-ultradian',
+          label: 'Switch to 90-Min Block',
+          shortcut: '3',
+          category: 'presets',
+          action: () => onPresetChange('ultradian'),
+          icon: <Clock className="w-4 h-4" />,
+          keywords: ['90', 'ultradian', 'long', 'kleitman'],
+          disabled: () => timerIsRunning,
+        },
+        {
+          id: 'preset-custom',
+          label: 'Switch to Custom Preset',
+          shortcut: '4',
+          category: 'presets',
+          action: () => onPresetChange('custom'),
+          icon: <Settings className="w-4 h-4" />,
+          keywords: ['custom', 'personal', 'my'],
+          disabled: () => timerIsRunning,
+        },
+      ] as Command[] : []),
+
       // Navigation commands
       {
         id: 'open-settings',
@@ -128,6 +176,7 @@ export function CommandRegistration({
     onToggleTheme,
     onOpenSettings,
     onToggleMute,
+    onPresetChange,
   ]);
 
   return null;

@@ -3,53 +3,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X } from 'lucide-react';
-import { SPRING } from '@/styles/design-tokens';
-import { useTimerSettingsContext, TIMER_PRESETS, type TimerDurations } from '@/contexts/TimerSettingsContext';
+import { SPRING, PRESETS, getPresetLabel } from '@/styles/design-tokens';
+import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
 import { SoundSettings } from './SoundSettings';
 import { AmbientSettings } from './AmbientSettings';
 import { VisualEffectsSettings } from './VisualEffectsSettings';
+import { CustomPresetEditor } from './CustomPresetEditor';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
   disabled?: boolean;
 }
 
-interface SliderRowProps {
-  label: string;
-  value: number; // in seconds
-  min: number;
-  max: number;
-  onChange: (minutes: number) => void;
-}
-
-function SliderRow({ label, value, min, max, onChange }: SliderRowProps) {
-  const minutes = Math.round(value / 60);
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-secondary light:text-secondary-dark">
-          {label}
-        </label>
-        <span className="text-sm font-mono text-accent light:text-accent-dark tabular-nums">
-          {minutes} min
-        </span>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={minutes}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-tertiary/20 light:bg-tertiary-dark/20 rounded-full appearance-none cursor-pointer accent-accent light:accent-accent-dark [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent light:[&::-webkit-slider-thumb]:bg-accent-dark [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent light:[&::-moz-range-thumb]:bg-accent-dark [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
-      />
-    </div>
-  );
-}
-
 export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { durations, updateDuration, applyPreset, currentPreset, isLoaded } = useTimerSettingsContext();
+  const { durations, applyPreset, activePresetId, isLoaded, presets } = useTimerSettingsContext();
 
   // Focus management refs
   const modalRef = useRef<HTMLDivElement>(null);
@@ -137,6 +105,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  // Preset order for display
+  const presetIds = ['pomodoro', 'deepWork', 'ultradian', 'custom'] as const;
+
   return (
     <div className="relative">
       <motion.button
@@ -200,49 +171,35 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                   {/* Presets */}
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
-                      Presets
+                      Timer Presets
                     </label>
-                    <div className="flex gap-2">
-                      {TIMER_PRESETS.map((preset) => (
-                        <button
-                          key={preset.name}
-                          onClick={() => applyPreset(preset.name)}
-                          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                            currentPreset === preset.name
-                              ? 'bg-accent light:bg-accent-dark text-background light:text-background-light'
-                              : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-secondary light:text-secondary-dark hover:bg-tertiary/20 light:hover:bg-tertiary-dark/20'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-4 gap-2">
+                      {presetIds.map((presetId) => {
+                        const preset = PRESETS[presetId];
+                        const isActive = activePresetId === presetId;
+                        return (
+                          <button
+                            key={presetId}
+                            onClick={() => applyPreset(presetId)}
+                            className={`py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                              isActive
+                                ? 'bg-accent light:bg-accent-dark text-background light:text-background-light'
+                                : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-secondary light:text-secondary-dark hover:bg-tertiary/20 light:hover:bg-tertiary-dark/20'
+                            }`}
+                            title={preset.description}
+                          >
+                            {getPresetLabel(preset)}
+                          </button>
+                        );
+                      })}
                     </div>
+                    <p className="text-xs text-tertiary light:text-tertiary-dark">
+                      {PRESETS[activePresetId]?.description || 'Select a preset'}
+                    </p>
                   </div>
 
-                  {/* Sliders */}
-                  <div className="space-y-4">
-                    <SliderRow
-                      label="Focus Session"
-                      value={durations.work}
-                      min={1}
-                      max={90}
-                      onChange={(mins) => updateDuration('work', mins)}
-                    />
-                    <SliderRow
-                      label="Short Break"
-                      value={durations.shortBreak}
-                      min={1}
-                      max={30}
-                      onChange={(mins) => updateDuration('shortBreak', mins)}
-                    />
-                    <SliderRow
-                      label="Long Break"
-                      value={durations.longBreak}
-                      min={1}
-                      max={60}
-                      onChange={(mins) => updateDuration('longBreak', mins)}
-                    />
-                  </div>
+                  {/* Custom Preset Editor (only shows when custom is active) */}
+                  <CustomPresetEditor />
 
                   {/* Sound Settings */}
                   <SoundSettings />

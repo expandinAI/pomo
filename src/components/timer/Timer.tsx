@@ -3,7 +3,7 @@
 import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
-import { SessionType as SessionTypeComponent } from './SessionType';
+import { PresetSelector } from './PresetSelector';
 import { SessionCounter } from './SessionCounter';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
@@ -17,7 +17,6 @@ import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { TimerSkeleton } from '@/components/ui/Skeleton';
 import { CommandRegistration } from '@/components/command';
 import {
-  LONG_BREAK_INTERVAL,
   type SessionType,
   SESSION_LABELS,
 } from '@/styles/design-tokens';
@@ -43,7 +42,7 @@ type TimerAction =
   | { type: 'PAUSE' }
   | { type: 'RESET'; durations: TimerDurations }
   | { type: 'SET_TIME'; time: number }
-  | { type: 'COMPLETE'; durations: TimerDurations }
+  | { type: 'COMPLETE'; durations: TimerDurations; sessionsUntilLong: number }
   | { type: 'SET_MODE'; mode: SessionType; durations: TimerDurations }
   | { type: 'HIDE_CELEBRATION' }
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
@@ -77,11 +76,11 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         ? state.completedPomodoros + 1
         : state.completedPomodoros;
 
-      // Determine next mode
+      // Determine next mode (use sessionsUntilLong from active preset)
       let nextMode: SessionType;
       if (isWorkSession) {
         nextMode =
-          newCompletedPomodoros % LONG_BREAK_INTERVAL === 0 ? 'longBreak' : 'shortBreak';
+          newCompletedPomodoros % action.sessionsUntilLong === 0 ? 'longBreak' : 'shortBreak';
       } else {
         nextMode = 'work';
       }
@@ -164,7 +163,15 @@ export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId } = useTimerSettingsContext();
+
+  // Ref to always have current sessionsUntilLong
+  const sessionsUntilLongRef = useRef(sessionsUntilLong);
+  sessionsUntilLongRef.current = sessionsUntilLong;
+
+  // Ref to always have current activePresetId
+  const activePresetIdRef = useRef(activePresetId);
+  activePresetIdRef.current = activePresetId;
 
   // Ref to always have current durations
   const durationsRef = useRef(durations);
@@ -226,13 +233,12 @@ export function Timer() {
     const sessionDuration = durationsRef.current[sessionMode];
     const wasWorkSession = sessionMode === 'work';
 
-    // Save completed session to history with task data (only for work sessions)
-    const taskData = wasWorkSession && state.currentTask
-      ? {
-          task: state.currentTask,
-          estimatedPomodoros: state.estimatedPomodoros ?? undefined,
-        }
-      : undefined;
+    // Save completed session to history with task data and preset info
+    const taskData = {
+      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      ...(wasWorkSession && state.estimatedPomodoros && { estimatedPomodoros: state.estimatedPomodoros }),
+      presetId: activePresetIdRef.current,
+    };
 
     addSession(sessionMode, sessionDuration, taskData);
 
@@ -245,7 +251,7 @@ export function Timer() {
       });
     }
 
-    dispatch({ type: 'COMPLETE', durations: durationsRef.current });
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
     elapsedRef.current = 0;
 
     // Clear task after completion (only for work sessions)
@@ -423,26 +429,31 @@ export function Timer() {
           break;
         case 's':
         case 'S':
-          dispatch({ type: 'COMPLETE', durations: durationsRef.current });
+          dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
           break;
         case 'd':
         case 'D':
           toggleTheme();
           break;
-        // Session type switching
+        // Preset switching (1-4)
         case '1':
           if (!state.isRunning) {
-            dispatch({ type: 'SET_MODE', mode: 'work', durations: durationsRef.current });
+            applyPreset('pomodoro');
           }
           break;
         case '2':
           if (!state.isRunning) {
-            dispatch({ type: 'SET_MODE', mode: 'shortBreak', durations: durationsRef.current });
+            applyPreset('deepWork');
           }
           break;
         case '3':
           if (!state.isRunning) {
-            dispatch({ type: 'SET_MODE', mode: 'longBreak', durations: durationsRef.current });
+            applyPreset('ultradian');
+          }
+          break;
+        case '4':
+          if (!state.isRunning) {
+            applyPreset('custom');
           }
           break;
         // Time adjustment (only when not running)
@@ -480,7 +491,7 @@ export function Timer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType]);
+  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType, applyPreset]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -507,7 +518,7 @@ export function Timer() {
 
   // Skip session (complete early)
   const handleSkip = useCallback(() => {
-    dispatch({ type: 'COMPLETE', durations: durationsRef.current });
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
     elapsedRef.current = 0;
   }, []);
 
@@ -551,12 +562,11 @@ export function Timer() {
         onToggleTheme={toggleTheme}
         onOpenSettings={handleOpenSettings}
         onToggleMute={toggleMute}
+        onPresetChange={applyPreset}
       />
 
-      {/* Session type selector */}
-      <SessionTypeComponent
-        currentMode={state.mode}
-        onModeChange={handleModeChange}
+      {/* Preset selector */}
+      <PresetSelector
         disabled={state.isRunning}
       />
 
@@ -591,7 +601,7 @@ export function Timer() {
       />
 
       {/* Session counter */}
-      <SessionCounter count={state.completedPomodoros} />
+      <SessionCounter count={state.completedPomodoros} sessionsUntilLong={sessionsUntilLong} />
 
       {/* Screen reader live regions */}
       <div

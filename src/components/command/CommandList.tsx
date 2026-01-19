@@ -13,11 +13,12 @@ interface CommandListProps {
 
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
   timer: 'Timer',
+  presets: 'Presets',
   navigation: 'Navigation',
   settings: 'Settings',
 };
 
-const CATEGORY_ORDER: CommandCategory[] = ['timer', 'navigation', 'settings'];
+const CATEGORY_ORDER: CommandCategory[] = ['timer', 'presets', 'navigation', 'settings'];
 
 export function CommandList({
   commands,
@@ -39,6 +40,7 @@ export function CommandList({
   // Group commands by category
   const groupedCommands: Record<CommandCategory, Command[]> = {
     timer: [],
+    presets: [],
     navigation: [],
     settings: [],
   };

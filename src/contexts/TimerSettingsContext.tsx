@@ -1,73 +1,108 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
+import {
+  PRESETS,
+  type TimerPreset,
+  type TimerDurations,
+} from '@/styles/design-tokens';
 
-export interface TimerDurations {
-  work: number; // in seconds
-  shortBreak: number;
-  longBreak: number;
-}
-
-export interface TimerPreset {
-  name: string;
-  label: string;
-  durations: TimerDurations;
-}
-
-export const TIMER_PRESETS: TimerPreset[] = [
-  {
-    name: 'classic',
-    label: 'Classic',
-    durations: { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 },
-  },
-  {
-    name: 'deepWork',
-    label: 'Deep Work',
-    durations: { work: 50 * 60, shortBreak: 10 * 60, longBreak: 30 * 60 },
-  },
-  {
-    name: 'sprint',
-    label: 'Sprint',
-    durations: { work: 15 * 60, shortBreak: 3 * 60, longBreak: 10 * 60 },
-  },
-];
+// Re-export for convenience
+export type { TimerDurations, TimerPreset };
 
 const STORAGE_KEY = 'pomo_timer_settings';
-const DEFAULT_DURATIONS: TimerDurations = TIMER_PRESETS[0].durations;
+const CUSTOM_PRESET_KEY = 'pomo_custom_preset';
+const DEFAULT_PRESET_ID = 'pomodoro';
 
-function loadSettings(): TimerDurations {
-  if (typeof window === 'undefined') return DEFAULT_DURATIONS;
+interface StoredSettings {
+  presetId: string;
+  customDurations?: TimerDurations;
+  customSessionsUntilLong?: number;
+}
+
+function loadSettings(): StoredSettings {
+  if (typeof window === 'undefined') {
+    return { presetId: DEFAULT_PRESET_ID };
+  }
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (
-        typeof parsed.work === 'number' &&
-        typeof parsed.shortBreak === 'number' &&
-        typeof parsed.longBreak === 'number'
-      ) {
+      if (typeof parsed.presetId === 'string' && parsed.presetId in PRESETS) {
         return parsed;
       }
     }
   } catch {
     // Ignore errors, use default
   }
-  return DEFAULT_DURATIONS;
+  return { presetId: DEFAULT_PRESET_ID };
 }
 
-function saveSettings(durations: TimerDurations): void {
+function saveSettings(settings: StoredSettings): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(durations));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function loadCustomPreset(): { durations: TimerDurations; sessionsUntilLong: number } {
+  if (typeof window === 'undefined') {
+    return {
+      durations: { ...PRESETS.custom.durations },
+      sessionsUntilLong: PRESETS.custom.sessionsUntilLong,
+    };
+  }
+
+  try {
+    const stored = localStorage.getItem(CUSTOM_PRESET_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (
+        typeof parsed.durations?.work === 'number' &&
+        typeof parsed.durations?.shortBreak === 'number' &&
+        typeof parsed.durations?.longBreak === 'number' &&
+        typeof parsed.sessionsUntilLong === 'number'
+      ) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return {
+    durations: { ...PRESETS.custom.durations },
+    sessionsUntilLong: PRESETS.custom.sessionsUntilLong,
+  };
+}
+
+function saveCustomPreset(durations: TimerDurations, sessionsUntilLong: number): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CUSTOM_PRESET_KEY, JSON.stringify({ durations, sessionsUntilLong }));
 }
 
 interface TimerSettingsContextValue {
+  // Current durations (from active preset)
   durations: TimerDurations;
+  // Sessions until long break (from active preset)
+  sessionsUntilLong: number;
+  // Loading state
   isLoaded: boolean;
-  updateDuration: (key: keyof TimerDurations, minutes: number) => void;
-  applyPreset: (presetName: string) => void;
-  currentPreset: string | undefined;
+  // Active preset ID
+  activePresetId: string;
+  // Get active preset object
+  getActivePreset: () => TimerPreset;
+  // Apply a preset by ID
+  applyPreset: (presetId: string) => void;
+  // Update custom preset durations
+  updateCustomDuration: (key: keyof TimerDurations, minutes: number) => void;
+  // Update custom preset sessions until long
+  updateCustomSessionsUntilLong: (count: number) => void;
+  // Reset custom preset to defaults
+  resetCustomPreset: () => void;
+  // All available presets
   presets: TimerPreset[];
+  // Custom preset values (for editor)
+  customDurations: TimerDurations;
+  customSessionsUntilLong: number;
 }
 
 const TimerSettingsContext = createContext<TimerSettingsContextValue | null>(null);
@@ -77,52 +112,106 @@ interface TimerSettingsProviderProps {
 }
 
 export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) {
-  const [durations, setDurations] = useState<TimerDurations>(DEFAULT_DURATIONS);
+  const [activePresetId, setActivePresetId] = useState<string>(DEFAULT_PRESET_ID);
+  const [customDurations, setCustomDurations] = useState<TimerDurations>({ ...PRESETS.custom.durations });
+  const [customSessionsUntilLong, setCustomSessionsUntilLong] = useState<number>(PRESETS.custom.sessionsUntilLong);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
   useEffect(() => {
-    setDurations(loadSettings());
+    const settings = loadSettings();
+    setActivePresetId(settings.presetId);
+
+    const customSettings = loadCustomPreset();
+    setCustomDurations(customSettings.durations);
+    setCustomSessionsUntilLong(customSettings.sessionsUntilLong);
+
     setIsLoaded(true);
   }, []);
 
-  // Update a single duration
-  const updateDuration = useCallback((key: keyof TimerDurations, minutes: number) => {
-    const seconds = Math.max(1, Math.min(90, minutes)) * 60;
-    setDurations((prev) => {
+  // Get active preset object
+  const getActivePreset = useCallback((): TimerPreset => {
+    if (activePresetId === 'custom') {
+      return {
+        ...PRESETS.custom,
+        durations: customDurations,
+        sessionsUntilLong: customSessionsUntilLong,
+      };
+    }
+    return PRESETS[activePresetId] || PRESETS[DEFAULT_PRESET_ID];
+  }, [activePresetId, customDurations, customSessionsUntilLong]);
+
+  // Derive durations and sessionsUntilLong from active preset
+  const activePreset = getActivePreset();
+  const durations = activePreset.durations;
+  const sessionsUntilLong = activePreset.sessionsUntilLong;
+
+  // Apply a preset by ID
+  const applyPreset = useCallback((presetId: string) => {
+    if (!(presetId in PRESETS)) return;
+
+    setActivePresetId(presetId);
+    saveSettings({ presetId });
+  }, []);
+
+  // Update custom preset durations
+  const updateCustomDuration = useCallback((key: keyof TimerDurations, minutes: number) => {
+    const seconds = Math.max(1, Math.min(120, minutes)) * 60;
+    setCustomDurations((prev) => {
       const updated = { ...prev, [key]: seconds };
-      saveSettings(updated);
+      saveCustomPreset(updated, customSessionsUntilLong);
       return updated;
     });
+  }, [customSessionsUntilLong]);
+
+  // Update custom preset sessions until long
+  const updateCustomSessionsUntilLong = useCallback((count: number) => {
+    const validCount = Math.max(1, Math.min(8, count));
+    setCustomSessionsUntilLong(validCount);
+    saveCustomPreset(customDurations, validCount);
+  }, [customDurations]);
+
+  // Reset custom preset to defaults
+  const resetCustomPreset = useCallback(() => {
+    const defaultDurations = { ...PRESETS.pomodoro.durations };
+    const defaultSessionsUntilLong = PRESETS.pomodoro.sessionsUntilLong;
+    setCustomDurations(defaultDurations);
+    setCustomSessionsUntilLong(defaultSessionsUntilLong);
+    saveCustomPreset(defaultDurations, defaultSessionsUntilLong);
   }, []);
 
-  // Apply a preset
-  const applyPreset = useCallback((presetName: string) => {
-    const preset = TIMER_PRESETS.find((p) => p.name === presetName);
-    if (preset) {
-      setDurations(preset.durations);
-      saveSettings(preset.durations);
-    }
-  }, []);
-
-  // Get current preset name (if any matches)
-  const currentPreset = TIMER_PRESETS.find(
-    (p) =>
-      p.durations.work === durations.work &&
-      p.durations.shortBreak === durations.shortBreak &&
-      p.durations.longBreak === durations.longBreak
-  )?.name;
+  // All available presets as array
+  const presets = useMemo(() => Object.values(PRESETS), []);
 
   const value = useMemo(
     () => ({
       durations,
+      sessionsUntilLong,
       isLoaded,
-      updateDuration,
+      activePresetId,
+      getActivePreset,
       applyPreset,
-      currentPreset,
-      presets: TIMER_PRESETS,
+      updateCustomDuration,
+      updateCustomSessionsUntilLong,
+      resetCustomPreset,
+      presets,
+      customDurations,
+      customSessionsUntilLong,
     }),
-    [durations, isLoaded, updateDuration, applyPreset, currentPreset]
+    [
+      durations,
+      sessionsUntilLong,
+      isLoaded,
+      activePresetId,
+      getActivePreset,
+      applyPreset,
+      updateCustomDuration,
+      updateCustomSessionsUntilLong,
+      resetCustomPreset,
+      presets,
+      customDurations,
+      customSessionsUntilLong,
+    ]
   );
 
   return (

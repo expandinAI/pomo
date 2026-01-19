@@ -3,15 +3,70 @@
  * These values should match tailwind.config.js
  */
 
-// Duration presets in seconds
-export const TIMER_DURATIONS = {
-  work: 25 * 60, // 25 minutes
-  shortBreak: 5 * 60, // 5 minutes
-  longBreak: 15 * 60, // 15 minutes
+// Duration type for timer
+export interface TimerDurations {
+  work: number; // in seconds
+  shortBreak: number;
+  longBreak: number;
+}
+
+// Preset definition with all configuration
+export interface TimerPreset {
+  id: string;
+  name: string;
+  shortcut: string;
+  durations: TimerDurations;
+  sessionsUntilLong: number;
+  description?: string;
+}
+
+// All available presets
+export const PRESETS: Record<string, TimerPreset> = {
+  pomodoro: {
+    id: 'pomodoro',
+    name: 'Pomodoro',
+    shortcut: '1',
+    durations: { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 },
+    sessionsUntilLong: 4,
+    description: 'Classic 25/5/15 technique by Francesco Cirillo',
+  },
+  deepWork: {
+    id: 'deepWork',
+    name: 'Deep Work',
+    shortcut: '2',
+    durations: { work: 52 * 60, shortBreak: 17 * 60, longBreak: 30 * 60 },
+    sessionsUntilLong: 2,
+    description: 'Based on DeskTime study: Top 10% work 52 min, break 17 min',
+  },
+  ultradian: {
+    id: 'ultradian',
+    name: '90-Min',
+    shortcut: '3',
+    durations: { work: 90 * 60, shortBreak: 20 * 60, longBreak: 30 * 60 },
+    sessionsUntilLong: 2,
+    description: "Based on Kleitman's Basic Rest-Activity Cycle",
+  },
+  custom: {
+    id: 'custom',
+    name: 'Custom',
+    shortcut: '4',
+    durations: { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 },
+    sessionsUntilLong: 4,
+    description: 'Customize your own timer settings',
+  },
 } as const;
 
-// Number of pomodoros before a long break
-export const LONG_BREAK_INTERVAL = 4;
+// Get preset display label (work duration in minutes)
+export function getPresetLabel(preset: TimerPreset): string {
+  const workMinutes = Math.floor(preset.durations.work / 60);
+  return `${workMinutes}m`;
+}
+
+// Legacy: Duration presets in seconds (for backward compatibility)
+export const TIMER_DURATIONS = PRESETS.pomodoro.durations;
+
+// Legacy: Number of pomodoros before a long break (for backward compatibility)
+export const LONG_BREAK_INTERVAL = PRESETS.pomodoro.sessionsUntilLong;
 
 // Animation durations in milliseconds (snappier feel)
 export const ANIMATION = {
