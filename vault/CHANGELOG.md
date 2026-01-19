@@ -15,6 +15,11 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Keyboard-First UX (G-prefix navigation)
   - System Integrations (DND, Website Blocking)
   - Statistics Dashboard (Focus Score, Streak, Timeline)
+- **Adaptive Quality + Visual Modes (POMO-092)**:
+  - Device Capability Detection (Mobile, Low-end, Reduced Motion)
+  - Visual Mode Selector (Minimal | Ambient | Auto)
+  - Adaptive Partikelanzahl (10-20 basierend auf Device)
+  - Verbesserte Grain-Textur (soft-light blend, 15% opacity)
 
 ### Changed
 - ROADMAP.md aktualisiert mit v0.2.0 UI Transformation Milestone
@@ -26,6 +31,11 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Kompaktere Button Heights (32px/36px/40px)
   - Dunklere Schatten für mehr Tiefe
   - Color Theme System entfernt (vereinfacht auf Dark/Light)
+- **Pure Monochrome Design (POMO-092)**:
+  - Blaue Akzentfarbe entfernt
+  - Dark Mode: Weiß (#FFFFFF) als Akzent
+  - Light Mode: Schwarz (#171717) als Akzent
+  - Maximaler Kontrast bei allen interaktiven Elementen
 
 ### Fixed
 -
@@ -36,7 +46,10 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-052-monospace-font]]
 - [[stories/done/POMO-053-faster-animations]]
 - [[stories/done/POMO-054-compact-layout]]
-- [[stories/done/POMO-055-dark-shadows]] 
+- [[stories/done/POMO-055-dark-shadows]]
+- [[stories/done/POMO-090-immersive-dark-foundation]]
+- [[stories/done/POMO-091-ambient-effects]]
+- [[stories/done/POMO-092-adaptive-quality-visual-modes]] 
 
 ---
 
