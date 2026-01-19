@@ -33,6 +33,10 @@ module.exports = {
           'light-hover': '#3B5BDB',
           'light-soft': 'rgba(79, 110, 247, 0.1)',
         },
+        // Warm glow for break sessions
+        warm: {
+          glow: 'rgba(247, 186, 79, 0.15)',
+        },
         // Text colors - Dark first
         primary: {
           DEFAULT: '#FAFAFA',

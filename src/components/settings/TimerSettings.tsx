@@ -4,9 +4,10 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
-import { useTimerSettings, TIMER_PRESETS, type TimerDurations } from '@/hooks/useTimerSettings';
+import { useTimerSettingsContext, TIMER_PRESETS, type TimerDurations } from '@/contexts/TimerSettingsContext';
 import { SoundSettings } from './SoundSettings';
 import { AmbientSettings } from './AmbientSettings';
+import { VisualEffectsSettings } from './VisualEffectsSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -48,7 +49,7 @@ function SliderRow({ label, value, min, max, onChange }: SliderRowProps) {
 
 export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { durations, updateDuration, applyPreset, currentPreset, isLoaded } = useTimerSettings();
+  const { durations, updateDuration, applyPreset, currentPreset, isLoaded } = useTimerSettingsContext();
 
   // Focus management refs
   const modalRef = useRef<HTMLDivElement>(null);
@@ -248,6 +249,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Ambient Sound Settings */}
                   <AmbientSettings />
+
+                  {/* Visual Effects Settings */}
+                  <VisualEffectsSettings />
                 </div>
 
                 {/* Footer hint */}

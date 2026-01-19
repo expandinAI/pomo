@@ -150,4 +150,21 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
+
+  /* Particle drift animation (floating upward) */
+  @keyframes particleDrift {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-110vh) translateX(var(--particle-drift, 0px));
+    }
+  }
+
+  .animate-particle {
+    animation: particleDrift var(--particle-duration, 25s) linear infinite;
+    animation-delay: var(--particle-delay, 0s);
+    opacity: var(--particle-opacity, 0.6);
+    will-change: transform;
+  }
 }

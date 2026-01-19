@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
-import { NoiseOverlay, Vignette } from '@/components/effects';
+import { NoiseOverlay, Vignette, AmbientEffects } from '@/components/effects';
+import { AmbientEffectsProvider } from '@/contexts/AmbientEffectsContext';
+import { TimerSettingsProvider } from '@/contexts/TimerSettingsContext';
+import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
 import './globals.css';
 
 const inter = Inter({
@@ -111,10 +114,17 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Visual effects for immersive dark experience */}
-        <NoiseOverlay />
-        <Vignette />
-        {children}
+        <TimerSettingsProvider>
+          <AmbientSoundProvider>
+            <AmbientEffectsProvider>
+              {/* Visual effects for immersive dark experience */}
+              <NoiseOverlay />
+              <Vignette />
+              <AmbientEffects />
+              {children}
+            </AmbientEffectsProvider>
+          </AmbientSoundProvider>
+        </TimerSettingsProvider>
       </body>
     </html>
   );

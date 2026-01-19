@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Timer } from '@/components/timer/Timer';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { useColorTheme } from '@/hooks/useColorTheme';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -29,9 +28,6 @@ const FocusHeatmap = dynamic(
 );
 
 export default function Home() {
-  // Initialize color theme on page load
-  useColorTheme();
-
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

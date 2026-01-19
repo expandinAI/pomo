@@ -2,7 +2,7 @@
 
 import { Volume2, VolumeX, Check, Waves } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAmbientSound } from '@/hooks/useAmbientSound';
+import { useAmbientSoundContext } from '@/contexts/AmbientSoundContext';
 import { type AmbientType } from '@/lib/ambientGenerators';
 import { SPRING } from '@/styles/design-tokens';
 
@@ -17,7 +17,7 @@ const AMBIENT_ICONS: Record<AmbientType, string> = {
 };
 
 export function AmbientSettings() {
-  const { type, volume, setType, setVolume, preview, presets } = useAmbientSound();
+  const { type, volume, setType, setVolume, preview, presets } = useAmbientSoundContext();
 
   const handleSelect = (ambientType: AmbientType) => {
     setType(ambientType);
