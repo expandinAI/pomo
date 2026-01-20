@@ -577,3 +577,75 @@ export function calculateFocusScore(sessions: CompletedSession[]): number {
 
   return Math.round(volumeScore * 50 + countScore * 30 + streakBonus * 20);
 }
+
+// =============================================================================
+// LIFETIME STATISTICS
+// =============================================================================
+
+/**
+ * Lifetime statistics for all-time tracking
+ */
+export interface LifetimeStats {
+  totalSeconds: number;
+  totalSessions: number;
+  firstSessionDate: string | null;
+  averageSessionLength: number; // in seconds
+}
+
+/**
+ * Calculate lifetime statistics across all sessions
+ * Only counts work sessions (not breaks)
+ */
+export function getLifetimeStats(): LifetimeStats {
+  const sessions = loadSessions();
+  const workSessions = sessions.filter(s => s.type === 'work');
+
+  if (workSessions.length === 0) {
+    return {
+      totalSeconds: 0,
+      totalSessions: 0,
+      firstSessionDate: null,
+      averageSessionLength: 0,
+    };
+  }
+
+  const totalSeconds = workSessions.reduce((sum, s) => sum + s.duration, 0);
+
+  // Sessions are stored newest first, so last item is the oldest
+  const firstSessionDate = workSessions[workSessions.length - 1].completedAt;
+
+  return {
+    totalSeconds,
+    totalSessions: workSessions.length,
+    firstSessionDate,
+    averageSessionLength: Math.round(totalSeconds / workSessions.length),
+  };
+}
+
+/**
+ * Format seconds as "Xh Ym" for display
+ */
+export function formatHoursMinutes(seconds: number): string {
+  if (seconds === 0) return '0h 0m';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.round((seconds % 3600) / 60);
+
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
+/**
+ * Format a date as "Mon DD, YYYY" or relative if recent
+ */
+export function formatFirstSessionDate(dateString: string | null): string {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}

@@ -22,6 +22,8 @@ import { TimeRangeSelector } from './TimeRangeSelector';
 import { MetricCard } from './MetricCard';
 import { SessionTimeline } from './SessionTimeline';
 import { WeeklyBarChart } from './WeeklyBarChart';
+import { TotalHoursCounter } from './TotalHoursCounter';
+import { ExportButton } from './ExportButton';
 
 interface StatisticsDashboardProps {
   refreshTrigger?: number;
@@ -254,6 +256,9 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     )}
                   </motion.div>
 
+                  {/* Total Hours Counter */}
+                  <TotalHoursCounter refreshTrigger={refreshTrigger} />
+
                   {/* Session Timeline */}
                   <motion.div
                     initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
@@ -270,6 +275,11 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                       maxHeight="max-h-[30vh]"
                     />
                   </motion.div>
+
+                  {/* Export Button */}
+                  <div className="pt-2 border-t border-tertiary/10 light:border-tertiary-dark/10">
+                    <ExportButton />
+                  </div>
                 </div>
               </div>
             </motion.div>
