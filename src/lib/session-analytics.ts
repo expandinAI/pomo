@@ -444,3 +444,136 @@ export function formatMinutesAsHours(minutes: number): string {
   const hours = minutes / 60;
   return `${hours.toFixed(1)}h`;
 }
+
+// =============================================================================
+// STREAK TRACKING
+// =============================================================================
+
+/**
+ * Get the date string (YYYY-MM-DD) for a given date in local timezone
+ */
+function getDateString(date: Date): string {
+  return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+}
+
+/**
+ * Check if there are work sessions on a specific date
+ */
+function hasWorkSessionsOnDate(sessions: CompletedSession[], date: Date): boolean {
+  const dateStr = getDateString(date);
+  return sessions.some(session => {
+    if (session.type !== 'work') return false;
+    const sessionDate = new Date(session.completedAt);
+    return getDateString(sessionDate) === dateStr;
+  });
+}
+
+/**
+ * Calculate the current streak (consecutive days with work sessions)
+ * Counts backwards from today (or yesterday if today has no sessions)
+ */
+export function calculateCurrentStreak(sessions: CompletedSession[]): number {
+  if (sessions.length === 0) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Check if today has sessions
+  const hasTodaySessions = hasWorkSessionsOnDate(sessions, today);
+
+  // Start from today if it has sessions, otherwise from yesterday
+  const currentDate = new Date(today);
+  if (!hasTodaySessions) {
+    currentDate.setDate(currentDate.getDate() - 1);
+    // If yesterday also has no sessions, streak is 0
+    if (!hasWorkSessionsOnDate(sessions, currentDate)) {
+      return 0;
+    }
+  }
+
+  // Count consecutive days with sessions
+  let streak = 0;
+  while (hasWorkSessionsOnDate(sessions, currentDate)) {
+    streak++;
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+
+  return streak;
+}
+
+/**
+ * Calculate the longest streak ever achieved
+ */
+export function calculateLongestStreak(sessions: CompletedSession[]): number {
+  if (sessions.length === 0) return 0;
+
+  // Filter to work sessions only
+  const workSessions = sessions.filter(s => s.type === 'work');
+  if (workSessions.length === 0) return 0;
+
+  // Get unique dates with sessions
+  const datesWithSessions = new Set<string>();
+  for (const session of workSessions) {
+    const sessionDate = new Date(session.completedAt);
+    datesWithSessions.add(getDateString(sessionDate));
+  }
+
+  // Sort dates
+  const sortedDates = Array.from(datesWithSessions).sort();
+  if (sortedDates.length === 0) return 0;
+
+  let longestStreak = 1;
+  let currentStreak = 1;
+
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prevDate = new Date(sortedDates[i - 1]);
+    const currDate = new Date(sortedDates[i]);
+
+    // Check if dates are consecutive (1 day apart)
+    const diffDays = Math.round(
+      (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 1) {
+      currentStreak++;
+      longestStreak = Math.max(longestStreak, currentStreak);
+    } else {
+      currentStreak = 1;
+    }
+  }
+
+  return longestStreak;
+}
+
+// =============================================================================
+// FOCUS SCORE
+// =============================================================================
+
+/**
+ * Calculate a Focus Score (0-100) based on:
+ * - Completion Volume (50%): Total work time vs 4h target
+ * - Session Count (30%): Number of work sessions vs 4 target
+ * - Streak Bonus (20%): Current streak vs 7 day target
+ */
+export function calculateFocusScore(sessions: CompletedSession[]): number {
+  if (sessions.length === 0) return 0;
+
+  const workSessions = sessions.filter(s => s.type === 'work');
+  if (workSessions.length === 0) return 0;
+
+  // Completion Volume (50%) - How much work was done?
+  // Basis: 4h (240 minutes) = 100%
+  const totalMinutes = workSessions.reduce((sum, s) => sum + s.duration, 0) / 60;
+  const volumeScore = Math.min(totalMinutes / 240, 1);
+
+  // Session Count (30%) - Regularity
+  // Basis: 4 sessions = 100%
+  const countScore = Math.min(workSessions.length / 4, 1);
+
+  // Streak Bonus (20%) - Consistency over days
+  // Need all sessions for streak calculation, not just filtered ones
+  const allSessions = loadSessions();
+  const streakBonus = Math.min(calculateCurrentStreak(allSessions) / 7, 1);
+
+  return Math.round(volumeScore * 50 + countScore * 30 + streakBonus * 20);
+}

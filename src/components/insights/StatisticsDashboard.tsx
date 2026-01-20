@@ -13,6 +13,9 @@ import {
   calculateWeeklyStats,
   formatHoursDecimal,
   formatTrendMessage,
+  calculateCurrentStreak,
+  calculateLongestStreak,
+  calculateFocusScore,
   type TimeRange,
 } from '@/lib/session-analytics';
 import { TimeRangeSelector } from './TimeRangeSelector';
@@ -74,6 +77,27 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
   const workSessionsCount = useMemo(() => {
     return filteredSessions.filter(s => s.type === 'work').length;
   }, [filteredSessions]);
+
+  // Calculate streak (uses all sessions, not filtered by time range)
+  const currentStreak = useMemo(() => {
+    return calculateCurrentStreak(sessions);
+  }, [sessions]);
+
+  const longestStreak = useMemo(() => {
+    return calculateLongestStreak(sessions);
+  }, [sessions]);
+
+  // Calculate focus score (uses filtered sessions for volume/count, all sessions for streak)
+  const focusScore = useMemo(() => {
+    return calculateFocusScore(filteredSessions);
+  }, [filteredSessions]);
+
+  // Generate focus score subtitle based on score
+  const focusScoreSubtitle = useMemo(() => {
+    if (focusScore >= 70) return 'Great focus!';
+    if (focusScore >= 40) return 'Keep going';
+    return 'Start a session';
+  }, [focusScore]);
 
   // Calculate weekly stats for the chart (always show current week)
   // Note: calculateWeeklyStats loads sessions internally from localStorage
@@ -173,11 +197,11 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4">
                   {/* Metrics Row */}
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-3 gap-4 mb-5">
                     <MetricCard
                       title="Focus Score"
-                      value="--"
-                      subtitle="Coming soon"
+                      value={focusScore.toString()}
+                      subtitle={focusScoreSubtitle}
                       icon={<Zap className="w-4 h-4" />}
                     />
                     <MetricCard
@@ -188,8 +212,8 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     />
                     <MetricCard
                       title="Streak"
-                      value="--"
-                      subtitle="Coming soon"
+                      value={`${currentStreak}d`}
+                      subtitle={`Best: ${longestStreak}d`}
                       icon={<Flame className="w-4 h-4" />}
                     />
                   </div>
