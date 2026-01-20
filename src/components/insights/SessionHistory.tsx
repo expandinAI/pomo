@@ -92,9 +92,11 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
   // Calculate filtered stats
   const filteredStats = useMemo(() => {
     const workSessions = filteredSessions.filter((s) => s.type === 'work');
+    const breakSessions = filteredSessions.filter((s) => s.type !== 'work');
     return {
       count: filteredSessions.length,
       workTime: getTotalDuration(workSessions),
+      breakTime: getTotalDuration(breakSessions),
     };
   }, [filteredSessions]);
 
@@ -228,7 +230,10 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 <div className="p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
                   <div className="text-center">
                     <p className="text-3xl font-bold text-accent light:text-accent-dark">
-                      {hasActiveFilters ? formatDuration(filteredStats.workTime) : formatDuration(totalWorkTime)}
+                      {hasActiveFilters
+                        ? formatDuration(typeFilter === 'break' ? filteredStats.breakTime : filteredStats.workTime)
+                        : formatDuration(totalWorkTime)
+                      }
                     </p>
                     <p className="text-sm text-tertiary light:text-tertiary-dark mt-1">
                       {hasActiveFilters
