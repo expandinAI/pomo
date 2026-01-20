@@ -50,6 +50,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Depth-basierte Opacity und Blur für Tiefenwirkung
   - Toggle in Settings UI (Depth Effect)
   - Funktioniert mit allen Animationsmodi
+- **Particle Pace Modes (POMO-097)**:
+  - Drei Geschwindigkeitsmodi für Partikelanimationen
+  - Drift (1.4x) - träumerisch, meditativ
+  - Flow (1.0x) - ausbalanciert, natürlich (Default)
+  - Pulse (0.7x) - energetischer, aber still calm
+  - Segmented Control in Settings UI
+  - Kombiniert mit Parallax Depth Effect
 - **Particle Pause/Freeze (POMO-094)**:
   - Partikel frieren bei Timer-Pause an aktueller Position ein
   - Bei Resume setzen Partikel Bewegung nahtlos fort
@@ -143,6 +150,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-077-vim-navigation]]
 - [[stories/done/POMO-094-particle-pause-freeze]]
 - [[stories/done/POMO-096-parallax-depth-effect]]
+- [[stories/done/POMO-097-particle-pace-modes]]
 
 ---
 
