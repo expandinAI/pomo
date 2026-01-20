@@ -139,12 +139,54 @@ Parked ideas:
 
 **Zieldatum:** TBD
 
-### v2.0 - Sync & Native
-- [ ] Cloud sync
-- [ ] iOS app
-- [ ] macOS menu bar app
+### v2.0 - Web Feature-Complete
+- [ ] **Project Tracking** - [[features/project-tracking]] (21 SP)
+- [ ] **Year View** (`G Y`) - GitHub-style Contribution Graph
+- [ ] **Sound Design 2.0** - Endel-inspired Chimes & Themes
+- [ ] Cloud Sync
 
 **Zieldatum:** TBD
+
+### v3.0 - Native Apps
+- [ ] **macOS App** (Swift/SwiftUI) - Menu Bar, System DND, Global Shortcuts
+- [ ] iOS App (SwiftUI, shared code with macOS)
+- [ ] Apple Watch Companion
+
+**Strategie:** Web App = "Golden Master" -> dann Native portieren
+
+**Zieldatum:** TBD
+
+---
+
+## Platform Strategy
+
+```
+Phase 1: Web Feature-Complete
+├── Project Tracking
+├── Year View (G Y)
+├── Sound Design 2.0
+└── Cloud Sync
+    |
+    v
+Phase 2: Native macOS App
+├── 1:1 Feature Parity mit Web
+├── Menu Bar Integration
+├── System DND
+├── Global Shortcuts (auch im Hintergrund)
+└── Offline-First
+    |
+    v
+Phase 3: iOS App (optional)
+├── Shared SwiftUI Code
+├── Widgets
+└── Apple Watch
+```
+
+**Warum diese Reihenfolge:**
+- Kein Feature-Drift zwischen Plattformen
+- Web als lebende Spezifikation für Native
+- User-Feedback auf Web vor Native-"Einbetonierung"
+- Native macOS = Core-Differentiator für Zielgruppe (Devs, Designer)
 
 ---
 
@@ -152,31 +194,34 @@ Parked ideas:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      POMO FREE                          │
+│                   PARTICLE FREE                         │
 ├─────────────────────────────────────────────────────────┤
-│ ✓ Basic Timer (25/5/15 Minuten)                        │
-│ ✓ Dark/Light Mode                                       │
-│ ✓ Keyboard Shortcuts                                    │
-│ ✓ Basic Sound                                           │
+│ ✓ Flexible Timer (25/5, 52/17, 90/20)                  │
+│ ✓ Dark Mode (Default)                                   │
+│ ✓ Keyboard-First UX                                     │
+│ ✓ Command Palette (Cmd+K)                              │
+│ ✓ Quick Tasks                                           │
+│ ✓ Basic Stats (7 Tage)                                 │
 │ ✓ PWA Installation                                      │
-│ ✓ Breathing Animation                                   │
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
-│                   POMO PREMIUM                          │
-│                    $4.99 einmalig                       │
+│                 PARTICLE PREMIUM                        │
+│              $49/Jahr ODER $99 Lifetime                 │
 ├─────────────────────────────────────────────────────────┤
 │ Alles aus Free, plus:                                   │
-│ ✓ Custom Timer Lengths                                  │
-│ ✓ Premium Sounds (6 Chimes)                            │
-│ ✓ Ambient Soundscapes (Rain, Forest, Cafe, Ocean...)   │
-│ ✓ Weekly Focus Report                                   │
-│ ✓ Focus Heatmap                                         │
-│ ✓ Session History (30 Tage)                            │
-│ ✓ Data Export                                           │
+│ ✓ Unbegrenzte Stats-History                            │
+│ ✓ Project Tracking                                      │
+│ ✓ Year View (G Y)                                       │
+│ ✓ Premium Sounds & Themes                              │
+│ ✓ Cloud Sync (alle Geräte)                             │
+│ ✓ CSV Export                                            │
+│ ✓ Priority Support                                      │
 └─────────────────────────────────────────────────────────┘
 ```
 
+**Philosophie:** Großzügiger Free-Tier. Premium = Power-Features, nicht Nerv-Limits.
+
 ---
 
-*Zuletzt aktualisiert: 2026-01-19*
+*Zuletzt aktualisiert: 2026-01-20*

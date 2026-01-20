@@ -64,7 +64,7 @@ export function TimerControls({
         ) : (
           <>
             <Play className="w-5 h-5" aria-hidden="true" />
-            {isPaused ? 'Resume' : 'Start'}
+            {isPaused ? 'Resume' : mode === 'work' ? 'Start Focus' : 'Start Break'}
             <KeyboardHint shortcut="Space" className="ml-1" />
           </>
         )}
