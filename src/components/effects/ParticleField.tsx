@@ -11,6 +11,7 @@ interface ParticleFieldProps {
   particleCount?: number;
   style?: ResolvedParticleStyle;
   parallaxEnabled?: boolean;
+  paceMultiplier?: number;
 }
 
 interface ParticleConfig {
@@ -69,7 +70,7 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall', parallaxEnabled = true }: ParticleFieldProps) {
+export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall', parallaxEnabled = true, paceMultiplier = 1.0 }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
 
   // Generate particles with random properties (memoized for stability)
@@ -97,10 +98,11 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
         : 3 + Math.random() * 4;  // Original: 3-7px random
 
       // Duration: near particles move faster (shorter duration)
-      const durationMultiplier = parallaxEnabled
+      // Parallax affects depth perception, pace affects overall speed
+      const depthMultiplier = parallaxEnabled
         ? 1.5 - (depth * 0.9)  // 0.6x (near) to 1.5x (far)
         : 1;
-      const duration = (config.baseDuration + Math.random() * config.durationVariance) * durationMultiplier;
+      const duration = (config.baseDuration + Math.random() * config.durationVariance) * depthMultiplier * paceMultiplier;
 
       // Opacity: depth-correlated when parallax enabled
       const opacity = parallaxEnabled
@@ -129,7 +131,7 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
         depth,
       };
     });
-  }, [particleCount, mode, parallaxEnabled]);
+  }, [particleCount, mode, parallaxEnabled, paceMultiplier]);
 
   // Don't render if reduced motion is preferred or not active
   if (reducedMotion || !isActive) {

@@ -4,13 +4,22 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 
 export type ParticleStyle = 'rise-fall' | 'shine-gather' | 'orbit-drift' | 'shuffle';
 export type ResolvedParticleStyle = 'rise-fall' | 'shine-gather' | 'orbit-drift';
+export type ParticlePace = 'drift' | 'flow' | 'pulse';
 
 const STORAGE_KEY = 'particle_style';
 const PARALLAX_STORAGE_KEY = 'particle_parallax';
+const PACE_STORAGE_KEY = 'particle_pace';
 const DEFAULT_STYLE: ParticleStyle = 'rise-fall';
 const DEFAULT_PARALLAX = true;
+const DEFAULT_PACE: ParticlePace = 'flow';
 const VALID_STYLES: ParticleStyle[] = ['rise-fall', 'shine-gather', 'orbit-drift', 'shuffle'];
 const RESOLVED_STYLES: ResolvedParticleStyle[] = ['rise-fall', 'shine-gather', 'orbit-drift'];
+const VALID_PACES: ParticlePace[] = ['drift', 'flow', 'pulse'];
+const PACE_MULTIPLIERS: Record<ParticlePace, number> = {
+  drift: 1.4,   // Slower, dreamier
+  flow: 1.0,   // Natural default
+  pulse: 0.7,  // Faster, more lively
+};
 
 function loadStyle(): ParticleStyle {
   if (typeof window === 'undefined') {
@@ -54,6 +63,27 @@ function saveParallax(enabled: boolean): void {
   localStorage.setItem(PARALLAX_STORAGE_KEY, String(enabled));
 }
 
+function loadPace(): ParticlePace {
+  if (typeof window === 'undefined') {
+    return DEFAULT_PACE;
+  }
+
+  try {
+    const stored = localStorage.getItem(PACE_STORAGE_KEY);
+    if (stored && VALID_PACES.includes(stored as ParticlePace)) {
+      return stored as ParticlePace;
+    }
+    return DEFAULT_PACE;
+  } catch {
+    return DEFAULT_PACE;
+  }
+}
+
+function savePace(pace: ParticlePace): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(PACE_STORAGE_KEY, pace);
+}
+
 /**
  * Hook for managing particle animation style preference.
  *
@@ -67,6 +97,7 @@ function saveParallax(enabled: boolean): void {
 export function useParticleStyle() {
   const [style, setStyleState] = useState<ParticleStyle>(DEFAULT_STYLE);
   const [parallaxEnabled, setParallaxState] = useState<boolean>(DEFAULT_PARALLAX);
+  const [pace, setPaceState] = useState<ParticlePace>(DEFAULT_PACE);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // For shuffle: resolve once on mount (randomly pick from all resolved styles)
@@ -79,8 +110,10 @@ export function useParticleStyle() {
   useEffect(() => {
     const savedStyle = loadStyle();
     const savedParallax = loadParallax();
+    const savedPace = loadPace();
     setStyleState(savedStyle);
     setParallaxState(savedParallax);
+    setPaceState(savedPace);
     setIsLoaded(true);
   }, []);
 
@@ -94,6 +127,11 @@ export function useParticleStyle() {
     saveParallax(enabled);
   }, []);
 
+  const setPace = useCallback((newPace: ParticlePace) => {
+    setPaceState(newPace);
+    savePace(newPace);
+  }, []);
+
   // Resolved style: for shuffle, use the session-stable resolution
   const resolvedStyle = useMemo<ResolvedParticleStyle>(() => {
     if (style === 'shuffle') {
@@ -102,5 +140,18 @@ export function useParticleStyle() {
     return style;
   }, [style, shuffleResolution]);
 
-  return { style, setStyle, resolvedStyle, parallaxEnabled, setParallaxEnabled, isLoaded };
+  // Pace multiplier: higher = slower animations, lower = faster
+  const paceMultiplier = PACE_MULTIPLIERS[pace];
+
+  return {
+    style,
+    setStyle,
+    resolvedStyle,
+    parallaxEnabled,
+    setParallaxEnabled,
+    pace,
+    setPace,
+    paceMultiplier,
+    isLoaded,
+  };
 }

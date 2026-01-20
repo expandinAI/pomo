@@ -32,6 +32,7 @@ export function AmbientEffects() {
     deviceCapabilities,
     resolvedParticleStyle,
     parallaxEnabled,
+    paceMultiplier,
   } = useAmbientEffects();
 
   // Don't render anything if:
@@ -57,6 +58,7 @@ export function AmbientEffects() {
           particleCount={particleCount}
           style={resolvedParticleStyle}
           parallaxEnabled={parallaxEnabled}
+          paceMultiplier={paceMultiplier}
         />
       )}
       <ParticleBurst isActive={shouldShowBurst} />

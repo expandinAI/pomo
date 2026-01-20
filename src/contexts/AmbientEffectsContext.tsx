@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { useAmbientEffectsSettings } from '@/hooks/useAmbientEffectsSettings';
 import { useAdaptiveQuality, type VisualMode } from '@/hooks/useAdaptiveQuality';
-import { useParticleStyle, type ParticleStyle, type ResolvedParticleStyle } from '@/hooks/useParticleStyle';
+import { useParticleStyle, type ParticleStyle, type ResolvedParticleStyle, type ParticlePace } from '@/hooks/useParticleStyle';
 import type { QualityLevel, DeviceCapabilities } from '@/lib/detectDevice';
 
 export type VisualState = 'idle' | 'focus' | 'break' | 'completed';
@@ -42,6 +42,11 @@ interface AmbientEffectsContextValue {
   parallaxEnabled: boolean;
   setParallaxEnabled: (enabled: boolean) => void;
 
+  // Particle pace
+  pace: ParticlePace;
+  setPace: (pace: ParticlePace) => void;
+  paceMultiplier: number;
+
   // Loading state
   isLoaded: boolean;
 }
@@ -72,6 +77,9 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     resolvedStyle: resolvedParticleStyle,
     parallaxEnabled,
     setParallaxEnabled,
+    pace,
+    setPace,
+    paceMultiplier,
     isLoaded: styleLoaded,
   } = useParticleStyle();
 
@@ -107,6 +115,9 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       resolvedParticleStyle,
       parallaxEnabled,
       setParallaxEnabled,
+      pace,
+      setPace,
+      paceMultiplier,
       isLoaded,
     }),
     [
@@ -129,6 +140,9 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       resolvedParticleStyle,
       parallaxEnabled,
       setParallaxEnabled,
+      pace,
+      setPace,
+      paceMultiplier,
       isLoaded,
     ]
   );

@@ -1,11 +1,11 @@
 'use client';
 
-import { Sparkles, Zap, Layers, Smartphone, Circle, Layers3 } from 'lucide-react';
+import { Sparkles, Zap, Layers, Smartphone, Circle, Layers3, Gauge } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { SPRING } from '@/styles/design-tokens';
 import type { VisualMode } from '@/hooks/useAdaptiveQuality';
-import type { ParticleStyle } from '@/hooks/useParticleStyle';
+import type { ParticleStyle, ParticlePace } from '@/hooks/useParticleStyle';
 
 interface ModeOption {
   value: VisualMode;
@@ -69,6 +69,30 @@ const PARTICLE_STYLE_OPTIONS: ParticleStyleOption[] = [
   },
 ];
 
+interface PaceOption {
+  value: ParticlePace;
+  label: string;
+  description: string;
+}
+
+const PACE_OPTIONS: PaceOption[] = [
+  {
+    value: 'drift',
+    label: 'Drift',
+    description: 'dreamy',
+  },
+  {
+    value: 'flow',
+    label: 'Flow',
+    description: 'natural',
+  },
+  {
+    value: 'pulse',
+    label: 'Pulse',
+    description: 'lively',
+  },
+];
+
 /**
  * VisualEffectsSettings - Toggle and mode selector for ambient visual effects
  *
@@ -91,6 +115,8 @@ export function VisualEffectsSettings() {
     setParticleStyle,
     parallaxEnabled,
     setParallaxEnabled,
+    pace,
+    setPace,
     isLoaded,
   } = useAmbientEffects();
 
@@ -313,6 +339,44 @@ export function VisualEffectsSettings() {
               />
             </div>
           </motion.button>
+        </div>
+      )}
+
+      {/* Particle Pace Selector - only show when effects are enabled and not minimal */}
+      {effectsEnabled && visualMode !== 'minimal' && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider flex items-center gap-2">
+            <Gauge className="w-3 h-3" />
+            Particle Pace
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {PACE_OPTIONS.map((option) => (
+              <motion.button
+                key={option.value}
+                onClick={() => setPace(option.value)}
+                className={`flex flex-col items-center p-3 rounded-lg transition-colors ${
+                  pace === option.value
+                    ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+                    : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+                }`}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', ...SPRING.default }}
+              >
+                <span
+                  className={`text-xs font-medium ${
+                    pace === option.value
+                      ? 'text-accent light:text-accent-dark'
+                      : 'text-secondary light:text-secondary-dark'
+                  }`}
+                >
+                  {option.label}
+                </span>
+                <span className="text-[10px] text-tertiary light:text-tertiary-dark">
+                  {option.description}
+                </span>
+              </motion.button>
+            ))}
+          </div>
         </div>
       )}
 
