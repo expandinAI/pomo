@@ -23,6 +23,7 @@ import { MetricCard } from './MetricCard';
 import { SessionTimeline } from './SessionTimeline';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { TotalHoursCounter } from './TotalHoursCounter';
+import { WeeklyReportSummary } from './WeeklyReportSummary';
 import { ExportButton } from './ExportButton';
 
 interface StatisticsDashboardProps {
@@ -258,6 +259,11 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
 
                   {/* Total Hours Counter */}
                   <TotalHoursCounter refreshTrigger={refreshTrigger} />
+
+                  {/* Weekly Report Summary */}
+                  <div className="mb-4">
+                    <WeeklyReportSummary refreshTrigger={refreshTrigger} />
+                  </div>
 
                   {/* Session Timeline */}
                   <motion.div

@@ -186,24 +186,6 @@ export function buildDailyStats(
 }
 
 /**
- * Find the best day (most focus time) from daily stats
- * Returns null if all days have zero focus time
- */
-function findBestDay(dailyStats: DailyStats[]): DailyStats | null {
-  let best: DailyStats | null = null;
-  let maxSeconds = 0;
-
-  for (const day of dailyStats) {
-    if (day.totalSeconds > maxSeconds) {
-      maxSeconds = day.totalSeconds;
-      best = day;
-    }
-  }
-
-  return best;
-}
-
-/**
  * Calculate complete weekly statistics
  * @param weekOffset 0 = current week, -1 = last week
  */
@@ -648,4 +630,142 @@ export function formatFirstSessionDate(dateString: string | null): string {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+// =============================================================================
+// TOP TASKS ANALYTICS
+// =============================================================================
+
+/**
+ * Task statistics for weekly report
+ */
+export interface TaskStats {
+  name: string;
+  totalSeconds: number;
+  sessionsCount: number;
+}
+
+/**
+ * Calculate top tasks from sessions, sorted by total time
+ * @param sessions Sessions to analyze
+ * @param limit Maximum number of tasks to return (default 3)
+ */
+export function calculateTopTasks(
+  sessions: CompletedSession[],
+  limit: number = 3
+): TaskStats[] {
+  // Group work sessions by task name
+  const taskMap = new Map<string, TaskStats>();
+
+  for (const session of sessions) {
+    if (session.type !== 'work') continue;
+
+    const taskName = session.task?.trim() || 'Untitled';
+    const existing = taskMap.get(taskName);
+
+    if (existing) {
+      existing.totalSeconds += session.duration;
+      existing.sessionsCount += 1;
+    } else {
+      taskMap.set(taskName, {
+        name: taskName,
+        totalSeconds: session.duration,
+        sessionsCount: 1,
+      });
+    }
+  }
+
+  // Sort by total time (descending) and return top N
+  return Array.from(taskMap.values())
+    .sort((a, b) => b.totalSeconds - a.totalSeconds)
+    .slice(0, limit);
+}
+
+/**
+ * Weekly report data structure
+ */
+export interface WeeklyReport {
+  weekStart: Date;
+  weekEnd: Date;
+  totalSeconds: number;
+  totalSessions: number;
+  focusScore: number;
+  topTasks: TaskStats[];
+  bestDay: DailyStats | null;
+  comparison: {
+    totalChange: number;      // positive = more than last week
+    sessionsChange: number;
+    trend: 'up' | 'down' | 'same';
+  };
+}
+
+/**
+ * Generate a comprehensive weekly report
+ * @param weekOffset 0 = current week, -1 = last week
+ */
+export function generateWeeklyReport(weekOffset: number = 0): WeeklyReport {
+  const sessions = loadSessions();
+
+  // Get week boundaries
+  const { start: weekStart, end: weekEnd } = getWeekBoundaries(weekOffset);
+
+  // Get sessions for this week and last week
+  const thisWeekSessions = getSessionsForWeek(sessions, weekOffset);
+  const lastWeekSessions = getSessionsForWeek(sessions, weekOffset - 1);
+
+  // Calculate daily stats and totals
+  const dailyStats = buildDailyStats(thisWeekSessions, weekStart);
+  const totalSeconds = dailyStats.reduce((sum, d) => sum + d.totalSeconds, 0);
+  const totalSessions = dailyStats.reduce((sum, d) => sum + d.sessionsCount, 0);
+  const bestDay = findBestDay(dailyStats);
+
+  // Calculate last week totals for comparison
+  const { start: lastWeekStart } = getWeekBoundaries(weekOffset - 1);
+  const lastWeekDailyStats = buildDailyStats(lastWeekSessions, lastWeekStart);
+  const lastWeekTotalSeconds = lastWeekDailyStats.reduce((sum, d) => sum + d.totalSeconds, 0);
+  const lastWeekTotalSessions = lastWeekDailyStats.reduce((sum, d) => sum + d.sessionsCount, 0);
+
+  // Calculate comparison
+  const totalChange = totalSeconds - lastWeekTotalSeconds;
+  const sessionsChange = totalSessions - lastWeekTotalSessions;
+  const trend: 'up' | 'down' | 'same' =
+    totalChange > 0 ? 'up' : totalChange < 0 ? 'down' : 'same';
+
+  // Calculate focus score for this week
+  const focusScore = calculateFocusScore(thisWeekSessions);
+
+  // Get top tasks
+  const topTasks = calculateTopTasks(thisWeekSessions, 3);
+
+  return {
+    weekStart,
+    weekEnd,
+    totalSeconds,
+    totalSessions,
+    focusScore,
+    topTasks,
+    bestDay,
+    comparison: {
+      totalChange,
+      sessionsChange,
+      trend,
+    },
+  };
+}
+
+/**
+ * Find the best day from daily stats (exported for reuse)
+ */
+export function findBestDay(dailyStats: DailyStats[]): DailyStats | null {
+  let best: DailyStats | null = null;
+  let maxSeconds = 0;
+
+  for (const day of dailyStats) {
+    if (day.totalSeconds > maxSeconds) {
+      maxSeconds = day.totalSeconds;
+      best = day;
+    }
+  }
+
+  return best;
 }

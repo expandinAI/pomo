@@ -78,6 +78,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - UTF-8 BOM für Excel-Kompatibilität
   - Filename mit Datum (particle-sessions-YYYY-MM-DD.csv)
   - Feedback States: success, empty, idle
+- **Session History Filters (POMO-087, 3 SP)**:
+  - Type Filter: All / Work / Breaks
+  - Task-Suche für schnelles Finden
+  - Gefilterte Stats werden in Summary angezeigt
+  - Reset bei Modal-Schließung
+- **Weekly Report Summary (POMO-088, 5 SP)**:
+  - Top 3 Tasks der Woche mit Zeit-Aggregation
+  - Vergleich vs. Vorwoche (+Xh / -Xh)
+  - Best Day Anzeige mit Trophy-Icon
+  - Integriert in Statistics Dashboard
 - **Focus Score (POMO-083, 5 SP)**:
   - 0-100 Score basierend auf Volume (50%), Session Count (30%), Streak Bonus (20%)
   - Dynamische Subtitles: "Great focus!" / "Keep going" / "Start a session"
@@ -177,6 +187,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-097-particle-pace-modes]]
 - [[stories/done/POMO-031-total-hours-counter]]
 - [[stories/done/POMO-032-export-data]]
+- [[stories/done/POMO-087-session-timeline]]
+- [[stories/done/POMO-088-weekly-report]]
 
 ---
 
