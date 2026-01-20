@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 5
 feature: "[[features/statistics-dashboard]]"
 created: 2026-01-19
-updated: 2026-01-19
-done_date: null
+updated: 2026-01-20
+done_date: 2026-01-20
 tags: [analytics, dashboard, layout, p0]
 ---
 
