@@ -1,6 +1,6 @@
 ---
 type: story
-status: backlog
+status: active
 priority: p1
 effort: 8
 feature: "[[features/ambient-effects]]"
@@ -165,16 +165,16 @@ Aktuell gibt es eine feste Animation: Partikel steigen im Work-Modus auf und sin
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** Settings, **When** Particle Style, **Then** 3 Optionen sichtbar
-- [ ] **Given** Rise & Fall, **When** Work, **Then** Partikel steigen
-- [ ] **Given** Rise & Fall, **When** Break, **Then** Partikel sinken
-- [ ] **Given** Shine & Gather, **When** Work, **Then** Partikel strahlen vom Zentrum
-- [ ] **Given** Shine & Gather, **When** Break, **Then** Partikel kehren zur Mitte zurück
+- [x] **Given** Settings, **When** Particle Style, **Then** 3 Optionen sichtbar
+- [x] **Given** Rise & Fall, **When** Work, **Then** Partikel steigen
+- [x] **Given** Rise & Fall, **When** Break, **Then** Partikel sinken
+- [x] **Given** Shine & Gather, **When** Work, **Then** Partikel strahlen vom Zentrum
+- [x] **Given** Shine & Gather, **When** Break, **Then** Partikel kehren zur Mitte zurück
 - [ ] **Given** Orbit & Drift, **When** Work, **Then** Partikel kreisen um Zentrum
 - [ ] **Given** Orbit & Drift, **When** Break, **Then** Partikel treiben ziellos
-- [ ] **Given** Modus-Wechsel, **When** während Timer, **Then** sanfter Übergang
-- [ ] **Given** Einstellung, **When** gespeichert, **Then** persistiert in localStorage
-- [ ] **Given** prefers-reduced-motion, **When** aktiv, **Then** keine Partikel
+- [x] **Given** Modus-Wechsel, **When** während Timer, **Then** sanfter Übergang
+- [x] **Given** Einstellung, **When** gespeichert, **Then** persistiert in localStorage
+- [x] **Given** prefers-reduced-motion, **When** aktiv, **Then** keine Partikel
 
 ---
 
@@ -244,11 +244,11 @@ Drei Wege, denselben Rhythmus von Arbeit und Pause zu visualisieren.
 
 ## Definition of Done
 
-- [ ] Drei Animations-Modi implementiert
-- [ ] Settings UI für Auswahl
-- [ ] Smooth Transitions zwischen Modi
-- [ ] Performance-optimiert (CSS-only)
-- [ ] Reduced Motion respektiert
-- [ ] Einstellung persistiert
-- [ ] TypeScript strict mode
+- [ ] Drei Animations-Modi implementiert (2/3: Rise & Fall ✓, Shine & Gather ✓)
+- [x] Settings UI für Auswahl
+- [x] Smooth Transitions zwischen Modi
+- [x] Performance-optimiert (CSS-only)
+- [x] Reduced Motion respektiert
+- [x] Einstellung persistiert
+- [x] TypeScript strict mode
 - [ ] Getestet auf Mobile
