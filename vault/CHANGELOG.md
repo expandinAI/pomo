@@ -38,6 +38,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Partikel frieren bei Timer-Pause an aktueller Position ein
   - Bei Resume setzen Partikel Bewegung nahtlos fort
   - CSS animation-play-state für flüssige Übergänge
+- **Streak Tracking (POMO-086, 3 SP)**:
+  - Aktuelle Streak: Aufeinanderfolgende Tage mit Work-Sessions
+  - Längste Streak aller Zeiten als Referenz
+  - Zentriertes MetricCard Layout im Dashboard
+- **Focus Score (POMO-083, 5 SP)**:
+  - 0-100 Score basierend auf Volume (50%), Session Count (30%), Streak Bonus (20%)
+  - Dynamische Subtitles: "Great focus!" / "Keep going" / "Start a session"
+  - Reagiert auf Time Range Filter (D/W/M/All)
   - isPaused State im AmbientEffectsContext
 - **Glasmorphismus UI-Effekt (POMO-093)**:
   - Partikel fließen visuell "unter" SessionType und QuickTaskInput
