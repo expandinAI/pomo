@@ -82,15 +82,7 @@ export function WeeklyReportSummary({ refreshTrigger }: WeeklyReportSummaryProps
           Week of {weekRangeLabel}
         </h3>
         {comparisonText && (
-          <span
-            className={`text-xs flex items-center gap-1 ${
-              report.comparison.trend === 'up'
-                ? 'text-green-500 light:text-green-600'
-                : report.comparison.trend === 'down'
-                  ? 'text-amber-500 light:text-amber-600'
-                  : 'text-tertiary light:text-tertiary-dark'
-            }`}
-          >
+          <span className="text-xs flex items-center gap-1 text-secondary light:text-secondary-dark">
             {report.comparison.trend === 'up' ? (
               <TrendingUp className="w-3 h-3" />
             ) : report.comparison.trend === 'down' ? (
@@ -131,7 +123,7 @@ export function WeeklyReportSummary({ refreshTrigger }: WeeklyReportSummaryProps
       {/* Best Day */}
       {report.bestDay && report.bestDay.totalSeconds > 0 && (
         <div className="flex items-center gap-2 pt-2 border-t border-tertiary/10 light:border-tertiary-dark/10">
-          <Trophy className="w-3.5 h-3.5 text-amber-500" />
+          <Trophy className="w-3.5 h-3.5 text-primary light:text-primary-dark" />
           <span className="text-xs text-secondary light:text-secondary-dark">
             Best day:{' '}
             <span className="text-primary light:text-primary-dark font-medium">
