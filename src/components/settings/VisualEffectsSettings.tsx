@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, Zap, Layers, Smartphone, Circle } from 'lucide-react';
+import { Sparkles, Zap, Layers, Smartphone, Circle, Layers3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { SPRING } from '@/styles/design-tokens';
@@ -89,6 +89,8 @@ export function VisualEffectsSettings() {
     quality,
     particleStyle,
     setParticleStyle,
+    parallaxEnabled,
+    setParallaxEnabled,
     isLoaded,
   } = useAmbientEffects();
 
@@ -253,6 +255,64 @@ export function VisualEffectsSettings() {
               </motion.button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Parallax Depth Toggle - only show when effects are enabled and not minimal */}
+      {effectsEnabled && visualMode !== 'minimal' && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider flex items-center gap-2">
+            <Layers3 className="w-3 h-3" />
+            Depth Effect
+          </label>
+          <motion.button
+            onClick={() => setParallaxEnabled(!parallaxEnabled)}
+            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+              parallaxEnabled
+                ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+                : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+            }`}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: 'spring', ...SPRING.default }}
+          >
+            <div className="flex items-center gap-3">
+              <Layers3
+                className={`w-4 h-4 ${
+                  parallaxEnabled
+                    ? 'text-accent light:text-accent-dark'
+                    : 'text-tertiary light:text-tertiary-dark'
+                }`}
+              />
+              <div className="text-left">
+                <p
+                  className={`text-sm font-medium ${
+                    parallaxEnabled
+                      ? 'text-accent light:text-accent-dark'
+                      : 'text-secondary light:text-secondary-dark'
+                  }`}
+                >
+                  Parallax Depth
+                </p>
+                <p className="text-xs text-tertiary light:text-tertiary-dark">
+                  Adds 3D depth illusion to particles
+                </p>
+              </div>
+            </div>
+            {/* Toggle Switch */}
+            <div
+              className={`relative w-10 h-6 rounded-full transition-colors ${
+                parallaxEnabled
+                  ? 'bg-accent light:bg-accent-dark'
+                  : 'bg-tertiary/30 light:bg-tertiary-dark/30'
+              }`}
+            >
+              <motion.div
+                className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                animate={{ left: parallaxEnabled ? 20 : 4 }}
+                transition={{ type: 'spring', ...SPRING.default }}
+              />
+            </div>
+          </motion.button>
         </div>
       )}
 

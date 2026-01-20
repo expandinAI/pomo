@@ -10,6 +10,7 @@ interface ParticleFieldProps {
   mode?: 'work' | 'break';
   particleCount?: number;
   style?: ResolvedParticleStyle;
+  parallaxEnabled?: boolean;
 }
 
 interface ParticleConfig {
@@ -58,6 +59,7 @@ interface Particle {
   orbitRadius: number;  // For Orbit & Drift: orbit radius in px
   driftX: number;  // For Orbit & Drift (break): drift direction X
   driftY: number;  // For Orbit & Drift (break): drift direction Y
+  depth: number;  // For Parallax: 0 (far) to 1 (near)
 }
 
 /**
@@ -67,7 +69,7 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall' }: ParticleFieldProps) {
+export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall', parallaxEnabled = true }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
 
   // Generate particles with random properties (memoized for stability)
@@ -86,23 +88,48 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
       const driftX = (Math.random() - 0.5) * 2; // -1 to 1
       const driftY = (Math.random() - 0.5) * 2; // -1 to 1
 
+      // Parallax depth: 0 (far) to 1 (near)
+      const depth = Math.random();
+
+      // Size: depth-correlated when parallax enabled, random otherwise
+      const size = parallaxEnabled
+        ? 2 + depth * 6  // 2-8px based on depth (near = larger)
+        : 3 + Math.random() * 4;  // Original: 3-7px random
+
+      // Duration: near particles move faster (shorter duration)
+      const durationMultiplier = parallaxEnabled
+        ? 1.5 - (depth * 0.9)  // 0.6x (near) to 1.5x (far)
+        : 1;
+      const duration = (config.baseDuration + Math.random() * config.durationVariance) * durationMultiplier;
+
+      // Opacity: depth-correlated when parallax enabled
+      const opacity = parallaxEnabled
+        ? config.opacityMin + depth * opacityRange  // Near = more opaque
+        : config.opacityMin + Math.random() * opacityRange;
+
+      // Blur: far particles are blurry (depth of field effect)
+      const blur = parallaxEnabled
+        ? (1 - depth) * 2  // 0px (near) to 2px (far)
+        : (Math.random() > 0.5 ? 1 : 0);
+
       return {
         id: i,
         left: `${Math.random() * 100}%`,
-        duration: config.baseDuration + Math.random() * config.durationVariance,
+        duration,
         delay: Math.random() * 5, // Stagger start times (0-5s positive delay)
         drift: (Math.random() - 0.5) * config.driftRange * 2, // ±driftRange horizontal drift
-        opacity: config.opacityMin + Math.random() * opacityRange,
-        size: 3 + Math.random() * 4, // 3-7px (larger)
-        blur: Math.random() > 0.5 ? 1 : 0, // Some particles have blur for depth
+        opacity,
+        size,
+        blur,
         angleX,
         angleY,
         orbitRadius,
         driftX,
         driftY,
+        depth,
       };
     });
-  }, [particleCount, mode]);
+  }, [particleCount, mode, parallaxEnabled]);
 
   // Don't render if reduced motion is preferred or not active
   if (reducedMotion || !isActive) {
@@ -145,7 +172,7 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
             width: `${particle.size}px`,
             height: `${particle.size}px`,
             boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
-            filter: particle.blur ? 'blur(1px)' : 'none',
+            filter: particle.blur > 0 ? `blur(${particle.blur}px)` : 'none',
             animationPlayState: isPaused ? 'paused' : 'running',
             '--particle-duration': `${particle.duration}s`,
             '--particle-delay': `${particle.delay}s`,

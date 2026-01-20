@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: "[[features/ambient-effects]]"
 created: 2026-01-20
 updated: 2026-01-20
-done_date: null
+done_date: 2026-01-20
 tags: [effects, particles, animation, premium, depth]
 ---
 
@@ -119,13 +119,13 @@ const PARALLAX_STORAGE_KEY = 'particle_parallax';
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** Parallax ON, **When** Partikel generiert, **Then** Größe korreliert mit Geschwindigkeit
-- [ ] **Given** Parallax ON, **When** große Partikel, **Then** bewegen sich schneller
-- [ ] **Given** Parallax ON, **When** kleine Partikel, **Then** bewegen sich langsamer
-- [ ] **Given** Parallax ON, **When** kleine Partikel, **Then** sind dezenter (niedrigere Opacity)
-- [ ] **Given** Parallax OFF, **When** Partikel generiert, **Then** unabhängige Randomisierung (aktuelles Verhalten)
-- [ ] **Given** Settings, **When** Parallax Toggle, **Then** Einstellung wird persistiert
-- [ ] **Given** Parallax, **When** alle Animations-Modi, **Then** funktioniert mit Rise/Shine/Orbit
+- [x] **Given** Parallax ON, **When** Partikel generiert, **Then** Größe korreliert mit Geschwindigkeit
+- [x] **Given** Parallax ON, **When** große Partikel, **Then** bewegen sich schneller
+- [x] **Given** Parallax ON, **When** kleine Partikel, **Then** bewegen sich langsamer
+- [x] **Given** Parallax ON, **When** kleine Partikel, **Then** sind dezenter (niedrigere Opacity)
+- [x] **Given** Parallax OFF, **When** Partikel generiert, **Then** unabhängige Randomisierung (aktuelles Verhalten)
+- [x] **Given** Settings, **When** Parallax Toggle, **Then** Einstellung wird persistiert
+- [x] **Given** Parallax, **When** alle Animations-Modi, **Then** funktioniert mit Rise/Shine/Orbit
 
 ---
 
@@ -158,9 +158,9 @@ Ja. Der Parallax-Effekt verwandelt flache Punkte in ein räumliches Feld mit Tie
 
 ## Definition of Done
 
-- [ ] Depth-basierte Partikel-Eigenschaften implementiert
-- [ ] Toggle in Settings UI
-- [ ] Funktioniert mit allen 3 Animations-Modi
-- [ ] Einstellung persistiert in localStorage
-- [ ] TypeScript strict mode
-- [ ] Visuell getestet und feingetunt
+- [x] Depth-basierte Partikel-Eigenschaften implementiert
+- [x] Toggle in Settings UI
+- [x] Funktioniert mit allen 3 Animations-Modi
+- [x] Einstellung persistiert in localStorage
+- [x] TypeScript strict mode
+- [x] Visuell getestet und feingetunt

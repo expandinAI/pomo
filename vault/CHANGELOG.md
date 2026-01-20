@@ -43,6 +43,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Tasks werden in Session History angezeigt
   - T-Shortcut fokussiert Task-Feld
   - Enter im Task-Feld startet Session
+- **Parallax Depth Effect (POMO-096)**:
+  - 3D-Tiefenillusion für Partikel
+  - Große Partikel (nah) bewegen sich schneller
+  - Kleine Partikel (fern) bewegen sich langsamer
+  - Depth-basierte Opacity und Blur für Tiefenwirkung
+  - Toggle in Settings UI (Depth Effect)
+  - Funktioniert mit allen Animationsmodi
 - **Particle Pause/Freeze (POMO-094)**:
   - Partikel frieren bei Timer-Pause an aktueller Position ein
   - Bei Resume setzen Partikel Bewegung nahtlos fort
@@ -135,6 +142,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-076-focus-trap]]
 - [[stories/done/POMO-077-vim-navigation]]
 - [[stories/done/POMO-094-particle-pause-freeze]]
+- [[stories/done/POMO-096-parallax-depth-effect]]
 
 ---
 

@@ -38,6 +38,10 @@ interface AmbientEffectsContextValue {
   setParticleStyle: (style: ParticleStyle) => void;
   resolvedParticleStyle: ResolvedParticleStyle;
 
+  // Parallax depth effect
+  parallaxEnabled: boolean;
+  setParallaxEnabled: (enabled: boolean) => void;
+
   // Loading state
   isLoaded: boolean;
 }
@@ -66,6 +70,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     style: particleStyle,
     setStyle: setParticleStyle,
     resolvedStyle: resolvedParticleStyle,
+    parallaxEnabled,
+    setParallaxEnabled,
     isLoaded: styleLoaded,
   } = useParticleStyle();
 
@@ -99,6 +105,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       particleStyle,
       setParticleStyle,
       resolvedParticleStyle,
+      parallaxEnabled,
+      setParallaxEnabled,
       isLoaded,
     }),
     [
@@ -119,6 +127,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       particleStyle,
       setParticleStyle,
       resolvedParticleStyle,
+      parallaxEnabled,
+      setParallaxEnabled,
       isLoaded,
     ]
   );
