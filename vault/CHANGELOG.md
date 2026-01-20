@@ -68,6 +68,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Aktuelle Streak: Aufeinanderfolgende Tage mit Work-Sessions
   - Längste Streak aller Zeiten als Referenz
   - Zentriertes MetricCard Layout im Dashboard
+- **Total Hours Counter (POMO-031, 2 SP)**:
+  - Lifetime Focus Time Anzeige im Statistics Dashboard
+  - Expandierbare Details: Total Particles, Average Session, First Date
+  - Ermutigende Messages basierend auf Fortschritt
+  - getLifetimeStats() Funktion in session-analytics.ts
+- **Export Data CSV (POMO-032, 2 SP)**:
+  - CSV Export aller Sessions mit einem Klick
+  - UTF-8 BOM für Excel-Kompatibilität
+  - Filename mit Datum (particle-sessions-YYYY-MM-DD.csv)
+  - Feedback States: success, empty, idle
 - **Focus Score (POMO-083, 5 SP)**:
   - 0-100 Score basierend auf Volume (50%), Session Count (30%), Streak Bonus (20%)
   - Dynamische Subtitles: "Great focus!" / "Keep going" / "Start a session"
@@ -165,6 +175,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-095-focus-pattern-layout]]
 - [[stories/done/POMO-096-parallax-depth-effect]]
 - [[stories/done/POMO-097-particle-pace-modes]]
+- [[stories/done/POMO-031-total-hours-counter]]
+- [[stories/done/POMO-032-export-data]]
 
 ---
 
