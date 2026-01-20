@@ -4,7 +4,7 @@
 
 ## Vision
 
-Transform Pomo from a functional timer into a **visual sanctuary** - a calming, immersive experience that helps users enter a focused state before they even start working. Inspired by [Endel](https://endel.io)'s generative visuals and [Linear](https://linear.app)'s minimal dark aesthetic.
+Transform Particle from a functional timer into a **visual sanctuary** - a calming, immersive experience that helps users enter a focused state before they even start working. Inspired by [Endel](https://endel.io)'s generative visuals and [Linear](https://linear.app)'s minimal dark aesthetic.
 
 ## Design Philosophy
 

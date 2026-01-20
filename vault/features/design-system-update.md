@@ -21,7 +21,7 @@ tags: [ui-transformation, design, p0, mvp]
 
 ## Zusammenfassung
 
-> Transformation des Pomo Design Systems von einer freundlichen, warmen Ästhetik zu einem professionellen, Linear-inspirierten Look mit monochromer Farbpalette, schärferen Ecken und optimierter Typografie.
+> Transformation des Particle Design Systems von einer freundlichen, warmen Ästhetik zu einem professionellen, Linear-inspirierten Look mit monochromer Farbpalette, schärferen Ecken und optimierter Typografie.
 
 ## Kontext & Problem
 
@@ -32,7 +32,7 @@ Das aktuelle Design wirkt "freundlich", aber nicht professionell genug für Powe
 Entwickler, Designer, Knowledge Worker die Premium-Tools schätzen.
 
 ### Auswirkung
-Ohne Update fühlt sich Pomo wie ein "Hobby-Tool" an, nicht wie ein professionelles Produktivitäts-Werkzeug.
+Ohne Update fühlt sich Particle wie ein "Hobby-Tool" an, nicht wie ein professionelles Produktivitäts-Werkzeug.
 
 ## Ziele
 

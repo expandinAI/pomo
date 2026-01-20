@@ -32,7 +32,7 @@ Aktuelle Shortcuts sind nicht systematisch; Power-User wollen mehr Maus-Freiheit
 Entwickler und Power-User die Vim, Linear, Raycast gewohnt sind.
 
 ### Auswirkung
-Ohne umfassendes Keyboard-System fühlt sich Pomo für Power-User ineffizient an.
+Ohne umfassendes Keyboard-System fühlt sich Particle für Power-User ineffizient an.
 
 ## Ziele
 

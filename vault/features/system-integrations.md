@@ -20,7 +20,7 @@ tags: [ui-transformation, integrations, focus, p0, mvp]
 
 ## Zusammenfassung
 
-> Integration von Pomo mit dem Betriebssystem und externen Services für ein nahtloses Fokus-Erlebnis: Automatische DND-Aktivierung, Slack Status Updates und Website-Blocking während Sessions.
+> Integration von Particle mit dem Betriebssystem und externen Services für ein nahtloses Fokus-Erlebnis: Automatische DND-Aktivierung, Slack Status Updates und Website-Blocking während Sessions.
 
 ## Kontext & Problem
 
@@ -74,7 +74,7 @@ const enableDND = () => {
 │              🍅                                 │
 │     You're in a focus session                   │
 │     23 minutes remaining                        │
-│     [Back to Pomo]  [Emergency Access (10s)]   │
+│     [Back to Particle]  [Emergency Access (10s)]   │
 └─────────────────────────────────────────────────┘
 ```
 

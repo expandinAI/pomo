@@ -32,7 +32,7 @@ Nicht alle Menschen arbeiten optimal mit 25-Minuten-Blöcken; manche brauchen l�
 Deep Work Practitioners, Entwickler, Kreative mit unterschiedlichen Fokus-Bedürfnissen.
 
 ### Auswirkung
-Mit nur einem Preset verliert Pomo Nutzer, die andere Methoden bevorzugen.
+Mit nur einem Preset verliert Particle Nutzer, die andere Methoden bevorzugen.
 
 ## Ziele
 

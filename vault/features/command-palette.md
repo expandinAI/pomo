@@ -31,7 +31,7 @@ Aktionen erfordern Mausklicks oder man muss sich viele einzelne Shortcuts merken
 Power-User die Tools wie Linear, Raycast, VS Code nutzen.
 
 ### Auswirkung
-Ohne Command Palette fühlt sich Pomo für Keyboard-Power-User träge und unprofessionell an.
+Ohne Command Palette fühlt sich Particle für Keyboard-Power-User träge und unprofessionell an.
 
 ## Ziele
 
