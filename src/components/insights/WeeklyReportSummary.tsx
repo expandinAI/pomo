@@ -2,14 +2,12 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { prefersReducedMotion } from '@/lib/utils';
 import {
   generateWeeklyReport,
   formatHoursMinutes,
-  formatHoursDecimal,
-  type WeeklyReport,
 } from '@/lib/session-analytics';
 
 interface WeeklyReportSummaryProps {
@@ -44,17 +42,6 @@ export function WeeklyReportSummary({ refreshTrigger }: WeeklyReportSummaryProps
     return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
   }, [report]);
 
-  // Format comparison
-  const comparisonText = useMemo(() => {
-    const { comparison } = report;
-    if (comparison.totalChange === 0) return null;
-
-    const deltaHours = formatHoursDecimal(Math.abs(comparison.totalChange));
-    return comparison.trend === 'up'
-      ? `+${deltaHours}h vs last week`
-      : `-${deltaHours}h vs last week`;
-  }, [report]);
-
   // No data state
   if (report.totalSessions === 0) {
     return (
@@ -77,22 +64,10 @@ export function WeeklyReportSummary({ refreshTrigger }: WeeklyReportSummaryProps
       className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-4"
     >
       {/* Header with week range */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3">
         <h3 className="text-sm font-medium text-secondary light:text-secondary-dark">
           Week of {weekRangeLabel}
         </h3>
-        {comparisonText && (
-          <span className="text-xs flex items-center gap-1 text-secondary light:text-secondary-dark">
-            {report.comparison.trend === 'up' ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : report.comparison.trend === 'down' ? (
-              <TrendingDown className="w-3 h-3" />
-            ) : (
-              <Minus className="w-3 h-3" />
-            )}
-            {comparisonText}
-          </span>
-        )}
       </div>
 
       {/* Top Tasks */}
