@@ -7,6 +7,15 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Particle Animation Modes (STORY-PARTICLE-ANIMATION-MODES, 8 SP)**:
+  - Drei wählbare Partikel-Animationsstile
+  - Rise & Fall: Vertikale Bewegung (Aufstieg/Sinken)
+  - Shine & Gather: Radiale Expansion vom Zentrum
+  - Orbit & Drift: Orbitale Kreisbewegung um Timer
+  - Shuffle-Option für zufällige Auswahl pro Session
+  - Particle Style Selector in Settings
+  - CSS-only Animationen für GPU-Beschleunigung
+  - animation-fill-mode: backwards für saubere Starts
 - **Extended Presets System (POMO-066 bis POMO-071, 12 SP)**:
   - PresetSelector Komponente ersetzt SessionType mit 4 Presets
   - Pomodoro (25/5/15, 4 Sessions) - Classic Francesco Cirillo Technik

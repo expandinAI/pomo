@@ -1,12 +1,12 @@
 ---
 type: story
-status: active
+status: done
 priority: p1
 effort: 8
 feature: "[[features/ambient-effects]]"
 created: 2026-01-20
 updated: 2026-01-20
-done_date: null
+done_date: 2026-01-20
 tags: [effects, particles, animation, premium]
 ---
 
@@ -170,8 +170,8 @@ Aktuell gibt es eine feste Animation: Partikel steigen im Work-Modus auf und sin
 - [x] **Given** Rise & Fall, **When** Break, **Then** Partikel sinken
 - [x] **Given** Shine & Gather, **When** Work, **Then** Partikel strahlen vom Zentrum
 - [x] **Given** Shine & Gather, **When** Break, **Then** Partikel kehren zur Mitte zurück
-- [ ] **Given** Orbit & Drift, **When** Work, **Then** Partikel kreisen um Zentrum
-- [ ] **Given** Orbit & Drift, **When** Break, **Then** Partikel treiben ziellos
+- [x] **Given** Orbit & Drift, **When** Work, **Then** Partikel kreisen um Zentrum
+- [x] **Given** Orbit & Drift, **When** Break, **Then** Partikel treiben ziellos
 - [x] **Given** Modus-Wechsel, **When** während Timer, **Then** sanfter Übergang
 - [x] **Given** Einstellung, **When** gespeichert, **Then** persistiert in localStorage
 - [x] **Given** prefers-reduced-motion, **When** aktiv, **Then** keine Partikel
@@ -244,11 +244,11 @@ Drei Wege, denselben Rhythmus von Arbeit und Pause zu visualisieren.
 
 ## Definition of Done
 
-- [ ] Drei Animations-Modi implementiert (2/3: Rise & Fall ✓, Shine & Gather ✓)
+- [x] Drei Animations-Modi implementiert (Rise & Fall ✓, Shine & Gather ✓, Orbit & Drift ✓)
 - [x] Settings UI für Auswahl
 - [x] Smooth Transitions zwischen Modi
 - [x] Performance-optimiert (CSS-only)
 - [x] Reduced Motion respektiert
 - [x] Einstellung persistiert
 - [x] TypeScript strict mode
-- [ ] Getestet auf Mobile
+- [x] Getestet auf Mobile
