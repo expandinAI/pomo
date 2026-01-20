@@ -6,8 +6,40 @@ import { prefersReducedMotion } from '@/lib/utils';
 interface ParticleFieldProps {
   isActive: boolean;
   isPaused?: boolean;
-  speed?: 'normal' | 'slow';
+  mode?: 'work' | 'break';
   particleCount?: number;
+}
+
+interface ParticleConfig {
+  baseDuration: number;
+  durationVariance: number;
+  opacityMin: number;
+  opacityMax: number;
+  driftRange: number;
+}
+
+/**
+ * Returns particle configuration based on timer mode.
+ * Break mode: slower, softer, more dreamlike - like breathing out
+ * Work mode: focused, energetic - like concentrated energy rising
+ */
+function getParticleConfig(mode: 'work' | 'break'): ParticleConfig {
+  if (mode === 'break') {
+    return {
+      baseDuration: 50,       // Much slower (was 25)
+      durationVariance: 15,
+      opacityMin: 0.2,        // Softer (was 0.4)
+      opacityMax: 0.4,        // (was 0.8)
+      driftRange: 30,         // Gentler drift (was 50)
+    };
+  }
+  return {
+    baseDuration: 25,
+    durationVariance: 10,
+    opacityMin: 0.4,
+    opacityMax: 0.8,
+    driftRange: 50,
+  };
 }
 
 interface Particle {
@@ -28,32 +60,35 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, isPaused = false, speed = 'normal', particleCount = 20 }: ParticleFieldProps) {
+export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20 }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
 
   // Generate particles with random properties (memoized for stability)
   const particles = useMemo<Particle[]>(() => {
-    return Array.from({ length: particleCount }, (_, i) => {
-      const baseDuration = speed === 'slow' ? 35 : 25;
-      const durationVariance = speed === 'slow' ? 15 : 10;
+    const config = getParticleConfig(mode);
+    const opacityRange = config.opacityMax - config.opacityMin;
 
+    return Array.from({ length: particleCount }, (_, i) => {
       return {
         id: i,
         left: `${Math.random() * 100}%`,
-        duration: baseDuration + Math.random() * durationVariance, // 25-35s or 35-50s
+        duration: config.baseDuration + Math.random() * config.durationVariance,
         delay: Math.random() * 5, // Stagger start times (0-5s positive delay)
-        drift: (Math.random() - 0.5) * 100, // -50px to +50px horizontal drift
-        opacity: 0.4 + Math.random() * 0.4, // 0.4 to 0.8 (much more visible)
+        drift: (Math.random() - 0.5) * config.driftRange * 2, // ±driftRange horizontal drift
+        opacity: config.opacityMin + Math.random() * opacityRange,
         size: 3 + Math.random() * 4, // 3-7px (larger)
         blur: Math.random() > 0.5 ? 1 : 0, // Some particles have blur for depth
       };
     });
-  }, [particleCount, speed]);
+  }, [particleCount, mode]);
 
   // Don't render if reduced motion is preferred or not active
   if (reducedMotion || !isActive) {
     return null;
   }
+
+  // Break mode: particles sink from top, Work mode: particles rise from bottom
+  const animationClass = mode === 'break' ? 'animate-particle-sink' : 'animate-particle';
 
   return (
     <div
@@ -63,10 +98,11 @@ export function ParticleField({ isActive, isPaused = false, speed = 'normal', pa
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="absolute rounded-full bg-white animate-particle will-change-[transform,opacity]"
+          className={`absolute rounded-full bg-white ${animationClass} will-change-[transform,opacity]`}
           style={{
             left: particle.left,
-            bottom: '-10px',
+            top: mode === 'break' ? '-10px' : undefined,
+            bottom: mode === 'work' ? '-10px' : undefined,
             width: `${particle.size}px`,
             height: `${particle.size}px`,
             boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,

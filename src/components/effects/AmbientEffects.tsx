@@ -42,7 +42,7 @@ export function AmbientEffects() {
   }
 
   // Determine effect configuration based on visual state
-  const particleSpeed = visualState === 'break' ? 'slow' : 'normal';
+  const particleMode: 'work' | 'break' = visualState === 'break' ? 'break' : 'work';
   const shouldShowBurst = showBurst && visualState === 'completed';
 
   return (
@@ -51,7 +51,7 @@ export function AmbientEffects() {
         <ParticleField
           isActive={true}
           isPaused={isPaused}
-          speed={particleSpeed}
+          mode={particleMode}
           particleCount={particleCount}
         />
       )}
