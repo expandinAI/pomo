@@ -56,6 +56,12 @@ const PARTICLE_STYLE_OPTIONS: ParticleStyleOption[] = [
     icon: '\u2732', // ✲
   },
   {
+    value: 'orbit-drift',
+    label: 'Orbit & Drift',
+    description: 'Orbital motion',
+    icon: '\u25CB', // ○
+  },
+  {
     value: 'shuffle',
     label: 'Shuffle',
     description: 'Random each session',

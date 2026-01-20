@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-export type ParticleStyle = 'rise-fall' | 'shine-gather' | 'shuffle';
-export type ResolvedParticleStyle = 'rise-fall' | 'shine-gather';
+export type ParticleStyle = 'rise-fall' | 'shine-gather' | 'orbit-drift' | 'shuffle';
+export type ResolvedParticleStyle = 'rise-fall' | 'shine-gather' | 'orbit-drift';
 
 const STORAGE_KEY = 'particle_style';
 const DEFAULT_STYLE: ParticleStyle = 'rise-fall';
-const VALID_STYLES: ParticleStyle[] = ['rise-fall', 'shine-gather', 'shuffle'];
+const VALID_STYLES: ParticleStyle[] = ['rise-fall', 'shine-gather', 'orbit-drift', 'shuffle'];
+const RESOLVED_STYLES: ResolvedParticleStyle[] = ['rise-fall', 'shine-gather', 'orbit-drift'];
 
 function loadStyle(): ParticleStyle {
   if (typeof window === 'undefined') {
@@ -44,9 +45,10 @@ export function useParticleStyle() {
   const [style, setStyleState] = useState<ParticleStyle>(DEFAULT_STYLE);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // For shuffle: resolve once on mount
+  // For shuffle: resolve once on mount (randomly pick from all resolved styles)
   const [shuffleResolution] = useState<ResolvedParticleStyle>(() => {
-    return Math.random() > 0.5 ? 'rise-fall' : 'shine-gather';
+    const randomIndex = Math.floor(Math.random() * RESOLVED_STYLES.length);
+    return RESOLVED_STYLES[randomIndex];
   });
 
   // Load settings on mount

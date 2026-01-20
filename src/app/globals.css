@@ -253,4 +253,85 @@
     animation-delay: var(--particle-delay, 0s);
     will-change: transform, opacity;
   }
+
+  /* Orbit & Drift - Work: particles orbit around center like electrons */
+  @keyframes particleOrbit {
+    0% {
+      transform: translate(-50%, -50%)
+        rotate(0deg)
+        translateX(var(--orbit-radius, 150px))
+        rotate(0deg);
+      opacity: 0;
+    }
+    5% {
+      opacity: var(--particle-opacity, 0.6);
+    }
+    95% {
+      opacity: var(--particle-opacity, 0.6);
+    }
+    100% {
+      transform: translate(-50%, -50%)
+        rotate(360deg)
+        translateX(var(--orbit-radius, 150px))
+        rotate(-360deg);
+      opacity: 0;
+    }
+  }
+
+  /* Orbit & Drift - Break: particles drift aimlessly (Brownian motion) */
+  @keyframes particleDriftBreak {
+    0% {
+      transform: translate(-50%, -50%) translate(0, 0);
+      opacity: 0;
+    }
+    5% {
+      opacity: var(--particle-opacity, 0.3);
+    }
+    25% {
+      transform: translate(-50%, -50%) translate(
+        calc(var(--drift-x, 0) * 40px),
+        calc(var(--drift-y, 0) * 40px)
+      );
+    }
+    50% {
+      transform: translate(-50%, -50%) translate(
+        calc(var(--drift-x, 0) * -30px + var(--drift-y, 0) * 20px),
+        calc(var(--drift-y, 0) * -25px + var(--drift-x, 0) * 35px)
+      );
+    }
+    75% {
+      transform: translate(-50%, -50%) translate(
+        calc(var(--drift-x, 0) * 25px - var(--drift-y, 0) * 30px),
+        calc(var(--drift-y, 0) * 45px)
+      );
+    }
+    95% {
+      opacity: var(--particle-opacity, 0.3);
+    }
+    100% {
+      transform: translate(-50%, -50%) translate(
+        calc(var(--drift-x, 0) * -20px),
+        calc(var(--drift-y, 0) * -15px)
+      );
+      opacity: 0;
+    }
+  }
+
+  .animate-particle-orbit {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    animation: particleOrbit var(--particle-duration, 20s) linear infinite backwards;
+    animation-delay: var(--particle-delay, 0s);
+    will-change: transform, opacity;
+  }
+
+  .animate-particle-drift-break {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    animation: particleDriftBreak var(--particle-duration, 60s) ease-in-out infinite backwards;
+    animation-delay: var(--particle-delay, 0s);
+    will-change: transform, opacity;
+  }
 }

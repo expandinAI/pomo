@@ -55,6 +55,9 @@ interface Particle {
   blur: number;
   angleX: number;  // For Shine & Gather: -1 to 1
   angleY: number;  // For Shine & Gather: -1 to 1
+  orbitRadius: number;  // For Orbit & Drift: orbit radius in px
+  driftX: number;  // For Orbit & Drift (break): drift direction X
+  driftY: number;  // For Orbit & Drift (break): drift direction Y
 }
 
 /**
@@ -78,6 +81,11 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
       const angleX = Math.cos(angle);
       const angleY = Math.sin(angle);
 
+      // Orbit & Drift properties
+      const orbitRadius = 80 + Math.random() * 200; // 80-280px orbit radius
+      const driftX = (Math.random() - 0.5) * 2; // -1 to 1
+      const driftY = (Math.random() - 0.5) * 2; // -1 to 1
+
       return {
         id: i,
         left: `${Math.random() * 100}%`,
@@ -89,6 +97,9 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
         blur: Math.random() > 0.5 ? 1 : 0, // Some particles have blur for depth
         angleX,
         angleY,
+        orbitRadius,
+        driftX,
+        driftY,
       };
     });
   }, [particleCount, mode]);
@@ -103,12 +114,15 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
     if (style === 'shine-gather') {
       return mode === 'break' ? 'animate-particle-gather' : 'animate-particle-shine';
     }
+    if (style === 'orbit-drift') {
+      return mode === 'break' ? 'animate-particle-drift-break' : 'animate-particle-orbit';
+    }
     // Default: rise-fall
     return mode === 'break' ? 'animate-particle-sink' : 'animate-particle';
   };
 
   const animationClass = getAnimationClass();
-  const isShineGather = style === 'shine-gather';
+  const usesCenterPosition = style === 'shine-gather' || style === 'orbit-drift';
 
   return (
     <div
@@ -118,11 +132,11 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className={`rounded-full bg-white ${animationClass} will-change-[transform,opacity] ${isShineGather ? '' : 'absolute'}`}
+          className={`rounded-full bg-white ${animationClass} will-change-[transform,opacity] ${usesCenterPosition ? '' : 'absolute'}`}
           style={{
             // Position based on style
-            ...(isShineGather
-              ? {} // Shine & Gather uses fixed positioning from CSS class
+            ...(usesCenterPosition
+              ? {} // Center-based styles use fixed positioning from CSS class
               : {
                   left: particle.left,
                   top: mode === 'break' ? '-10px' : undefined,
@@ -139,6 +153,9 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
             '--particle-opacity': particle.opacity,
             '--particle-angle-x': particle.angleX,
             '--particle-angle-y': particle.angleY,
+            '--orbit-radius': `${particle.orbitRadius}px`,
+            '--drift-x': particle.driftX,
+            '--drift-y': particle.driftY,
           } as React.CSSProperties}
         />
       ))}
