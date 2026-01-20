@@ -100,6 +100,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Commands: Start/Pause, Reset, Skip, Toggle Theme, Toggle Mute, Open Settings
 
 ### Changed
+- **Rebrand: Pomo → Particle**:
+  - App-Name geändert von "Pomo" zu "Particle"
+  - Sessions heißen jetzt "Particles" (gesammelt, nicht abgeschlossen)
+  - "X sessions completed" → "X Particles collected"
+  - Preset "Pomodoro (25/5)" → "Classic (25/5)"
+  - Alle localStorage Keys migriert (pomo_* → particle_*)
+  - Custom Events umbenannt (pomo:* → particle:*)
+  - PWA Manifest, Service Worker, Meta Tags aktualisiert
+  - Tab-Titel zeigt "Particle - Focus Timer"
+  - Migration-Logik für bestehende Nutzerdaten implementiert
 - ROADMAP.md aktualisiert mit v0.2.0 UI Transformation Milestone
 - **Design System Update (POMO-050 bis POMO-055, 13 SP)** - Komplett implementiert:
   - Monochrome Farbpalette mit blauem Akzent (#4F6EF7)
