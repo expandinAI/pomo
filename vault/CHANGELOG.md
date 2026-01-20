@@ -57,6 +57,9 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Pulse (0.7x) - energetischer, aber still calm
   - Segmented Control in Settings UI
   - Kombiniert mit Parallax Depth Effect
+- **Focus Pattern Layout Fix (POMO-095)**:
+  - Heatmap-Grid horizontal zentriert im Modal
+  - Symmetrische Abstände links/rechts
 - **Particle Pause/Freeze (POMO-094)**:
   - Partikel frieren bei Timer-Pause an aktueller Position ein
   - Bei Resume setzen Partikel Bewegung nahtlos fort
@@ -149,6 +152,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 - [[stories/done/POMO-076-focus-trap]]
 - [[stories/done/POMO-077-vim-navigation]]
 - [[stories/done/POMO-094-particle-pause-freeze]]
+- [[stories/done/POMO-095-focus-pattern-layout]]
 - [[stories/done/POMO-096-parallax-depth-effect]]
 - [[stories/done/POMO-097-particle-pace-modes]]
 
