@@ -30,6 +30,7 @@ export function AmbientEffects() {
     showParticles,
     showBurst,
     deviceCapabilities,
+    resolvedParticleStyle,
   } = useAmbientEffects();
 
   // Don't render anything if:
@@ -53,6 +54,7 @@ export function AmbientEffects() {
           isPaused={isPaused}
           mode={particleMode}
           particleCount={particleCount}
+          style={resolvedParticleStyle}
         />
       )}
       <ParticleBurst isActive={shouldShowBurst} />

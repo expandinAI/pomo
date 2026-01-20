@@ -184,4 +184,73 @@
     opacity: var(--particle-opacity, 0.4);
     will-change: transform;
   }
+
+  /* Shine & Gather - Work: radiate outward from center */
+  @keyframes particleShine {
+    0% {
+      transform: translate(
+        calc(-50% + var(--particle-angle-x, 0) * 5vw),
+        calc(-50% + var(--particle-angle-y, 0) * 5vh)
+      ) scale(1);
+      opacity: 0;
+    }
+    5% {
+      opacity: var(--particle-opacity, 0.6);
+    }
+    90% {
+      opacity: var(--particle-opacity, 0.6);
+    }
+    100% {
+      transform: translate(
+        calc(-50% + var(--particle-angle-x, 0) * 50vw),
+        calc(-50% + var(--particle-angle-y, 0) * 50vh)
+      ) scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* Shine & Gather - Break: return to center */
+  @keyframes particleGather {
+    0% {
+      transform: translate(
+        calc(-50% + var(--particle-angle-x, 0) * 50vw),
+        calc(-50% + var(--particle-angle-y, 0) * 50vh)
+      ) scale(1);
+      opacity: 0;
+    }
+    10% {
+      opacity: var(--particle-opacity, 0.4);
+    }
+    80% {
+      opacity: var(--particle-opacity, 0.4);
+    }
+    95% {
+      opacity: 0;
+    }
+    100% {
+      transform: translate(
+        calc(-50% + var(--particle-angle-x, 0) * 10vw),
+        calc(-50% + var(--particle-angle-y, 0) * 10vh)
+      ) scale(1);
+      opacity: 0;
+    }
+  }
+
+  .animate-particle-shine {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    animation: particleShine var(--particle-duration, 30s) linear infinite backwards;
+    animation-delay: var(--particle-delay, 0s);
+    will-change: transform, opacity;
+  }
+
+  .animate-particle-gather {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    animation: particleGather var(--particle-duration, 45s) linear infinite backwards;
+    animation-delay: var(--particle-delay, 0s);
+    will-change: transform, opacity;
+  }
 }

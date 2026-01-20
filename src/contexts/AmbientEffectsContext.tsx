@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { useAmbientEffectsSettings } from '@/hooks/useAmbientEffectsSettings';
 import { useAdaptiveQuality, type VisualMode } from '@/hooks/useAdaptiveQuality';
+import { useParticleStyle, type ParticleStyle, type ResolvedParticleStyle } from '@/hooks/useParticleStyle';
 import type { QualityLevel, DeviceCapabilities } from '@/lib/detectDevice';
 
 export type VisualState = 'idle' | 'focus' | 'break' | 'completed';
@@ -32,6 +33,11 @@ interface AmbientEffectsContextValue {
   showParticles: boolean;
   showBurst: boolean;
 
+  // Particle style
+  particleStyle: ParticleStyle;
+  setParticleStyle: (style: ParticleStyle) => void;
+  resolvedParticleStyle: ResolvedParticleStyle;
+
   // Loading state
   isLoaded: boolean;
 }
@@ -56,6 +62,12 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     showBurst,
     isLoaded: qualityLoaded,
   } = useAdaptiveQuality();
+  const {
+    style: particleStyle,
+    setStyle: setParticleStyle,
+    resolvedStyle: resolvedParticleStyle,
+    isLoaded: styleLoaded,
+  } = useParticleStyle();
 
   const setVisualState = useCallback((state: VisualState) => {
     setVisualStateInternal(state);
@@ -65,8 +77,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     setIsPausedInternal(paused);
   }, []);
 
-  // Both settings must be loaded before we consider the context ready
-  const isLoaded = settingsLoaded && qualityLoaded;
+  // All settings must be loaded before we consider the context ready
+  const isLoaded = settingsLoaded && qualityLoaded && styleLoaded;
 
   const value = useMemo(
     () => ({
@@ -84,6 +96,9 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       particleCount,
       showParticles,
       showBurst,
+      particleStyle,
+      setParticleStyle,
+      resolvedParticleStyle,
       isLoaded,
     }),
     [
@@ -101,6 +116,9 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       particleCount,
       showParticles,
       showBurst,
+      particleStyle,
+      setParticleStyle,
+      resolvedParticleStyle,
       isLoaded,
     ]
   );

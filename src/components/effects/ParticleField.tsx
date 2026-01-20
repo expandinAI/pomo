@@ -2,12 +2,14 @@
 
 import { useMemo } from 'react';
 import { prefersReducedMotion } from '@/lib/utils';
+import type { ResolvedParticleStyle } from '@/hooks/useParticleStyle';
 
 interface ParticleFieldProps {
   isActive: boolean;
   isPaused?: boolean;
   mode?: 'work' | 'break';
   particleCount?: number;
+  style?: ResolvedParticleStyle;
 }
 
 interface ParticleConfig {
@@ -51,6 +53,8 @@ interface Particle {
   opacity: number;
   size: number;
   blur: number;
+  angleX: number;  // For Shine & Gather: -1 to 1
+  angleY: number;  // For Shine & Gather: -1 to 1
 }
 
 /**
@@ -60,7 +64,7 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20 }: ParticleFieldProps) {
+export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall' }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
 
   // Generate particles with random properties (memoized for stability)
@@ -69,6 +73,11 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
     const opacityRange = config.opacityMax - config.opacityMin;
 
     return Array.from({ length: particleCount }, (_, i) => {
+      // Calculate random angle for Shine & Gather style
+      const angle = Math.random() * Math.PI * 2; // 0 to 2π
+      const angleX = Math.cos(angle);
+      const angleY = Math.sin(angle);
+
       return {
         id: i,
         left: `${Math.random() * 100}%`,
@@ -78,6 +87,8 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
         opacity: config.opacityMin + Math.random() * opacityRange,
         size: 3 + Math.random() * 4, // 3-7px (larger)
         blur: Math.random() > 0.5 ? 1 : 0, // Some particles have blur for depth
+        angleX,
+        angleY,
       };
     });
   }, [particleCount, mode]);
@@ -87,8 +98,17 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
     return null;
   }
 
-  // Break mode: particles sink from top, Work mode: particles rise from bottom
-  const animationClass = mode === 'break' ? 'animate-particle-sink' : 'animate-particle';
+  // Determine animation class based on style and mode
+  const getAnimationClass = (): string => {
+    if (style === 'shine-gather') {
+      return mode === 'break' ? 'animate-particle-gather' : 'animate-particle-shine';
+    }
+    // Default: rise-fall
+    return mode === 'break' ? 'animate-particle-sink' : 'animate-particle';
+  };
+
+  const animationClass = getAnimationClass();
+  const isShineGather = style === 'shine-gather';
 
   return (
     <div
@@ -98,11 +118,16 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className={`absolute rounded-full bg-white ${animationClass} will-change-[transform,opacity]`}
+          className={`rounded-full bg-white ${animationClass} will-change-[transform,opacity] ${isShineGather ? '' : 'absolute'}`}
           style={{
-            left: particle.left,
-            top: mode === 'break' ? '-10px' : undefined,
-            bottom: mode === 'work' ? '-10px' : undefined,
+            // Position based on style
+            ...(isShineGather
+              ? {} // Shine & Gather uses fixed positioning from CSS class
+              : {
+                  left: particle.left,
+                  top: mode === 'break' ? '-10px' : undefined,
+                  bottom: mode === 'work' ? '-10px' : undefined,
+                }),
             width: `${particle.size}px`,
             height: `${particle.size}px`,
             boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
@@ -112,6 +137,8 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
             '--particle-delay': `${particle.delay}s`,
             '--particle-drift': `${particle.drift}px`,
             '--particle-opacity': particle.opacity,
+            '--particle-angle-x': particle.angleX,
+            '--particle-angle-y': particle.angleY,
           } as React.CSSProperties}
         />
       ))}

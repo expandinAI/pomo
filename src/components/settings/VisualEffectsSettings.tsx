@@ -1,10 +1,11 @@
 'use client';
 
-import { Sparkles, Zap, Layers, Smartphone } from 'lucide-react';
+import { Sparkles, Zap, Layers, Smartphone, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
 import { SPRING } from '@/styles/design-tokens';
 import type { VisualMode } from '@/hooks/useAdaptiveQuality';
+import type { ParticleStyle } from '@/hooks/useParticleStyle';
 
 interface ModeOption {
   value: VisualMode;
@@ -34,12 +35,41 @@ const MODE_OPTIONS: ModeOption[] = [
   },
 ];
 
+interface ParticleStyleOption {
+  value: ParticleStyle;
+  label: string;
+  description: string;
+  icon: string;
+}
+
+const PARTICLE_STYLE_OPTIONS: ParticleStyleOption[] = [
+  {
+    value: 'rise-fall',
+    label: 'Rise & Fall',
+    description: 'Vertical flow',
+    icon: '\u2195', // ↕
+  },
+  {
+    value: 'shine-gather',
+    label: 'Shine & Gather',
+    description: 'Radial expansion',
+    icon: '\u2732', // ✲
+  },
+  {
+    value: 'shuffle',
+    label: 'Shuffle',
+    description: 'Random each session',
+    icon: '\u2684', // ⚄
+  },
+];
+
 /**
  * VisualEffectsSettings - Toggle and mode selector for ambient visual effects
  *
  * Allows users to:
  * - Enable/disable ambient effects
  * - Choose visual mode: Minimal | Ambient | Auto
+ * - Choose particle style: Rise & Fall | Shine & Gather | Shuffle
  *
  * Settings are persisted to localStorage.
  */
@@ -51,6 +81,8 @@ export function VisualEffectsSettings() {
     setVisualMode,
     deviceCapabilities,
     quality,
+    particleStyle,
+    setParticleStyle,
     isLoaded,
   } = useAmbientEffects();
 
@@ -166,6 +198,55 @@ export function VisualEffectsSettings() {
               {deviceCapabilities.isMobile ? 'Mobile' : 'Desktop'} detected, using {quality} quality
             </p>
           )}
+        </div>
+      )}
+
+      {/* Particle Style Selector - only show when effects are enabled and not minimal */}
+      {effectsEnabled && visualMode !== 'minimal' && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider flex items-center gap-2">
+            <Circle className="w-3 h-3" />
+            Particle Style
+          </label>
+          <div className="grid grid-cols-1 gap-2">
+            {PARTICLE_STYLE_OPTIONS.map((option) => (
+              <motion.button
+                key={option.value}
+                onClick={() => setParticleStyle(option.value)}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                  particleStyle === option.value
+                    ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+                    : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+                }`}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', ...SPRING.default }}
+              >
+                <span
+                  className={`text-lg w-6 text-center ${
+                    particleStyle === option.value
+                      ? 'text-accent light:text-accent-dark'
+                      : 'text-tertiary light:text-tertiary-dark'
+                  }`}
+                >
+                  {option.icon}
+                </span>
+                <div className="text-left">
+                  <p
+                    className={`text-sm font-medium ${
+                      particleStyle === option.value
+                        ? 'text-accent light:text-accent-dark'
+                        : 'text-secondary light:text-secondary-dark'
+                    }`}
+                  >
+                    {option.label}
+                  </p>
+                  <p className="text-xs text-tertiary light:text-tertiary-dark">
+                    {option.description}
+                  </p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
         </div>
       )}
 
