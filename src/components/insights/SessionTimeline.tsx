@@ -31,8 +31,8 @@ interface SessionTimelineProps {
  */
 export function SessionTimeline({
   sessions,
-  emptyMessage = 'No sessions yet',
-  emptyDescription = 'Complete a focus session to see it here',
+  emptyMessage = 'No Particles yet',
+  emptyDescription = 'Collect a Particle to see it here',
   maxHeight = 'max-h-[40vh]',
 }: SessionTimelineProps) {
   // Group sessions by date

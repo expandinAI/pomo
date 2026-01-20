@@ -6,7 +6,7 @@
 export const STORAGE_KEYS = {
   theme: 'theme',
   completedPomodoros: 'completedPomodoros',
-  settings: 'pomoSettings',
+  settings: 'particleSettings',
 } as const;
 
 // Notification messages
@@ -27,7 +27,7 @@ export const NOTIFICATIONS = {
 
 // Tab title templates
 export const TAB_TITLES = {
-  idle: 'Pomo - Focus Timer',
-  running: (time: string, mode: string) => `${time} - ${mode} | Pomo`,
-  paused: (time: string, mode: string) => `⏸ ${time} - ${mode} | Pomo`,
+  idle: 'Particle - Focus Timer',
+  running: (time: string, mode: string) => `${time} - ${mode} | Particle`,
+  paused: (time: string, mode: string) => `⏸ ${time} - ${mode} | Particle`,
 } as const;

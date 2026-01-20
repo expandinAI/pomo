@@ -10,9 +10,13 @@ import {
 // Re-export for convenience
 export type { TimerDurations, TimerPreset };
 
-const STORAGE_KEY = 'pomo_timer_settings';
-const CUSTOM_PRESET_KEY = 'pomo_custom_preset';
-const DEFAULT_PRESET_ID = 'pomodoro';
+const STORAGE_KEY = 'particle_timer_settings';
+const CUSTOM_PRESET_KEY = 'particle_custom_preset';
+const DEFAULT_PRESET_ID = 'classic';
+
+// Old keys for migration
+const OLD_STORAGE_KEY = 'pomo_timer_settings';
+const OLD_CUSTOM_PRESET_KEY = 'pomo_custom_preset';
 
 interface StoredSettings {
   presetId: string;
@@ -26,11 +30,24 @@ function loadSettings(): StoredSettings {
   }
 
   try {
+    // Migrate from old key if exists
+    const oldStored = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldStored && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldStored);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (typeof parsed.presetId === 'string' && parsed.presetId in PRESETS) {
-        return parsed;
+      if (typeof parsed.presetId === 'string') {
+        // Migrate 'pomodoro' preset ID to 'classic'
+        if (parsed.presetId === 'pomodoro') {
+          parsed.presetId = 'classic';
+        }
+        if (parsed.presetId in PRESETS) {
+          return parsed;
+        }
       }
     }
   } catch {
@@ -53,6 +70,13 @@ function loadCustomPreset(): { durations: TimerDurations; sessionsUntilLong: num
   }
 
   try {
+    // Migrate from old key if exists
+    const oldStored = localStorage.getItem(OLD_CUSTOM_PRESET_KEY);
+    if (oldStored && !localStorage.getItem(CUSTOM_PRESET_KEY)) {
+      localStorage.setItem(CUSTOM_PRESET_KEY, oldStored);
+      localStorage.removeItem(OLD_CUSTOM_PRESET_KEY);
+    }
+
     const stored = localStorage.getItem(CUSTOM_PRESET_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -173,8 +197,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
   // Reset custom preset to defaults
   const resetCustomPreset = useCallback(() => {
-    const defaultDurations = { ...PRESETS.pomodoro.durations };
-    const defaultSessionsUntilLong = PRESETS.pomodoro.sessionsUntilLong;
+    const defaultDurations = { ...PRESETS.classic.durations };
+    const defaultSessionsUntilLong = PRESETS.classic.sessionsUntilLong;
     setCustomDurations(defaultDurations);
     setCustomSessionsUntilLong(defaultSessionsUntilLong);
     saveCustomPreset(defaultDurations, defaultSessionsUntilLong);

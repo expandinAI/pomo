@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'pomo_recent_tasks';
+const STORAGE_KEY = 'particle_recent_tasks';
+const OLD_STORAGE_KEY = 'pomo_recent_tasks';
 const MAX_RECENT_TASKS = 10;
 
 export interface RecentTask {
@@ -11,6 +12,13 @@ export function getRecentTasks(): RecentTask[] {
   if (typeof window === 'undefined') return [];
 
   try {
+    // Migrate from old key if exists
+    const oldStored = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldStored && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldStored);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);

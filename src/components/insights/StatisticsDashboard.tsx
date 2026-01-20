@@ -125,12 +125,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
       setIsOpen(true);
     }
 
-    window.addEventListener('pomo:open-dashboard', handleOpenDashboard);
+    window.addEventListener('particle:open-dashboard', handleOpenDashboard);
     // Also listen to the old event for backwards compatibility during transition
-    window.addEventListener('pomo:open-stats', handleOpenDashboard);
+    window.addEventListener('particle:open-stats', handleOpenDashboard);
     return () => {
-      window.removeEventListener('pomo:open-dashboard', handleOpenDashboard);
-      window.removeEventListener('pomo:open-stats', handleOpenDashboard);
+      window.removeEventListener('particle:open-dashboard', handleOpenDashboard);
+      window.removeEventListener('particle:open-stats', handleOpenDashboard);
     };
   }, []);
 
@@ -207,7 +207,7 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     <MetricCard
                       title="Deep Work"
                       value={formatDeepWorkTime(deepWorkMinutes)}
-                      subtitle={`${workSessionsCount} session${workSessionsCount !== 1 ? 's' : ''}`}
+                      subtitle={`${workSessionsCount} Particle${workSessionsCount !== 1 ? 's' : ''}`}
                       icon={<Clock className="w-4 h-4" />}
                     />
                     <MetricCard
@@ -261,12 +261,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     transition={reducedMotion ? { duration: 0 } : { delay: 0.15 }}
                   >
                     <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3">
-                      Recent Sessions
+                      Collected Particles
                     </h3>
                     <SessionTimeline
                       sessions={filteredSessions}
-                      emptyMessage={`No sessions ${timeRangeLabel}`}
-                      emptyDescription="Complete a focus session to see it here"
+                      emptyMessage={`No Particles ${timeRangeLabel}`}
+                      emptyDescription="Collect a Particle to see it here"
                       maxHeight="max-h-[30vh]"
                     />
                   </motion.div>

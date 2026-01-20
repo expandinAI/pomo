@@ -10,7 +10,8 @@ import {
 
 export type VisualMode = 'minimal' | 'ambient' | 'auto';
 
-const STORAGE_KEY = 'pomo_visual_mode';
+const STORAGE_KEY = 'particle_visual_mode';
+const OLD_STORAGE_KEY = 'pomo_visual_mode';
 const DEFAULT_MODE: VisualMode = 'auto';
 
 function loadVisualMode(): VisualMode {
@@ -19,6 +20,13 @@ function loadVisualMode(): VisualMode {
   }
 
   try {
+    // Migrate from old key if exists
+    const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldValue && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldValue);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && ['minimal', 'ambient', 'auto'].includes(stored)) {
       return stored as VisualMode;

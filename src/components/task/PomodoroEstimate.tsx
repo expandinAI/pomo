@@ -30,7 +30,7 @@ export function PomodoroEstimate({
     <div
       className="flex items-center gap-0.5"
       role="group"
-      aria-label="Estimated pomodoros"
+      aria-label="Estimated Particles"
     >
       <span className="text-xs text-tertiary light:text-tertiary-dark mr-1.5">~</span>
       {ESTIMATE_OPTIONS.map((estimate) => {
@@ -56,7 +56,7 @@ export function PomodoroEstimate({
             whileHover={disabled ? {} : { scale: 1.1 }}
             whileTap={disabled ? {} : { scale: 0.9 }}
             transition={{ type: 'spring', ...SPRING.snappy }}
-            aria-label={`${estimate} pomodoro${estimate > 1 ? 's' : ''}`}
+            aria-label={`${estimate} Particle${estimate > 1 ? 's' : ''}`}
             aria-pressed={isExact}
           >
             <span

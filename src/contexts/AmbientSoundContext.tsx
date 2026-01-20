@@ -8,8 +8,12 @@ import {
   createAmbientSound,
 } from '@/lib/ambientGenerators';
 
-const STORAGE_KEY_TYPE = 'pomo_ambient_type';
-const STORAGE_KEY_VOLUME = 'pomo_ambient_volume';
+const STORAGE_KEY_TYPE = 'particle_ambient_type';
+const STORAGE_KEY_VOLUME = 'particle_ambient_volume';
+
+// Old keys for migration
+const OLD_STORAGE_KEY_TYPE = 'pomo_ambient_type';
+const OLD_STORAGE_KEY_VOLUME = 'pomo_ambient_volume';
 
 const DEFAULT_TYPE: AmbientType = 'silence';
 const DEFAULT_VOLUME = 0.5;
@@ -29,6 +33,19 @@ function loadSettings(): { type: AmbientType; volume: number } {
   }
 
   try {
+    // Migrate from old keys if they exist
+    const migrations = [
+      [OLD_STORAGE_KEY_TYPE, STORAGE_KEY_TYPE],
+      [OLD_STORAGE_KEY_VOLUME, STORAGE_KEY_VOLUME],
+    ];
+    for (const [oldKey, newKey] of migrations) {
+      const oldValue = localStorage.getItem(oldKey);
+      if (oldValue !== null && localStorage.getItem(newKey) === null) {
+        localStorage.setItem(newKey, oldValue);
+        localStorage.removeItem(oldKey);
+      }
+    }
+
     const storedType = localStorage.getItem(STORAGE_KEY_TYPE);
     const storedVolume = localStorage.getItem(STORAGE_KEY_VOLUME);
 

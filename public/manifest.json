@@ -1,7 +1,7 @@
 {
-  "name": "Pomo - Focus Timer",
-  "short_name": "Pomo",
-  "description": "Your sanctuary for deep work. A beautifully designed Pomodoro timer.",
+  "name": "Particle - Focus Timer",
+  "short_name": "Particle",
+  "description": "Your sanctuary for deep work. A beautifully designed focus timer.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0C0A09",

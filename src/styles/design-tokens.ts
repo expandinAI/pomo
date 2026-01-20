@@ -1,5 +1,5 @@
 /**
- * Design tokens for Pomo
+ * Design tokens for Particle
  * These values should match tailwind.config.js
  */
 
@@ -22,13 +22,13 @@ export interface TimerPreset {
 
 // All available presets
 export const PRESETS: Record<string, TimerPreset> = {
-  pomodoro: {
-    id: 'pomodoro',
-    name: 'Pomodoro',
+  classic: {
+    id: 'classic',
+    name: 'Classic',
     shortcut: '1',
     durations: { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 },
     sessionsUntilLong: 4,
-    description: 'Classic 25/5/15 technique by Francesco Cirillo',
+    description: 'Classic 25/5/15 technique',
   },
   deepWork: {
     id: 'deepWork',
@@ -63,10 +63,10 @@ export function getPresetLabel(preset: TimerPreset): string {
 }
 
 // Legacy: Duration presets in seconds (for backward compatibility)
-export const TIMER_DURATIONS = PRESETS.pomodoro.durations;
+export const TIMER_DURATIONS = PRESETS.classic.durations;
 
-// Legacy: Number of pomodoros before a long break (for backward compatibility)
-export const LONG_BREAK_INTERVAL = PRESETS.pomodoro.sessionsUntilLong;
+// Legacy: Number of sessions before a long break (for backward compatibility)
+export const LONG_BREAK_INTERVAL = PRESETS.classic.sessionsUntilLong;
 
 // Animation durations in milliseconds (snappier feel)
 export const ANIMATION = {

@@ -1,5 +1,5 @@
-// Pomo Service Worker - Basic offline support
-const CACHE_NAME = 'pomo-v1';
+// Particle Service Worker - Basic offline support
+const CACHE_NAME = 'particle-v1';
 const OFFLINE_URL = '/';
 
 // Assets to cache on install

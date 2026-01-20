@@ -19,9 +19,14 @@ export const SOUND_PRESETS: SoundPreset[] = [
   { id: 'minimal', name: 'Minimal', description: 'Short beep' },
 ];
 
-const STORAGE_KEY = 'pomo_sound_settings';
-const VOLUME_KEY = 'pomo_sound_volume';
-const MUTED_KEY = 'pomo_sound_muted';
+const STORAGE_KEY = 'particle_sound_settings';
+const VOLUME_KEY = 'particle_sound_volume';
+const MUTED_KEY = 'particle_sound_muted';
+
+// Old keys for migration
+const OLD_STORAGE_KEY = 'pomo_sound_settings';
+const OLD_VOLUME_KEY = 'pomo_sound_volume';
+const OLD_MUTED_KEY = 'pomo_sound_muted';
 
 const DEFAULT_SOUND: SoundOption = 'default';
 const DEFAULT_VOLUME = 0.75;
@@ -38,6 +43,20 @@ function loadSettings(): SoundSettings {
   }
 
   try {
+    // Migrate from old keys if they exist
+    const migrations = [
+      [OLD_STORAGE_KEY, STORAGE_KEY],
+      [OLD_VOLUME_KEY, VOLUME_KEY],
+      [OLD_MUTED_KEY, MUTED_KEY],
+    ];
+    for (const [oldKey, newKey] of migrations) {
+      const oldValue = localStorage.getItem(oldKey);
+      if (oldValue !== null && localStorage.getItem(newKey) === null) {
+        localStorage.setItem(newKey, oldValue);
+        localStorage.removeItem(oldKey);
+      }
+    }
+
     const storedSound = localStorage.getItem(STORAGE_KEY);
     const storedVolume = localStorage.getItem(VOLUME_KEY);
     const storedMuted = localStorage.getItem(MUTED_KEY);

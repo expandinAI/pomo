@@ -1,5 +1,5 @@
 /**
- * Command Registry for the Command Palette (POMO-060)
+ * Command Registry for the Command Palette
  * Central management of all app commands
  */
 
@@ -127,7 +127,7 @@ export function clearCommands(): void {
 }
 
 // Recent commands storage key
-const RECENT_COMMANDS_KEY = 'pomo-recent-commands';
+const RECENT_COMMANDS_KEY = 'particle-recent-commands';
 const MAX_RECENT_COMMANDS = 5;
 
 /**

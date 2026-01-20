@@ -22,30 +22,30 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Pomo - Your sanctuary for deep work',
+  title: 'Particle - Your sanctuary for deep work',
   description:
-    'A beautifully designed Pomodoro timer that creates calm, not anxiety. Focus with intention.',
-  keywords: ['pomodoro', 'timer', 'focus', 'productivity', 'deep work'],
-  authors: [{ name: 'Pomo' }],
-  creator: 'Pomo',
+    'A beautifully designed focus timer that creates calm, not anxiety. Focus with intention.',
+  keywords: ['particle', 'focus', 'timer', 'productivity', 'deep work'],
+  authors: [{ name: 'Particle' }],
+  creator: 'Particle',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Pomo',
+    title: 'Particle',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://pomo.so',
-    title: 'Pomo - Your sanctuary for deep work',
-    description: 'A beautifully designed Pomodoro timer that creates calm, not anxiety.',
-    siteName: 'Pomo',
+    title: 'Particle - Your sanctuary for deep work',
+    description: 'A beautifully designed focus timer that creates calm, not anxiety.',
+    siteName: 'Particle',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pomo - Your sanctuary for deep work',
-    description: 'A beautifully designed Pomodoro timer that creates calm, not anxiety.',
+    title: 'Particle - Your sanctuary for deep work',
+    description: 'A beautifully designed focus timer that creates calm, not anxiety.',
   },
   robots: {
     index: true,

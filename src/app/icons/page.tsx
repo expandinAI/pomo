@@ -240,8 +240,8 @@ function IconMinimalClock({ size = 64 }: IconProps) {
   );
 }
 
-// Icon 17: Pomo Text
-function IconPomoText({ size = 64 }: IconProps) {
+// Icon 17: Particle Text
+function IconParticleText({ size = 64 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
       <defs>
@@ -261,7 +261,7 @@ function IconPomoText({ size = 64 }: IconProps) {
         fontFamily="system-ui, sans-serif"
         letterSpacing="-1"
       >
-        pomo
+        part
       </text>
     </svg>
   );
@@ -476,7 +476,7 @@ const icons = [
   { component: IconDotGrid, name: 'Dot Grid', description: '9-Punkt Raster' },
   { component: IconHourglass, name: 'Hourglass', description: 'Sanduhr' },
   { component: IconSoftP, name: 'Soft P', description: 'P auf Korall' },
-  { component: IconPomoText, name: 'Pomo Text', description: 'pomo Schriftzug' },
+  { component: IconParticleText, name: 'Particle Text', description: 'Particle Schriftzug' },
   { component: IconTealFocus, name: 'Teal Focus', description: 'App-Farbe Teal' },
   { component: IconTealArc, name: 'Teal Arc', description: 'Teal Timer-Bogen' },
   { component: IconTealSquircle, name: 'Teal Squircle', description: 'Teal Squircle' },
@@ -495,7 +495,7 @@ export default function IconGalleryPage() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className={`text-2xl font-semibold ${darkMode ? 'text-stone-100' : 'text-stone-900'}`}>
-              Pomo Icon Galerie
+              Particle Icon Galerie
             </h1>
             <p className={`text-sm mt-1 ${darkMode ? 'text-stone-400' : 'text-stone-500'}`}>
               {icons.length} Vorschläge – Klicke um auszuwählen

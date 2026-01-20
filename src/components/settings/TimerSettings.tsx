@@ -60,13 +60,13 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
       }
     }
 
-    window.addEventListener('pomo:open-settings', handleOpenSettings);
-    return () => window.removeEventListener('pomo:open-settings', handleOpenSettings);
+    window.addEventListener('particle:open-settings', handleOpenSettings);
+    return () => window.removeEventListener('particle:open-settings', handleOpenSettings);
   }, [disabled]);
 
 
   // Preset order for display
-  const presetIds = ['pomodoro', 'deepWork', 'ultradian', 'custom'] as const;
+  const presetIds = ['classic', 'deepWork', 'ultradian', 'custom'] as const;
 
   return (
     <div className="relative">

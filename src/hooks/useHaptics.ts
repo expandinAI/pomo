@@ -18,7 +18,8 @@ const HAPTIC_PATTERNS: Record<HapticPattern, number | number[]> = {
   heavy: 150,
 };
 
-const STORAGE_KEY = 'pomo_haptics_enabled';
+const STORAGE_KEY = 'particle_haptics_enabled';
+const OLD_STORAGE_KEY = 'pomo_haptics_enabled';
 
 /**
  * Hook for haptic feedback via the Web Vibration API.
@@ -35,8 +36,15 @@ export function useHaptics() {
     const supported = typeof navigator !== 'undefined' && 'vibrate' in navigator;
     setIsSupported(supported);
 
-    // Load preference from localStorage
+    // Load preference from localStorage (with migration)
     if (typeof window !== 'undefined') {
+      // Migrate from old key if exists
+      const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+      if (oldValue !== null && localStorage.getItem(STORAGE_KEY) === null) {
+        localStorage.setItem(STORAGE_KEY, oldValue);
+        localStorage.removeItem(OLD_STORAGE_KEY);
+      }
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved !== null) {
         setIsEnabled(saved === 'true');

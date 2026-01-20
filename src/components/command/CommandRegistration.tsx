@@ -107,11 +107,11 @@ export function CommandRegistration({
       // Preset commands
       ...(onPresetChange ? [
         {
-          id: 'preset-pomodoro',
-          label: 'Switch to Pomodoro (25/5)',
+          id: 'preset-classic',
+          label: 'Switch to Classic (25/5)',
           shortcut: '1',
           category: 'presets',
-          action: () => onPresetChange('pomodoro'),
+          action: () => onPresetChange('classic'),
           icon: <Timer className="w-4 h-4" />,
           keywords: ['classic', 'traditional', '25', 'pomodoro'],
           disabled: () => timerIsRunning,

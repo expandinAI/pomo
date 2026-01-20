@@ -10,7 +10,8 @@ export interface CompletedSession {
   presetId?: string; // ID of the preset used for this session
 }
 
-const STORAGE_KEY = 'pomo_session_history';
+const STORAGE_KEY = 'particle_session_history';
+const OLD_STORAGE_KEY = 'pomo_session_history';
 const MAX_SESSIONS = 100;
 
 function generateId(): string {
@@ -21,6 +22,13 @@ export function loadSessions(): CompletedSession[] {
   if (typeof window === 'undefined') return [];
 
   try {
+    // Migrate from old key if exists
+    const oldStored = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldStored && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldStored);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'pomo:keyboard-hints-visible';
+const STORAGE_KEY = 'particle:keyboard-hints-visible';
+const OLD_STORAGE_KEY = 'pomo:keyboard-hints-visible';
 
 /**
  * Hook for managing keyboard hints visibility setting
@@ -18,8 +19,15 @@ export function useKeyboardHintsSettings(): {
   const [showKeyboardHints, setShowKeyboardHintsState] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount (with migration from old key)
   useEffect(() => {
+    // Migrate from old key if exists
+    const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldValue !== null && localStorage.getItem(STORAGE_KEY) === null) {
+      localStorage.setItem(STORAGE_KEY, oldValue);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) {
       setShowKeyboardHintsState(stored === 'true');

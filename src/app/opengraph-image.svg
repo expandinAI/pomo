@@ -12,6 +12,6 @@
   </defs>
   <rect width="1200" height="630" fill="url(#bgGrad)" />
   <rect x="460" y="175" width="280" height="280" rx="64" fill="url(#sunriseGrad)" />
-  <text x="600" y="540" text-anchor="middle" fill="#1C1917" font-size="48" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Pomo</text>
+  <text x="600" y="540" text-anchor="middle" fill="#1C1917" font-size="48" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Particle</text>
   <text x="600" y="585" text-anchor="middle" fill="#78716C" font-size="24" font-family="system-ui, -apple-system, sans-serif">Focus Timer</text>
 </svg>

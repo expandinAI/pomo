@@ -39,13 +39,13 @@ export default function Home() {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
       },
       onStats: () => {
-        window.dispatchEvent(new CustomEvent('pomo:open-dashboard'));
+        window.dispatchEvent(new CustomEvent('particle:open-dashboard'));
       },
       onHistory: () => {
-        window.dispatchEvent(new CustomEvent('pomo:open-history'));
+        window.dispatchEvent(new CustomEvent('particle:open-history'));
       },
       onSettings: () => {
-        window.dispatchEvent(new CustomEvent('pomo:open-settings'));
+        window.dispatchEvent(new CustomEvent('particle:open-settings'));
       },
     }),
     []
@@ -64,7 +64,7 @@ export default function Home() {
       // Cmd+, (Mac) or Ctrl+, (Windows/Linux) to open settings
       if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent('pomo:open-settings'));
+        window.dispatchEvent(new CustomEvent('particle:open-settings'));
       }
     }
 

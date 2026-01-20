@@ -16,7 +16,7 @@ export function SessionCounter({ count, sessionsUntilLong }: SessionCounterProps
 
   return (
     <div className="flex flex-col items-center gap-2">
-      {/* Pomodoro indicators */}
+      {/* Particle indicators */}
       <div className="flex items-center gap-2">
         {Array.from({ length: sessionsUntilLong }).map((_, index) => {
           const isCompleted = index < displayCount;
@@ -57,11 +57,11 @@ export function SessionCounter({ count, sessionsUntilLong }: SessionCounterProps
       {/* Total count */}
       <p className="text-sm text-secondary light:text-secondary-dark">
         {count === 0 ? (
-          'Start your first focus session'
+          'Collect your first Particle'
         ) : (
           <>
             <span className="font-medium text-primary light:text-primary-dark">{count}</span>
-            {count === 1 ? ' session' : ' sessions'} completed
+            {count === 1 ? ' Particle' : ' Particles'} collected
             {completedSets > 0 && (
               <span className="text-tertiary light:text-tertiary-dark">
                 {' '}

@@ -27,7 +27,7 @@ function getPresetAriaLabel(preset: TimerPreset): string {
 export function PresetSelector({ disabled, onPresetChange }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
 
-  const presetIds = ['pomodoro', 'deepWork', 'ultradian', 'custom'] as const;
+  const presetIds = ['classic', 'deepWork', 'ultradian', 'custom'] as const;
   const activeIndex = presetIds.indexOf(activePresetId as typeof presetIds[number]);
 
   // Button width (w-16 = 64px) + gap (gap-1 = 4px)

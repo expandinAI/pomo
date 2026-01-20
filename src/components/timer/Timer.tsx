@@ -544,7 +544,7 @@ export function Timer() {
         // Preset switching (1-4)
         case '1':
           if (!state.isRunning) {
-            applyPreset('pomodoro');
+            applyPreset('classic');
           }
           break;
         case '2':
@@ -636,7 +636,7 @@ export function Timer() {
 
   // Open settings via custom event
   const handleOpenSettings = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('pomo:open-settings'));
+    window.dispatchEvent(new CustomEvent('particle:open-settings'));
   }, []);
 
   // Task handlers

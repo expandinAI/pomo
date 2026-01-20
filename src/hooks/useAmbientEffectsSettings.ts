@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'pomo_ambient_effects_enabled';
+const STORAGE_KEY = 'particle_ambient_effects_enabled';
+const OLD_STORAGE_KEY = 'pomo_ambient_effects_enabled';
 const DEFAULT_ENABLED = true;
 
 function loadSettings(): boolean {
@@ -11,6 +12,13 @@ function loadSettings(): boolean {
   }
 
   try {
+    // Migrate from old key if exists
+    const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldValue !== null && localStorage.getItem(STORAGE_KEY) === null) {
+      localStorage.setItem(STORAGE_KEY, oldValue);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) {
       return stored === 'true';

@@ -73,8 +73,8 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
       setIsOpen(true);
     }
 
-    window.addEventListener('pomo:open-history', handleOpenHistory);
-    return () => window.removeEventListener('pomo:open-history', handleOpenHistory);
+    window.addEventListener('particle:open-history', handleOpenHistory);
+    return () => window.removeEventListener('particle:open-history', handleOpenHistory);
   }, []);
 
   return (
@@ -122,7 +122,7 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
                   <h2 id="session-history-title" className="text-base font-semibold text-primary light:text-primary-dark">
-                    Session History
+                    Particle History
                   </h2>
                   <button
                     ref={closeButtonRef}
@@ -151,10 +151,10 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                   {sessions.length === 0 ? (
                     <div className="text-center py-8">
                       <p className="text-tertiary light:text-tertiary-dark">
-                        No sessions yet
+                        No Particles yet
                       </p>
                       <p className="text-sm text-tertiary light:text-tertiary-dark mt-1">
-                        Complete a focus session to see it here
+                        Collect a Particle to see it here
                       </p>
                     </div>
                   ) : (
