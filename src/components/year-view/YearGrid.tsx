@@ -12,8 +12,8 @@ interface YearGridProps {
   data: YearViewData;
   /** Whether weeks start on Monday (default: true) */
   weekStartsOnMonday?: boolean;
-  /** Callback when hovering over a cell */
-  onCellHover?: (cell: GridCell | null) => void;
+  /** Callback when hovering over a cell (includes element rect for tooltip positioning) */
+  onCellHover?: (cell: GridCell | null, rect: DOMRect | null) => void;
   /** Callback when clicking a cell */
   onCellClick?: (cell: GridCell) => void;
 }

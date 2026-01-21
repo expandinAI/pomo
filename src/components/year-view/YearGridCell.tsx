@@ -9,7 +9,7 @@ interface YearGridCellProps {
   reducedMotion: boolean;
   animationDelay: number;
   isDarkMode: boolean;
-  onHover?: (cell: GridCell | null) => void;
+  onHover?: (cell: GridCell | null, rect: DOMRect | null) => void;
   onClick?: (cell: GridCell) => void;
 }
 
@@ -91,8 +91,8 @@ export function YearGridCell({
           ? {}
           : { scale: 1.3, transition: { type: 'spring', ...SPRING.snappy } }
       }
-      onMouseEnter={() => onHover?.(cell)}
-      onMouseLeave={() => onHover?.(null)}
+      onMouseEnter={(e) => onHover?.(cell, e.currentTarget.getBoundingClientRect())}
+      onMouseLeave={() => onHover?.(null, null)}
       onClick={() => onClick?.(cell)}
     />
   );

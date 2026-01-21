@@ -5,13 +5,16 @@
  *
  * @example
  * ```tsx
- * import { YearGrid } from '@/components/year-view';
+ * import { YearGrid, YearTooltip } from '@/components/year-view';
  * import { getYearViewData } from '@/lib/year-view';
  *
  * const data = await getYearViewData(2026);
- * <YearGrid data={data} />
+ * <YearGrid data={data} onCellHover={setHoveredCell} />
+ * <YearTooltip cell={hoveredCell} dayData={...} anchorRect={...} />
  * ```
  */
 
 export { YearGrid } from './YearGrid';
 export { YearGridCell } from './YearGridCell';
+export { YearTooltip } from './YearTooltip';
+export { ParticleDots } from './ParticleDots';
