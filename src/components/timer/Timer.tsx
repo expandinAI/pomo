@@ -330,11 +330,14 @@ export function Timer() {
     vibrate('medium');
 
     // Play sound on completion
-    // Skip for work sessions if convergence animation played (collect sound already played)
-    if (wasWorkSession && convergenceTriggeredRef.current) {
-      // Collect sound already played during convergence - no additional sound needed
+    if (wasWorkSession) {
+      // Work session: skip completion sound if convergence animation played (collect sound already played)
+      if (!convergenceTriggeredRef.current) {
+        playSound('completion');
+      }
     } else {
-      playSound(wasWorkSession ? 'completion' : 'break');
+      // Break session: always play break sound
+      playSound('break');
     }
   }, [playSound, state.mode, state.currentTask, vibrate]);
 
