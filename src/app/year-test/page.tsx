@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { YearGrid, YearTooltip } from '@/components/year-view';
+import { YearGrid, YearTooltip, YearSummary } from '@/components/year-view';
 import type { YearViewData, YearViewDay } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
 import { useTheme } from '@/hooks/useTheme';
@@ -203,25 +203,8 @@ export default function YearTestPage() {
           anchorRect={hoveredRect}
         />
 
-        {/* Summary stats */}
-        <div className="grid grid-cols-4 gap-4 text-center">
-          <div className="bg-surface rounded-lg p-4">
-            <p className="text-2xl font-semibold text-primary">{data.summary.totalParticles}</p>
-            <p className="text-xs text-tertiary">Total Particles</p>
-          </div>
-          <div className="bg-surface rounded-lg p-4">
-            <p className="text-2xl font-semibold text-primary">{data.summary.activeDays}</p>
-            <p className="text-xs text-tertiary">Active Days</p>
-          </div>
-          <div className="bg-surface rounded-lg p-4">
-            <p className="text-2xl font-semibold text-primary">{data.summary.longestStreak}</p>
-            <p className="text-xs text-tertiary">Longest Streak</p>
-          </div>
-          <div className="bg-surface rounded-lg p-4">
-            <p className="text-2xl font-semibold text-primary">{data.personalMax}</p>
-            <p className="text-xs text-tertiary">Personal Max</p>
-          </div>
-        </div>
+        {/* Year Summary Stats */}
+        <YearSummary summary={data.summary} />
       </div>
     </div>
   );
