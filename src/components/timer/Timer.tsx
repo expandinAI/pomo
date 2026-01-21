@@ -255,6 +255,9 @@ export function Timer() {
   // Track glow state for SessionCounter
   const [showSlotGlow, setShowSlotGlow] = useState(false);
 
+  // Ref for glow/sound timeout (to prevent cleanup from canceling it)
+  const glowTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Screen reader announcements
   const [statusAnnouncement, setStatusAnnouncement] = useState('');
   const [timerAnnouncement, setTimerAnnouncement] = useState('');
@@ -429,12 +432,11 @@ export function Timer() {
       setConvergenceTarget(nextSlotPosition);
 
       // Start glow effect and collect sound at ~0.5s before arrival (4.5s into the animation)
-      const glowTimeout = setTimeout(() => {
+      // Store in ref to prevent cleanup from canceling it when timeRemaining changes
+      glowTimeoutRef.current = setTimeout(() => {
         setShowSlotGlow(true);
         playSound('collect');
       }, 4500);
-
-      return () => clearTimeout(glowTimeout);
     }
   }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget, playSound]);
 
@@ -447,6 +449,11 @@ export function Timer() {
         setShowSlotGlow(false);
         setConvergenceTarget(null);
         slowingTriggeredRef.current = false;
+        // Clear pending glow/sound timeout
+        if (glowTimeoutRef.current) {
+          clearTimeout(glowTimeoutRef.current);
+          glowTimeoutRef.current = null;
+        }
       }
     };
 
@@ -461,6 +468,11 @@ export function Timer() {
       slowingTriggeredRef.current = false;
       setShowSlotGlow(false);
       setConvergenceTarget(null);
+      // Clear any pending glow/sound timeout
+      if (glowTimeoutRef.current) {
+        clearTimeout(glowTimeoutRef.current);
+        glowTimeoutRef.current = null;
+      }
     }
   }, [state.isRunning, state.mode, setConvergenceTarget]);
 
