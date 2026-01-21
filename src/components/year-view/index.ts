@@ -18,4 +18,5 @@ export { YearGrid } from './YearGrid';
 export { YearGridCell } from './YearGridCell';
 export { YearTooltip } from './YearTooltip';
 export { YearSummary } from './YearSummary';
+export { YearSelector } from './YearSelector';
 export { ParticleDots } from './ParticleDots';

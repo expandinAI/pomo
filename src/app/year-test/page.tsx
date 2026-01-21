@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
-import { YearGrid, YearTooltip, YearSummary } from '@/components/year-view';
+import { useMemo, useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { YearGrid, YearTooltip, YearSummary, YearSelector } from '@/components/year-view';
 import type { YearViewData, YearViewDay } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
 import { useTheme } from '@/hooks/useTheme';
@@ -126,17 +127,23 @@ function generateMockYearData(year: number): YearViewData {
   };
 }
 
+// Available years for navigation (mock: 2023-current)
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_YEAR = 2023;
+
 /**
  * Test page for YearGrid component
  * Access at: http://localhost:3000/year-test
  */
 export default function YearTestPage() {
+  const [currentYear, setCurrentYear] = useState(CURRENT_YEAR);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [hoveredCell, setHoveredCell] = useState<GridCell | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  // Generate mock data (memoized so it doesn't regenerate on every render)
-  const data: YearViewData = useMemo(() => generateMockYearData(2025), []);
+  // Generate mock data for the selected year
+  const data: YearViewData = useMemo(() => generateMockYearData(currentYear), [currentYear]);
 
   // Find the day data for the hovered cell
   const hoveredDayData = useMemo(() => {
@@ -154,57 +161,84 @@ export default function YearTestPage() {
     setHoveredRect(rect);
   }, []);
 
+  // Handle year change with direction for animation
+  const handleYearChange = useCallback((newYear: number) => {
+    setDirection(newYear > currentYear ? 'left' : 'right');
+    setHoveredCell(null); // Clear hover state when changing years
+    setCurrentYear(newYear);
+  }, [currentYear]);
+
+  // Animation variants for slide effect
+  const slideVariants = {
+    enter: (dir: 'left' | 'right') => ({
+      x: dir === 'left' ? 100 : -100,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: 'left' | 'right') => ({
+      x: dir === 'left' ? -100 : 100,
+      opacity: 0,
+    }),
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold text-primary">Year Grid Test</h1>
-          <p className="text-secondary">
-            {data.year} - {data.summary.totalParticles} particles across {data.summary.activeDays} active days
+        {/* Header with Year Selector */}
+        <div className="text-center space-y-4">
+          <YearSelector
+            currentYear={currentYear}
+            minYear={MIN_YEAR}
+            maxYear={CURRENT_YEAR}
+            onYearChange={handleYearChange}
+          />
+          <p className="text-secondary light:text-secondary-light text-sm">
+            Use ← → or H / L to navigate years
           </p>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="mt-4 px-4 py-2 rounded-lg bg-surface border border-border text-primary hover:bg-border transition-colors"
+            className="px-4 py-2 rounded-lg bg-surface light:bg-surface-light border border-border light:border-border-light text-primary light:text-primary-light hover:bg-border light:hover:bg-border-light transition-colors"
           >
-            Toggle Theme ({theme === 'dark' ? '🌙 Dark' : '☀️ Light'})
+            {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
           </button>
         </div>
 
-        {/* Hovered cell info */}
-        <div className="h-8 text-center">
-          {hoveredCell && (
-            <p className="text-secondary text-sm">
-              {hoveredCell.date.toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-              })}
-              : {hoveredCell.particleCount} particle{hoveredCell.particleCount !== 1 ? 's' : ''}
-              {hoveredCell.isPeakDay && ' (Peak Day)'}
-            </p>
-          )}
-        </div>
+        {/* Animated Year Content */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentYear}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
+            {/* Year Grid */}
+            <div className="bg-surface light:bg-surface-light rounded-xl p-6">
+              <YearGrid
+                data={data}
+                weekStartsOnMonday={true}
+                onCellHover={handleCellHover}
+                onCellClick={(cell) => console.log('Clicked:', cell)}
+              />
+            </div>
 
-        {/* Year Grid */}
-        <div className="bg-surface rounded-xl p-6">
-          <YearGrid
-            data={data}
-            weekStartsOnMonday={true}
-            onCellHover={handleCellHover}
-            onCellClick={(cell) => console.log('Clicked:', cell)}
-          />
-        </div>
+            {/* Year Summary Stats */}
+            <YearSummary summary={data.summary} />
+          </motion.div>
+        </AnimatePresence>
 
-        {/* Tooltip */}
+        {/* Tooltip (outside AnimatePresence to avoid flickering) */}
         <YearTooltip
           cell={hoveredCell}
           dayData={hoveredDayData}
           anchorRect={hoveredRect}
         />
-
-        {/* Year Summary Stats */}
-        <YearSummary summary={data.summary} />
       </div>
     </div>
   );
