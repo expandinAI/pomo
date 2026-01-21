@@ -3,7 +3,7 @@
  * Central source of truth for all keyboard shortcuts in the app
  */
 
-export type ShortcutCategory = 'timer' | 'navigation' | 'general';
+export type ShortcutCategory = 'timer' | 'projects' | 'navigation' | 'general';
 
 export interface Shortcut {
   key: string;
@@ -31,10 +31,21 @@ export const SHORTCUTS: Shortcut[] = [
   { key: '3', description: 'Ultradian preset', category: 'timer' },
   { key: '4', description: 'Custom preset', category: 'timer' },
 
+  // Project shortcuts
+  { key: 'P', description: 'Open project selector', category: 'projects' },
+  { key: 'P 1-9', description: 'Select recent project', category: 'projects' },
+  { key: 'P 0', description: 'Select "No Project"', category: 'projects' },
+  { key: 'N', description: 'New project (in Projects)', category: 'projects' },
+  { key: 'E', description: 'Edit project', category: 'projects' },
+  { key: 'A', description: 'Archive project', category: 'projects' },
+  { key: 'J / K', description: 'Navigate project list', category: 'projects' },
+
   // Navigation shortcuts
   { key: 'G T', description: 'Go to Timer', category: 'navigation' },
   { key: 'G S', description: 'Open Statistics', category: 'navigation' },
   { key: 'G H', description: 'Open History', category: 'navigation' },
+  { key: 'G P', description: 'Go to Projects', category: 'navigation' },
+  { key: 'G Y', description: 'Open Year View', category: 'navigation' },
   { key: 'G ,', description: 'Open Settings', category: 'navigation' },
 
   // General shortcuts
@@ -52,6 +63,7 @@ export const SHORTCUTS: Shortcut[] = [
  */
 export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
   timer: 'Timer',
+  projects: 'Projects',
   navigation: 'Navigation',
   general: 'General',
 };
@@ -59,7 +71,7 @@ export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
 /**
  * Category display order
  */
-export const CATEGORY_ORDER: ShortcutCategory[] = ['timer', 'navigation', 'general'];
+export const CATEGORY_ORDER: ShortcutCategory[] = ['timer', 'projects', 'navigation', 'general'];
 
 /**
  * Get shortcuts grouped by category
