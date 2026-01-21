@@ -11,6 +11,7 @@ import { ParticleBurst } from './ParticleBurst';
  * - idle: No effects
  * - focus: Blue glow (0.8), normal speed particles
  * - break: Warm glow (0.4), slow particles
+ * - converging: Particles fly toward session counter
  * - completed: Blue glow (1.0), particles + burst
  *
  * Visual Modes:
@@ -33,6 +34,7 @@ export function AmbientEffects() {
     resolvedParticleStyle,
     parallaxEnabled,
     paceMultiplier,
+    convergenceTarget,
   } = useAmbientEffects();
 
   // Don't render anything if:
@@ -47,6 +49,7 @@ export function AmbientEffects() {
   // Determine effect configuration based on visual state
   const particleMode: 'work' | 'break' = visualState === 'break' ? 'break' : 'work';
   const shouldShowBurst = showBurst && visualState === 'completed';
+  const isConverging = visualState === 'converging';
 
   return (
     <>
@@ -59,6 +62,8 @@ export function AmbientEffects() {
           style={resolvedParticleStyle}
           parallaxEnabled={parallaxEnabled}
           paceMultiplier={paceMultiplier}
+          isConverging={isConverging}
+          convergenceTarget={convergenceTarget}
         />
       )}
       <ParticleBurst isActive={shouldShowBurst} />

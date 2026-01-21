@@ -238,7 +238,22 @@ export function Timer() {
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
 
   // Ambient visual effects
-  const { setVisualState, setIsPaused: setParticlesPaused } = useAmbientEffects();
+  const { setVisualState, setIsPaused: setParticlesPaused, setConvergenceTarget } = useAmbientEffects();
+
+  // Track next slot position for convergence animation
+  const [nextSlotPosition, setNextSlotPosition] = useState<{ x: number; y: number } | null>(null);
+
+  // Trigger to refresh slot position (incremented before convergence)
+  const [refreshPositionTrigger, setRefreshPositionTrigger] = useState(0);
+
+  // Track if convergence has been triggered for current session
+  const convergenceTriggeredRef = useRef(false);
+
+  // Track if slowing has been triggered for current session
+  const slowingTriggeredRef = useRef(false);
+
+  // Track glow state for SessionCounter
+  const [showSlotGlow, setShowSlotGlow] = useState(false);
 
   // Screen reader announcements
   const [statusAnnouncement, setStatusAnnouncement] = useState('');
@@ -387,19 +402,76 @@ export function Timer() {
     }
   }, [state.isRunning, requestWakeLock, releaseWakeLock]);
 
+  // Convergence animation trigger at 5 seconds remaining (work sessions only)
+  // Single continuous animation: slowing (2s) → convergence (3s) = 5s total
+  useEffect(() => {
+    // Only trigger for work sessions when running
+    if (!state.isRunning || state.mode !== 'work') {
+      return;
+    }
+
+    // Refresh slot position at 6 seconds (before animation starts)
+    if (state.timeRemaining === 6 && !slowingTriggeredRef.current && !document.hidden) {
+      setRefreshPositionTrigger(prev => prev + 1);
+    }
+
+    // Start the complete animation at 5 seconds
+    // Skip if document is hidden (tab not visible) - animation wouldn't be seen anyway
+    if (state.timeRemaining === 5 && !convergenceTriggeredRef.current && nextSlotPosition && !document.hidden) {
+      convergenceTriggeredRef.current = true;
+      slowingTriggeredRef.current = true;
+      setVisualState('converging');
+      setConvergenceTarget(nextSlotPosition);
+
+      // Start glow effect at ~0.5s before arrival (4.5s into the animation)
+      const glowTimeout = setTimeout(() => {
+        setShowSlotGlow(true);
+      }, 4500);
+
+      return () => clearTimeout(glowTimeout);
+    }
+  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget]);
+
+  // Handle tab visibility change during slowing/convergence
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // If tab becomes hidden during slowing or convergence, skip to normal state
+      if (document.hidden && (convergenceTriggeredRef.current || slowingTriggeredRef.current)) {
+        setVisualState(state.mode === 'work' ? 'focus' : 'break');
+        setShowSlotGlow(false);
+        setConvergenceTarget(null);
+        slowingTriggeredRef.current = false;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [state.mode, setVisualState, setConvergenceTarget]);
+
+  // Reset convergence and slowing state when session completes or mode changes
+  useEffect(() => {
+    if (!state.isRunning) {
+      convergenceTriggeredRef.current = false;
+      slowingTriggeredRef.current = false;
+      setShowSlotGlow(false);
+      setConvergenceTarget(null);
+    }
+  }, [state.isRunning, state.mode, setConvergenceTarget]);
+
   // Sync visual effects state with timer state
   useEffect(() => {
     if (state.showCelebration) {
       setVisualState('completed');
       setParticlesPaused(false);
-    } else if (state.isRunning) {
+    } else if (state.isRunning && !convergenceTriggeredRef.current && !slowingTriggeredRef.current) {
+      // Only set focus/break state if not converging or slowing
       setVisualState(state.mode === 'work' ? 'focus' : 'break');
       setParticlesPaused(false);
     } else if (state.isPaused) {
       // Keep visual state active but pause particles (freeze in place)
       setVisualState(state.mode === 'work' ? 'focus' : 'break');
       setParticlesPaused(true);
-    } else {
+    } else if (!state.isRunning && !state.isPaused && !state.showCelebration) {
       // Truly idle (reset, initial state)
       setVisualState('idle');
       setParticlesPaused(false);
@@ -756,7 +828,13 @@ export function Timer() {
       />
 
       {/* Session counter */}
-      <SessionCounter count={state.completedPomodoros} sessionsUntilLong={sessionsUntilLong} />
+      <SessionCounter
+        count={state.completedPomodoros}
+        sessionsUntilLong={sessionsUntilLong}
+        onNextSlotPosition={setNextSlotPosition}
+        showGlow={showSlotGlow}
+        refreshPositionTrigger={refreshPositionTrigger}
+      />
 
       {/* Screen reader live regions */}
       <div

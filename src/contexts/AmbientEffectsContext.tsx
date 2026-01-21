@@ -6,7 +6,7 @@ import { useAdaptiveQuality, type VisualMode } from '@/hooks/useAdaptiveQuality'
 import { useParticleStyle, type ParticleStyle, type ResolvedParticleStyle, type ParticlePace } from '@/hooks/useParticleStyle';
 import type { QualityLevel, DeviceCapabilities } from '@/lib/detectDevice';
 
-export type VisualState = 'idle' | 'focus' | 'break' | 'completed';
+export type VisualState = 'idle' | 'focus' | 'break' | 'slowing' | 'converging' | 'completed';
 
 interface AmbientEffectsContextValue {
   // Visual state
@@ -16,6 +16,10 @@ interface AmbientEffectsContextValue {
   // Pause state (freeze particles without unmounting)
   isPaused: boolean;
   setIsPaused: (paused: boolean) => void;
+
+  // Convergence target for end-of-session animation
+  convergenceTarget: { x: number; y: number } | null;
+  setConvergenceTarget: (target: { x: number; y: number } | null) => void;
 
   // Effects toggle
   effectsEnabled: boolean;
@@ -60,6 +64,7 @@ interface AmbientEffectsProviderProps {
 export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps) {
   const [visualState, setVisualStateInternal] = useState<VisualState>('idle');
   const [isPaused, setIsPausedInternal] = useState(false);
+  const [convergenceTarget, setConvergenceTargetInternal] = useState<{ x: number; y: number } | null>(null);
   const { effectsEnabled, setEffectsEnabled, toggleEffects, isLoaded: settingsLoaded } = useAmbientEffectsSettings();
   const {
     visualMode,
@@ -91,6 +96,10 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     setIsPausedInternal(paused);
   }, []);
 
+  const setConvergenceTarget = useCallback((target: { x: number; y: number } | null) => {
+    setConvergenceTargetInternal(target);
+  }, []);
+
   // All settings must be loaded before we consider the context ready
   const isLoaded = settingsLoaded && qualityLoaded && styleLoaded;
 
@@ -100,6 +109,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       setVisualState,
       isPaused,
       setIsPaused,
+      convergenceTarget,
+      setConvergenceTarget,
       effectsEnabled,
       setEffectsEnabled,
       toggleEffects,
@@ -125,6 +136,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       setVisualState,
       isPaused,
       setIsPaused,
+      convergenceTarget,
+      setConvergenceTarget,
       effectsEnabled,
       setEffectsEnabled,
       toggleEffects,

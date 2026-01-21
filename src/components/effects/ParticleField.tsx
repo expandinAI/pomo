@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { prefersReducedMotion } from '@/lib/utils';
 import type { ResolvedParticleStyle } from '@/hooks/useParticleStyle';
 
@@ -12,6 +13,8 @@ interface ParticleFieldProps {
   style?: ResolvedParticleStyle;
   parallaxEnabled?: boolean;
   paceMultiplier?: number;
+  isConverging?: boolean;
+  convergenceTarget?: { x: number; y: number } | null;
 }
 
 interface ParticleConfig {
@@ -61,6 +64,11 @@ interface Particle {
   driftX: number;  // For Orbit & Drift (break): drift direction X
   driftY: number;  // For Orbit & Drift (break): drift direction Y
   depth: number;  // For Parallax: 0 (far) to 1 (near)
+  wobbleX: number;  // For slowing animation: stable random wobble X
+  wobbleY: number;  // For slowing animation: stable random wobble Y
+  convergenceDelay: number;  // For convergence: stable random delay
+  rotationDirection: number;  // For convergence: 1 or -1 (clockwise/counter-clockwise)
+  rotationSpeed: number;  // For convergence: 0.5-1.5 multiplier
 }
 
 /**
@@ -70,8 +78,62 @@ interface Particle {
  * Each particle has unique duration, delay, and drift via CSS variables.
  * GPU-accelerated via transform and opacity only.
  */
-export function ParticleField({ isActive, isPaused = false, mode = 'work', particleCount = 20, style = 'rise-fall', parallaxEnabled = true, paceMultiplier = 1.0 }: ParticleFieldProps) {
+// Position tracking for convergence animation
+interface TrackedPosition {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+export function ParticleField({
+  isActive,
+  isPaused = false,
+  mode = 'work',
+  particleCount = 20,
+  style = 'rise-fall',
+  parallaxEnabled = true,
+  paceMultiplier = 1.0,
+  isConverging = false,
+  convergenceTarget = null,
+}: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
+
+  // Refs for tracking particle positions
+  const particleRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Tracked positions for slowing/convergence animation
+  const [trackedPositions, setTrackedPositions] = useState<TrackedPosition[]>([]);
+
+  // Track if we've captured positions for slowing/convergence
+  const [hasSnapshotted, setHasSnapshotted] = useState(false);
+
+  // Capture particle positions when convergence animation starts
+  useEffect(() => {
+    // Snapshot when converging starts
+    if (isConverging && convergenceTarget && !hasSnapshotted) {
+      const positions: TrackedPosition[] = [];
+
+      particleRefs.current.forEach((el, index) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          positions[index] = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            scale: 1,
+          };
+        }
+      });
+
+      setTrackedPositions(positions);
+      setHasSnapshotted(true);
+    }
+
+    // Reset snapshot state when not converging
+    if (!isConverging) {
+      setHasSnapshotted(false);
+      setTrackedPositions([]);
+    }
+  }, [isConverging, convergenceTarget, hasSnapshotted]);
 
   // Generate particles with random properties (memoized for stability)
   const particles = useMemo<Particle[]>(() => {
@@ -129,6 +191,13 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
         driftX,
         driftY,
         depth,
+        // Stable random values for slowing/convergence animations
+        wobbleX: (Math.random() - 0.5) * 12,
+        wobbleY: (Math.random() - 0.5) * 12,
+        convergenceDelay: Math.random() * 0.12,
+        // Rotation: random direction and speed for organic feel
+        rotationDirection: Math.random() > 0.5 ? 1 : -1,
+        rotationSpeed: 0.5 + Math.random(),  // 0.5-1.5x
       };
     });
   }, [particleCount, mode, parallaxEnabled, paceMultiplier]);
@@ -153,14 +222,156 @@ export function ParticleField({ isActive, isPaused = false, mode = 'work', parti
   const animationClass = getAnimationClass();
   const usesCenterPosition = style === 'shine-gather' || style === 'orbit-drift';
 
+  // Render converging particles with Framer Motion
+  // Single continuous 5-second animation: slowing (0-40%) → convergence (40-100%)
+  if (isConverging && convergenceTarget && hasSnapshotted && trackedPositions.length > 0) {
+    const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 500;
+    const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
+
+    return (
+      <div
+        className="pointer-events-none fixed inset-0 z-10 overflow-hidden light:opacity-0"
+        aria-hidden="true"
+      >
+        {particles.map((particle, index) => {
+          const startPos = trackedPositions[index];
+          if (!startPos) return null;
+
+          // === PHASE 1: Slowing (0-40% of animation) ===
+          // Calculate gravitational pull toward center
+          const dxCenter = centerX - startPos.x;
+          const dyCenter = centerY - startPos.y;
+          const pullStrength = 0.20 + (particle.depth * 0.1);
+
+          // Position after slowing phase (40% mark)
+          const slowedX = startPos.x + (dxCenter * pullStrength) + particle.wobbleX;
+          const slowedY = startPos.y + (dyCenter * pullStrength) + particle.wobbleY;
+
+          // === PHASE 2: Convergence (40-100% of animation) ===
+          // Calculate curved path from slowed position to target
+          const toTargetX = convergenceTarget.x - slowedX;
+          const toTargetY = convergenceTarget.y - slowedY;
+          const distance = Math.sqrt(toTargetX * toTargetX + toTargetY * toTargetY);
+
+          // Arc control point (perpendicular offset)
+          const curveDirection = slowedX < convergenceTarget.x ? 1 : -1;
+          const curveMagnitude = Math.max(distance * 0.12 * (0.5 + particle.depth * 0.5), 20);
+          const perpX = distance > 0 ? (-toTargetY / distance) * curveMagnitude * curveDirection : 0;
+          const perpY = distance > 0 ? (toTargetX / distance) * curveMagnitude * curveDirection : 0;
+
+          // Arc midpoint (at 70% of the way, for the curve feel)
+          const arcX = slowedX + toTargetX * 0.5 + perpX;
+          const arcY = slowedY + toTargetY * 0.5 + perpY;
+
+          // === TIMING ===
+          const baseScale = particle.depth || 1;
+          // Depth-dependent delay: closer particles arrive slightly earlier
+          const depthDelay = (1 - (particle.depth || 0.5)) * 0.15;
+          const totalDelay = particle.convergenceDelay + depthDelay;
+
+          // === KEYFRAME VALUES ===
+          // Position: start → slowed (with wobble) → arc → target
+          const positionKeyframes = {
+            left: [startPos.x, slowedX, arcX, convergenceTarget.x],
+            top: [startPos.y, slowedY, arcY, convergenceTarget.y],
+          };
+
+          // Scale: breathing during slow, then shrink to target
+          const scaleKeyframes = [
+            baseScale,           // 0%: start
+            baseScale * 0.96,    // 20%: breath in
+            baseScale * 0.88,    // 35%: breath out
+            baseScale * 0.6,     // 70%: shrinking
+            0.15,                // 100%: tiny at target
+          ];
+
+          // Opacity: brighten during journey
+          const opacityKeyframes = [
+            particle.opacity,                    // 0%
+            Math.min(particle.opacity * 1.1, 1), // 40%
+            1,                                   // 70%
+            1,                                   // 100%
+          ];
+
+          // Glow: subtle → intense
+          const glowKeyframes = [
+            `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
+            `0 0 ${particle.size * 2.5}px ${particle.size * 1.2}px rgba(255, 255, 255, 0.4)`,
+            `0 0 ${particle.size * 3}px ${particle.size * 1.5}px rgba(255, 255, 255, 0.6)`,
+            `0 0 ${particle.size * 4}px ${particle.size * 2}px rgba(255, 255, 255, 0.95)`,
+          ];
+
+          // Rotation: gentle wobble → accelerating spin → fast spin at arrival
+          const rotationAmount = 180 * particle.rotationSpeed * particle.rotationDirection;
+          const rotationKeyframes = [
+            0,                           // 0%: start
+            rotationAmount * 0.05,       // 40%: slight wobble during slow phase
+            rotationAmount * 0.4,        // 70%: picking up speed
+            rotationAmount,              // 100%: full rotation at arrival
+          ];
+
+          return (
+            <motion.div
+              key={particle.id}
+              className="rounded-full bg-white fixed will-change-transform"
+              initial={{
+                left: startPos.x,
+                top: startPos.y,
+                x: '-50%',
+                y: '-50%',
+                scale: baseScale,
+                opacity: particle.opacity,
+                rotate: 0,
+                boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
+              }}
+              animate={{
+                left: positionKeyframes.left,
+                top: positionKeyframes.top,
+                x: '-50%',
+                y: '-50%',
+                scale: scaleKeyframes,
+                opacity: opacityKeyframes,
+                rotate: rotationKeyframes,
+                boxShadow: glowKeyframes,
+              }}
+              transition={{
+                duration: 5,
+                ease: [0.4, 0.0, 0.1, 1], // Smooth throughout
+                delay: totalDelay,
+                // Position: slow drift (0-40%), then accelerate to target
+                left: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
+                top: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
+                // Scale: breathing then shrink
+                scale: { duration: 5, times: [0, 0.2, 0.35, 0.7, 1], ease: [0.4, 0.0, 0.1, 1] },
+                // Opacity: gradual brighten
+                opacity: { duration: 5, times: [0, 0.4, 0.7, 1], ease: 'easeOut' },
+                // Rotation: accelerates toward end (like being sucked in)
+                rotate: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.2, 0.0, 0.0, 1] },
+                // Glow: intensifies toward end
+                boxShadow: { duration: 5, times: [0, 0.4, 0.75, 1], ease: 'easeIn' },
+              }}
+              style={{
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                filter: particle.blur > 0 ? `blur(${Math.max(0, particle.blur * 0.5)}px)` : 'none',
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Regular CSS animation mode
   return (
     <div
       className="pointer-events-none fixed inset-0 z-10 overflow-hidden light:opacity-0"
       aria-hidden="true"
     >
-      {particles.map((particle) => (
+      {particles.map((particle, index) => (
         <div
           key={particle.id}
+          ref={(el) => { particleRefs.current[index] = el; }}
           className={`rounded-full bg-white ${animationClass} will-change-[transform,opacity] ${usesCenterPosition ? '' : 'absolute'}`}
           style={{
             // Position based on style
