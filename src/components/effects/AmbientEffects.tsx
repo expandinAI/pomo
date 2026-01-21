@@ -50,10 +50,15 @@ export function AmbientEffects() {
   const particleMode: 'work' | 'break' = visualState === 'break' ? 'break' : 'work';
   const shouldShowBurst = showBurst && visualState === 'completed';
   const isConverging = visualState === 'converging';
+  const isCompleted = visualState === 'completed';
+
+  // Don't show particles during 'completed' state
+  // The convergence animation has finished - particles should not restart
+  const shouldShowParticles = showParticles && !isCompleted;
 
   return (
     <>
-      {showParticles && (
+      {shouldShowParticles && (
         <ParticleField
           isActive={true}
           isPaused={isPaused}

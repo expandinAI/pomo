@@ -97,20 +97,6 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
       aria-label={ariaTimeLabel}
       aria-live="off"
     >
-      {/* Celebration glow effect */}
-      <AnimatePresence>
-        {showCelebration && (
-          <motion.div
-            className="absolute inset-0 bg-accent/20 light:bg-accent-dark/20 blur-3xl"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1.2 }}
-            exit={{ opacity: 0, scale: 1.4 }}
-            transition={{ duration: 0.6 }}
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
-
       {/* Floating timer display (no circle) */}
       <motion.div
         className="relative flex items-center justify-center"
@@ -119,17 +105,13 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
             ? {}
             : justStarted
               ? { scale: [1, 1.03, 1] }
-              : showCelebration
-                ? { scale: [1, 1.02, 1] }
-                : { scale: 1 }
+              : { scale: 1 }
         }
         transition={{ type: 'spring', ...SPRING.gentle }}
       >
         {/* Time display with animated digits and custom colon */}
-        <motion.div
+        <div
           className="timer-display font-mono font-semibold tabular-nums text-timer sm:text-timer-lg text-primary light:text-primary-light flex items-center justify-center"
-          animate={showCelebration && !reducedMotion ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-          transition={{ duration: 0.6, type: 'spring', ...SPRING.gentle }}
         >
           {/* Minutes */}
           {minuteChars.map((char, index) => (
@@ -143,7 +125,7 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
           {secondChars.map((char, index) => (
             <AnimatedDigit key={`s-${index}`} char={char} index={minuteChars.length + index} />
           ))}
-        </motion.div>
+        </div>
       </motion.div>
 
     </div>
