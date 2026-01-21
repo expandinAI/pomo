@@ -32,6 +32,10 @@ const YearViewModal = dynamic(
   () => import('@/components/year-view/YearViewModal').then(mod => ({ default: mod.YearViewModal })),
   { ssr: false }
 );
+const ProjectListModal = dynamic(
+  () => import('@/components/projects/ProjectListModal').then(mod => ({ default: mod.ProjectListModal })),
+  { ssr: false }
+);
 
 export default function Home() {
   // G-prefix navigation callbacks
@@ -53,6 +57,9 @@ export default function Home() {
       },
       onYear: () => {
         window.dispatchEvent(new CustomEvent('particle:open-year'));
+      },
+      onProjects: () => {
+        window.dispatchEvent(new CustomEvent('particle:open-projects'));
       },
     }),
     []
@@ -99,6 +106,9 @@ export default function Home() {
       {/* Year View Modal (opened via G+Y keyboard shortcut) */}
       <YearViewModal />
 
+      {/* Project List Modal (opened via G+P keyboard shortcut) */}
+      <ProjectListModal />
+
       <Timer />
 
       {/* Shortcuts help in bottom-left corner */}
@@ -120,7 +130,7 @@ export default function Home() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/s/h/y/,
+              t/s/h/y/p/,
             </span>
           </motion.div>
         )}
