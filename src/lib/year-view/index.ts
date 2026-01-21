@@ -50,3 +50,6 @@ export {
   calculateYearStreak,
   calculateSummary,
 } from './aggregation';
+
+// Mock data generator (for demo and testing)
+export { generateMockYearData } from './mock-data';

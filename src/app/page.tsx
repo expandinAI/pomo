@@ -28,6 +28,10 @@ const FocusHeatmap = dynamic(
   () => import('@/components/insights/FocusHeatmap').then(mod => ({ default: mod.FocusHeatmap })),
   { ssr: false }
 );
+const YearViewModal = dynamic(
+  () => import('@/components/year-view/YearViewModal').then(mod => ({ default: mod.YearViewModal })),
+  { ssr: false }
+);
 
 export default function Home() {
   // G-prefix navigation callbacks
@@ -46,6 +50,9 @@ export default function Home() {
       },
       onSettings: () => {
         window.dispatchEvent(new CustomEvent('particle:open-settings'));
+      },
+      onYear: () => {
+        window.dispatchEvent(new CustomEvent('particle:open-year'));
       },
     }),
     []
@@ -89,6 +96,9 @@ export default function Home() {
       {/* Statistics Dashboard (opened via G+S keyboard shortcut) */}
       <StatisticsDashboard />
 
+      {/* Year View Modal (opened via G+Y keyboard shortcut) */}
+      <YearViewModal />
+
       <Timer />
 
       {/* Shortcuts help in bottom-left corner */}
@@ -110,7 +120,7 @@ export default function Home() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/s/h/,
+              t/s/h/y/,
             </span>
           </motion.div>
         )}
