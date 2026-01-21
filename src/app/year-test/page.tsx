@@ -6,6 +6,7 @@ import { YearGrid, YearTooltip, YearSummary, YearSelector } from '@/components/y
 import type { YearViewData, YearViewDay } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
 import { useTheme } from '@/hooks/useTheme';
+import { useWeekStart } from '@/hooks/useWeekStart';
 
 // Sample tasks for mock data
 const SAMPLE_TASKS = [
@@ -142,6 +143,7 @@ export default function YearTestPage() {
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
   const [gridAnimationComplete, setGridAnimationComplete] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { weekStartsOnMonday, weekStart, setWeekStart } = useWeekStart();
 
   // Generate mock data for the selected year
   const data: YearViewData = useMemo(() => generateMockYearData(currentYear), [currentYear]);
@@ -205,13 +207,24 @@ export default function YearTestPage() {
           <p className="text-secondary light:text-secondary-light text-sm">
             Use ← → or H / L to navigate years
           </p>
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="px-4 py-2 rounded-lg bg-surface light:bg-surface-light border border-border light:border-border-light text-primary light:text-primary-light hover:bg-border light:hover:bg-border-light transition-colors"
-          >
-            {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-          </button>
+          {/* Settings toggles */}
+          <div className="flex gap-3 justify-center">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="px-4 py-2 rounded-lg bg-surface light:bg-surface-light border border-border light:border-border-light text-primary light:text-primary-light hover:bg-border light:hover:bg-border-light transition-colors"
+            >
+              {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+            </button>
+
+            {/* Week start toggle */}
+            <button
+              onClick={() => setWeekStart(weekStart === 'monday' ? 'sunday' : 'monday')}
+              className="px-4 py-2 rounded-lg bg-surface light:bg-surface-light border border-border light:border-border-light text-primary light:text-primary-light hover:bg-border light:hover:bg-border-light transition-colors"
+            >
+              {weekStartsOnMonday ? '📅 Mo' : '📅 So'}
+            </button>
+          </div>
         </div>
 
         {/* Animated Year Content */}
@@ -229,7 +242,7 @@ export default function YearTestPage() {
             <div className="bg-surface light:bg-surface-light rounded-xl p-6">
               <YearGrid
                 data={data}
-                weekStartsOnMonday={true}
+                weekStartsOnMonday={weekStartsOnMonday}
                 onCellHover={handleCellHover}
                 onCellClick={(cell) => console.log('Clicked:', cell)}
                 onAnimationComplete={handleGridAnimationComplete}

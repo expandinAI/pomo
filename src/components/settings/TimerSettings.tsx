@@ -10,6 +10,7 @@ import { SoundSettings } from './SoundSettings';
 import { AmbientSettings } from './AmbientSettings';
 import { VisualEffectsSettings } from './VisualEffectsSettings';
 import { CustomPresetEditor } from './CustomPresetEditor';
+import { WeekStartSetting } from './WeekStartSetting';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -169,6 +170,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Visual Effects Settings */}
                   <VisualEffectsSettings />
+
+                  {/* Week Start Setting */}
+                  <WeekStartSetting />
                 </div>
 
                 {/* Footer hint */}
