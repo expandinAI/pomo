@@ -140,6 +140,7 @@ export default function YearTestPage() {
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [hoveredCell, setHoveredCell] = useState<GridCell | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+  const [gridAnimationComplete, setGridAnimationComplete] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   // Generate mock data for the selected year
@@ -165,8 +166,14 @@ export default function YearTestPage() {
   const handleYearChange = useCallback((newYear: number) => {
     setDirection(newYear > currentYear ? 'left' : 'right');
     setHoveredCell(null); // Clear hover state when changing years
+    setGridAnimationComplete(false); // Reset animation state for new year
     setCurrentYear(newYear);
   }, [currentYear]);
+
+  // Handle grid animation completion
+  const handleGridAnimationComplete = useCallback(() => {
+    setGridAnimationComplete(true);
+  }, []);
 
   // Animation variants for slide effect
   const slideVariants = {
@@ -225,11 +232,18 @@ export default function YearTestPage() {
                 weekStartsOnMonday={true}
                 onCellHover={handleCellHover}
                 onCellClick={(cell) => console.log('Clicked:', cell)}
+                onAnimationComplete={handleGridAnimationComplete}
               />
             </div>
 
-            {/* Year Summary Stats */}
-            <YearSummary summary={data.summary} />
+            {/* Year Summary Stats - fades in after grid animation */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={gridAnimationComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              <YearSummary summary={data.summary} />
+            </motion.div>
           </motion.div>
         </AnimatePresence>
 

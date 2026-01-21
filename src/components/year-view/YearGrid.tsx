@@ -1,11 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import type { YearViewData } from '@/lib/year-view';
 import { generateYearGrid, type GridCell, type YearGridData } from '@/lib/year-view/grid';
 import { YearGridCell } from './YearGridCell';
 import { prefersReducedMotion } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
+
+// Animation timing constants
+const STAGGER_DELAY = 0.012; // 12ms between columns
+const CELL_ANIMATION_DURATION = 0.15; // 150ms per cell
+const INITIAL_DELAY = 0.1; // 100ms initial delay
 
 interface YearGridProps {
   /** Year view data with all days and statistics */
@@ -16,6 +21,8 @@ interface YearGridProps {
   onCellHover?: (cell: GridCell | null, rect: DOMRect | null) => void;
   /** Callback when clicking a cell */
   onCellClick?: (cell: GridCell) => void;
+  /** Callback when the wave animation completes */
+  onAnimationComplete?: () => void;
 }
 
 // Weekday labels (Monday-first)
@@ -46,16 +53,46 @@ export function YearGrid({
   weekStartsOnMonday = true,
   onCellHover,
   onCellClick,
+  onAnimationComplete,
 }: YearGridProps) {
   const reducedMotion = prefersReducedMotion();
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
+  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate grid data (expensive, memoize)
   const gridData: YearGridData = useMemo(
     () => generateYearGrid(data, weekStartsOnMonday),
     [data, weekStartsOnMonday]
   );
+
+  // Calculate total animation duration and trigger completion callback
+  useEffect(() => {
+    if (reducedMotion) {
+      // No animation, call immediately
+      onAnimationComplete?.();
+      return;
+    }
+
+    // Clear any existing timer
+    if (animationTimerRef.current) {
+      clearTimeout(animationTimerRef.current);
+    }
+
+    // Total duration: initial delay + (total weeks * stagger) + cell animation duration
+    // ~53 weeks * 12ms = 636ms + 100ms initial + 150ms last cell = ~886ms
+    const totalDuration = (INITIAL_DELAY + gridData.totalWeeks * STAGGER_DELAY + CELL_ANIMATION_DURATION) * 1000;
+
+    animationTimerRef.current = setTimeout(() => {
+      onAnimationComplete?.();
+    }, totalDuration);
+
+    return () => {
+      if (animationTimerRef.current) {
+        clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, [data.year, reducedMotion, gridData.totalWeeks, onAnimationComplete]);
 
   const weekdayLabels = weekStartsOnMonday
     ? WEEKDAY_LABELS_MONDAY
@@ -131,7 +168,7 @@ export function YearGrid({
                     key={`cell-${dayIndex}-${weekIndex}`}
                     cell={cell}
                     reducedMotion={reducedMotion}
-                    animationDelay={reducedMotion ? 0 : weekIndex * 0.01}
+                    animationDelay={reducedMotion ? 0 : INITIAL_DELAY + weekIndex * STAGGER_DELAY}
                     isDarkMode={isDarkMode}
                     onHover={onCellHover}
                     onClick={onCellClick}

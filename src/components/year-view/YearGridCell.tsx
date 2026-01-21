@@ -67,6 +67,24 @@ export function YearGridCell({
       : { boxShadow: '0 0 8px rgba(0, 0, 0, 0.4)' }
     : {};
 
+  // Wave animation: scale + opacity for dramatic reveal
+  const initialAnimation = reducedMotion
+    ? { opacity: 1, scale: 1 }
+    : { opacity: 0, scale: 0.6 };
+
+  const targetAnimation = {
+    opacity: isFuture ? 0.3 : 1,
+    scale: 1,
+  };
+
+  const transitionConfig = reducedMotion
+    ? { duration: 0 }
+    : {
+        duration: 0.15,
+        delay: animationDelay,
+        ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
+      };
+
   return (
     <motion.div
       role="gridcell"
@@ -76,16 +94,12 @@ export function YearGridCell({
       className="w-3 h-3 rounded-sm cursor-pointer"
       style={{
         backgroundColor,
-        opacity: isFuture ? 0.3 : 1,
         ...peakGlowStyle,
+        willChange: 'opacity, transform',
       }}
-      initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
-      animate={{ opacity: isFuture ? 0.3 : 1 }}
-      transition={
-        reducedMotion
-          ? { duration: 0 }
-          : { duration: 0.2, delay: animationDelay }
-      }
+      initial={initialAnimation}
+      animate={targetAnimation}
+      transition={transitionConfig}
       whileHover={
         reducedMotion
           ? {}
