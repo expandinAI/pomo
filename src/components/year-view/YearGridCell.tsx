@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import type { GridCell } from '@/lib/year-view/grid';
+import { cn } from '@/lib/utils';
 
 interface YearGridCellProps {
   cell: GridCell;
@@ -60,13 +61,6 @@ export function YearGridCell({
     ? `rgba(255, 255, 255, ${brightness})`
     : `rgba(0, 0, 0, ${brightness})`;
 
-  // Peak day glow effect
-  const peakGlowStyle = isPeakDay
-    ? isDarkMode
-      ? { boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)' }
-      : { boxShadow: '0 0 8px rgba(0, 0, 0, 0.4)' }
-    : {};
-
   // Wave animation: scale + opacity for dramatic reveal
   const initialAnimation = reducedMotion
     ? { opacity: 1, scale: 1 }
@@ -85,16 +79,23 @@ export function YearGridCell({
         ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
       };
 
+  // Peak day gets larger hover scale
+  const hoverScale = isPeakDay ? 1.4 : 1.3;
+
   return (
     <motion.div
       role="gridcell"
       aria-label={ariaLabel}
       aria-current={isPeakDay ? 'true' : undefined}
       title={tooltipText}
-      className="w-3 h-3 rounded-sm cursor-pointer"
+      className={cn(
+        'w-3 h-3 rounded-sm cursor-pointer',
+        isPeakDay && !reducedMotion && 'year-grid-peak-day',
+        isPeakDay && reducedMotion && 'year-grid-peak-day-static',
+        isDarkMode ? 'year-grid-cell-dark' : 'year-grid-cell-light'
+      )}
       style={{
         backgroundColor,
-        ...peakGlowStyle,
         willChange: 'opacity, transform',
       }}
       initial={initialAnimation}
@@ -103,7 +104,7 @@ export function YearGridCell({
       whileHover={
         reducedMotion
           ? {}
-          : { scale: 1.3, transition: { type: 'spring', ...SPRING.snappy } }
+          : { scale: hoverScale, transition: { type: 'spring', ...SPRING.snappy } }
       }
       onMouseEnter={(e) => onHover?.(cell, e.currentTarget.getBoundingClientRect())}
       onMouseLeave={() => onHover?.(null, null)}

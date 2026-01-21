@@ -334,4 +334,63 @@
     animation-delay: var(--particle-delay, 0s);
     will-change: transform, opacity;
   }
+
+  /* Year Grid - Peak Day Pulsing Glow Animation */
+  @keyframes peakGlow {
+    0%, 100% {
+      box-shadow:
+        0 0 4px rgba(255, 255, 255, 0.4),
+        0 0 8px rgba(255, 255, 255, 0.2);
+    }
+    50% {
+      box-shadow:
+        0 0 8px rgba(255, 255, 255, 0.6),
+        0 0 16px rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  @keyframes peakGlowLight {
+    0%, 100% {
+      box-shadow:
+        0 0 4px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(0, 0, 0, 0.15);
+    }
+    50% {
+      box-shadow:
+        0 0 8px rgba(0, 0, 0, 0.5),
+        0 0 16px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  /* Dark mode peak day - animated glow */
+  .year-grid-peak-day.year-grid-cell-dark {
+    animation: peakGlow 3s ease-in-out infinite;
+  }
+
+  /* Light mode peak day - animated glow */
+  .year-grid-peak-day.year-grid-cell-light {
+    animation: peakGlowLight 3s ease-in-out infinite;
+  }
+
+  /* Reduced motion: static glow without animation */
+  .year-grid-peak-day-static.year-grid-cell-dark {
+    box-shadow:
+      0 0 6px rgba(255, 255, 255, 0.5),
+      0 0 12px rgba(255, 255, 255, 0.25);
+  }
+
+  .year-grid-peak-day-static.year-grid-cell-light {
+    box-shadow:
+      0 0 6px rgba(0, 0, 0, 0.4),
+      0 0 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Base cell styles for hover effects */
+  .year-grid-cell-dark:hover {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  }
+
+  .year-grid-cell-light:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  }
 }
