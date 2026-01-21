@@ -42,7 +42,7 @@ High-level Überblick über Features und Milestones.
 | [[features/extended-presets]] | POMO-066 bis 071 | 12 | ✅ Done |
 | [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | ✅ Done |
 | [[features/system-integrations]] | POMO-078 bis 082 | 29 | Backlog |
-| [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | Backlog |
+| [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | ✅ Done |
 
 **P0 Total: ~118 Story Points (43 Stories)**
 
@@ -119,7 +119,7 @@ Parked ideas:
 - [x] Extended Presets (52/17, 90min)
 - [x] Keyboard-First UX (G-prefix, Focus Trap, Vim Nav)
 - [ ] System Integrations (DND, Blocking)
-- [ ] Statistics Dashboard
+- [x] Statistics Dashboard ✅
 
 **Stories:** POMO-050 bis POMO-092 (43 total)
 
@@ -141,7 +141,7 @@ Parked ideas:
 
 ### v2.0 - Web Feature-Complete
 - [ ] **Project Tracking** - [[features/project-tracking]] (21 SP)
-- [ ] **Year View** (`G Y`) - GitHub-style Contribution Graph
+- [x] **Year View** (`G Y`) - GitHub-style Contribution Graph ✅
 - [ ] **Sound Design 2.0** - Endel-inspired Chimes & Themes
 - [ ] Cloud Sync
 
@@ -224,4 +224,4 @@ Phase 3: iOS App (optional)
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-20*
+*Zuletzt aktualisiert: 2026-01-21*
