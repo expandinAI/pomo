@@ -27,6 +27,8 @@ import { formatTime } from '@/lib/utils';
 import { addSession } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
 import { QuickTaskInput } from '@/components/task';
+import { ProjectSelector } from '@/components/projects';
+import { useProjects } from '@/hooks/useProjects';
 
 interface TimerState {
   mode: SessionType;
@@ -212,6 +214,9 @@ export function Timer() {
   const durationsRef = useRef(durations);
   durationsRef.current = durations;
 
+  // Ref for selectedProjectId (to use in callbacks)
+  const selectedProjectIdRef = useRef<string | null>(null);
+
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
 
@@ -253,6 +258,20 @@ export function Timer() {
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
+  // Projects
+  const {
+    activeProjects,
+    selectedProjectId,
+    selectProject,
+    recentProjectIds,
+    isLoading: projectsLoading,
+  } = useProjects();
+
+  // Keep ref in sync with selectedProjectId
+  useEffect(() => {
+    selectedProjectIdRef.current = selectedProjectId;
+  }, [selectedProjectId]);
+
   // Sync durations when settings load or change
   useEffect(() => {
     if (isLoaded) {
@@ -271,11 +290,12 @@ export function Timer() {
     const sessionDuration = durationsRef.current[sessionMode];
     const wasWorkSession = sessionMode === 'work';
 
-    // Save completed session to history with task data and preset info
+    // Save completed session to history with task data, preset info, and project
     const taskData = {
       ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
       ...(wasWorkSession && state.estimatedPomodoros && { estimatedPomodoros: state.estimatedPomodoros }),
       presetId: activePresetIdRef.current,
+      ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
     };
 
     addSession(sessionMode, sessionDuration, taskData);
@@ -476,6 +496,7 @@ export function Timer() {
       const taskData = {
         ...(isWorkSession && state.currentTask && { task: state.currentTask }),
         presetId: activePresetIdRef.current,
+        ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
       };
 
       // Save ACTUAL elapsed time, not full duration
@@ -731,6 +752,17 @@ export function Timer() {
           disabled={state.isRunning}
           onEnter={handleTaskEnter}
           inputRef={taskInputRef}
+        />
+      )}
+
+      {/* Project selector (only for work sessions and when projects exist or can be created) */}
+      {state.mode === 'work' && !projectsLoading && (
+        <ProjectSelector
+          projects={activeProjects}
+          selectedProjectId={selectedProjectId}
+          onSelect={selectProject}
+          recentProjectIds={recentProjectIds}
+          disabled={false}
         />
       )}
 
