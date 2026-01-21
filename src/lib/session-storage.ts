@@ -8,6 +8,7 @@ export interface CompletedSession {
   task?: string; // Task description
   estimatedPomodoros?: number; // 1-4+ pomodoros
   presetId?: string; // ID of the preset used for this session
+  projectId?: string; // Optional project assignment
 }
 
 const STORAGE_KEY = 'particle_session_history';
@@ -51,6 +52,7 @@ export interface TaskData {
   task?: string;
   estimatedPomodoros?: number;
   presetId?: string;
+  projectId?: string;
 }
 
 export function addSession(
@@ -66,6 +68,7 @@ export function addSession(
     ...(taskData?.task && { task: taskData.task }),
     ...(taskData?.estimatedPomodoros && { estimatedPomodoros: taskData.estimatedPomodoros }),
     ...(taskData?.presetId && { presetId: taskData.presetId }),
+    ...(taskData?.projectId && { projectId: taskData.projectId }),
   };
 
   const sessions = loadSessions();
