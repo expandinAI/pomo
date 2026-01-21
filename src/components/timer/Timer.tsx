@@ -26,8 +26,7 @@ import { TAB_TITLES } from '@/lib/constants';
 import { formatTime } from '@/lib/utils';
 import { addSession } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
-import { QuickTaskInput } from '@/components/task';
-import { ProjectSelector } from '@/components/projects';
+import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 
 interface TimerState {
@@ -39,7 +38,6 @@ interface TimerState {
   showCelebration: boolean;
   showSkipMessage: boolean;
   currentTask: string;
-  estimatedPomodoros: number | null;
 }
 
 type TimerAction =
@@ -55,7 +53,6 @@ type TimerAction =
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
   | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations }
   | { type: 'SET_TASK'; task: string }
-  | { type: 'SET_ESTIMATE'; estimate: number | null }
   | { type: 'CLEAR_TASK' };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
@@ -166,11 +163,8 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     case 'SET_TASK':
       return { ...state, currentTask: action.task };
 
-    case 'SET_ESTIMATE':
-      return { ...state, estimatedPomodoros: action.estimate };
-
     case 'CLEAR_TASK':
-      return { ...state, currentTask: '', estimatedPomodoros: null };
+      return { ...state, currentTask: '' };
 
     default:
       return state;
@@ -193,7 +187,6 @@ const initialState: TimerState = {
   showCelebration: false,
   showSkipMessage: false,
   currentTask: '',
-  estimatedPomodoros: null,
 };
 
 export function Timer() {
@@ -293,7 +286,6 @@ export function Timer() {
     // Save completed session to history with task data, preset info, and project
     const taskData = {
       ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
-      ...(wasWorkSession && state.estimatedPomodoros && { estimatedPomodoros: state.estimatedPomodoros }),
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
     };
@@ -305,7 +297,6 @@ export function Timer() {
       addRecentTask({
         text: state.currentTask,
         lastUsed: new Date().toISOString(),
-        estimatedPomodoros: state.estimatedPomodoros ?? undefined,
       });
     }
 
@@ -322,7 +313,7 @@ export function Timer() {
 
     // Play sound on completion
     playSound(wasWorkSession ? 'completion' : 'break');
-  }, [playSound, state.mode, state.currentTask, state.estimatedPomodoros, vibrate]);
+  }, [playSound, state.mode, state.currentTask, vibrate]);
 
   // Initialize Web Worker timer
   const {
@@ -620,7 +611,8 @@ export function Timer() {
         // Task input focus (only when idle and in work mode)
         case 't':
         case 'T':
-          if (!state.isRunning && state.mode === 'work') {
+          // Always allow focusing task input in work mode
+          if (state.mode === 'work') {
             e.preventDefault();
             taskInputRef.current?.focus();
           }
@@ -663,10 +655,6 @@ export function Timer() {
   // Task handlers
   const handleTaskChange = useCallback((task: string) => {
     dispatch({ type: 'SET_TASK', task });
-  }, []);
-
-  const handleEstimateChange = useCallback((estimate: number | null) => {
-    dispatch({ type: 'SET_ESTIMATE', estimate });
   }, []);
 
   // Start session when pressing Enter in task input
@@ -742,27 +730,18 @@ export function Timer() {
         )}
       </AnimatePresence>
 
-      {/* Task input (only for work sessions) */}
-      {state.mode === 'work' && (
-        <QuickTaskInput
-          value={state.currentTask}
-          onChange={handleTaskChange}
-          estimatedPomodoros={state.estimatedPomodoros}
-          onEstimateChange={handleEstimateChange}
-          disabled={state.isRunning}
-          onEnter={handleTaskEnter}
-          inputRef={taskInputRef}
-        />
-      )}
-
-      {/* Project selector (only for work sessions and when projects exist or can be created) */}
+      {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (
-        <ProjectSelector
+        <UnifiedTaskInput
+          taskText={state.currentTask}
+          onTaskChange={handleTaskChange}
+          onEnter={handleTaskEnter}
+          projectId={selectedProjectId}
+          onProjectSelect={selectProject}
           projects={activeProjects}
-          selectedProjectId={selectedProjectId}
-          onSelect={selectProject}
           recentProjectIds={recentProjectIds}
           disabled={false}
+          inputRef={taskInputRef}
         />
       )}
 
