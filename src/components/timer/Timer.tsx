@@ -423,14 +423,15 @@ export function Timer() {
       setVisualState('converging');
       setConvergenceTarget(nextSlotPosition);
 
-      // Start glow effect at ~0.5s before arrival (4.5s into the animation)
+      // Start glow effect and collect sound at ~0.5s before arrival (4.5s into the animation)
       const glowTimeout = setTimeout(() => {
         setShowSlotGlow(true);
+        playSound('collect');
       }, 4500);
 
       return () => clearTimeout(glowTimeout);
     }
-  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget]);
+  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget, playSound]);
 
   // Handle tab visibility change during slowing/convergence
   useEffect(() => {

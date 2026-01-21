@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break';
+type SoundType = 'completion' | 'break' | 'collect';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -468,6 +468,58 @@ function playBreakChimeWithDest(ctx: AudioContext, dest: AudioNode): void {
   oscillator.stop(now + 0.3);
 }
 
+/**
+ * Collect: Crystalline shimmer for particle arrival
+ * Short, satisfying "sparkle" sound when particles converge to slot
+ */
+function playCollectSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+  const duration = 0.25;
+
+  // Rising shimmer: multiple quick ascending tones
+  const frequencies = [1200, 1600, 2000, 2400]; // High crystalline tones
+  const delays = [0, 0.03, 0.06, 0.08]; // Staggered for sparkle effect
+
+  frequencies.forEach((freq, index) => {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = 'sine';
+    // Slight upward pitch bend for "collecting" feel
+    oscillator.frequency.setValueAtTime(freq * 0.9, now + delays[index]);
+    oscillator.frequency.exponentialRampToValueAtTime(freq, now + delays[index] + 0.05);
+
+    const volume = 0.06 / (index * 0.5 + 1); // Decreasing volume for higher tones
+    gainNode.gain.setValueAtTime(0, now + delays[index]);
+    gainNode.gain.linearRampToValueAtTime(volume, now + delays[index] + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + delays[index] + duration * 0.8);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(dest);
+
+    oscillator.start(now + delays[index]);
+    oscillator.stop(now + delays[index] + duration);
+  });
+
+  // Add subtle low "thump" for weight/impact
+  const thump = ctx.createOscillator();
+  const thumpGain = ctx.createGain();
+
+  thump.type = 'sine';
+  thump.frequency.setValueAtTime(200, now);
+  thump.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+
+  thumpGain.gain.setValueAtTime(0, now);
+  thumpGain.gain.linearRampToValueAtTime(0.08, now + 0.01);
+  thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+  thump.connect(thumpGain);
+  thumpGain.connect(dest);
+
+  thump.start(now);
+  thump.stop(now + 0.15);
+}
+
 const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: AudioNode) => void> = {
   default: playDefaultChimeWithDest,
   soft: playSoftChimeWithDest,
@@ -536,6 +588,8 @@ export function useSound(): UseSoundReturn {
     const doPlay = () => {
       if (type === 'break') {
         playSoundWithVolume(ctx, playBreakChimeWithDest, volume);
+      } else if (type === 'collect') {
+        playSoundWithVolume(ctx, playCollectSoundWithDest, volume);
       } else {
         playSound(selectedSound, volume);
       }
