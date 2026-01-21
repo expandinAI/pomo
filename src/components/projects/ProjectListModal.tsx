@@ -120,8 +120,18 @@ export function ProjectListModal() {
       refresh();
     }
 
+    function handleNewProject() {
+      setIsOpen(true);
+      setShowCreateForm(true);
+      refresh();
+    }
+
     window.addEventListener('particle:open-projects', handleOpen);
-    return () => window.removeEventListener('particle:open-projects', handleOpen);
+    window.addEventListener('particle:new-project', handleNewProject);
+    return () => {
+      window.removeEventListener('particle:open-projects', handleOpen);
+      window.removeEventListener('particle:new-project', handleNewProject);
+    };
   }, [refresh]);
 
   // Open project detail directly via event (from Stats Dashboard)

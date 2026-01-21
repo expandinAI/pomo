@@ -16,9 +16,10 @@ const CATEGORY_LABELS: Record<CommandCategory, string> = {
   presets: 'Presets',
   navigation: 'Navigation',
   settings: 'Settings',
+  projects: 'Projects',
 };
 
-const CATEGORY_ORDER: CommandCategory[] = ['timer', 'presets', 'navigation', 'settings'];
+const CATEGORY_ORDER: CommandCategory[] = ['timer', 'presets', 'projects', 'navigation', 'settings'];
 
 export function CommandList({
   commands,
@@ -43,6 +44,7 @@ export function CommandList({
     presets: [],
     navigation: [],
     settings: [],
+    projects: [],
   };
 
   commands.forEach((cmd) => {

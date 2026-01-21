@@ -105,16 +105,16 @@ export function YearGrid({
   }, [data]);
 
   return (
-    <div className="overflow-x-auto flex justify-center">
+    <div className="overflow-x-auto px-2">
       <div
         role="grid"
         aria-label={ariaLabel}
-        className="inline-block"
+        className="w-fit mx-auto"
       >
         {/* Month labels row */}
         <div className="flex mb-2" aria-hidden="true">
           {/* Empty cell for weekday labels column */}
-          <div className="w-6 flex-shrink-0" />
+          <div className="w-7 flex-shrink-0" />
           {/* Month labels positioned absolutely within relative container */}
           <div
             className="relative h-3"
@@ -141,7 +141,7 @@ export function YearGrid({
           <div key={`day-${dayIndex}`} className="flex mb-[3px]" role="row">
             {/* Weekday label */}
             <div
-              className="w-6 flex-shrink-0 flex items-center"
+              className="w-7 flex-shrink-0 flex items-center"
               aria-hidden="true"
             >
               <span className="text-[10px] text-tertiary light:text-tertiary-dark font-medium">

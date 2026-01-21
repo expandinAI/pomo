@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 2
 feature: project-tracking
 created: 2026-01-20
-updated: 2026-01-20
-done_date: null
+updated: 2026-01-21
+done_date: 2026-01-21
 tags: [projects, shortcuts, keyboard, p0]
 ---
 
@@ -240,8 +240,20 @@ const projectShortcuts = [
 
 ## Arbeitsverlauf
 
-### Gestartet:
-<!-- Claude: Notiere hier was du tust -->
+### Gestartet: 2026-01-21
 
-### Erledigt:
-<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->
+### Erledigt: 2026-01-21
+
+**Befund:** Die meisten Shortcuts waren bereits in vorherigen Stories implementiert:
+- P, P1-9, P0: ProjectSelector (POMO-102)
+- N, J/K, Enter, E, A, Escape: ProjectListModal (POMO-103)
+- E, Escape/Backspace: ProjectDetailModal (POMO-104)
+- Cmd+Enter, Escape: ProjectForm (POMO-101)
+- G P: useGPrefixNavigation (POMO-103)
+
+**Implementiert:**
+- 'projects' Kategorie zum Shortcuts-Registry hinzugefügt
+- Alle Project Shortcuts im Help Modal (?) dokumentiert
+- G P und G Y zu Navigation-Shortcuts hinzugefügt
+
+**Commit:** `d89c87a` - feat(shortcuts): Add Project shortcuts to Help Modal (POMO-106)

@@ -77,6 +77,30 @@ export function getDayOfWeekIndex(date: Date, weekStartsOnMonday: boolean): numb
 }
 
 /**
+ * Cumulative days before each month (non-leap year)
+ */
+const DAYS_BEFORE_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+
+/**
+ * Get day of year (0-indexed, Jan 1 = 0)
+ * Uses calendar math instead of timestamps to avoid DST issues
+ */
+function getDayOfYear(date: Date): number {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const dayOfMonth = date.getDate();
+
+  let dayOfYear = DAYS_BEFORE_MONTH[month] + dayOfMonth - 1;
+
+  // Add 1 for leap years after February
+  if (month > 1 && isLeapYear(year)) {
+    dayOfYear++;
+  }
+
+  return dayOfYear;
+}
+
+/**
  * Get the week of year index for a date
  *
  * Week 0 is the partial week containing Jan 1.
@@ -95,10 +119,8 @@ export function getWeekOfYear(
   const jan1 = new Date(year, 0, 1);
   const jan1DayIndex = getDayOfWeekIndex(jan1, weekStartsOnMonday);
 
-  // Days since Jan 1
-  const dayOfYear = Math.floor(
-    (date.getTime() - jan1.getTime()) / (24 * 60 * 60 * 1000)
-  );
+  // Use calendar-based day calculation (immune to DST issues)
+  const dayOfYear = getDayOfYear(date);
 
   // Add the day offset from Jan 1's position in its week
   return Math.floor((dayOfYear + jan1DayIndex) / 7);

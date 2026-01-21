@@ -5,7 +5,7 @@
 
 import type { ReactNode } from 'react';
 
-export type CommandCategory = 'timer' | 'navigation' | 'settings' | 'presets';
+export type CommandCategory = 'timer' | 'navigation' | 'settings' | 'presets' | 'projects';
 
 export interface Command {
   id: string;
@@ -99,6 +99,7 @@ export function getCommandsByCategory(): Record<CommandCategory, Command[]> {
     navigation: [],
     settings: [],
     presets: [],
+    projects: [],
   };
 
   commands.forEach((command) => {

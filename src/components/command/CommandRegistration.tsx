@@ -12,6 +12,9 @@ import {
   Volume2,
   Timer,
   Clock,
+  FolderKanban,
+  Plus,
+  Repeat,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -157,6 +160,41 @@ export function CommandRegistration({
         action: onOpenSettings,
         icon: <Settings className="w-4 h-4" />,
         keywords: ['preferences', 'config', 'options'],
+      },
+      {
+        id: 'go-to-projects',
+        label: 'Go to Projects',
+        shortcut: 'G P',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-projects'));
+        },
+        icon: <FolderKanban className="w-4 h-4" />,
+        keywords: ['projects', 'list', 'view', 'manage'],
+      },
+
+      // Project commands
+      {
+        id: 'new-project',
+        label: 'New Project',
+        shortcut: 'N',
+        category: 'projects',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:new-project'));
+        },
+        icon: <Plus className="w-4 h-4" />,
+        keywords: ['create', 'add', 'new', 'project'],
+      },
+      {
+        id: 'switch-project',
+        label: 'Switch Project',
+        shortcut: 'P',
+        category: 'projects',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:toggle-project-selector'));
+        },
+        icon: <Repeat className="w-4 h-4" />,
+        keywords: ['change', 'select', 'switch', 'project'],
       },
     ];
 

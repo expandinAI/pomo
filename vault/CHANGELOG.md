@@ -7,6 +7,18 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Project Tracking (POMO-100 bis POMO-107, 16 SP)**:
+  - Projekt-Datenmodell mit ID, Name, Brightness, Archiv-Status
+  - CRUD-Operationen für Projekte (Erstellen, Bearbeiten, Archivieren, Wiederherstellen)
+  - ProjectSelector Dropdown im Timer mit P-Shortcut und P 0-9 Quick Selection
+  - ProjectListModal (G P) mit J/K Navigation, E/A für Edit/Archive
+  - ProjectDetailModal mit Partikel-Visualisierung, Stats-Cards und Session-Liste
+  - Project Breakdown im Statistics Dashboard mit Zeit-Range-Filter
+  - Klickbare Projekte navigieren von Stats zu Project Detail
+  - Keyboard Shortcuts im Help Modal dokumentiert (Projects Kategorie)
+  - Command Palette Integration: New Project, Go to Projects, Switch Project
+  - Brightness-basierte visuelle Unterscheidung der Projekte
+  - "No Project" Kategorie für unzugeordnete Partikel
 - **Particle Animation Modes (STORY-PARTICLE-ANIMATION-MODES, 8 SP)**:
   - Drei wählbare Partikel-Animationsstile
   - Rise & Fall: Vertikale Bewegung (Aufstieg/Sinken)

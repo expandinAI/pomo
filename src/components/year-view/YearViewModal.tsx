@@ -229,7 +229,7 @@ export function YearViewModal() {
                       transition={{ duration: 0.25, ease: 'easeInOut' }}
                     >
                       {/* Year Grid */}
-                      <div className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-4 mb-4">
+                      <div className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-6 mb-4">
                         <YearGrid
                           data={data}
                           weekStartsOnMonday={weekStartsOnMonday}

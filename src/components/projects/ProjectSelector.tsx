@@ -222,6 +222,21 @@ export function ProjectSelector({
     }
   }, [isOpen, highlightedIndex]);
 
+  // Listen for event to open selector (from Command Palette)
+  useEffect(() => {
+    function handleToggle() {
+      if (!disabled) {
+        setIsOpen((prev) => !prev);
+        if (!isOpen) {
+          setHighlightedIndex(0);
+        }
+      }
+    }
+
+    window.addEventListener('particle:toggle-project-selector', handleToggle);
+    return () => window.removeEventListener('particle:toggle-project-selector', handleToggle);
+  }, [disabled, isOpen]);
+
   return (
     <div ref={containerRef} className="relative w-full">
       {/* Trigger Button */}
@@ -229,12 +244,14 @@ export function ProjectSelector({
         onClick={() => (isOpen ? handleClose() : handleOpen())}
         disabled={disabled}
         className={`
-          w-full flex items-center justify-between gap-2 px-4 py-2.5
+          relative z-20 w-full flex items-center justify-between gap-2 px-4 py-3
           rounded-xl text-sm text-left
-          bg-tertiary/5 light:bg-tertiary-dark/5
-          border border-tertiary/10 light:border-tertiary-dark/10
+          bg-surface/70 light:bg-surface-dark/70
+          backdrop-blur-md
+          border border-white/[0.08] light:border-black/[0.05]
+          shadow-lg
           transition-colors
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface/80 light:hover:bg-surface-dark/80'}
           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent
         `}
         aria-haspopup="listbox"

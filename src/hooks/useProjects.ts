@@ -109,6 +109,16 @@ export function useProjects(): UseProjectsReturn {
     setIsLoading(false);
   }, []);
 
+  // Listen for project changes from other hook instances
+  useEffect(() => {
+    function handleProjectsChanged() {
+      setProjects(loadProjects());
+    }
+
+    window.addEventListener('particle:projects-changed', handleProjectsChanged);
+    return () => window.removeEventListener('particle:projects-changed', handleProjectsChanged);
+  }, []);
+
   // Refresh projects from storage
   const refresh = useCallback(() => {
     setProjects(loadProjects());
@@ -146,20 +156,27 @@ export function useProjects(): UseProjectsReturn {
     }
   }, []);
 
+  // Notify other hook instances of changes
+  const notifyChange = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('particle:projects-changed'));
+  }, []);
+
   // CRUD operations
   const create = useCallback((data: CreateProjectData): Project => {
     const project = createProject(data);
     refresh();
+    notifyChange();
     return project;
-  }, [refresh]);
+  }, [refresh, notifyChange]);
 
   const update = useCallback((id: string, data: UpdateProjectData): Project | null => {
     const project = updateProject(id, data);
     if (project) {
       refresh();
+      notifyChange();
     }
     return project;
-  }, [refresh]);
+  }, [refresh, notifyChange]);
 
   const archive = useCallback((id: string): Project | null => {
     const project = archiveProject(id);
@@ -169,17 +186,19 @@ export function useProjects(): UseProjectsReturn {
         selectProject(null);
       }
       refresh();
+      notifyChange();
     }
     return project;
-  }, [refresh, selectedProjectId, selectProject]);
+  }, [refresh, notifyChange, selectedProjectId, selectProject]);
 
   const restore = useCallback((id: string): Project | null => {
     const project = restoreProject(id);
     if (project) {
       refresh();
+      notifyChange();
     }
     return project;
-  }, [refresh]);
+  }, [refresh, notifyChange]);
 
   const getById = useCallback((id: string): Project | null => {
     return getProject(id);
