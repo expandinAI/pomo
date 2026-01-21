@@ -21,8 +21,21 @@ export type {
   DayAggregation,
 } from './types';
 
+// Grid types
+export type {
+  GridCell,
+  MonthLabel,
+  YearGridData,
+} from './grid';
+
 // Main API
 export { getYearViewData, hasDataForYear } from './data';
+
+// Grid API
+export { generateYearGrid, getDayOfWeekIndex, getWeekOfYear } from './grid';
+
+// Brightness API
+export { calculateBrightness } from './brightness';
 
 // Utilities (exported for testing and advanced use cases)
 export {
