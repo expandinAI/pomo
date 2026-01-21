@@ -231,8 +231,8 @@ export function Timer() {
     presets: ambientPresets,
   } = useAmbientSoundContext();
 
-  // Sound settings for mute toggle
-  const { toggleMute, muted } = useSoundSettings();
+  // Sound settings for mute toggle and collect sound
+  const { toggleMute, muted, collectSoundEnabled } = useSoundSettings();
 
   // Wake lock to prevent screen from sleeping during active sessions
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
@@ -413,35 +413,37 @@ export function Timer() {
     }
   }, [state.isRunning, requestWakeLock, releaseWakeLock]);
 
-  // Convergence animation trigger at 5 seconds remaining (work sessions only)
-  // Single continuous animation: slowing (2s) → convergence (3s) = 5s total
+  // Convergence animation trigger at 3 seconds remaining (work sessions only)
+  // Single continuous 3-second animation: slowing → convergence
   useEffect(() => {
     // Only trigger for work sessions when running
     if (!state.isRunning || state.mode !== 'work') {
       return;
     }
 
-    // Refresh slot position at 6 seconds (before animation starts)
-    if (state.timeRemaining === 6 && !slowingTriggeredRef.current && !document.hidden) {
+    // Refresh slot position at 4 seconds (before animation starts)
+    if (state.timeRemaining === 4 && !slowingTriggeredRef.current && !document.hidden) {
       setRefreshPositionTrigger(prev => prev + 1);
     }
 
-    // Start the complete animation at 5 seconds
+    // Start the complete animation at 3 seconds
     // Skip if document is hidden (tab not visible) - animation wouldn't be seen anyway
-    if (state.timeRemaining === 5 && !convergenceTriggeredRef.current && nextSlotPosition && !document.hidden) {
+    if (state.timeRemaining === 3 && !convergenceTriggeredRef.current && nextSlotPosition && !document.hidden) {
       convergenceTriggeredRef.current = true;
       slowingTriggeredRef.current = true;
       setVisualState('converging');
       setConvergenceTarget(nextSlotPosition);
 
-      // Start glow effect and collect sound at ~0.5s before arrival (4.5s into the animation)
+      // Start glow effect and collect sound at ~0.3s before arrival (2.7s into 3s animation)
       // Store in ref to prevent cleanup from canceling it when timeRemaining changes
       glowTimeoutRef.current = setTimeout(() => {
         setShowSlotGlow(true);
-        playSound('collect');
-      }, 4500);
+        if (collectSoundEnabled) {
+          playSound('collect');
+        }
+      }, 2700);
     }
-  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget, playSound]);
+  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget, playSound, collectSoundEnabled]);
 
   // Handle tab visibility change during slowing/convergence
   useEffect(() => {

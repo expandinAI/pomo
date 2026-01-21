@@ -223,7 +223,7 @@ export function ParticleField({
   const usesCenterPosition = style === 'shine-gather' || style === 'orbit-drift';
 
   // Render converging particles with Framer Motion
-  // Single continuous 5-second animation: slowing (0-40%) → convergence (40-100%)
+  // Single continuous 3-second animation: slowing (0-40%) → convergence (40-100%)
   if (isConverging && convergenceTarget && hasSnapshotted && trackedPositions.length > 0) {
     const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 500;
     const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
@@ -335,20 +335,20 @@ export function ParticleField({
                 boxShadow: glowKeyframes,
               }}
               transition={{
-                duration: 5,
+                duration: 3,
                 ease: [0.4, 0.0, 0.1, 1], // Smooth throughout
                 delay: totalDelay,
                 // Position: slow drift (0-40%), then accelerate to target
-                left: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
-                top: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
+                left: { duration: 3, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
+                top: { duration: 3, times: [0, 0.4, 0.7, 1], ease: [0.4, 0.0, 0.05, 1] },
                 // Scale: breathing then shrink
-                scale: { duration: 5, times: [0, 0.2, 0.35, 0.7, 1], ease: [0.4, 0.0, 0.1, 1] },
+                scale: { duration: 3, times: [0, 0.2, 0.35, 0.7, 1], ease: [0.4, 0.0, 0.1, 1] },
                 // Opacity: gradual brighten
-                opacity: { duration: 5, times: [0, 0.4, 0.7, 1], ease: 'easeOut' },
+                opacity: { duration: 3, times: [0, 0.4, 0.7, 1], ease: 'easeOut' },
                 // Rotation: accelerates toward end (like being sucked in)
-                rotate: { duration: 5, times: [0, 0.4, 0.7, 1], ease: [0.2, 0.0, 0.0, 1] },
+                rotate: { duration: 3, times: [0, 0.4, 0.7, 1], ease: [0.2, 0.0, 0.0, 1] },
                 // Glow: intensifies toward end
-                boxShadow: { duration: 5, times: [0, 0.4, 0.75, 1], ease: 'easeIn' },
+                boxShadow: { duration: 3, times: [0, 0.4, 0.75, 1], ease: 'easeIn' },
               }}
               style={{
                 width: `${particle.size}px`,
