@@ -469,50 +469,32 @@ function playBreakChimeWithDest(ctx: AudioContext, dest: AudioNode): void {
 }
 
 /**
- * Collect: Short, snappy "wupp" for particle arrival
- * Quick, friendly pop that's satisfying to hear repeatedly
+ * Collect: Soft, low "doop" for particle arrival
+ * Gentle, warm sound that's pleasant to hear repeatedly
+ * Like something softly landing in its place
  */
 function playCollectSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
   const now = ctx.currentTime;
 
-  // Main "wupp" - quick upward pitch bend
-  const pop = ctx.createOscillator();
-  const popGain = ctx.createGain();
+  // Soft low tone - gentle "doop"
+  const tone = ctx.createOscillator();
+  const toneGain = ctx.createGain();
 
-  pop.type = 'sine';
-  // Start low, bend up quickly for "wupp" feel
-  pop.frequency.setValueAtTime(400, now);
-  pop.frequency.exponentialRampToValueAtTime(900, now + 0.06);
-  pop.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+  tone.type = 'sine';
+  // Low frequency, slight drop for "landing" feel
+  tone.frequency.setValueAtTime(320, now);
+  tone.frequency.exponentialRampToValueAtTime(240, now + 0.1);
 
-  // Quick attack, quick decay
-  popGain.gain.setValueAtTime(0, now);
-  popGain.gain.linearRampToValueAtTime(0.15, now + 0.015);
-  popGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+  // Soft attack, smooth decay - not sharp at all
+  toneGain.gain.setValueAtTime(0, now);
+  toneGain.gain.linearRampToValueAtTime(0.12, now + 0.025); // Gentle attack
+  toneGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); // Smooth fade
 
-  pop.connect(popGain);
-  popGain.connect(dest);
+  tone.connect(toneGain);
+  toneGain.connect(dest);
 
-  pop.start(now);
-  pop.stop(now + 0.15);
-
-  // Soft high overtone for brightness
-  const bright = ctx.createOscillator();
-  const brightGain = ctx.createGain();
-
-  bright.type = 'sine';
-  bright.frequency.setValueAtTime(1200, now);
-  bright.frequency.exponentialRampToValueAtTime(800, now + 0.08);
-
-  brightGain.gain.setValueAtTime(0, now);
-  brightGain.gain.linearRampToValueAtTime(0.04, now + 0.01);
-  brightGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-  bright.connect(brightGain);
-  bright.connect(dest);
-
-  bright.start(now);
-  bright.stop(now + 0.1);
+  tone.start(now);
+  tone.stop(now + 0.18);
 }
 
 const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: AudioNode) => void> = {
