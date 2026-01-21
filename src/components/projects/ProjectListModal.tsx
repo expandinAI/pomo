@@ -10,6 +10,7 @@ import { ProjectListItem } from './ProjectListItem';
 import { ProjectEmptyState } from './ProjectEmptyState';
 import { ProjectForm } from './ProjectForm';
 import { ProjectArchiveDialog } from './ProjectArchiveDialog';
+import { ProjectDetailModal } from './ProjectDetailModal';
 import { getUnassignedStats } from '@/lib/projects';
 
 /**
@@ -31,6 +32,7 @@ export function ProjectListModal() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [archivingProject, setArchivingProject] = useState<string | null>(null);
+  const [viewingProject, setViewingProject] = useState<string | null | 'no-project'>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -123,13 +125,13 @@ export function ProjectListModal() {
   }, [refresh]);
 
   // Focus trap
-  useFocusTrap(modalRef, isOpen && !showCreateForm && !editingProject && !archivingProject, {
+  useFocusTrap(modalRef, isOpen && !showCreateForm && !editingProject && !archivingProject && !viewingProject, {
     initialFocusRef: closeButtonRef,
   });
 
   // Keyboard navigation
   useEffect(() => {
-    if (!isOpen || showCreateForm || editingProject || archivingProject) return;
+    if (!isOpen || showCreateForm || editingProject || archivingProject || viewingProject) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       // Close on Escape
@@ -158,8 +160,11 @@ export function ProjectListModal() {
           if (listItems[focusedIndex]) {
             const item = listItems[focusedIndex];
             if (item.type === 'project' && item.id) {
-              // For now, open edit modal (detail view will be POMO-104)
-              setEditingProject(item.id);
+              // Open detail view
+              setViewingProject(item.id);
+            } else if (item.type === 'noProject') {
+              // Open detail view for "No Project"
+              setViewingProject('no-project');
             }
           }
           break;
@@ -197,7 +202,7 @@ export function ProjectListModal() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showCreateForm, editingProject, archivingProject, focusedIndex, listItems, restore, refresh]);
+  }, [isOpen, showCreateForm, editingProject, archivingProject, viewingProject, focusedIndex, listItems, restore, refresh]);
 
   // Scroll focused item into view
   useEffect(() => {
@@ -247,11 +252,26 @@ export function ProjectListModal() {
     []
   );
 
-  // Get project being edited or archived
+  // Get project being edited, archived, or viewed
   const projectBeingEdited = editingProject ? getById(editingProject) : null;
   const projectBeingArchived = archivingProject
     ? projectsWithStats.find((p) => p.id === archivingProject) ?? getById(archivingProject)
     : null;
+  const projectBeingViewed =
+    viewingProject === 'no-project'
+      ? null
+      : viewingProject
+        ? projectsWithStats.find((p) => p.id === viewingProject) ?? getById(viewingProject)
+        : undefined;
+
+  // Handler for updates from detail view
+  const handleUpdateFromDetail = useCallback(
+    (id: string, data: { name?: string; brightness?: number }) => {
+      update(id, data);
+      refresh();
+    },
+    [update, refresh]
+  );
 
   const hasProjects = activeProjects.length > 0 || archivedProjects.length > 0;
 
@@ -336,7 +356,9 @@ export function ProjectListModal() {
                             onClick={() => {
                               setFocusedIndex(idx);
                               if (item.type === 'project' && item.id) {
-                                setEditingProject(item.id);
+                                setViewingProject(item.id);
+                              } else if (item.type === 'noProject') {
+                                setViewingProject('no-project');
                               }
                             }}
                             onEdit={
@@ -418,6 +440,15 @@ export function ProjectListModal() {
         isOpen={!!archivingProject}
         onConfirm={() => archivingProject && handleArchiveProject(archivingProject)}
         onCancel={() => setArchivingProject(null)}
+      />
+
+      {/* Detail Modal */}
+      <ProjectDetailModal
+        project={projectBeingViewed === undefined ? null : projectBeingViewed}
+        isOpen={!!viewingProject}
+        onClose={() => setViewingProject(null)}
+        onUpdate={handleUpdateFromDetail}
+        checkDuplicateName={checkDuplicateName}
       />
     </>
   );
