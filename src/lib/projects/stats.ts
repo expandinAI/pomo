@@ -10,6 +10,18 @@ import type { Project, ProjectWithStats, ProjectBreakdown } from './types';
 import { loadProjects, getActiveProjects } from './storage';
 
 /**
+ * Check if a date is today
+ */
+function isToday(date: Date): boolean {
+  const now = new Date();
+  return (
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+}
+
+/**
  * Check if a date is within this week (Monday-Sunday)
  */
 function isThisWeek(date: Date): boolean {
@@ -153,11 +165,11 @@ export function getUnassignedStats(sessions?: CompletedSession[]): {
 /**
  * Calculate project breakdown for statistics display
  *
- * @param timeRange - Filter by time range ('week' | 'month' | 'all')
+ * @param timeRange - Filter by time range ('day' | 'week' | 'month' | 'all')
  * @returns Array of project breakdowns with percentages
  */
 export function getProjectBreakdown(
-  timeRange: 'week' | 'month' | 'all' = 'week'
+  timeRange: 'day' | 'week' | 'month' | 'all' = 'week'
 ): ProjectBreakdown[] {
   const sessions = loadSessions();
   const workSessions = getWorkSessions(sessions);
@@ -168,6 +180,7 @@ export function getProjectBreakdown(
     if (timeRange === 'all') return true;
 
     const date = new Date(s.completedAt);
+    if (timeRange === 'day') return isToday(date);
     if (timeRange === 'week') return isThisWeek(date);
     if (timeRange === 'month') return isThisMonth(date);
     return true;

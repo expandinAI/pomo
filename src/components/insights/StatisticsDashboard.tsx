@@ -24,7 +24,9 @@ import { SessionTimeline } from './SessionTimeline';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { TotalHoursCounter } from './TotalHoursCounter';
 import { WeeklyReportSummary } from './WeeklyReportSummary';
+import { StatsProjectBreakdown } from './StatsProjectBreakdown';
 import { ExportButton } from './ExportButton';
+import { getProjectBreakdown } from '@/lib/projects';
 
 interface StatisticsDashboardProps {
   refreshTrigger?: number;
@@ -109,6 +111,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     return calculateWeeklyStats(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, refreshTrigger]);
+
+  // Calculate project breakdown based on time range
+  const projectBreakdown = useMemo(() => {
+    if (!isOpen) return [];
+    return getProjectBreakdown(timeRange);
+  }, [isOpen, timeRange, refreshTrigger]);
 
   // Close on Escape
   useEffect(() => {
@@ -264,6 +272,27 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                   <div className="mb-4">
                     <WeeklyReportSummary refreshTrigger={refreshTrigger} />
                   </div>
+
+                  {/* Project Breakdown */}
+                  {projectBreakdown.length > 0 && (
+                    <div className="mb-4 border-t border-tertiary/10 light:border-tertiary-dark/10">
+                      <StatsProjectBreakdown
+                        breakdown={projectBreakdown}
+                        onProjectClick={(projectId) => {
+                          // Close stats dashboard and open project detail
+                          setIsOpen(false);
+                          // Dispatch event to open project detail
+                          setTimeout(() => {
+                            window.dispatchEvent(
+                              new CustomEvent('particle:open-project-detail', {
+                                detail: { projectId },
+                              })
+                            );
+                          }, 150); // Small delay to let modal close animation complete
+                        }}
+                      />
+                    </div>
+                  )}
 
                   {/* Session Timeline */}
                   <motion.div

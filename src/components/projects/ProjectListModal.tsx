@@ -124,6 +124,29 @@ export function ProjectListModal() {
     return () => window.removeEventListener('particle:open-projects', handleOpen);
   }, [refresh]);
 
+  // Open project detail directly via event (from Stats Dashboard)
+  useEffect(() => {
+    function handleOpenDetail(e: CustomEvent<{ projectId: string | null }>) {
+      const { projectId } = e.detail;
+      refresh();
+      if (projectId === null) {
+        setViewingProject('no-project');
+      } else {
+        setViewingProject(projectId);
+      }
+    }
+
+    window.addEventListener(
+      'particle:open-project-detail',
+      handleOpenDetail as EventListener
+    );
+    return () =>
+      window.removeEventListener(
+        'particle:open-project-detail',
+        handleOpenDetail as EventListener
+      );
+  }, [refresh]);
+
   // Focus trap
   useFocusTrap(modalRef, isOpen && !showCreateForm && !editingProject && !archivingProject && !viewingProject, {
     initialFocusRef: closeButtonRef,
