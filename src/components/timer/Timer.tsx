@@ -327,7 +327,12 @@ export function Timer() {
     vibrate('medium');
 
     // Play sound on completion
-    playSound(wasWorkSession ? 'completion' : 'break');
+    // Skip for work sessions if convergence animation played (collect sound already played)
+    if (wasWorkSession && convergenceTriggeredRef.current) {
+      // Collect sound already played during convergence - no additional sound needed
+    } else {
+      playSound(wasWorkSession ? 'completion' : 'break');
+    }
   }, [playSound, state.mode, state.currentTask, vibrate]);
 
   // Initialize Web Worker timer
