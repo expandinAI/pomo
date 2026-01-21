@@ -146,20 +146,6 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
         </motion.div>
       </motion.div>
 
-      {/* Well done message during celebration */}
-      <AnimatePresence>
-        {showCelebration && (
-          <motion.p
-            className="mt-8 text-lg font-medium text-accent light:text-accent-dark"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ type: 'spring', ...SPRING.gentle, delay: 0.2 }}
-          >
-            Well done!
-          </motion.p>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
