@@ -6,6 +6,7 @@ import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
 import { PresetSelector } from './PresetSelector';
 import { SessionCounter } from './SessionCounter';
+import { StatusMessage } from './StatusMessage';
 import { EndConfirmationModal } from './EndConfirmationModal';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
@@ -804,21 +805,6 @@ export function Timer() {
         showCelebration={state.showCelebration}
       />
 
-      {/* Skip feedback message */}
-      <AnimatePresence>
-        {state.showSkipMessage && (
-          <motion.p
-            className="mt-4 text-sm text-secondary light:text-secondary-dark"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            Skipped to {SESSION_LABELS[state.mode]}
-          </motion.p>
-        )}
-      </AnimatePresence>
-
       {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (
         <UnifiedTaskInput
@@ -870,6 +856,17 @@ export function Timer() {
       >
         {timerAnnouncement}
       </div>
+
+      {/* Fixed status message slot at bottom of screen */}
+      <StatusMessage
+        message={
+          state.showCelebration
+            ? 'Well done!'
+            : state.showSkipMessage
+              ? `Skipped to ${SESSION_LABELS[state.mode]}`
+              : null
+        }
+      />
     </div>
   );
 }
