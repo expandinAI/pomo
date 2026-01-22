@@ -792,6 +792,9 @@ export function Timer() {
       {/* Preset selector */}
       <PresetSelector
         disabled={state.isRunning}
+        isSessionActive={state.isRunning || state.isPaused}
+        currentMode={state.mode}
+        durations={durations}
       />
 
       {/* Timer display */}
