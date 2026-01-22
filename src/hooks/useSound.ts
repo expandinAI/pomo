@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break' | 'collect';
+type SoundType = 'completion' | 'break';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -565,8 +565,6 @@ export function useSound(): UseSoundReturn {
     const doPlay = () => {
       if (type === 'break') {
         playSoundWithVolume(ctx, playBreakChimeWithDest, volume);
-      } else if (type === 'collect') {
-        playSoundWithVolume(ctx, playCollectSoundWithDest, volume);
       } else {
         playSound(selectedSound, volume);
       }

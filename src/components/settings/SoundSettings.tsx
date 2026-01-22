@@ -1,13 +1,13 @@
 'use client';
 
-import { Volume2, VolumeX, Check, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Check, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundSettings, SOUND_PRESETS, type SoundOption } from '@/hooks/useSoundSettings';
 import { useSound } from '@/hooks/useSound';
 import { SPRING } from '@/styles/design-tokens';
 
 export function SoundSettings() {
-  const { selectedSound, setSound, volume, setVolume, muted, toggleMute, collectSoundEnabled, setCollectSoundEnabled } = useSoundSettings();
+  const { selectedSound, setSound, volume, setVolume, muted, toggleMute, completionSoundEnabled, setCompletionSoundEnabled } = useSoundSettings();
   const { preview } = useSound();
 
   const handleSelect = (soundId: SoundOption) => {
@@ -77,15 +77,15 @@ export function SoundSettings() {
         </div>
       </div>
 
-      {/* Collect Sound Toggle */}
+      {/* Session Complete Sound Toggle */}
       <div className="space-y-2">
         <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
-          Collect Sound
+          Session Sound
         </label>
         <motion.button
-          onClick={() => setCollectSoundEnabled(!collectSoundEnabled)}
+          onClick={() => setCompletionSoundEnabled(!completionSoundEnabled)}
           className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-            collectSoundEnabled
+            completionSoundEnabled
               ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
               : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
           }`}
@@ -93,9 +93,9 @@ export function SoundSettings() {
           transition={{ type: 'spring', ...SPRING.default }}
         >
           <div className="flex items-center gap-3">
-            <Sparkles
+            <Bell
               className={`w-4 h-4 ${
-                collectSoundEnabled
+                completionSoundEnabled
                   ? 'text-accent light:text-accent-dark'
                   : 'text-tertiary light:text-tertiary-dark'
               }`}
@@ -103,29 +103,29 @@ export function SoundSettings() {
             <div className="text-left">
               <p
                 className={`text-sm font-medium ${
-                  collectSoundEnabled
+                  completionSoundEnabled
                     ? 'text-accent light:text-accent-dark'
                     : 'text-secondary light:text-secondary-dark'
                 }`}
               >
-                Particle Collect
+                Session Complete
               </p>
               <p className="text-xs text-tertiary light:text-tertiary-dark">
-                Sound when particle converges
+                Sound when session ends
               </p>
             </div>
           </div>
           {/* Toggle Switch */}
           <div
             className={`relative w-10 h-6 rounded-full transition-colors ${
-              collectSoundEnabled
+              completionSoundEnabled
                 ? 'bg-accent light:bg-accent-dark'
                 : 'bg-tertiary/30 light:bg-tertiary-dark/30'
             }`}
           >
             <motion.div
               className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
-              animate={{ left: collectSoundEnabled ? 20 : 4 }}
+              animate={{ left: completionSoundEnabled ? 20 : 4 }}
               transition={{ type: 'spring', ...SPRING.default }}
             />
           </div>

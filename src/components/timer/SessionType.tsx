@@ -23,7 +23,7 @@ export function SessionType({ currentMode, onModeChange, disabled }: SessionType
     <div
       role="radiogroup"
       aria-label="Session type"
-      className="relative z-20 flex items-center gap-1 p-1 rounded-xl bg-surface/70 light:bg-surface-dark/70 backdrop-blur-md border border-white/[0.08] light:border-black/[0.05] shadow-lg"
+      className="relative z-20 flex items-center gap-1 p-1 rounded-xl bg-surface/40 light:bg-surface-dark/40 backdrop-blur-sm border border-white/[0.08] light:border-black/[0.05] shadow-lg"
     >
       {modes.map((mode) => (
         <button

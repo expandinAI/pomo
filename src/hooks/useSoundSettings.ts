@@ -22,7 +22,7 @@ export const SOUND_PRESETS: SoundPreset[] = [
 const STORAGE_KEY = 'particle_sound_settings';
 const VOLUME_KEY = 'particle_sound_volume';
 const MUTED_KEY = 'particle_sound_muted';
-const COLLECT_SOUND_KEY = 'particle_collect_sound_enabled';
+const COMPLETION_SOUND_KEY = 'particle_completion_sound_enabled';
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_sound_settings';
@@ -36,12 +36,12 @@ interface SoundSettings {
   sound: SoundOption;
   volume: number;
   muted: boolean;
-  collectSoundEnabled: boolean;
+  completionSoundEnabled: boolean;
 }
 
 function loadSettings(): SoundSettings {
   if (typeof window === 'undefined') {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, collectSoundEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true };
   }
 
   try {
@@ -62,7 +62,7 @@ function loadSettings(): SoundSettings {
     const storedSound = localStorage.getItem(STORAGE_KEY);
     const storedVolume = localStorage.getItem(VOLUME_KEY);
     const storedMuted = localStorage.getItem(MUTED_KEY);
-    const storedCollectSound = localStorage.getItem(COLLECT_SOUND_KEY);
+    const storedCompletionSound = localStorage.getItem(COMPLETION_SOUND_KEY);
 
     return {
       sound: storedSound && SOUND_PRESETS.some((p) => p.id === storedSound)
@@ -70,10 +70,10 @@ function loadSettings(): SoundSettings {
         : DEFAULT_SOUND,
       volume: storedVolume !== null ? parseFloat(storedVolume) : DEFAULT_VOLUME,
       muted: storedMuted === 'true',
-      collectSoundEnabled: storedCollectSound !== 'false', // Default: true
+      completionSoundEnabled: storedCompletionSound !== 'false', // Default: true
     };
   } catch {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, collectSoundEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true };
   }
 }
 
@@ -89,8 +89,8 @@ function saveSettings(settings: Partial<SoundSettings>): void {
   if (settings.muted !== undefined) {
     localStorage.setItem(MUTED_KEY, String(settings.muted));
   }
-  if (settings.collectSoundEnabled !== undefined) {
-    localStorage.setItem(COLLECT_SOUND_KEY, String(settings.collectSoundEnabled));
+  if (settings.completionSoundEnabled !== undefined) {
+    localStorage.setItem(COMPLETION_SOUND_KEY, String(settings.completionSoundEnabled));
   }
 }
 
@@ -98,7 +98,7 @@ export function useSoundSettings() {
   const [selectedSound, setSelectedSound] = useState<SoundOption>(DEFAULT_SOUND);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const [muted, setMutedState] = useState(false);
-  const [collectSoundEnabled, setCollectSoundEnabledState] = useState(true);
+  const [completionSoundEnabled, setCompletionSoundEnabledState] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -107,7 +107,7 @@ export function useSoundSettings() {
     setSelectedSound(settings.sound);
     setVolumeState(settings.volume);
     setMutedState(settings.muted);
-    setCollectSoundEnabledState(settings.collectSoundEnabled);
+    setCompletionSoundEnabledState(settings.completionSoundEnabled);
     setIsLoaded(true);
   }, []);
 
@@ -139,10 +139,10 @@ export function useSoundSettings() {
     saveSettings({ muted: isMuted });
   }, []);
 
-  // Set collect sound enabled
-  const setCollectSoundEnabled = useCallback((enabled: boolean) => {
-    setCollectSoundEnabledState(enabled);
-    saveSettings({ collectSoundEnabled: enabled });
+  // Set completion sound enabled
+  const setCompletionSoundEnabled = useCallback((enabled: boolean) => {
+    setCompletionSoundEnabledState(enabled);
+    saveSettings({ completionSoundEnabled: enabled });
   }, []);
 
   return {
@@ -153,8 +153,8 @@ export function useSoundSettings() {
     muted,
     toggleMute,
     setMuted,
-    collectSoundEnabled,
-    setCollectSoundEnabled,
+    completionSoundEnabled,
+    setCompletionSoundEnabled,
     isLoaded,
     presets: SOUND_PRESETS,
   };

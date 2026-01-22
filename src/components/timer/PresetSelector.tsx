@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { PRESETS, getPresetLabel, type TimerPreset } from '@/styles/design-tokens';
@@ -26,6 +27,8 @@ function getPresetAriaLabel(preset: TimerPreset): string {
 
 export function PresetSelector({ disabled, onPresetChange }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
+  const [isHovered, setIsHovered] = useState(false);
+  const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const presetIds = ['classic', 'deepWork', 'ultradian', 'custom'] as const;
   const activeIndex = presetIds.indexOf(activePresetId as typeof presetIds[number]);
@@ -40,15 +43,58 @@ export function PresetSelector({ disabled, onPresetChange }: PresetSelectorProps
     onPresetChange?.(presetId);
   };
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const handleTouchStart = () => {
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+    }
+    setIsHovered(true);
+  };
+
+  const handleTouchEnd = () => {
+    touchTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 2000); // 2s visible after touch
+  };
+
   const activePreset = getActivePreset();
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div
+      className="relative flex flex-col items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Preset info - absolutely positioned above tabs, no layout shift */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.p
+            key={activePresetId}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm text-secondary light:text-secondary-dark whitespace-nowrap"
+          >
+            {getPresetInfo(activePreset)}
+          </motion.p>
+        )}
+      </AnimatePresence>
+
       {/* Preset tabs */}
       <div
         role="radiogroup"
         aria-label="Timer preset"
-        className="relative z-20 flex items-center gap-1 p-1 rounded-xl bg-surface/70 light:bg-surface-dark/70 backdrop-blur-md border border-white/[0.08] light:border-black/[0.05] shadow-lg"
+        className="relative z-20 flex items-center gap-1 p-1 rounded-xl bg-surface/40 light:bg-surface-dark/40 backdrop-blur-sm border border-white/[0.08] light:border-black/[0.05] shadow-lg"
       >
         {/* Animated highlight - positioned absolutely, moves only horizontally */}
         <motion.div
@@ -85,17 +131,6 @@ export function PresetSelector({ disabled, onPresetChange }: PresetSelectorProps
           );
         })}
       </div>
-
-      {/* Preset info */}
-      <motion.p
-        key={activePresetId}
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-        className="text-sm text-secondary light:text-secondary-dark"
-      >
-        {getPresetInfo(activePreset)}
-      </motion.p>
     </div>
   );
 }

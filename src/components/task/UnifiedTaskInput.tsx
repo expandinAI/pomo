@@ -183,8 +183,8 @@ export function UnifiedTaskInput({
       <motion.div
         className={`
           relative z-20 px-4 py-3
-          bg-surface/70 light:bg-surface-dark/70
-          backdrop-blur-md
+          bg-surface/40 light:bg-surface-dark/40
+          backdrop-blur-sm
           border border-white/[0.08] light:border-black/[0.05]
           rounded-xl shadow-lg
           transition-colors duration-fast

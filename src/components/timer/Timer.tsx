@@ -231,8 +231,8 @@ export function Timer() {
     presets: ambientPresets,
   } = useAmbientSoundContext();
 
-  // Sound settings for mute toggle and collect sound
-  const { toggleMute, muted, collectSoundEnabled } = useSoundSettings();
+  // Sound settings for mute toggle and completion sound
+  const { toggleMute, muted, completionSoundEnabled } = useSoundSettings();
 
   // Wake lock to prevent screen from sleeping during active sessions
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
@@ -329,17 +329,11 @@ export function Timer() {
     // Haptic feedback on completion
     vibrate('medium');
 
-    // Play sound on completion
-    if (wasWorkSession) {
-      // Work session: skip completion sound if convergence animation played (collect sound already played)
-      if (!convergenceTriggeredRef.current) {
-        playSound('completion');
-      }
-    } else {
-      // Break session: always play break sound
+    // Play completion sound (same sound for work and break sessions)
+    if (completionSoundEnabled) {
       playSound('break');
     }
-  }, [playSound, state.mode, state.currentTask, vibrate]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled]);
 
   // Initialize Web Worker timer
   const {
@@ -434,16 +428,13 @@ export function Timer() {
       setVisualState('converging');
       setConvergenceTarget(nextSlotPosition);
 
-      // Start glow effect and collect sound at ~0.3s before arrival (2.7s into 3s animation)
+      // Start glow effect at ~0.3s before arrival (2.7s into 3s animation)
       // Store in ref to prevent cleanup from canceling it when timeRemaining changes
       glowTimeoutRef.current = setTimeout(() => {
         setShowSlotGlow(true);
-        if (collectSoundEnabled) {
-          playSound('collect');
-        }
       }, 2700);
     }
-  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget, playSound, collectSoundEnabled]);
+  }, [state.timeRemaining, state.isRunning, state.mode, nextSlotPosition, setVisualState, setConvergenceTarget]);
 
   // Handle tab visibility change during slowing/convergence
   useEffect(() => {
