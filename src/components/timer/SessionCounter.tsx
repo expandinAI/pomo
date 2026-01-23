@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 
 // Threshold for switching to compact view
@@ -58,10 +57,8 @@ function StandardView({
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.5, opacity: 0 }}
                   transition={{ type: 'spring', ...SPRING.bouncy }}
-                  className="relative w-5 h-5 rounded-full bg-primary light:bg-primary-dark flex items-center justify-center"
-                >
-                  <Check className="w-3 h-3 text-background light:text-background-dark" strokeWidth={3} />
-                </motion.div>
+                  className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark"
+                />
               ) : (
                 <motion.div
                   key="empty"
@@ -105,9 +102,7 @@ function CompactView({
       </motion.span>
 
       {/* Filled particle symbol */}
-      <div className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark flex items-center justify-center">
-        <Check className="w-3 h-3 text-background light:text-background-dark" strokeWidth={3} />
-      </div>
+      <div className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark" />
 
       {/* Active slot (target for convergence animation) */}
       <motion.div
@@ -122,10 +117,8 @@ function CompactView({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0, x: -20 }}
               transition={{ type: 'spring', ...SPRING.bouncy }}
-              className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark flex items-center justify-center"
-            >
-              <Check className="w-3 h-3 text-background light:text-background-dark" strokeWidth={3} />
-            </motion.div>
+              className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark"
+            />
           ) : (
             <motion.div
               key="empty"
