@@ -24,7 +24,7 @@ import {
   SESSION_LABELS,
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
-import { formatTime } from '@/lib/utils';
+import { formatTime, formatEndTime } from '@/lib/utils';
 import { addSession } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
 import { UnifiedTaskInput } from '@/components/task';
@@ -218,6 +218,9 @@ export function Timer() {
   // Overflow state (tracked locally, updated by worker)
   const [isOverflow, setIsOverflow] = useState(false);
   const [overflowSeconds, setOverflowSeconds] = useState(0);
+
+  // Timer hover state (for end time preview)
+  const [isTimerHovered, setIsTimerHovered] = useState(false);
 
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
@@ -930,6 +933,7 @@ export function Timer() {
         isOverflow={isOverflow}
         overflowSeconds={overflowSeconds}
         sessionDuration={durations[state.mode]}
+        onHoverChange={setIsTimerHovered}
       />
 
       {/* Unified task and project input (only for work sessions) */}
@@ -993,10 +997,13 @@ export function Timer() {
             ? 'Well done!'
             : state.showSkipMessage
               ? `Skipped to ${SESSION_LABELS[state.mode]}`
-              : isOverflow && state.isRunning
-                ? 'In the flow? Keep going.'
+              : isTimerHovered && state.isRunning
+                ? isOverflow
+                  ? formatEndTime(overflowSeconds, true)
+                  : formatEndTime(state.timeRemaining, false)
                 : null
         }
+        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage}
       />
     </div>
   );

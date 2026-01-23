@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, memo } from 'react';
+import { useRef, useEffect, useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, prefersReducedMotion } from '@/lib/utils';
 import { SPRING, ANIMATION, MICRO_ANIMATION } from '@/styles/design-tokens';
@@ -12,6 +12,7 @@ interface TimerDisplayProps {
   isOverflow?: boolean;
   overflowSeconds?: number;
   sessionDuration?: number; // Original session duration for overflow display
+  onHoverChange?: (isHovered: boolean) => void;
 }
 
 // Custom colon component with two stacked dots for better vertical alignment
@@ -72,6 +73,7 @@ export function TimerDisplay({
   isOverflow = false,
   overflowSeconds = 0,
   sessionDuration = 0,
+  onHoverChange,
 }: TimerDisplayProps) {
   // In overflow: show total worked time (session duration + overflow)
   // Normal: show remaining time
@@ -79,7 +81,38 @@ export function TimerDisplay({
   const formattedTime = formatTime(displayTime);
   const prevIsRunning = useRef(isRunning);
   const [justStarted, setJustStarted] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reducedMotion = prefersReducedMotion();
+
+  // Handle tap on touch devices - show end time for 3 seconds
+  const handleTap = useCallback(() => {
+    if (!isRunning) return;
+
+    // Clear any existing timeout
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+    }
+
+    setIsHovered(true);
+    touchTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 3000);
+  }, [isRunning]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Notify parent of hover state changes
+  useEffect(() => {
+    onHoverChange?.(isHovered);
+  }, [isHovered, onHoverChange]);
 
   // Generate accessible time label
   const minutes = Math.floor(displayTime / 60);
@@ -121,6 +154,9 @@ export function TimerDisplay({
       role="timer"
       aria-label={ariaTimeLabel}
       aria-live="off"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTap}
     >
       {/* Floating timer display (no circle) */}
       <motion.div
@@ -154,7 +190,6 @@ export function TimerDisplay({
           ))}
         </div>
       </motion.div>
-
     </div>
   );
 }

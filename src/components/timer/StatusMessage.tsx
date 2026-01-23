@@ -5,6 +5,7 @@ import { SPRING } from '@/styles/design-tokens';
 
 interface StatusMessageProps {
   message: string | null;
+  subtle?: boolean;
 }
 
 /**
@@ -17,7 +18,7 @@ interface StatusMessageProps {
  * - Centered between content and screen edge
  * - Future-ready for quotes, motivation, etc.
  */
-export function StatusMessage({ message }: StatusMessageProps) {
+export function StatusMessage({ message, subtle = false }: StatusMessageProps) {
   return (
     <div
       className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-40"
@@ -29,14 +30,18 @@ export function StatusMessage({ message }: StatusMessageProps) {
           <motion.p
             key={message}
             initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: subtle ? 0.5 : 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{
               type: 'spring',
               ...SPRING.gentle,
               opacity: { duration: 0.25 }
             }}
-            className="text-sm text-secondary light:text-secondary-dark"
+            className={
+              subtle
+                ? "text-sm text-tertiary light:text-tertiary-dark"
+                : "text-sm text-secondary light:text-secondary-dark"
+            }
           >
             {message}
           </motion.p>

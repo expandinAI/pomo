@@ -62,3 +62,26 @@ export function prefersDarkMode(): boolean {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
+
+/**
+ * Format end time for display (e.g., "Endet um 14:30" or "Im Flow seit 14:07")
+ */
+export function formatEndTime(secondsRemaining: number, isOverflow: boolean = false): string {
+  const targetDate = isOverflow
+    ? new Date(Date.now() - secondsRemaining * 1000) // When timer hit 0
+    : new Date(Date.now() + secondsRemaining * 1000); // When timer will end
+
+  const now = new Date();
+  const isToday = targetDate.toDateString() === now.toDateString();
+
+  const timeStr = targetDate.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  if (isOverflow) {
+    return `Im Flow seit ${timeStr}`;
+  }
+
+  return isToday ? `Endet um ${timeStr}` : `Endet morgen um ${timeStr}`;
+}
