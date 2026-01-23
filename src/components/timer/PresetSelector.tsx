@@ -106,7 +106,14 @@ function CollapsedPresetView({
 }
 
 export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled }: PresetSelectorProps) {
-  const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
+  const { activePresetId, applyPreset, getActivePreset, customDurations, customSessionsUntilLong } = useTimerSettingsContext();
+
+  // Build a virtual custom preset with actual custom values (not dependent on active preset)
+  const customPreset: TimerPreset = {
+    ...PRESETS.custom,
+    durations: customDurations,
+    sessionsUntilLong: customSessionsUntilLong,
+  };
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -152,9 +159,9 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
   const effectiveDurations = propDurations || activePreset.durations;
 
   // Show info for hovered preset, or active preset if nothing hovered
-  // For custom preset, always use actual custom values from context
+  // For custom preset, always use actual custom values (not dependent on active preset)
   const displayPreset = hoveredPresetId
-    ? (hoveredPresetId === 'custom' ? activePreset : PRESETS[hoveredPresetId as keyof typeof PRESETS])
+    ? (hoveredPresetId === 'custom' ? customPreset : PRESETS[hoveredPresetId as keyof typeof PRESETS])
     : activePreset;
 
   return (
@@ -232,8 +239,8 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
                 aria-hidden="true"
               />
               {presetIds.map((presetId) => {
-                // For custom preset, use the actual custom values from context
-                const preset = presetId === 'custom' ? getActivePreset() : PRESETS[presetId];
+                // For custom preset, use the actual custom values (not dependent on active preset)
+                const preset = presetId === 'custom' ? customPreset : PRESETS[presetId];
                 const isActive = activePresetId === presetId;
 
                 return (
