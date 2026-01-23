@@ -1,0 +1,165 @@
+/**
+ * Smart Task Input Parser
+ *
+ * Parses user input to extract task name and duration.
+ * Supports patterns like "Meeting 30", "30m Meeting", "1h", etc.
+ */
+
+export interface ParsedInput {
+  /** The task name, or null if only duration was specified */
+  taskName: string | null;
+  /** Duration in seconds, or null if no duration pattern detected */
+  durationSeconds: number | null;
+  /** True if duration was capped at maximum (180 min) */
+  wasLimited: boolean;
+  /** Original input string */
+  raw: string;
+}
+
+const MIN_DURATION_MINUTES = 1;
+const MAX_DURATION_MINUTES = 180;
+
+/**
+ * Parse smart input to extract task name and duration
+ *
+ * Patterns:
+ * - "Meeting 30" or "Meeting 30m" → Task "Meeting", 30 min
+ * - "Meeting 1h" → Task "Meeting", 60 min
+ * - "30 Meeting" or "30m Meeting" → Task "Meeting", 30 min
+ * - "30" or "30m" → No task, 30 min
+ * - "1h" → No task, 60 min
+ * - "Meeting30" (no space) → Regular task, no duration (preset used)
+ * - "Meeting" → Regular task, no duration (preset used)
+ */
+export function parseSmartInput(input: string): ParsedInput {
+  const trimmed = input.trim();
+
+  if (!trimmed) {
+    return {
+      taskName: null,
+      durationSeconds: null,
+      wasLimited: false,
+      raw: input,
+    };
+  }
+
+  // Pattern: Duration at the end (with space separator)
+  // e.g., "Meeting 30", "Meeting 30m", "Meeting 1h", "Meeting 1.5h"
+  const endPattern = /^(.+?)\s+(\d+(?:\.\d+)?)(m|h)?$/i;
+  const endMatch = trimmed.match(endPattern);
+
+  if (endMatch) {
+    const [, taskPart, numberStr, unit] = endMatch;
+    const parsed = parseDuration(numberStr, unit);
+
+    if (parsed.durationSeconds !== null) {
+      return {
+        taskName: taskPart.trim() || null,
+        durationSeconds: parsed.durationSeconds,
+        wasLimited: parsed.wasLimited,
+        raw: input,
+      };
+    }
+  }
+
+  // Pattern: Duration at the start (with space separator)
+  // e.g., "30 Meeting", "30m Meeting", "1h Meeting"
+  const startPattern = /^(\d+(?:\.\d+)?)(m|h)?\s+(.+)$/i;
+  const startMatch = trimmed.match(startPattern);
+
+  if (startMatch) {
+    const [, numberStr, unit, taskPart] = startMatch;
+    const parsed = parseDuration(numberStr, unit);
+
+    if (parsed.durationSeconds !== null) {
+      return {
+        taskName: taskPart.trim() || null,
+        durationSeconds: parsed.durationSeconds,
+        wasLimited: parsed.wasLimited,
+        raw: input,
+      };
+    }
+  }
+
+  // Pattern: Duration only (no task)
+  // e.g., "30", "30m", "1h", "1.5h"
+  const durationOnlyPattern = /^(\d+(?:\.\d+)?)(m|h)?$/i;
+  const durationOnlyMatch = trimmed.match(durationOnlyPattern);
+
+  if (durationOnlyMatch) {
+    const [, numberStr, unit] = durationOnlyMatch;
+    const parsed = parseDuration(numberStr, unit);
+
+    if (parsed.durationSeconds !== null) {
+      return {
+        taskName: null,
+        durationSeconds: parsed.durationSeconds,
+        wasLimited: parsed.wasLimited,
+        raw: input,
+      };
+    }
+  }
+
+  // No duration pattern detected - treat as regular task
+  return {
+    taskName: trimmed,
+    durationSeconds: null,
+    wasLimited: false,
+    raw: input,
+  };
+}
+
+/**
+ * Parse a number and optional unit into duration in seconds
+ */
+function parseDuration(
+  numberStr: string,
+  unit: string | undefined
+): { durationSeconds: number | null; wasLimited: boolean } {
+  const num = parseFloat(numberStr);
+
+  if (isNaN(num) || num <= 0) {
+    return { durationSeconds: null, wasLimited: false };
+  }
+
+  // Convert to minutes based on unit
+  let minutes: number;
+  if (unit?.toLowerCase() === 'h') {
+    minutes = num * 60;
+  } else {
+    // Default to minutes (no unit or 'm')
+    minutes = num;
+  }
+
+  // Apply limits
+  let wasLimited = false;
+
+  if (minutes < MIN_DURATION_MINUTES) {
+    minutes = MIN_DURATION_MINUTES;
+    wasLimited = true;
+  }
+
+  if (minutes > MAX_DURATION_MINUTES) {
+    minutes = MAX_DURATION_MINUTES;
+    wasLimited = true;
+  }
+
+  // Convert to seconds and round to nearest whole second
+  const durationSeconds = Math.round(minutes * 60);
+
+  return { durationSeconds, wasLimited };
+}
+
+/**
+ * Format duration for display in preview
+ */
+export function formatDurationPreview(seconds: number): string {
+  const minutes = Math.round(seconds / 60);
+
+  if (minutes >= 60 && minutes % 60 === 0) {
+    const hours = minutes / 60;
+    return `${hours}h`;
+  }
+
+  return `${minutes} min`;
+}

@@ -13,6 +13,8 @@ interface PresetSelectorProps {
   currentMode?: SessionType;
   durations?: TimerDurations;
   nextBreakIsLong?: boolean;
+  /** Override work duration from smart input (e.g., "Meeting 30") */
+  overrideWorkDuration?: number | null;
 }
 
 // Get preset info text (work + break duration)
@@ -35,13 +37,18 @@ function CollapsedPresetView({
   currentMode,
   durations,
   nextBreakIsLong,
+  overrideWorkDuration,
 }: {
   currentMode: SessionType;
   durations: TimerDurations;
   nextBreakIsLong?: boolean;
+  overrideWorkDuration?: number | null;
 }) {
   const isWork = currentMode === 'work';
-  const workMinutes = Math.floor(durations.work / 60);
+  // Use override duration if set (from smart input), otherwise use preset
+  const workMinutes = overrideWorkDuration
+    ? Math.floor(overrideWorkDuration / 60)
+    : Math.floor(durations.work / 60);
 
   // Determine break duration and label based on current mode and next break type
   let breakMinutes: number;
@@ -87,7 +94,7 @@ function CollapsedPresetView({
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
@@ -180,6 +187,7 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
               currentMode={currentMode}
               durations={effectiveDurations}
               nextBreakIsLong={nextBreakIsLong}
+              overrideWorkDuration={overrideWorkDuration}
             />
           </motion.div>
         ) : (

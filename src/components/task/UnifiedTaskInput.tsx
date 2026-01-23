@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import { TaskSuggestions } from './TaskSuggestions';
 import { ProjectDropdown } from './ProjectDropdown';
 import { getRecentTasks, filterTasks, type RecentTask } from '@/lib/task-storage';
+import { parseSmartInput, formatDurationPreview } from '@/lib/smart-input-parser';
 import type { Project, ProjectWithStats } from '@/lib/projects';
 
 interface UnifiedTaskInputProps {
@@ -13,6 +14,8 @@ interface UnifiedTaskInputProps {
   taskText: string;
   onTaskChange: (text: string) => void;
   onEnter?: () => void;
+  /** Called when user submits with smart duration (e.g., "Meeting 30") */
+  onSubmitWithDuration?: (task: string | null, durationSeconds: number, wasLimited: boolean) => void;
 
   // Project
   projectId: string | null;
@@ -37,6 +40,7 @@ export function UnifiedTaskInput({
   taskText,
   onTaskChange,
   onEnter,
+  onSubmitWithDuration,
   projectId,
   onProjectSelect,
   projects,
@@ -56,6 +60,10 @@ export function UnifiedTaskInput({
 
   // Project dropdown state
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+
+  // Parse smart input for duration detection
+  const parsed = useMemo(() => parseSmartInput(taskText), [taskText]);
+  const showSmartPreview = parsed.durationSeconds !== null;
 
   // Load recent tasks on focus
   useEffect(() => {
@@ -123,6 +131,11 @@ export function UnifiedTaskInput({
             if (suggestionIndex >= 0 && suggestionIndex < filteredTasks.length) {
               e.preventDefault();
               handleSelectTask(filteredTasks[suggestionIndex]);
+            } else if (parsed.durationSeconds !== null && onSubmitWithDuration) {
+              // Smart input with duration detected
+              e.preventDefault();
+              inputRef.current?.blur();
+              onSubmitWithDuration(parsed.taskName, parsed.durationSeconds, parsed.wasLimited);
             } else {
               // Blur input to release focus for keyboard shortcuts
               inputRef.current?.blur();
@@ -136,12 +149,19 @@ export function UnifiedTaskInput({
             break;
         }
       } else if (e.key === 'Enter') {
-        // Blur input to release focus for keyboard shortcuts
-        inputRef.current?.blur();
-        onEnter?.();
+        if (parsed.durationSeconds !== null && onSubmitWithDuration) {
+          // Smart input with duration detected
+          e.preventDefault();
+          inputRef.current?.blur();
+          onSubmitWithDuration(parsed.taskName, parsed.durationSeconds, parsed.wasLimited);
+        } else {
+          // Blur input to release focus for keyboard shortcuts
+          inputRef.current?.blur();
+          onEnter?.();
+        }
       }
     },
-    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, inputRef]
+    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, parsed, inputRef]
   );
 
   // Global keyboard shortcuts for P key
@@ -235,6 +255,40 @@ export function UnifiedTaskInput({
           />
         </div>
       </motion.div>
+
+      {/* Smart Input Preview - shows detected duration */}
+      <AnimatePresence>
+        {showSmartPreview && isFocused && !showSuggestions && !showProjectDropdown && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ type: 'spring', ...SPRING.gentle }}
+            className="
+              absolute left-0 right-0 top-full mt-1 z-10
+              px-4 py-2.5
+              bg-surface/60 light:bg-surface-dark/60
+              backdrop-blur-sm
+              border border-white/[0.08] light:border-black/[0.05]
+              rounded-lg
+              flex items-center justify-between
+            "
+          >
+            <span className="text-sm text-secondary light:text-secondary-dark">
+              {parsed.taskName ? (
+                <>
+                  <span className="text-primary light:text-primary-dark">{parsed.taskName}</span>
+                  <span className="mx-2 text-tertiary light:text-tertiary-dark">·</span>
+                  <span>{formatDurationPreview(parsed.durationSeconds!)}</span>
+                </>
+              ) : (
+                <span>{formatDurationPreview(parsed.durationSeconds!)}</span>
+              )}
+            </span>
+            <span className="text-tertiary light:text-tertiary-dark text-xs">↵</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Task Suggestions dropdown */}
       <AnimatePresence>

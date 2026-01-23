@@ -220,6 +220,12 @@ export function Timer() {
   const [isOverflow, setIsOverflow] = useState(false);
   const [overflowSeconds, setOverflowSeconds] = useState(0);
 
+  // One-off duration from smart input (e.g., "Meeting 30" → 30 min)
+  const [oneOffDuration, setOneOffDuration] = useState<number | null>(null);
+
+  // Show max limit message when duration was capped
+  const [showMaxLimitMessage, setShowMaxLimitMessage] = useState(false);
+
   // Timer hover state (for end time preview)
   const [isTimerHovered, setIsTimerHovered] = useState(false);
 
@@ -377,7 +383,8 @@ export function Timer() {
   // Handle timer completion from worker (only called when overflow is disabled)
   const handleComplete = useCallback(() => {
     const sessionMode = state.mode;
-    const sessionDuration = durationsRef.current[sessionMode];
+    // Use one-off duration if set, otherwise use preset
+    const sessionDuration = oneOffDuration ?? durationsRef.current[sessionMode];
     const wasWorkSession = sessionMode === 'work';
 
     // Save completed session to history with task data, preset info, and project
@@ -409,6 +416,9 @@ export function Timer() {
       dispatch({ type: 'CLEAR_TASK' });
     }
 
+    // Reset one-off duration (next session uses preset)
+    setOneOffDuration(null);
+
     // Haptic feedback on completion
     vibrate('medium');
 
@@ -416,7 +426,7 @@ export function Timer() {
     if (completionSoundEnabled) {
       playSound('break');
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration]);
 
   // Initialize Web Worker timer
   const {
@@ -481,6 +491,16 @@ export function Timer() {
       return () => clearTimeout(timeout);
     }
   }, [state.showSkipMessage]);
+
+  // Hide max limit message after 2 seconds
+  useEffect(() => {
+    if (showMaxLimitMessage) {
+      const timeout = setTimeout(() => {
+        setShowMaxLimitMessage(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showMaxLimitMessage]);
 
   // Control ambient sound based on timer state
   // Plays during work sessions only, stops on pause/break/completion
@@ -658,7 +678,8 @@ export function Timer() {
   // Skip session (complete early with actual elapsed time)
   const handleSkip = useCallback(() => {
     const sessionMode = state.mode;
-    const fullDuration = durationsRef.current[sessionMode];
+    // Use one-off duration if set, otherwise use preset
+    const fullDuration = oneOffDuration ?? durationsRef.current[sessionMode];
     // Include overflow time in elapsed calculation
     const elapsedTime = isOverflow
       ? fullDuration + overflowSeconds
@@ -711,7 +732,10 @@ export function Timer() {
     if (isWorkSession) {
       dispatch({ type: 'CLEAR_TASK' });
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, overflowSeconds, playSound, vibrate, workerReset]);
+
+    // Reset one-off duration (next session uses preset)
+    setOneOffDuration(null);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, overflowSeconds, playSound, vibrate, workerReset, oneOffDuration]);
 
   // Complete session from overflow mode (Enter key in overflow)
   // This is a proper completion that increments the counter
@@ -719,7 +743,8 @@ export function Timer() {
     if (!isOverflow) return;
 
     const sessionMode = state.mode;
-    const fullDuration = durationsRef.current[sessionMode];
+    // Use one-off duration if set, otherwise use preset
+    const fullDuration = oneOffDuration ?? durationsRef.current[sessionMode];
     const totalDuration = fullDuration + overflowSeconds;
     const wasWorkSession = sessionMode === 'work';
 
@@ -763,8 +788,11 @@ export function Timer() {
       dispatch({ type: 'CLEAR_TASK' });
     }
 
+    // Reset one-off duration (next session uses preset)
+    setOneOffDuration(null);
+
     vibrate('medium');
-  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset]);
+  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, oneOffDuration]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -927,6 +955,31 @@ export function Timer() {
     }
   }, [state.isRunning, state.isPaused, handleStart]);
 
+  // Handle smart task input with custom duration (e.g., "Meeting 30")
+  const handleTaskSubmitWithDuration = useCallback((
+    task: string | null,
+    durationSeconds: number,
+    wasLimited: boolean
+  ) => {
+    // Set task if provided
+    if (task) {
+      dispatch({ type: 'SET_TASK', task });
+    }
+
+    // Store one-off duration
+    setOneOffDuration(durationSeconds);
+
+    // Show max limit message if capped
+    if (wasLimited) {
+      setShowMaxLimitMessage(true);
+    }
+
+    // Start timer with custom duration
+    workerStart(durationSeconds, 0, overflowEnabledRef.current);
+    dispatch({ type: 'START' });
+    vibrate('light');
+  }, [workerStart, vibrate]);
+
   // Handle end confirmation (must be before early return to follow hooks rules)
   const handleEndConfirm = useCallback(() => {
     handleSkip();
@@ -982,6 +1035,7 @@ export function Timer() {
         currentMode={state.mode}
         durations={durations}
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
+        overrideWorkDuration={oneOffDuration}
       />
 
       {/* Timer display */}
@@ -1001,6 +1055,7 @@ export function Timer() {
           taskText={state.currentTask}
           onTaskChange={handleTaskChange}
           onEnter={handleTaskEnter}
+          onSubmitWithDuration={handleTaskSubmitWithDuration}
           projectId={selectedProjectId}
           onProjectSelect={selectProject}
           projects={activeProjects}
@@ -1055,21 +1110,23 @@ export function Timer() {
       {/* Fixed status message slot at bottom of screen */}
       <StatusMessage
         message={
-          state.showCelebration
-            ? showDailyGoalReached
-              ? 'Daily Goal reached!'
-              : 'Well done!'
-            : state.showSkipMessage
-              ? `Skipped to ${SESSION_LABELS[state.mode]}`
-              : showDailyGoalReached
+          showMaxLimitMessage
+            ? 'Maximum 180 min'
+            : state.showCelebration
+              ? showDailyGoalReached
                 ? 'Daily Goal reached!'
-                : isTimerHovered && state.isRunning
-                  ? isOverflow
-                    ? formatEndTime(overflowSeconds, true)
-                    : formatEndTime(state.timeRemaining, false)
-                  : null
+                : 'Well done!'
+              : state.showSkipMessage
+                ? `Skipped to ${SESSION_LABELS[state.mode]}`
+                : showDailyGoalReached
+                  ? 'Daily Goal reached!'
+                  : isTimerHovered && state.isRunning
+                    ? isOverflow
+                      ? formatEndTime(overflowSeconds, true)
+                      : formatEndTime(state.timeRemaining, false)
+                    : null
         }
-        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage && !showDailyGoalReached}
+        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage && !showDailyGoalReached && !showMaxLimitMessage}
       />
     </div>
   );
