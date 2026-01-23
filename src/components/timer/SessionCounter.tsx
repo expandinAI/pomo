@@ -23,15 +23,13 @@ interface SessionCounterProps {
 function StandardView({
   totalDots,
   filledCount,
-  displayCount,
-  showGoalMode,
+  nextSlotIndex,
   showGlow,
   slotRefs,
 }: {
   totalDots: number;
   filledCount: number;
-  displayCount: number;
-  showGoalMode: boolean;
+  nextSlotIndex: number;
   showGlow: boolean;
   slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
 }) {
@@ -39,8 +37,8 @@ function StandardView({
     <>
       {Array.from({ length: totalDots }).map((_, index) => {
         const isCompleted = index < filledCount;
-        // Glow only applies to cycle mode (convergence animation target)
-        const isNextSlot = !showGoalMode && index === displayCount;
+        // The next slot is the first empty one (at index = filledCount)
+        const isNextSlot = index === nextSlotIndex;
         const shouldGlow = showGlow && isNextSlot;
 
         return (
@@ -164,13 +162,20 @@ export function SessionCounter({
   // Should we show compact view?
   const showCompact = actualCount >= COMPACT_THRESHOLD;
 
-  // In goal mode: show goal dots (or more if exceeded), filled = todayCount
-  // In cycle mode: show sessionsUntilLong dots, filled = count % sessionsUntilLong
-  const totalDots = showGoalMode ? Math.max(dailyGoal, todayCount) : sessionsUntilLong;
+  // Calculate filled count (completed particles)
   const filledCount = showGoalMode ? todayCount : (count % sessionsUntilLong);
 
-  // For convergence animation - use cycle count (not today count)
-  const displayCount = count % sessionsUntilLong;
+  // Calculate total dots to display:
+  // - In goal mode: show at least dailyGoal dots, but always have one empty slot for next session
+  // - In cycle mode: show sessionsUntilLong dots
+  // The key insight: we ALWAYS need one empty slot (unless in compact mode)
+  const totalDots = showGoalMode
+    ? Math.max(dailyGoal, filledCount + 1)  // +1 ensures there's always a next empty slot
+    : sessionsUntilLong;
+
+  // The next empty slot is always at index = filledCount (first empty from left)
+  // This is the target for the convergence animation
+  const nextSlotIndex = filledCount;
 
   // Refs for slot elements to calculate position
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -210,9 +215,8 @@ export function SessionCounter({
       };
     }
 
-    // Standard mode
-    const nextSlotIndex = displayCount;
-    if (nextSlotIndex >= sessionsUntilLong) return null;
+    // Standard mode - target the first empty slot
+    if (nextSlotIndex >= totalDots) return null;
 
     const slotElement = slotRefs.current[nextSlotIndex];
     if (!slotElement) return null;
@@ -222,7 +226,7 @@ export function SessionCounter({
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
     };
-  }, [displayCount, sessionsUntilLong, showCompact]);
+  }, [nextSlotIndex, totalDots, showCompact]);
 
   // Report position when count changes, on mount, or when refresh is triggered
   useEffect(() => {
@@ -232,7 +236,7 @@ export function SessionCounter({
         onNextSlotPosition(position);
       });
     }
-  }, [count, refreshPositionTrigger, onNextSlotPosition, getNextSlotPosition, showCompact]);
+  }, [count, todayCount, refreshPositionTrigger, onNextSlotPosition, getNextSlotPosition, showCompact]);
 
   // Update position on resize
   useEffect(() => {
@@ -301,8 +305,7 @@ export function SessionCounter({
             <StandardView
               totalDots={totalDots}
               filledCount={filledCount}
-              displayCount={displayCount}
-              showGoalMode={showGoalMode}
+              nextSlotIndex={nextSlotIndex}
               showGlow={showGlow}
               slotRefs={slotRefs}
             />
