@@ -15,6 +15,7 @@ import {
   FolderKanban,
   Plus,
   Repeat,
+  Target,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -171,6 +172,17 @@ export function CommandRegistration({
         },
         icon: <FolderKanban className="w-4 h-4" />,
         keywords: ['projects', 'list', 'view', 'manage'],
+      },
+      {
+        id: 'set-daily-goal',
+        label: 'Set Daily Goal',
+        shortcut: 'G O',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-goals'));
+        },
+        icon: <Target className="w-4 h-4" />,
+        keywords: ['goal', 'daily', 'target', 'particles', 'objective'],
       },
 
       // Project commands

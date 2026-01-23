@@ -61,6 +61,9 @@ export default function Home() {
       onProjects: () => {
         window.dispatchEvent(new CustomEvent('particle:open-projects'));
       },
+      onGoals: () => {
+        window.dispatchEvent(new CustomEvent('particle:open-goals'));
+      },
     }),
     []
   );
@@ -130,7 +133,7 @@ export default function Home() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/s/h/y/p/,
+              t/s/h/y/p/o/,
             </span>
           </motion.div>
         )}

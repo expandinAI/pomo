@@ -46,6 +46,7 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'G H', description: 'Open History', category: 'navigation' },
   { key: 'G P', description: 'Go to Projects', category: 'navigation' },
   { key: 'G Y', description: 'Open Year View', category: 'navigation' },
+  { key: 'G O', description: 'Open Daily Goal', category: 'navigation' },
   { key: 'G ,', description: 'Open Settings', category: 'navigation' },
 
   // General shortcuts

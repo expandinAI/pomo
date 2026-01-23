@@ -165,3 +165,15 @@ export function formatTime(dateString: string): string {
     hour12: true,
   });
 }
+
+// Get today's completed work sessions
+export function getTodaySessions(): CompletedSession[] {
+  const sessions = loadSessions();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return sessions.filter(session => {
+    const sessionDate = new Date(session.completedAt);
+    return sessionDate >= today && session.type === 'work';
+  });
+}

@@ -8,6 +8,7 @@ import { PresetSelector } from './PresetSelector';
 import { SessionCounter } from './SessionCounter';
 import { StatusMessage } from './StatusMessage';
 import { EndConfirmationModal } from './EndConfirmationModal';
+import { DailyGoalOverlay } from './DailyGoalOverlay';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
 import { useTheme } from '@/hooks/useTheme';
@@ -25,7 +26,7 @@ import {
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
-import { addSession } from '@/lib/session-storage';
+import { addSession, getTodaySessions } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
@@ -194,7 +195,7 @@ export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -278,6 +279,16 @@ export function Timer() {
   // End confirmation modal
   const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
+  // Daily goal overlay
+  const [showDailyGoalOverlay, setShowDailyGoalOverlay] = useState(false);
+
+  // Today's completed sessions count (for daily goal)
+  const [todayCount, setTodayCount] = useState(0);
+
+  // Daily goal celebration
+  const [showDailyGoalReached, setShowDailyGoalReached] = useState(false);
+  const prevTodayCountRef = useRef(0);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -301,6 +312,45 @@ export function Timer() {
       dispatch({ type: 'SYNC_DURATIONS', durations });
     }
   }, [durations, isLoaded]);
+
+  // Load and update today's session count
+  useEffect(() => {
+    if (isLoaded) {
+      const newCount = getTodaySessions().length;
+      setTodayCount(newCount);
+
+      // Check for daily goal reached (only when count increases to match goal)
+      if (
+        dailyGoal &&
+        newCount === dailyGoal &&
+        prevTodayCountRef.current < dailyGoal
+      ) {
+        setShowDailyGoalReached(true);
+      }
+
+      prevTodayCountRef.current = newCount;
+    }
+  }, [isLoaded, state.completedPomodoros, dailyGoal]); // Re-calculate when pomodoros increment
+
+  // Hide daily goal reached message after 3 seconds
+  useEffect(() => {
+    if (showDailyGoalReached) {
+      const timeout = setTimeout(() => {
+        setShowDailyGoalReached(false);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showDailyGoalReached]);
+
+  // Listen for G O navigation shortcut to open daily goal overlay
+  useEffect(() => {
+    function handleOpenGoals() {
+      setShowDailyGoalOverlay(true);
+    }
+
+    window.addEventListener('particle:open-goals', handleOpenGoals);
+    return () => window.removeEventListener('particle:open-goals', handleOpenGoals);
+  }, []);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -901,6 +951,15 @@ export function Timer() {
         onCancel={handleEndCancel}
       />
 
+      {/* Daily Goal Overlay */}
+      <DailyGoalOverlay
+        isOpen={showDailyGoalOverlay}
+        onClose={() => setShowDailyGoalOverlay(false)}
+        currentGoal={dailyGoal}
+        todayCount={todayCount}
+        onGoalChange={setDailyGoal}
+      />
+
       {/* Command Palette Registration */}
       <CommandRegistration
         timerIsRunning={state.isRunning}
@@ -970,6 +1029,9 @@ export function Timer() {
         onNextSlotPosition={setNextSlotPosition}
         showGlow={showSlotGlow}
         refreshPositionTrigger={refreshPositionTrigger}
+        dailyGoal={dailyGoal}
+        todayCount={todayCount}
+        onCounterClick={() => setShowDailyGoalOverlay(true)}
       />
 
       {/* Screen reader live regions */}
@@ -994,16 +1056,20 @@ export function Timer() {
       <StatusMessage
         message={
           state.showCelebration
-            ? 'Well done!'
+            ? showDailyGoalReached
+              ? 'Daily Goal reached!'
+              : 'Well done!'
             : state.showSkipMessage
               ? `Skipped to ${SESSION_LABELS[state.mode]}`
-              : isTimerHovered && state.isRunning
-                ? isOverflow
-                  ? formatEndTime(overflowSeconds, true)
-                  : formatEndTime(state.timeRemaining, false)
-                : null
+              : showDailyGoalReached
+                ? 'Daily Goal reached!'
+                : isTimerHovered && state.isRunning
+                  ? isOverflow
+                    ? formatEndTime(overflowSeconds, true)
+                    : formatEndTime(state.timeRemaining, false)
+                  : null
         }
-        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage}
+        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage && !showDailyGoalReached}
       />
     </div>
   );

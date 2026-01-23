@@ -9,6 +9,7 @@ interface GPrefixCallbacks {
   onSettings: () => void;
   onYear?: () => void;
   onProjects?: () => void;
+  onGoals?: () => void;
 }
 
 /**
@@ -19,6 +20,7 @@ interface GPrefixCallbacks {
  * G H = Open History (SessionHistory)
  * G Y = Open Year View
  * G P = Open Projects
+ * G O = Open Goals (Daily Goal)
  * G , = Open Settings
  *
  * After pressing G, user has 1 second to press the second key
@@ -88,6 +90,11 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
             e.preventDefault();
             e.stopImmediatePropagation();
             callbacks.onProjects?.();
+            break;
+          case 'o':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onGoals?.();
             break;
           case ',':
             e.preventDefault();

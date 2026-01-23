@@ -11,10 +11,31 @@ interface SessionCounterProps {
   onNextSlotPosition?: (position: { x: number; y: number } | null) => void;
   showGlow?: boolean;
   refreshPositionTrigger?: number;  // Increment to force position recalculation
+  dailyGoal?: number | null;        // Daily goal (1-6), null = no goal
+  todayCount?: number;              // Today's completed sessions
+  onCounterClick?: () => void;      // Click handler for goal overlay
 }
 
-export function SessionCounter({ count, sessionsUntilLong, onNextSlotPosition, showGlow = false, refreshPositionTrigger = 0 }: SessionCounterProps) {
-  // Show up to sessionsUntilLong indicators, then reset
+export function SessionCounter({
+  count,
+  sessionsUntilLong,
+  onNextSlotPosition,
+  showGlow = false,
+  refreshPositionTrigger = 0,
+  dailyGoal = null,
+  todayCount = 0,
+  onCounterClick,
+}: SessionCounterProps) {
+  // Goal mode: show daily goal progress
+  // Non-goal mode: show cycle progress (sessions until long break)
+  const showGoalMode = dailyGoal !== null;
+
+  // In goal mode: show goal dots (or more if exceeded), filled = todayCount
+  // In cycle mode: show sessionsUntilLong dots, filled = count % sessionsUntilLong
+  const totalDots = showGoalMode ? Math.max(dailyGoal, todayCount) : sessionsUntilLong;
+  const filledCount = showGoalMode ? todayCount : (count % sessionsUntilLong);
+
+  // For convergence animation - use cycle count (not today count)
   const displayCount = count % sessionsUntilLong;
 
   // Refs for slot elements to calculate position
@@ -62,11 +83,28 @@ export function SessionCounter({ count, sessionsUntilLong, onNextSlotPosition, s
   }, [onNextSlotPosition, getNextSlotPosition]);
 
   return (
-    <div className="flex items-center gap-3">
+    <div
+      className={`flex items-center gap-3 ${onCounterClick ? 'cursor-pointer' : ''}`}
+      onClick={onCounterClick}
+      onKeyDown={onCounterClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onCounterClick();
+        }
+      } : undefined}
+      role={onCounterClick ? 'button' : undefined}
+      tabIndex={onCounterClick ? 0 : undefined}
+      aria-label={onCounterClick ? (
+        dailyGoal
+          ? `Daily goal: ${todayCount} of ${dailyGoal} particles. Click to change goal.`
+          : 'Set daily goal'
+      ) : undefined}
+    >
       {/* Particle indicators */}
-      {Array.from({ length: sessionsUntilLong }).map((_, index) => {
-        const isCompleted = index < displayCount;
-        const isNextSlot = index === displayCount;
+      {Array.from({ length: totalDots }).map((_, index) => {
+        const isCompleted = index < filledCount;
+        // Glow only applies to cycle mode (convergence animation target)
+        const isNextSlot = !showGoalMode && index === displayCount;
         const shouldGlow = showGlow && isNextSlot;
 
         return (

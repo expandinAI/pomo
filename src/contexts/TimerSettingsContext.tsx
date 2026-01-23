@@ -13,6 +13,7 @@ export type { TimerDurations, TimerPreset };
 const STORAGE_KEY = 'particle_timer_settings';
 const CUSTOM_PRESET_KEY = 'particle_custom_preset';
 const OVERFLOW_KEY = 'particle_overflow_enabled';
+const DAILY_GOAL_KEY = 'particle_daily_goal';
 const DEFAULT_PRESET_ID = 'classic';
 const DEFAULT_OVERFLOW_ENABLED = true; // Overflow is ON by default
 
@@ -123,6 +124,31 @@ function saveOverflowEnabled(enabled: boolean): void {
   localStorage.setItem(OVERFLOW_KEY, JSON.stringify(enabled));
 }
 
+function loadDailyGoal(): number | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(DAILY_GOAL_KEY);
+    if (stored !== null) {
+      const parsed = parseInt(stored, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 9) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null;
+}
+
+function saveDailyGoal(goal: number | null): void {
+  if (typeof window === 'undefined') return;
+  if (goal === null) {
+    localStorage.removeItem(DAILY_GOAL_KEY);
+  } else {
+    localStorage.setItem(DAILY_GOAL_KEY, goal.toString());
+  }
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -150,6 +176,9 @@ interface TimerSettingsContextValue {
   // Overflow mode (continue past 0:00)
   overflowEnabled: boolean;
   setOverflowEnabled: (enabled: boolean) => void;
+  // Daily goal (1-9 particles, null = no goal)
+  dailyGoal: number | null;
+  setDailyGoal: (goal: number | null) => void;
 }
 
 const TimerSettingsContext = createContext<TimerSettingsContextValue | null>(null);
@@ -163,6 +192,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [customDurations, setCustomDurations] = useState<TimerDurations>({ ...PRESETS.custom.durations });
   const [customSessionsUntilLong, setCustomSessionsUntilLong] = useState<number>(PRESETS.custom.sessionsUntilLong);
   const [overflowEnabled, setOverflowEnabledState] = useState<boolean>(DEFAULT_OVERFLOW_ENABLED);
+  const [dailyGoal, setDailyGoalState] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -176,6 +206,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const overflow = loadOverflowEnabled();
     setOverflowEnabledState(overflow);
+
+    const goal = loadDailyGoal();
+    setDailyGoalState(goal);
 
     setIsLoaded(true);
   }, []);
@@ -237,6 +270,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveOverflowEnabled(enabled);
   }, []);
 
+  // Set daily goal
+  const setDailyGoal = useCallback((goal: number | null) => {
+    setDailyGoalState(goal);
+    saveDailyGoal(goal);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -256,6 +295,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       customSessionsUntilLong,
       overflowEnabled,
       setOverflowEnabled,
+      dailyGoal,
+      setDailyGoal,
     }),
     [
       durations,
@@ -272,6 +313,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       customSessionsUntilLong,
       overflowEnabled,
       setOverflowEnabled,
+      dailyGoal,
+      setDailyGoal,
     ]
   );
 
