@@ -11,6 +11,7 @@ import { AmbientSettings } from './AmbientSettings';
 import { VisualEffectsSettings } from './VisualEffectsSettings';
 import { CustomPresetEditor } from './CustomPresetEditor';
 import { WeekStartSetting } from './WeekStartSetting';
+import { OverflowSettings } from './OverflowSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -161,6 +162,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Custom Preset Editor (only shows when custom is active) */}
                   <CustomPresetEditor />
+
+                  {/* Overflow Mode Toggle */}
+                  <OverflowSettings />
 
                   {/* Sound Settings */}
                   <SoundSettings />

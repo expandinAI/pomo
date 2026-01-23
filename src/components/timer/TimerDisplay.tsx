@@ -9,6 +9,9 @@ interface TimerDisplayProps {
   timeRemaining: number;
   isRunning: boolean;
   showCelebration: boolean;
+  isOverflow?: boolean;
+  overflowSeconds?: number;
+  sessionDuration?: number; // Original session duration for overflow display
 }
 
 // Custom colon component with two stacked dots for better vertical alignment
@@ -62,18 +65,30 @@ const AnimatedDigit = memo(function AnimatedDigit({
   );
 });
 
-export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: TimerDisplayProps) {
-  const formattedTime = formatTime(timeRemaining);
+export function TimerDisplay({
+  timeRemaining,
+  isRunning,
+  showCelebration,
+  isOverflow = false,
+  overflowSeconds = 0,
+  sessionDuration = 0,
+}: TimerDisplayProps) {
+  // In overflow: show total worked time (session duration + overflow)
+  // Normal: show remaining time
+  const displayTime = isOverflow ? (sessionDuration + overflowSeconds) : timeRemaining;
+  const formattedTime = formatTime(displayTime);
   const prevIsRunning = useRef(isRunning);
   const [justStarted, setJustStarted] = useState(false);
   const reducedMotion = prefersReducedMotion();
 
   // Generate accessible time label
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
-  const ariaTimeLabel = minutes > 0
-    ? `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''} remaining`
-    : `${seconds} second${seconds !== 1 ? 's' : ''} remaining`;
+  const minutes = Math.floor(displayTime / 60);
+  const seconds = displayTime % 60;
+  const ariaTimeLabel = isOverflow
+    ? `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''} worked`
+    : minutes > 0
+      ? `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''} remaining`
+      : `${seconds} second${seconds !== 1 ? 's' : ''} remaining`;
 
   // Detect when timer starts and trigger scale animation
   useEffect(() => {
@@ -90,6 +105,16 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
   const minuteChars = minutePart.split('');
   const secondChars = secondPart.split('');
 
+  // Overflow pulse animation
+  const overflowPulse = {
+    opacity: [0.7, 1, 0.7],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  };
+
   return (
     <div
       className="relative flex flex-col items-center justify-center"
@@ -103,9 +128,11 @@ export function TimerDisplay({ timeRemaining, isRunning, showCelebration }: Time
         animate={
           reducedMotion
             ? {}
-            : justStarted
-              ? { scale: [1, 1.03, 1] }
-              : { scale: 1 }
+            : isOverflow && isRunning
+              ? overflowPulse
+              : justStarted
+                ? { scale: [1, 1.03, 1] }
+                : { scale: 1, opacity: 1 }
         }
         transition={{ type: 'spring', ...SPRING.gentle }}
       >

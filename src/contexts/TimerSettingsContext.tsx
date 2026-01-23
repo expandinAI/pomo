@@ -12,7 +12,9 @@ export type { TimerDurations, TimerPreset };
 
 const STORAGE_KEY = 'particle_timer_settings';
 const CUSTOM_PRESET_KEY = 'particle_custom_preset';
+const OVERFLOW_KEY = 'particle_overflow_enabled';
 const DEFAULT_PRESET_ID = 'classic';
+const DEFAULT_OVERFLOW_ENABLED = true; // Overflow is ON by default
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_timer_settings';
@@ -103,6 +105,24 @@ function saveCustomPreset(durations: TimerDurations, sessionsUntilLong: number):
   localStorage.setItem(CUSTOM_PRESET_KEY, JSON.stringify({ durations, sessionsUntilLong }));
 }
 
+function loadOverflowEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_OVERFLOW_ENABLED;
+  try {
+    const stored = localStorage.getItem(OVERFLOW_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_OVERFLOW_ENABLED;
+}
+
+function saveOverflowEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(OVERFLOW_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -127,6 +147,9 @@ interface TimerSettingsContextValue {
   // Custom preset values (for editor)
   customDurations: TimerDurations;
   customSessionsUntilLong: number;
+  // Overflow mode (continue past 0:00)
+  overflowEnabled: boolean;
+  setOverflowEnabled: (enabled: boolean) => void;
 }
 
 const TimerSettingsContext = createContext<TimerSettingsContextValue | null>(null);
@@ -139,6 +162,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [activePresetId, setActivePresetId] = useState<string>(DEFAULT_PRESET_ID);
   const [customDurations, setCustomDurations] = useState<TimerDurations>({ ...PRESETS.custom.durations });
   const [customSessionsUntilLong, setCustomSessionsUntilLong] = useState<number>(PRESETS.custom.sessionsUntilLong);
+  const [overflowEnabled, setOverflowEnabledState] = useState<boolean>(DEFAULT_OVERFLOW_ENABLED);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -149,6 +173,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     const customSettings = loadCustomPreset();
     setCustomDurations(customSettings.durations);
     setCustomSessionsUntilLong(customSettings.sessionsUntilLong);
+
+    const overflow = loadOverflowEnabled();
+    setOverflowEnabledState(overflow);
 
     setIsLoaded(true);
   }, []);
@@ -204,6 +231,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveCustomPreset(defaultDurations, defaultSessionsUntilLong);
   }, []);
 
+  // Toggle overflow mode
+  const setOverflowEnabled = useCallback((enabled: boolean) => {
+    setOverflowEnabledState(enabled);
+    saveOverflowEnabled(enabled);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -221,6 +254,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       presets,
       customDurations,
       customSessionsUntilLong,
+      overflowEnabled,
+      setOverflowEnabled,
     }),
     [
       durations,
@@ -235,6 +270,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       presets,
       customDurations,
       customSessionsUntilLong,
+      overflowEnabled,
+      setOverflowEnabled,
     ]
   );
 

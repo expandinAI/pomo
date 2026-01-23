@@ -194,7 +194,7 @@ export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -208,8 +208,16 @@ export function Timer() {
   const durationsRef = useRef(durations);
   durationsRef.current = durations;
 
+  // Ref to always have current overflowEnabled
+  const overflowEnabledRef = useRef(overflowEnabled);
+  overflowEnabledRef.current = overflowEnabled;
+
   // Ref for selectedProjectId (to use in callbacks)
   const selectedProjectIdRef = useRef<string | null>(null);
+
+  // Overflow state (tracked locally, updated by worker)
+  const [isOverflow, setIsOverflow] = useState(false);
+  const [overflowSeconds, setOverflowSeconds] = useState(0);
 
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
@@ -292,11 +300,28 @@ export function Timer() {
   }, [durations, isLoaded]);
 
   // Handle timer tick from worker
-  const handleTick = useCallback((remaining: number) => {
+  const handleTick = useCallback((remaining: number, overflow?: number) => {
     dispatch({ type: 'SET_TIME', time: remaining });
+    // Track overflow state
+    if (overflow !== undefined && overflow > 0) {
+      setIsOverflow(true);
+      setOverflowSeconds(overflow);
+    }
   }, []);
 
-  // Handle timer completion from worker
+  // Handle timer reaching 0 (overflow mode - timer continues)
+  const handleReachedZero = useCallback(() => {
+    // Play completion sound when hitting 0 (even in overflow mode)
+    if (completionSoundEnabled) {
+      playSound('break');
+    }
+    // Haptic feedback
+    vibrate('medium');
+    // Mark that we're now in overflow
+    setIsOverflow(true);
+  }, [playSound, vibrate, completionSoundEnabled]);
+
+  // Handle timer completion from worker (only called when overflow is disabled)
   const handleComplete = useCallback(() => {
     const sessionMode = state.mode;
     const sessionDuration = durationsRef.current[sessionMode];
@@ -322,6 +347,10 @@ export function Timer() {
     dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
     elapsedRef.current = 0;
 
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
     // Clear task after completion (only for work sessions)
     if (wasWorkSession) {
       dispatch({ type: 'CLEAR_TASK' });
@@ -344,25 +373,36 @@ export function Timer() {
   } = useTimerWorker(durations[state.mode], {
     onTick: handleTick,
     onComplete: handleComplete,
+    onReachedZero: handleReachedZero,
   });
 
   // Update tab title
   useEffect(() => {
     if (state.isRunning) {
-      document.title = TAB_TITLES.running(formatTime(state.timeRemaining), SESSION_LABELS[state.mode]);
+      // In overflow: show total worked time (session duration + overflow)
+      const sessionDuration = durationsRef.current[state.mode];
+      const displayTime = isOverflow
+        ? formatTime(sessionDuration + overflowSeconds)
+        : formatTime(state.timeRemaining);
+      document.title = TAB_TITLES.running(displayTime, SESSION_LABELS[state.mode]);
     } else if (state.isPaused) {
-      document.title = TAB_TITLES.paused(formatTime(state.timeRemaining), SESSION_LABELS[state.mode]);
+      const sessionDuration = durationsRef.current[state.mode];
+      const displayTime = isOverflow
+        ? formatTime(sessionDuration + overflowSeconds)
+        : formatTime(state.timeRemaining);
+      document.title = TAB_TITLES.paused(displayTime, SESSION_LABELS[state.mode]);
     } else {
       document.title = TAB_TITLES.idle;
     }
-  }, [state.isRunning, state.isPaused, state.timeRemaining, state.mode]);
+  }, [state.isRunning, state.isPaused, state.timeRemaining, state.mode, isOverflow, overflowSeconds]);
 
   // Sync worker with running state
   useEffect(() => {
     if (state.isRunning) {
       const duration = durationsRef.current[state.mode];
       const elapsed = duration - state.timeRemaining;
-      workerStart(duration, elapsed);
+      // Pass overflowEnabled to worker
+      workerStart(duration, elapsed, overflowEnabledRef.current);
     } else if (!state.isRunning && state.isPaused) {
       workerPause();
       elapsedRef.current = durationsRef.current[state.mode] - state.timeRemaining;
@@ -566,7 +606,10 @@ export function Timer() {
   const handleSkip = useCallback(() => {
     const sessionMode = state.mode;
     const fullDuration = durationsRef.current[sessionMode];
-    const elapsedTime = fullDuration - state.timeRemaining;
+    // Include overflow time in elapsed calculation
+    const elapsedTime = isOverflow
+      ? fullDuration + overflowSeconds
+      : fullDuration - state.timeRemaining;
     const isWorkSession = sessionMode === 'work';
 
     // Only save if > 60 seconds elapsed (minimum threshold)
@@ -575,9 +618,11 @@ export function Timer() {
         ...(isWorkSession && state.currentTask && { task: state.currentTask }),
         presetId: activePresetIdRef.current,
         ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+        // Track overflow separately
+        ...(isOverflow && overflowSeconds > 0 && { overflowDuration: overflowSeconds }),
       };
 
-      // Save ACTUAL elapsed time, not full duration
+      // Save ACTUAL elapsed time (including overflow)
       addSession(sessionMode, elapsedTime, taskData);
     }
 
@@ -602,6 +647,10 @@ export function Timer() {
     workerReset(durationsRef.current[nextMode]);
     elapsedRef.current = 0;
 
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
     playSound('break');
     vibrate('light');
 
@@ -609,7 +658,60 @@ export function Timer() {
     if (isWorkSession) {
       dispatch({ type: 'CLEAR_TASK' });
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, playSound, vibrate, workerReset]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, overflowSeconds, playSound, vibrate, workerReset]);
+
+  // Complete session from overflow mode (Enter key in overflow)
+  // This is a proper completion that increments the counter
+  const handleCompleteFromOverflow = useCallback(() => {
+    if (!isOverflow) return;
+
+    const sessionMode = state.mode;
+    const fullDuration = durationsRef.current[sessionMode];
+    const totalDuration = fullDuration + overflowSeconds;
+    const wasWorkSession = sessionMode === 'work';
+
+    // Save session with full duration + overflow
+    const taskData = {
+      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      presetId: activePresetIdRef.current,
+      ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+      // Track overflow separately
+      ...(overflowSeconds > 0 && { overflowDuration: overflowSeconds }),
+    };
+
+    addSession(sessionMode, totalDuration, taskData);
+
+    // Save task to recent tasks (only for work sessions with a task)
+    if (wasWorkSession && state.currentTask) {
+      addRecentTask({
+        text: state.currentTask,
+        lastUsed: new Date().toISOString(),
+      });
+    }
+
+    // Proper COMPLETE action (increments counter, shows celebration)
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
+
+    // Reset worker to next session
+    const isWork = sessionMode === 'work';
+    const newCount = isWork ? state.completedPomodoros + 1 : state.completedPomodoros;
+    const nextMode: SessionType = isWork
+      ? (newCount % sessionsUntilLongRef.current === 0 ? 'longBreak' : 'shortBreak')
+      : 'work';
+    workerReset(durationsRef.current[nextMode]);
+    elapsedRef.current = 0;
+
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
+    // Clear task after completion (only for work sessions)
+    if (wasWorkSession) {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
+
+    vibrate('medium');
+  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -704,12 +806,27 @@ export function Timer() {
             taskInputRef.current?.focus();
           }
           break;
+        // Enter = Complete from overflow (Done)
+        case 'Enter':
+          if (isOverflow && state.isRunning) {
+            e.preventDefault();
+            handleCompleteFromOverflow();
+          }
+          break;
+        // B = Start break immediately (in overflow)
+        case 'b':
+        case 'B':
+          if (isOverflow && state.isRunning) {
+            e.preventDefault();
+            handleCompleteFromOverflow();
+          }
+          break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip]);
+  }, [state.isRunning, state.mode, state.isPaused, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -726,12 +843,18 @@ export function Timer() {
     dispatch({ type: 'RESET', durations: durationsRef.current });
     workerReset(durationsRef.current[state.mode]);
     elapsedRef.current = 0;
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
   }, [workerReset, state.mode, vibrate]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
     workerReset(durationsRef.current[mode]);
     elapsedRef.current = 0;
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
   }, [workerReset]);
 
   // Open settings via custom event
@@ -796,6 +919,7 @@ export function Timer() {
         isSessionActive={state.isRunning || state.isPaused}
         currentMode={state.mode}
         durations={durations}
+        nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
       />
 
       {/* Timer display */}
@@ -803,6 +927,9 @@ export function Timer() {
         timeRemaining={state.timeRemaining}
         isRunning={state.isRunning}
         showCelebration={state.showCelebration}
+        isOverflow={isOverflow}
+        overflowSeconds={overflowSeconds}
+        sessionDuration={durations[state.mode]}
       />
 
       {/* Unified task and project input (only for work sessions) */}
@@ -827,7 +954,9 @@ export function Timer() {
         onStart={handleStart}
         onPause={handlePause}
         onReset={handleReset}
+        onComplete={handleCompleteFromOverflow}
         mode={state.mode}
+        isOverflow={isOverflow}
       />
 
       {/* Session counter */}
@@ -864,7 +993,9 @@ export function Timer() {
             ? 'Well done!'
             : state.showSkipMessage
               ? `Skipped to ${SESSION_LABELS[state.mode]}`
-              : null
+              : isOverflow && state.isRunning
+                ? 'In the flow? Keep going.'
+                : null
         }
       />
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { KeyboardHint } from '@/components/ui/KeyboardHint';
@@ -13,7 +13,9 @@ interface TimerControlsProps {
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
+  onComplete?: () => void;
   mode: SessionType;
+  isOverflow?: boolean;
 }
 
 export function TimerControls({
@@ -22,7 +24,9 @@ export function TimerControls({
   onStart,
   onPause,
   onReset,
+  onComplete,
   mode,
+  isOverflow = false,
 }: TimerControlsProps) {
   // Generate descriptive aria-labels
   const sessionLabel = SESSION_LABELS[mode].toLowerCase();
@@ -42,7 +46,7 @@ export function TimerControls({
       <IconButton
         label="Reset timer to beginning"
         onClick={onReset}
-        size="lg"
+        size="md"
       >
         <RotateCcw className="w-full h-full" />
       </IconButton>
@@ -70,8 +74,45 @@ export function TimerControls({
         )}
       </Button>
 
-      {/* Spacer for visual balance */}
-      <div className="w-12 h-12" aria-hidden="true" />
+      {/* Done button - morphs out when in overflow */}
+      <AnimatePresence>
+        {isOverflow && isRunning && onComplete && (
+          <motion.button
+            onClick={onComplete}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-light"
+            aria-label="Complete session"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: 1,
+              opacity: 1,
+              boxShadow: [
+                '0 0 0 0 rgba(255, 255, 255, 0.4)',
+                '0 0 20px 4px rgba(255, 255, 255, 0.2)',
+                '0 0 0 0 rgba(255, 255, 255, 0.4)',
+              ],
+            }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{
+              type: 'spring',
+              ...SPRING.gentle,
+              boxShadow: {
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              },
+            }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Check className="w-5 h-5" strokeWidth={3} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Spacer for visual balance (only when not in overflow) */}
+      {!(isOverflow && isRunning) && (
+        <div className="w-10 h-10" aria-hidden="true" />
+      )}
     </motion.div>
   );
 }

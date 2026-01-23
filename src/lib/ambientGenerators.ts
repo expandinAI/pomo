@@ -30,6 +30,25 @@ export interface AmbientSound {
 }
 
 /**
+ * Applies crossfade to make a noise buffer loop seamlessly.
+ * Blends the end of the buffer into the beginning to eliminate clicks.
+ */
+function applyLoopCrossfade(buffer: AudioBuffer, fadeMs: number = 50): void {
+  const channelData = buffer.getChannelData(0);
+  const fadeSamples = Math.floor((fadeMs / 1000) * buffer.sampleRate);
+  const length = channelData.length;
+
+  for (let i = 0; i < fadeSamples; i++) {
+    const fadeOut = 1 - i / fadeSamples; // 1 → 0
+    const fadeIn = i / fadeSamples; // 0 → 1
+
+    // Blend end into beginning
+    const endIndex = length - fadeSamples + i;
+    channelData[i] = channelData[i] * fadeIn + channelData[endIndex] * fadeOut;
+  }
+}
+
+/**
  * Creates a white noise buffer source.
  * White noise has equal energy at all frequencies.
  */
@@ -41,6 +60,9 @@ function createWhiteNoiseSource(ctx: AudioContext): AudioBufferSourceNode {
   for (let i = 0; i < bufferSize; i++) {
     output[i] = Math.random() * 2 - 1;
   }
+
+  // Apply crossfade for seamless loop
+  applyLoopCrossfade(buffer, 50);
 
   const source = ctx.createBufferSource();
   source.buffer = buffer;

@@ -3,12 +3,13 @@ import type { SessionType } from '@/styles/design-tokens';
 export interface CompletedSession {
   id: string;
   type: SessionType;
-  duration: number; // in seconds
+  duration: number; // in seconds (total = planned + overflow)
   completedAt: string; // ISO date string
   task?: string; // Task description
   estimatedPomodoros?: number; // 1-4+ pomodoros
   presetId?: string; // ID of the preset used for this session
   projectId?: string; // Optional project assignment
+  overflowDuration?: number; // Time spent past 0:00 (in seconds)
 }
 
 const STORAGE_KEY = 'particle_session_history';
@@ -53,6 +54,7 @@ export interface TaskData {
   estimatedPomodoros?: number;
   presetId?: string;
   projectId?: string;
+  overflowDuration?: number;
 }
 
 export function addSession(
@@ -69,6 +71,7 @@ export function addSession(
     ...(taskData?.estimatedPomodoros && { estimatedPomodoros: taskData.estimatedPomodoros }),
     ...(taskData?.presetId && { presetId: taskData.presetId }),
     ...(taskData?.projectId && { projectId: taskData.projectId }),
+    ...(taskData?.overflowDuration && { overflowDuration: taskData.overflowDuration }),
   };
 
   const sessions = loadSessions();

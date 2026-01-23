@@ -12,6 +12,7 @@ interface StartMessage {
   type: 'START';
   duration: number; // Total duration in seconds
   elapsed?: number; // Already elapsed time (for resume)
+  overflowEnabled?: boolean; // Whether to continue past 0
 }
 
 interface PauseMessage {
@@ -27,46 +28,83 @@ interface StopMessage {
   type: 'STOP';
 }
 
-type WorkerIncomingMessage = StartMessage | PauseMessage | ResetMessage | StopMessage;
+interface SetOverflowMessage {
+  type: 'SET_OVERFLOW';
+  enabled: boolean;
+}
+
+type WorkerIncomingMessage = StartMessage | PauseMessage | ResetMessage | StopMessage | SetOverflowMessage;
 
 // Message types from worker to main thread
 interface TickMessage {
   type: 'TICK';
   remaining: number;
+  overflow?: number; // Seconds past 0 (only when overflow enabled)
 }
 
 interface CompleteMessage {
   type: 'COMPLETE';
 }
 
-export type WorkerOutgoingMessage = TickMessage | CompleteMessage;
+interface ReachedZeroMessage {
+  type: 'REACHED_ZERO'; // Sent when timer hits 0 (overflow mode continues after this)
+}
+
+export type WorkerOutgoingMessage = TickMessage | CompleteMessage | ReachedZeroMessage;
 
 // Worker state
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let startTime: number | null = null;
 let duration: number = 0;
 let elapsedAtPause: number = 0;
+let overflowEnabled: boolean = false;
+let reachedZeroSent: boolean = false;
+
+function calculateElapsed(): number {
+  if (startTime === null) return elapsedAtPause;
+  return elapsedAtPause + (Date.now() - startTime) / 1000;
+}
 
 function calculateRemaining(): number {
-  if (startTime === null) return duration;
-  const elapsed = elapsedAtPause + (Date.now() - startTime) / 1000;
+  const elapsed = calculateElapsed();
   return Math.max(0, Math.ceil(duration - elapsed));
+}
+
+function calculateOverflow(): number {
+  const elapsed = calculateElapsed();
+  const overflow = elapsed - duration;
+  return overflow > 0 ? Math.floor(overflow) : 0;
 }
 
 function tick(): void {
   const remaining = calculateRemaining();
-  self.postMessage({ type: 'TICK', remaining } as TickMessage);
+  const overflow = overflowEnabled ? calculateOverflow() : 0;
 
+  self.postMessage({ type: 'TICK', remaining, overflow } as TickMessage);
+
+  // Timer reached 0
   if (remaining <= 0) {
-    stopTimer();
-    self.postMessage({ type: 'COMPLETE' } as CompleteMessage);
+    if (overflowEnabled) {
+      // In overflow mode: send REACHED_ZERO once, then continue ticking
+      if (!reachedZeroSent) {
+        reachedZeroSent = true;
+        self.postMessage({ type: 'REACHED_ZERO' } as ReachedZeroMessage);
+      }
+      // Continue ticking for overflow
+    } else {
+      // No overflow: stop and complete
+      stopTimer();
+      self.postMessage({ type: 'COMPLETE' } as CompleteMessage);
+    }
   }
 }
 
-function startTimer(totalDuration: number, alreadyElapsed: number = 0): void {
+function startTimer(totalDuration: number, alreadyElapsed: number = 0, overflow: boolean = false): void {
   stopTimer();
   duration = totalDuration;
   elapsedAtPause = alreadyElapsed;
+  overflowEnabled = overflow;
+  reachedZeroSent = false;
   startTime = Date.now();
 
   // Initial tick
@@ -95,6 +133,7 @@ function stopTimer(): void {
   }
   startTime = null;
   elapsedAtPause = 0;
+  reachedZeroSent = false;
 }
 
 function resetTimer(newDuration: number): void {
@@ -109,7 +148,7 @@ self.onmessage = (event: MessageEvent<WorkerIncomingMessage>) => {
 
   switch (message.type) {
     case 'START':
-      startTimer(message.duration, message.elapsed ?? 0);
+      startTimer(message.duration, message.elapsed ?? 0, message.overflowEnabled ?? false);
       break;
     case 'PAUSE':
       pauseTimer();
@@ -119,6 +158,9 @@ self.onmessage = (event: MessageEvent<WorkerIncomingMessage>) => {
       break;
     case 'STOP':
       stopTimer();
+      break;
+    case 'SET_OVERFLOW':
+      overflowEnabled = message.enabled;
       break;
   }
 };
