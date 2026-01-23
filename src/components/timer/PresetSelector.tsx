@@ -152,7 +152,10 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
   const effectiveDurations = propDurations || activePreset.durations;
 
   // Show info for hovered preset, or active preset if nothing hovered
-  const displayPreset = hoveredPresetId ? PRESETS[hoveredPresetId as keyof typeof PRESETS] : activePreset;
+  // For custom preset, always use actual custom values from context
+  const displayPreset = hoveredPresetId
+    ? (hoveredPresetId === 'custom' ? activePreset : PRESETS[hoveredPresetId as keyof typeof PRESETS])
+    : activePreset;
 
   return (
     <div
@@ -229,7 +232,8 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
                 aria-hidden="true"
               />
               {presetIds.map((presetId) => {
-                const preset = PRESETS[presetId];
+                // For custom preset, use the actual custom values from context
+                const preset = presetId === 'custom' ? getActivePreset() : PRESETS[presetId];
                 const isActive = activePresetId === presetId;
 
                 return (
