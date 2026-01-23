@@ -1,4 +1,4 @@
-# 📝 Changelog
+	# 📝 Changelog
 
 Dokumentation aller abgeschlossenen Stories und Releases.
 
@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Smart Task Input (POMO-136, 3 SP)**:
+  - "Meeting 30" → Task "Meeting" + 30min Timer startet sofort
+  - Patterns: "30m Meeting", "1h", "Deep work 1.5h"
+  - Live-Preview unter Input zeigt erkannte Duration
+  - Preset-Anzeige aktualisiert sich auf Override-Duration
+  - Max 180 min mit "Maximum 180 min" Feedback
+  - 3 Interaktionen: T → tippen → Enter = Flow
 - **Daily Goals (POMO-134, 5 SP)**:
   - Tägliches Partikel-Ziel setzen (1-9)
   - SessionCounter transformiert sich zu Goal-Progress-Anzeige
