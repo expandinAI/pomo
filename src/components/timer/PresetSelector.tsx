@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FastForward } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
 import { PRESETS, getPresetLabel, SPRING, type TimerPreset, type SessionType } from '@/styles/design-tokens';
@@ -15,6 +16,8 @@ interface PresetSelectorProps {
   nextBreakIsLong?: boolean;
   /** Override work duration from smart input (e.g., "Meeting 30") */
   overrideWorkDuration?: number | null;
+  /** Whether auto-start is enabled (shows visual indicator) */
+  autoStartEnabled?: boolean;
 }
 
 // Get preset info text (work + break duration)
@@ -38,11 +41,13 @@ function CollapsedPresetView({
   durations,
   nextBreakIsLong,
   overrideWorkDuration,
+  autoStartEnabled,
 }: {
   currentMode: SessionType;
   durations: TimerDurations;
   nextBreakIsLong?: boolean;
   overrideWorkDuration?: number | null;
+  autoStartEnabled?: boolean;
 }) {
   const isWork = currentMode === 'work';
   // Use override duration if set (from smart input), otherwise use preset
@@ -73,7 +78,7 @@ function CollapsedPresetView({
 
   return (
     <div
-      className="relative z-20 flex items-center justify-center px-4 py-2 rounded-xl bg-surface/40 light:bg-surface-dark/40 backdrop-blur-sm border border-white/[0.08] light:border-black/[0.05] shadow-lg text-sm font-medium"
+      className="relative z-20 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-surface/40 light:bg-surface-dark/40 backdrop-blur-sm border border-white/[0.08] light:border-black/[0.05] shadow-lg text-sm font-medium"
       role="status"
       aria-live="polite"
     >
@@ -90,11 +95,17 @@ function CollapsedPresetView({
           <span className="text-tertiary light:text-tertiary-dark">{workMinutes}m Work</span>
         </>
       )}
+      {autoStartEnabled && (
+        <FastForward
+          className="w-3 h-3 text-tertiary light:text-tertiary-dark ml-1"
+          aria-label="Auto-start enabled"
+        />
+      )}
     </div>
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
@@ -188,6 +199,7 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
               durations={effectiveDurations}
               nextBreakIsLong={nextBreakIsLong}
               overrideWorkDuration={overrideWorkDuration}
+              autoStartEnabled={autoStartEnabled}
             />
           </motion.div>
         ) : (

@@ -14,8 +14,17 @@ const STORAGE_KEY = 'particle_timer_settings';
 const CUSTOM_PRESET_KEY = 'particle_custom_preset';
 const OVERFLOW_KEY = 'particle_overflow_enabled';
 const DAILY_GOAL_KEY = 'particle_daily_goal';
+const AUTO_START_KEY = 'particle_auto_start_enabled';
+const AUTO_START_DELAY_KEY = 'particle_auto_start_delay';
+const AUTO_START_MODE_KEY = 'particle_auto_start_mode';
 const DEFAULT_PRESET_ID = 'classic';
 const DEFAULT_OVERFLOW_ENABLED = true; // Overflow is ON by default
+const DEFAULT_AUTO_START_ENABLED = false;
+const DEFAULT_AUTO_START_DELAY: AutoStartDelay = 5;
+const DEFAULT_AUTO_START_MODE: AutoStartMode = 'all';
+
+type AutoStartDelay = 3 | 5 | 10;
+type AutoStartMode = 'all' | 'breaks-only';
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_timer_settings';
@@ -149,6 +158,63 @@ function saveDailyGoal(goal: number | null): void {
   }
 }
 
+function loadAutoStartEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_AUTO_START_ENABLED;
+  try {
+    const stored = localStorage.getItem(AUTO_START_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_AUTO_START_ENABLED;
+}
+
+function saveAutoStartEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(AUTO_START_KEY, JSON.stringify(enabled));
+}
+
+function loadAutoStartDelay(): AutoStartDelay {
+  if (typeof window === 'undefined') return DEFAULT_AUTO_START_DELAY;
+  try {
+    const stored = localStorage.getItem(AUTO_START_DELAY_KEY);
+    if (stored !== null) {
+      const parsed = parseInt(stored, 10);
+      if (parsed === 3 || parsed === 5 || parsed === 10) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_AUTO_START_DELAY;
+}
+
+function saveAutoStartDelay(delay: AutoStartDelay): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(AUTO_START_DELAY_KEY, delay.toString());
+}
+
+function loadAutoStartMode(): AutoStartMode {
+  if (typeof window === 'undefined') return DEFAULT_AUTO_START_MODE;
+  try {
+    const stored = localStorage.getItem(AUTO_START_MODE_KEY);
+    if (stored === 'all' || stored === 'breaks-only') {
+      return stored;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_AUTO_START_MODE;
+}
+
+function saveAutoStartMode(mode: AutoStartMode): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(AUTO_START_MODE_KEY, mode);
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -179,7 +245,17 @@ interface TimerSettingsContextValue {
   // Daily goal (1-9 particles, null = no goal)
   dailyGoal: number | null;
   setDailyGoal: (goal: number | null) => void;
+  // Auto-start next session
+  autoStartEnabled: boolean;
+  setAutoStartEnabled: (enabled: boolean) => void;
+  autoStartDelay: AutoStartDelay;
+  setAutoStartDelay: (delay: AutoStartDelay) => void;
+  // Auto-start mode: 'all' or 'breaks-only'
+  autoStartMode: AutoStartMode;
+  setAutoStartMode: (mode: AutoStartMode) => void;
 }
+
+export type { AutoStartDelay, AutoStartMode };
 
 const TimerSettingsContext = createContext<TimerSettingsContextValue | null>(null);
 
@@ -193,6 +269,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [customSessionsUntilLong, setCustomSessionsUntilLong] = useState<number>(PRESETS.custom.sessionsUntilLong);
   const [overflowEnabled, setOverflowEnabledState] = useState<boolean>(DEFAULT_OVERFLOW_ENABLED);
   const [dailyGoal, setDailyGoalState] = useState<number | null>(null);
+  const [autoStartEnabled, setAutoStartEnabledState] = useState<boolean>(DEFAULT_AUTO_START_ENABLED);
+  const [autoStartDelay, setAutoStartDelayState] = useState<AutoStartDelay>(DEFAULT_AUTO_START_DELAY);
+  const [autoStartMode, setAutoStartModeState] = useState<AutoStartMode>(DEFAULT_AUTO_START_MODE);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -209,6 +288,15 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const goal = loadDailyGoal();
     setDailyGoalState(goal);
+
+    const autoStart = loadAutoStartEnabled();
+    setAutoStartEnabledState(autoStart);
+
+    const autoStartDelayVal = loadAutoStartDelay();
+    setAutoStartDelayState(autoStartDelayVal);
+
+    const autoStartModeVal = loadAutoStartMode();
+    setAutoStartModeState(autoStartModeVal);
 
     setIsLoaded(true);
   }, []);
@@ -276,6 +364,24 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveDailyGoal(goal);
   }, []);
 
+  // Set auto-start enabled
+  const setAutoStartEnabled = useCallback((enabled: boolean) => {
+    setAutoStartEnabledState(enabled);
+    saveAutoStartEnabled(enabled);
+  }, []);
+
+  // Set auto-start delay
+  const setAutoStartDelay = useCallback((delay: AutoStartDelay) => {
+    setAutoStartDelayState(delay);
+    saveAutoStartDelay(delay);
+  }, []);
+
+  // Set auto-start mode
+  const setAutoStartMode = useCallback((mode: AutoStartMode) => {
+    setAutoStartModeState(mode);
+    saveAutoStartMode(mode);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -297,6 +403,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setOverflowEnabled,
       dailyGoal,
       setDailyGoal,
+      autoStartEnabled,
+      setAutoStartEnabled,
+      autoStartDelay,
+      setAutoStartDelay,
+      autoStartMode,
+      setAutoStartMode,
     }),
     [
       durations,
@@ -315,6 +427,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setOverflowEnabled,
       dailyGoal,
       setDailyGoal,
+      autoStartEnabled,
+      setAutoStartEnabled,
+      autoStartDelay,
+      setAutoStartDelay,
+      autoStartMode,
+      setAutoStartMode,
     ]
   );
 

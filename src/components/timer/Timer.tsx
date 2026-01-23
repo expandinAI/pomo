@@ -40,6 +40,7 @@ interface TimerState {
   showCelebration: boolean;
   showSkipMessage: boolean;
   currentTask: string;
+  autoStartCountdown: number | null;
 }
 
 type TimerAction =
@@ -55,12 +56,15 @@ type TimerAction =
   | { type: 'SYNC_DURATIONS'; durations: TimerDurations }
   | { type: 'ADJUST_TIME'; delta: number; durations: TimerDurations }
   | { type: 'SET_TASK'; task: string }
-  | { type: 'CLEAR_TASK' };
+  | { type: 'CLEAR_TASK' }
+  | { type: 'START_AUTO_COUNTDOWN'; delay: number }
+  | { type: 'TICK_AUTO_COUNTDOWN' }
+  | { type: 'CANCEL_AUTO_COUNTDOWN' };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
     case 'START':
-      return { ...state, isRunning: true, isPaused: false };
+      return { ...state, isRunning: true, isPaused: false, autoStartCountdown: null };
 
     case 'PAUSE':
       return { ...state, isRunning: false, isPaused: true };
@@ -71,6 +75,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         timeRemaining: action.durations[state.mode],
         isRunning: false,
         isPaused: false,
+        autoStartCountdown: null,
       };
 
     case 'SET_TIME':
@@ -125,6 +130,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         // NO completedPomodoros increment
         // NO showCelebration
         showSkipMessage: true,
+        autoStartCountdown: null, // Cancel any active countdown
       };
     }
 
@@ -135,6 +141,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         timeRemaining: action.durations[action.mode],
         isRunning: false,
         isPaused: false,
+        autoStartCountdown: null, // Cancel any active countdown
       };
 
     case 'SYNC_DURATIONS':
@@ -168,6 +175,18 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     case 'CLEAR_TASK':
       return { ...state, currentTask: '' };
 
+    case 'START_AUTO_COUNTDOWN':
+      return { ...state, autoStartCountdown: action.delay };
+
+    case 'TICK_AUTO_COUNTDOWN':
+      if (state.autoStartCountdown === null || state.autoStartCountdown <= 0) {
+        return state;
+      }
+      return { ...state, autoStartCountdown: state.autoStartCountdown - 1 };
+
+    case 'CANCEL_AUTO_COUNTDOWN':
+      return { ...state, autoStartCountdown: null, showCelebration: true };
+
     default:
       return state;
   }
@@ -189,13 +208,14 @@ const initialState: TimerState = {
   showCelebration: false,
   showSkipMessage: false,
   currentTask: '',
+  autoStartCountdown: null,
 };
 
 export function Timer() {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -212,6 +232,14 @@ export function Timer() {
   // Ref to always have current overflowEnabled
   const overflowEnabledRef = useRef(overflowEnabled);
   overflowEnabledRef.current = overflowEnabled;
+
+  // Ref to always have current autoStartEnabled, delay, and mode
+  const autoStartEnabledRef = useRef(autoStartEnabled);
+  autoStartEnabledRef.current = autoStartEnabled;
+  const autoStartDelayRef = useRef(autoStartDelay);
+  autoStartDelayRef.current = autoStartDelay;
+  const autoStartModeRef = useRef(autoStartMode);
+  autoStartModeRef.current = autoStartMode;
 
   // Ref for selectedProjectId (to use in callbacks)
   const selectedProjectIdRef = useRef<string | null>(null);
@@ -295,6 +323,9 @@ export function Timer() {
   const [showDailyGoalReached, setShowDailyGoalReached] = useState(false);
   const prevTodayCountRef = useRef(0);
 
+  // Toast message (for Shift+A toggle, etc.)
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -357,6 +388,26 @@ export function Timer() {
     window.addEventListener('particle:open-goals', handleOpenGoals);
     return () => window.removeEventListener('particle:open-goals', handleOpenGoals);
   }, []);
+
+  // Listen for toast events and auto-clear after 2 seconds
+  useEffect(() => {
+    function handleToast(e: CustomEvent<{ message: string }>) {
+      setToastMessage(e.detail.message);
+    }
+
+    window.addEventListener('particle:toast', handleToast as EventListener);
+    return () => window.removeEventListener('particle:toast', handleToast as EventListener);
+  }, []);
+
+  // Auto-clear toast after 2 seconds
+  useEffect(() => {
+    if (toastMessage) {
+      const timeout = setTimeout(() => {
+        setToastMessage(null);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [toastMessage]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -426,7 +477,37 @@ export function Timer() {
     if (completionSoundEnabled) {
       playSound('break');
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration]);
+
+    // Trigger auto-start countdown if enabled and conditions are met
+    // Check: auto-start enabled, not in overflow mode, mode allows, daily goal not reached
+    const isWorkToBreak = sessionMode === 'work';
+    const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
+
+    // Calculate new today count after this session (for daily goal check)
+    const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+    const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
+
+    const shouldAutoStart =
+      autoStartEnabledRef.current &&
+      !overflowEnabledRef.current &&
+      autoStartAllowed &&
+      !dailyGoalReached;
+
+    const countdownDelay = autoStartDelayRef.current;
+
+    // Show toast if auto-start was blocked by daily goal
+    if (autoStartEnabledRef.current && !overflowEnabledRef.current && autoStartAllowed && dailyGoalReached) {
+      window.dispatchEvent(new CustomEvent('particle:toast', {
+        detail: { message: 'Daily goal reached · Auto-start paused' }
+      }));
+    }
+
+    if (shouldAutoStart) {
+      setTimeout(() => {
+        dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
+      }, 100);
+    }
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal]);
 
   // Initialize Web Worker timer
   const {
@@ -491,6 +572,24 @@ export function Timer() {
       return () => clearTimeout(timeout);
     }
   }, [state.showSkipMessage]);
+
+  // Auto-start countdown tick
+  useEffect(() => {
+    if (state.autoStartCountdown === null) return;
+
+    // When countdown reaches 0, play sound and start session
+    if (state.autoStartCountdown === 0) {
+      playSound('autostart');
+      dispatch({ type: 'START' }); // START clears autoStartCountdown
+      return;
+    }
+
+    const interval = setInterval(() => {
+      dispatch({ type: 'TICK_AUTO_COUNTDOWN' });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [state.autoStartCountdown, playSound]);
 
   // Hide max limit message after 2 seconds
   useEffect(() => {
@@ -792,7 +891,35 @@ export function Timer() {
     setOneOffDuration(null);
 
     vibrate('medium');
-  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, oneOffDuration]);
+
+    // Trigger auto-start countdown if enabled and conditions are met
+    const isWorkToBreak = sessionMode === 'work';
+    const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
+
+    // Calculate new today count after this session (for daily goal check)
+    const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+    const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
+
+    const shouldAutoStart =
+      autoStartEnabledRef.current &&
+      autoStartAllowed &&
+      !dailyGoalReached;
+
+    const countdownDelay = autoStartDelayRef.current;
+
+    // Show toast if auto-start was blocked by daily goal
+    if (autoStartEnabledRef.current && autoStartAllowed && dailyGoalReached) {
+      window.dispatchEvent(new CustomEvent('particle:toast', {
+        detail: { message: 'Daily goal reached · Auto-start paused' }
+      }));
+    }
+
+    if (shouldAutoStart) {
+      setTimeout(() => {
+        dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
+      }, 100);
+    }
+  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, oneOffDuration, todayCount, dailyGoal]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -805,10 +932,20 @@ export function Timer() {
       switch (e.key) {
         case ' ':
           e.preventDefault();
-          if (state.isRunning) {
+          // Cancel auto-start countdown if active
+          if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
+            dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
+          } else if (state.isRunning) {
             dispatch({ type: 'PAUSE' });
           } else {
             dispatch({ type: 'START' });
+          }
+          break;
+        case 'Escape':
+          // Cancel auto-start countdown if active
+          if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
+            e.preventDefault();
+            dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
           }
           break;
         case 'r':
@@ -876,7 +1013,18 @@ export function Timer() {
           break;
         case 'a':
         case 'A':
-          cycleAmbientType();
+          if (e.shiftKey) {
+            // Shift+A = Toggle Auto-Start
+            e.preventDefault();
+            const newEnabled = !autoStartEnabled;
+            setAutoStartEnabled(newEnabled);
+            // Dispatch toast event
+            window.dispatchEvent(new CustomEvent('particle:toast', {
+              detail: { message: newEnabled ? 'Auto-Start enabled' : 'Auto-Start disabled' }
+            }));
+          } else {
+            cycleAmbientType();
+          }
           break;
         // Task input focus (only when idle and in work mode)
         case 't':
@@ -907,7 +1055,7 @@ export function Timer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -942,6 +1090,16 @@ export function Timer() {
   const handleOpenSettings = useCallback(() => {
     window.dispatchEvent(new CustomEvent('particle:open-settings'));
   }, []);
+
+  // Toggle auto-start (for command palette)
+  const handleToggleAutoStart = useCallback(() => {
+    const newEnabled = !autoStartEnabled;
+    setAutoStartEnabled(newEnabled);
+    // Dispatch toast event
+    window.dispatchEvent(new CustomEvent('particle:toast', {
+      detail: { message: newEnabled ? 'Auto-Start enabled' : 'Auto-Start disabled' }
+    }));
+  }, [autoStartEnabled, setAutoStartEnabled]);
 
   // Task handlers
   const handleTaskChange = useCallback((task: string) => {
@@ -1018,6 +1176,7 @@ export function Timer() {
         timerIsRunning={state.isRunning}
         timerIsPaused={state.isPaused}
         isMuted={muted}
+        autoStartEnabled={autoStartEnabled}
         onStart={handleStart}
         onPause={handlePause}
         onReset={handleReset}
@@ -1026,6 +1185,7 @@ export function Timer() {
         onOpenSettings={handleOpenSettings}
         onToggleMute={toggleMute}
         onPresetChange={applyPreset}
+        onToggleAutoStart={handleToggleAutoStart}
       />
 
       {/* Preset selector */}
@@ -1036,6 +1196,7 @@ export function Timer() {
         durations={durations}
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
         overrideWorkDuration={oneOffDuration}
+        autoStartEnabled={autoStartEnabled}
       />
 
       {/* Timer display */}
@@ -1110,23 +1271,26 @@ export function Timer() {
       {/* Fixed status message slot at bottom of screen */}
       <StatusMessage
         message={
-          showMaxLimitMessage
-            ? 'Maximum 180 min'
-            : state.showCelebration
-              ? showDailyGoalReached
-                ? 'Daily Goal reached!'
-                : 'Well done!'
-              : state.showSkipMessage
-                ? `Skipped to ${SESSION_LABELS[state.mode]}`
-                : showDailyGoalReached
+          toastMessage
+            ? toastMessage
+            : showMaxLimitMessage
+              ? 'Maximum 180 min'
+              : state.showCelebration
+                ? showDailyGoalReached
                   ? 'Daily Goal reached!'
-                  : isTimerHovered && state.isRunning
-                    ? isOverflow
-                      ? formatEndTime(overflowSeconds, true)
-                      : formatEndTime(state.timeRemaining, false)
-                    : null
+                  : 'Well done!'
+                : state.showSkipMessage
+                  ? `Skipped to ${SESSION_LABELS[state.mode]}`
+                  : showDailyGoalReached
+                    ? 'Daily Goal reached!'
+                    : isTimerHovered && state.isRunning
+                      ? isOverflow
+                        ? formatEndTime(overflowSeconds, true)
+                        : formatEndTime(state.timeRemaining, false)
+                      : null
         }
-        subtle={isTimerHovered && state.isRunning && !state.showCelebration && !state.showSkipMessage && !showDailyGoalReached && !showMaxLimitMessage}
+        autoStartCountdown={state.autoStartCountdown}
+        nextMode={SESSION_LABELS[state.mode]}
       />
     </div>
   );
