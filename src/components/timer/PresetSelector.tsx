@@ -12,6 +12,7 @@ interface PresetSelectorProps {
   isSessionActive?: boolean;
   currentMode?: SessionType;
   durations?: TimerDurations;
+  nextBreakIsLong?: boolean;
 }
 
 // Get preset info text (work + break duration)
@@ -33,16 +34,35 @@ function getPresetAriaLabel(preset: TimerPreset): string {
 function CollapsedPresetView({
   currentMode,
   durations,
+  nextBreakIsLong,
 }: {
   currentMode: SessionType;
   durations: TimerDurations;
+  nextBreakIsLong?: boolean;
 }) {
   const isWork = currentMode === 'work';
   const workMinutes = Math.floor(durations.work / 60);
-  const breakMinutes = currentMode === 'longBreak'
-    ? Math.floor(durations.longBreak / 60)
-    : Math.floor(durations.shortBreak / 60);
-  const breakLabel = currentMode === 'longBreak' ? 'Long Break' : 'Break';
+
+  // Determine break duration and label based on current mode and next break type
+  let breakMinutes: number;
+  let breakLabel: string;
+
+  if (currentMode === 'longBreak') {
+    breakMinutes = Math.floor(durations.longBreak / 60);
+    breakLabel = 'Long Break';
+  } else if (currentMode === 'shortBreak') {
+    breakMinutes = Math.floor(durations.shortBreak / 60);
+    breakLabel = 'Break';
+  } else {
+    // Work mode - show what the NEXT break will be
+    if (nextBreakIsLong) {
+      breakMinutes = Math.floor(durations.longBreak / 60);
+      breakLabel = 'Long Break';
+    } else {
+      breakMinutes = Math.floor(durations.shortBreak / 60);
+      breakLabel = 'Break';
+    }
+  }
 
   return (
     <div
@@ -54,7 +74,7 @@ function CollapsedPresetView({
         <>
           <span className="text-primary light:text-primary-dark">{workMinutes}m Work</span>
           <span className="text-tertiary light:text-tertiary-dark mx-2">→</span>
-          <span className="text-tertiary light:text-tertiary-dark">{breakMinutes}m Break</span>
+          <span className="text-tertiary light:text-tertiary-dark">{breakMinutes}m {breakLabel}</span>
         </>
       ) : (
         <>
@@ -67,7 +87,7 @@ function CollapsedPresetView({
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset } = useTimerSettingsContext();
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
@@ -159,6 +179,7 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
             <CollapsedPresetView
               currentMode={currentMode}
               durations={effectiveDurations}
+              nextBreakIsLong={nextBreakIsLong}
             />
           </motion.div>
         ) : (
