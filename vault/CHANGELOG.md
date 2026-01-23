@@ -7,6 +7,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Daily Goals (POMO-134, 5 SP)**:
+  - Tägliches Partikel-Ziel setzen (1-9)
+  - SessionCounter transformiert sich zu Goal-Progress-Anzeige
+  - G O Shortcut öffnet Goal-Overlay (vim-style Navigation)
+  - Keyboard-first: Direkteingabe 1-9, 0 für "No Goal"
+  - "Daily Goal reached!" Celebration bei Zielerreichung
+  - Command Palette Integration (Set Daily Goal)
+  - Klick auf Session-Dots öffnet Overlay
+  - Persistenz in localStorage, Reset um Mitternacht
+  - Philosophie: Goal = Kompass, nicht Peitsche
 - **Project Tracking (POMO-100 bis POMO-107, 16 SP)**:
   - Projekt-Datenmodell mit ID, Name, Brightness, Archiv-Status
   - CRUD-Operationen für Projekte (Erstellen, Bearbeiten, Archivieren, Wiederherstellen)
@@ -161,6 +171,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-134-daily-goals]]
 - [[stories/done/POMO-066-preset-selector]]
 - [[stories/done/POMO-067-deep-work-preset]]
 - [[stories/done/POMO-068-ultradian-preset]]
