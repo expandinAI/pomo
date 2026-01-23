@@ -26,10 +26,10 @@ Ein Blick gen체gt: "Fertig um 14:30" sagt mehr als "noch 23:45". Der Nutzer wei�
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** Timer l채uft, **When** ich auf den Timer schaue, **Then** sehe ich unter der Zeit "bis 14:30" in dezenter Schrift
-- [ ] **Given** Timer ist pausiert, **When** ich pausiere, **Then** verschwindet die Endzeit (da sie sich bei Resume 채ndert)
-- [ ] **Given** Timer im Overflow, **When** Zeit > 0 체berschritten, **Then** zeigt "seit 14:30" statt "bis"
-- [ ] **Given** Endzeit w채re morgen, **When** Session > 24h (Edge Case), **Then** zeigt "bis morgen 02:30"
+- [x] **Given** Timer l채uft, **When** ich auf den Timer schaue, **Then** sehe ich unter der Zeit "bis 14:30" in dezenter Schrift
+- [x] **Given** Timer ist pausiert, **When** ich pausiere, **Then** verschwindet die Endzeit (da sie sich bei Resume 채ndert)
+- [x] **Given** Timer im Overflow, **When** Zeit > 0 체berschritten, **Then** zeigt "seit 14:30" statt "bis"
+- [x] **Given** Endzeit w채re morgen, **When** Session > 24h (Edge Case), **Then** zeigt "bis morgen 02:30"
 - [ ] **Given** Nutzer bevorzugt 12h Format, **When** System 12h verwendet, **Then** zeigt "bis 2:30 PM"
 
 ## Technische Details
