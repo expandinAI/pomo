@@ -344,6 +344,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   // Toast message (for Shift+A toggle, etc.)
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Hovered preset ID (for StatusMessage contextual display)
+  const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
+
+  // Collapsed view hover (for session info display during active session)
+  const [isCollapsedHovered, setIsCollapsedHovered] = useState(false);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -1419,6 +1425,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
         overrideWorkDuration={oneOffDuration}
         autoStartEnabled={autoStartEnabled}
+        onPresetHover={setHoveredPresetId}
+        onCollapsedHover={setIsCollapsedHovered}
       />
 
       {/* Timer display - clickable to open timeline */}
@@ -1527,6 +1535,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}
+        hoveredPresetId={hoveredPresetId}
+        durations={durations}
+        isRunning={state.isRunning}
+        mode={state.mode}
+        isCollapsedHovered={isCollapsedHovered}
+        nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
       />
     </div>
   );

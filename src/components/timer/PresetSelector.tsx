@@ -18,6 +18,10 @@ interface PresetSelectorProps {
   overrideWorkDuration?: number | null;
   /** Whether auto-start is enabled (shows visual indicator) */
   autoStartEnabled?: boolean;
+  /** Callback when hovering over a preset (only when idle) */
+  onPresetHover?: (presetId: string | null) => void;
+  /** Callback when hovering over collapsed view (during active session) */
+  onCollapsedHover?: (isHovered: boolean) => void;
 }
 
 // Get preset info text (work + break duration)
@@ -105,7 +109,7 @@ function CollapsedPresetView({
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, onPresetHover, onCollapsedHover }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset, customDurations, customSessionsUntilLong } = useTimerSettingsContext();
 
   // Build a virtual custom preset with actual custom values (not dependent on active preset)
@@ -203,6 +207,8 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
               ...SPRING.bouncy,
               opacity: { duration: 0.2 }
             }}
+            onMouseEnter={() => onCollapsedHover?.(true)}
+            onMouseLeave={() => onCollapsedHover?.(false)}
           >
             <CollapsedPresetView
               currentMode={currentMode}
@@ -250,8 +256,18 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
                     aria-checked={isActive}
                     aria-label={getPresetAriaLabel(preset)}
                     onClick={() => handlePresetClick(presetId)}
-                    onMouseEnter={() => setHoveredPresetId(presetId)}
-                    onMouseLeave={() => setHoveredPresetId(null)}
+                    onMouseEnter={() => {
+                      setHoveredPresetId(presetId);
+                      if (!isSessionActive) {
+                        onPresetHover?.(presetId);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredPresetId(null);
+                      if (!isSessionActive) {
+                        onPresetHover?.(null);
+                      }
+                    }}
                     disabled={disabled}
                     title={preset.description}
                     className={cn(
