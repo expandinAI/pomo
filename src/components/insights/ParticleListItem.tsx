@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Coffee, Zap, MoreHorizontal } from 'lucide-react';
+import { Coffee, Zap } from 'lucide-react';
 import { SESSION_LABELS, type SessionType } from '@/styles/design-tokens';
 import { formatDuration, formatTime, type CompletedSession } from '@/lib/session-storage';
 import { getProject } from '@/lib/projects';
@@ -18,7 +18,7 @@ interface ParticleListItemProps {
 }
 
 /**
- * Single particle list item with icon, task name, project, duration, and menu button
+ * Single particle list item - entire row is clickable to open details
  */
 export function ParticleListItem({ session, onEdit }: ParticleListItemProps) {
   const isWork = session.type === 'work';
@@ -32,7 +32,11 @@ export function ParticleListItem({ session, onEdit }: ParticleListItemProps) {
   }, [session.projectId]);
 
   return (
-    <div className="group flex items-center gap-3 py-2 px-1 -mx-1 rounded-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 transition-colors">
+    <button
+      onClick={() => onEdit(session)}
+      className="w-full flex items-center gap-3 py-2 px-1 -mx-1 rounded-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 active:bg-tertiary/10 light:active:bg-tertiary-dark/10 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
+      aria-label={`Edit ${displayName}`}
+    >
       {/* Icon */}
       <div
         className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -65,15 +69,6 @@ export function ParticleListItem({ session, onEdit }: ParticleListItemProps) {
       <span className="text-xs text-tertiary light:text-tertiary-dark tabular-nums w-16 text-right flex-shrink-0">
         {formatTime(session.completedAt)}
       </span>
-
-      {/* Menu Button */}
-      <button
-        onClick={() => onEdit(session)}
-        className="w-7 h-7 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark opacity-0 group-hover:opacity-100 hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-all focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        aria-label={`Edit ${displayName}`}
-      >
-        <MoreHorizontal className="w-4 h-4" />
-      </button>
-    </div>
+    </button>
   );
 }
