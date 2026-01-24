@@ -2,30 +2,23 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, Clock, Flame } from 'lucide-react';
+import { X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { prefersReducedMotion } from '@/lib/utils';
 import { loadSessions, type CompletedSession } from '@/lib/session-storage';
 import {
   filterSessionsByTimeRange,
-  calculateDeepWorkMinutes,
   calculateWeeklyStats,
-  formatHoursDecimal,
-  formatTrendMessage,
-  calculateCurrentStreak,
-  calculateLongestStreak,
   calculateFocusScore,
+  getLifetimeStats,
+  formatHoursMinutes,
   type TimeRange,
 } from '@/lib/session-analytics';
 import { TimeRangeSelector } from './TimeRangeSelector';
-import { MetricCard } from './MetricCard';
-import { SessionTimeline } from './SessionTimeline';
-import { WeeklyBarChart } from './WeeklyBarChart';
-import { TotalHoursCounter } from './TotalHoursCounter';
-import { WeeklyReportSummary } from './WeeklyReportSummary';
-import { StatsProjectBreakdown } from './StatsProjectBreakdown';
-import { ExportButton } from './ExportButton';
+import { DashboardTabs, type DashboardTab } from './DashboardTabs';
+import { OverviewTab } from './OverviewTab';
+import { HistoryTab } from './HistoryTab';
 import { getProjectBreakdown } from '@/lib/projects';
 
 interface StatisticsDashboardProps {
@@ -33,25 +26,12 @@ interface StatisticsDashboardProps {
 }
 
 /**
- * Format minutes as hours and minutes (e.g., "2h 30m" or "45m")
- */
-function formatDeepWorkTime(minutes: number): string {
-  if (minutes === 0) return '0m';
-
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60);
-
-  if (hours === 0) return `${mins}m`;
-  if (mins === 0) return `${hours}h`;
-  return `${hours}h ${mins}m`;
-}
-
-/**
  * Statistics Dashboard Modal
- * Container for all statistics components with time range filtering
+ * Container for all statistics components with time range filtering and tabs
  */
 export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
   const [sessions, setSessions] = useState<CompletedSession[]>([]);
 
@@ -74,38 +54,23 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     return filterSessionsByTimeRange(sessions, timeRange);
   }, [sessions, timeRange]);
 
-  // Calculate metrics
-  const deepWorkMinutes = useMemo(() => {
-    return calculateDeepWorkMinutes(filteredSessions);
-  }, [filteredSessions]);
-
-  const workSessionsCount = useMemo(() => {
+  // Calculate particle count (work sessions only)
+  const particleCount = useMemo(() => {
     return filteredSessions.filter(s => s.type === 'work').length;
   }, [filteredSessions]);
 
-  // Calculate streak (uses all sessions, not filtered by time range)
-  const currentStreak = useMemo(() => {
-    return calculateCurrentStreak(sessions);
-  }, [sessions]);
-
-  const longestStreak = useMemo(() => {
-    return calculateLongestStreak(sessions);
-  }, [sessions]);
-
-  // Calculate focus score (uses filtered sessions for volume/count, all sessions for streak)
+  // Calculate focus score (uses filtered sessions)
   const focusScore = useMemo(() => {
     return calculateFocusScore(filteredSessions);
   }, [filteredSessions]);
 
-  // Generate focus score subtitle based on score
-  const focusScoreSubtitle = useMemo(() => {
-    if (focusScore >= 70) return 'Great focus!';
-    if (focusScore >= 40) return 'Keep going';
-    return 'Start a session';
-  }, [focusScore]);
+  // Get lifetime total hours (all-time, not filtered)
+  const totalHours = useMemo(() => {
+    const stats = getLifetimeStats();
+    return formatHoursMinutes(stats.totalSeconds);
+  }, [sessions]); // Recalculate when sessions change
 
   // Calculate weekly stats for the chart (always show current week)
-  // Note: calculateWeeklyStats loads sessions internally from localStorage
   const weeklyStats = useMemo(() => {
     if (!isOpen) return null;
     return calculateWeeklyStats(0);
@@ -133,27 +98,45 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
   // Listen for external open event (G S navigation)
   useEffect(() => {
     function handleOpenDashboard() {
+      setActiveTab('overview');
+      setIsOpen(true);
+    }
+
+    function handleOpenHistory() {
+      setActiveTab('history');
       setIsOpen(true);
     }
 
     window.addEventListener('particle:open-dashboard', handleOpenDashboard);
-    // Also listen to the old event for backwards compatibility during transition
+    window.addEventListener('particle:open-history', handleOpenHistory);
+    // Also listen to the old event for backwards compatibility
     window.addEventListener('particle:open-stats', handleOpenDashboard);
     return () => {
       window.removeEventListener('particle:open-dashboard', handleOpenDashboard);
+      window.removeEventListener('particle:open-history', handleOpenHistory);
       window.removeEventListener('particle:open-stats', handleOpenDashboard);
     };
   }, []);
 
-  // Get time range label for accessibility
-  const timeRangeLabel = useMemo(() => {
-    switch (timeRange) {
-      case 'day': return 'today';
-      case 'week': return 'this week';
-      case 'month': return 'this month';
-      case 'all': return 'all time';
-    }
-  }, [timeRange]);
+  // Handle project click - close dashboard and open project detail
+  const handleProjectClick = (projectId: string | null) => {
+    // Only handle clicks on actual projects, not "No Project"
+    if (projectId === null) return;
+
+    setIsOpen(false);
+    setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent('particle:open-project-detail', {
+          detail: { projectId },
+        })
+      );
+    }, 150); // Small delay to let modal close animation complete
+  };
+
+  // Handle switch to history tab
+  const handleSwitchToHistory = () => {
+    setActiveTab('history');
+  };
 
   return (
     <AnimatePresence>
@@ -205,117 +188,30 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  {/* Metrics Row */}
-                  <div className="grid grid-cols-3 gap-4 mb-5">
-                    <MetricCard
-                      title="Focus Score"
-                      value={focusScore.toString()}
-                      subtitle={focusScoreSubtitle}
-                      icon={<Zap className="w-4 h-4" />}
-                    />
-                    <MetricCard
-                      title="Deep Work"
-                      value={formatDeepWorkTime(deepWorkMinutes)}
-                      subtitle={`${workSessionsCount} Particle${workSessionsCount !== 1 ? 's' : ''}`}
-                      icon={<Clock className="w-4 h-4" />}
-                    />
-                    <MetricCard
-                      title="Streak"
-                      value={`${currentStreak}d`}
-                      subtitle={`Best: ${longestStreak}d`}
-                      icon={<Flame className="w-4 h-4" />}
-                    />
-                  </div>
+                {/* Tab Navigation */}
+                <DashboardTabs
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                />
 
-                  {/* Weekly Chart */}
-                  <motion.div
-                    initial={reducedMotion ? {} : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={reducedMotion ? { duration: 0 } : { delay: 0.1 }}
-                    className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-4 mb-4"
-                  >
-                    <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3 text-center">
-                      This Week
-                    </h3>
-                    {weeklyStats && (
-                      <>
-                        <WeeklyBarChart
-                          dailyStats={weeklyStats.dailyStats}
-                          bestDay={weeklyStats.bestDay}
-                          showGoal={true}
-                          goalHours={4}
-                        />
-                        {/* Week summary */}
-                        <div className="mt-4 pt-3 border-t border-tertiary/10 light:border-tertiary-dark/10 flex items-center justify-center gap-4 text-xs">
-                          <span className="text-secondary light:text-secondary-dark">
-                            <span className="font-medium text-primary light:text-primary-dark">
-                              {formatHoursDecimal(weeklyStats.totalSeconds)}h
-                            </span>
-                            {' '}this week
-                          </span>
-                          {formatTrendMessage(weeklyStats) && (
-                            <span className={`${weeklyStats.trend === 'up' ? 'text-accent light:text-accent-dark' : 'text-tertiary light:text-tertiary-dark'}`}>
-                              {formatTrendMessage(weeklyStats)}
-                            </span>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </motion.div>
-
-                  {/* Total Hours Counter */}
-                  <TotalHoursCounter refreshTrigger={refreshTrigger} />
-
-                  {/* Weekly Report Summary */}
-                  <div className="mb-4">
-                    <WeeklyReportSummary refreshTrigger={refreshTrigger} />
-                  </div>
-
-                  {/* Project Breakdown */}
-                  {projectBreakdown.length > 0 && (
-                    <div className="mb-4 border-t border-tertiary/10 light:border-tertiary-dark/10">
-                      <StatsProjectBreakdown
-                        breakdown={projectBreakdown}
-                        onProjectClick={(projectId) => {
-                          // Close stats dashboard and open project detail
-                          setIsOpen(false);
-                          // Dispatch event to open project detail
-                          setTimeout(() => {
-                            window.dispatchEvent(
-                              new CustomEvent('particle:open-project-detail', {
-                                detail: { projectId },
-                              })
-                            );
-                          }, 150); // Small delay to let modal close animation complete
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Session Timeline */}
-                  <motion.div
-                    initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={reducedMotion ? { duration: 0 } : { delay: 0.15 }}
-                  >
-                    <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3">
-                      Collected Particles
-                    </h3>
-                    <SessionTimeline
-                      sessions={filteredSessions}
-                      emptyMessage={`No Particles ${timeRangeLabel}`}
-                      emptyDescription="Collect a Particle to see it here"
-                      maxHeight="max-h-[30vh]"
-                    />
-                  </motion.div>
-
-                  {/* Export Button */}
-                  <div className="pt-2 border-t border-tertiary/10 light:border-tertiary-dark/10">
-                    <ExportButton />
-                  </div>
-                </div>
+                {/* Tab Content */}
+                {activeTab === 'overview' ? (
+                  <OverviewTab
+                    sessions={sessions}
+                    filteredSessions={filteredSessions}
+                    timeRange={timeRange}
+                    refreshTrigger={refreshTrigger}
+                    totalHours={totalHours}
+                    particleCount={particleCount}
+                    focusScore={focusScore}
+                    weeklyStats={weeklyStats}
+                    projectBreakdown={projectBreakdown}
+                    onSwitchToHistory={handleSwitchToHistory}
+                    onProjectClick={handleProjectClick}
+                  />
+                ) : (
+                  <HistoryTab />
+                )}
               </div>
             </motion.div>
           </motion.div>

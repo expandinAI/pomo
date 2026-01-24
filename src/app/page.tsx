@@ -50,8 +50,8 @@ export default function Home() {
         window.dispatchEvent(new CustomEvent('particle:open-dashboard'));
       },
       onHistory: () => {
-        // History is now accessed via Timeline
-        setShowTimeline(true);
+        // Open Statistics Dashboard with History tab
+        window.dispatchEvent(new CustomEvent('particle:open-history'));
       },
       onSettings: () => {
         window.dispatchEvent(new CustomEvent('particle:open-settings'));

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface GPrefixCallbacks {
-  onTimer: () => void;
+  onTimeline: () => void;
   onStats: () => void;
   onHistory: () => void;
   onSettings: () => void;
@@ -15,9 +15,9 @@ interface GPrefixCallbacks {
 /**
  * Hook for G-prefix (vim-like) navigation shortcuts
  *
- * G T = Go to Timer (close all modals)
- * G S = Open Statistics Dashboard
- * G H = Open History (SessionHistory)
+ * G T = Open Timeline (day view)
+ * G S = Open Statistics Dashboard (Overview tab)
+ * G H = Open Statistics Dashboard (History tab)
  * G Y = Open Year View
  * G P = Open Projects
  * G O = Open Goals (Daily Goal)
@@ -69,7 +69,7 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
           case 't':
             e.preventDefault();
             e.stopImmediatePropagation();
-            callbacks.onTimer();
+            callbacks.onTimeline();
             break;
           case 's':
             e.preventDefault();
