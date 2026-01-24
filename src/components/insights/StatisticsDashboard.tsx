@@ -139,8 +139,8 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
           {/* Modal Backdrop + Container */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: 1, pointerEvents: 'auto' as const }}
+            exit={{ opacity: 0, pointerEvents: 'none' as const }}
             transition={{ duration: reducedMotion ? 0 : 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 light:bg-black/40"
             onClick={() => setIsOpen(false)}
