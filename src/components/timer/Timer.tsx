@@ -1425,6 +1425,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
         overrideWorkDuration={oneOffDuration}
         autoStartEnabled={autoStartEnabled}
+        overflowEnabled={overflowEnabled}
         onPresetHover={setHoveredPresetId}
         onCollapsedHover={setIsCollapsedHovered}
       />
