@@ -3,7 +3,7 @@
  * Central source of truth for all keyboard shortcuts in the app
  */
 
-export type ShortcutCategory = 'timer' | 'projects' | 'navigation' | 'general';
+export type ShortcutCategory = 'timer' | 'particle' | 'projects' | 'navigation' | 'general';
 
 export interface Shortcut {
   key: string;
@@ -31,6 +31,14 @@ export const SHORTCUTS: Shortcut[] = [
   { key: '3', description: 'Ultradian preset', category: 'timer' },
   { key: '4', description: 'Custom preset', category: 'timer' },
 
+  // Particle detail shortcuts
+  { key: '↑/+', description: '+1 minute', category: 'particle' },
+  { key: '↓/-', description: '-1 minute', category: 'particle' },
+  { key: 'Shift+↑', description: '+5 minutes', category: 'particle' },
+  { key: 'Shift+↓', description: '-5 minutes', category: 'particle' },
+  { key: 'Enter', description: 'Save and close', category: 'particle' },
+  { key: 'Esc', description: 'Close', category: 'particle' },
+
   // Project shortcuts
   { key: 'P', description: 'Open project selector', category: 'projects' },
   { key: 'P 1-9', description: 'Select recent project', category: 'projects' },
@@ -41,7 +49,7 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'J / K', description: 'Navigate project list', category: 'projects' },
 
   // Navigation shortcuts
-  { key: 'G T', description: 'Go to Timer', category: 'navigation' },
+  { key: 'G T', description: 'Open Timeline', category: 'navigation' },
   { key: 'G S', description: 'Open Statistics', category: 'navigation' },
   { key: 'G H', description: 'Open History', category: 'navigation' },
   { key: 'G P', description: 'Go to Projects', category: 'navigation' },
@@ -64,6 +72,7 @@ export const SHORTCUTS: Shortcut[] = [
  */
 export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
   timer: 'Timer',
+  particle: 'Particle Detail',
   projects: 'Projects',
   navigation: 'Navigation',
   general: 'General',
@@ -72,7 +81,7 @@ export const CATEGORY_LABELS: Record<ShortcutCategory, string> = {
 /**
  * Category display order
  */
-export const CATEGORY_ORDER: ShortcutCategory[] = ['timer', 'projects', 'navigation', 'general'];
+export const CATEGORY_ORDER: ShortcutCategory[] = ['timer', 'particle', 'projects', 'navigation', 'general'];
 
 /**
  * Get shortcuts grouped by category

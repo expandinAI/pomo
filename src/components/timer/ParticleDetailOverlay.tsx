@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, X, Trash2 } from 'lucide-react';
+import { Minus, Plus, X, Trash2, Zap } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
@@ -11,6 +11,7 @@ import {
   deleteSession,
   formatTime24h,
   formatDuration,
+  formatDate,
   type CompletedSession,
 } from '@/lib/session-storage';
 import { ProjectDropdown } from '@/components/task/ProjectDropdown';
@@ -139,12 +140,25 @@ export function ParticleDetailOverlay({
     setIsEditingDuration(false);
   }, [durationInput]);
 
+  // Duration adjusters (defined before useEffect that uses it)
+  const adjustDuration = useCallback((delta: number) => {
+    setDuration((prev) => {
+      const newDuration = Math.max(MIN_DURATION, Math.min(MAX_DURATION, prev + delta));
+      return newDuration;
+    });
+    setIsDirty(true);
+  }, []);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      // Don't intercept when editing duration
+      // Don't intercept when typing in inputs (except duration input)
+      const target = e.target as HTMLElement;
+      const isInTextInput = target.tagName === 'INPUT' && target !== durationInputRef.current;
+
+      // Don't intercept when editing duration (except for special keys)
       if (isEditingDuration) {
         if (e.key === 'Escape') {
           e.preventDefault();
@@ -174,21 +188,23 @@ export function ParticleDetailOverlay({
           // Enter = Save and Close (primary action)
           handleSaveAndClose();
         }
+      } else if (!isInTextInput) {
+        // Duration adjustment shortcuts (only when not typing in task input)
+        if (e.key === 'ArrowUp' || e.key === '+' || e.key === '=') {
+          e.preventDefault();
+          const delta = e.shiftKey ? 5 * 60 : 60; // Shift = +5 min, else +1 min
+          adjustDuration(delta);
+        } else if (e.key === 'ArrowDown' || e.key === '-') {
+          e.preventDefault();
+          const delta = e.shiftKey ? -5 * 60 : -60; // Shift = -5 min, else -1 min
+          adjustDuration(delta);
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit]);
-
-  // Duration adjusters
-  const adjustDuration = (delta: number) => {
-    setDuration((prev) => {
-      const newDuration = Math.max(MIN_DURATION, Math.min(MAX_DURATION, prev + delta));
-      return newDuration;
-    });
-    setIsDirty(true);
-  };
+  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration]);
 
   // Quick edit duration
   const startDurationEdit = () => {
@@ -221,6 +237,24 @@ export function ParticleDetailOverlay({
     ? session!.duration - session!.overflowDuration!
     : session?.duration || 0;
   const overflowDuration = session?.overflowDuration || 0;
+
+  // Calculate time span (start → end)
+  // End time is completedAt, start time is calculated from duration
+  const timeSpan = useMemo(() => {
+    if (!session) return null;
+    const endTime = new Date(session.completedAt);
+    const startTime = new Date(endTime.getTime() - duration * 1000);
+    return {
+      start: formatTime24h(startTime.toISOString()),
+      end: formatTime24h(session.completedAt),
+    };
+  }, [session, duration]);
+
+  // Date context for header
+  const dateContext = useMemo(() => {
+    if (!session) return '';
+    return formatDate(session.completedAt);
+  }, [session]);
 
   // Ordinal suffix for particle number
   const getOrdinalSuffix = (n: number) => {
@@ -287,7 +321,7 @@ export function ParticleDetailOverlay({
                           : 'Particle'}
                       </span>
                       <span className="text-xs text-tertiary light:text-tertiary-dark">
-                        {formatTime24h(session.completedAt)}
+                        {dateContext}
                       </span>
                     </div>
                   </div>
@@ -303,13 +337,31 @@ export function ParticleDetailOverlay({
 
                 {/* Content with staggered animation */}
                 <motion.div
-                  className="p-6 space-y-6"
+                  className="p-6 space-y-5"
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
                 >
+                  {/* Time span display */}
+                  <motion.div
+                    variants={itemVariants}
+                    className="text-center"
+                  >
+                    <motion.p
+                      key={timeSpan?.start}
+                      initial={{ opacity: 0.5 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15 }}
+                      className="text-base font-mono text-secondary light:text-secondary-dark tabular-nums tracking-wide"
+                    >
+                      {timeSpan?.start}
+                      <span className="mx-2 text-tertiary light:text-tertiary-dark">→</span>
+                      {timeSpan?.end}
+                    </motion.p>
+                  </motion.div>
+
                   {/* Duration display - hero element */}
-                  <motion.div variants={itemVariants} className="text-center py-2">
+                  <motion.div variants={itemVariants} className="text-center py-1">
                     <div className="flex items-center justify-center gap-4">
                       {/* Decrease buttons */}
                       <div className="flex items-center gap-1">
@@ -344,20 +396,24 @@ export function ParticleDetailOverlay({
                               value={durationInput}
                               onChange={(e) => setDurationInput(e.target.value)}
                               onBlur={commitDurationEdit}
-                              className="w-full text-center text-4xl font-light text-primary light:text-primary-dark bg-transparent border-b-2 border-accent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              className="w-full text-center text-5xl font-light text-primary light:text-primary-dark bg-transparent border-b-2 border-accent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                           ) : (
-                            <button
+                            <motion.button
+                              key={durationMinutes}
                               onClick={startDurationEdit}
-                              className="w-full text-center text-4xl font-light text-primary light:text-primary-dark tabular-nums hover:opacity-70 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg border-b-2 border-transparent"
+                              className="w-full text-center text-5xl font-light text-primary light:text-primary-dark tabular-nums hover:opacity-70 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg border-b-2 border-transparent"
                               title="Click to edit"
+                              initial={{ scale: 0.95 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                             >
                               {durationMinutes}
-                            </button>
+                            </motion.button>
                           )}
                         </div>
                         {/* Fixed position min label */}
-                        <span className="text-sm text-tertiary light:text-tertiary-dark ml-1 self-end pb-1">
+                        <span className="text-sm text-tertiary light:text-tertiary-dark ml-1 self-end pb-2">
                           min
                         </span>
                       </div>
@@ -382,20 +438,30 @@ export function ParticleDetailOverlay({
                         </button>
                       </div>
                     </div>
-
-                    {/* Overflow info */}
-                    {hasOverflow && (
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-xs text-tertiary light:text-tertiary-dark mt-3"
-                      >
-                        {formatDuration(plannedDuration)} planned
-                        <span className="mx-1.5 opacity-50">+</span>
-                        {formatDuration(overflowDuration)} extra
-                      </motion.p>
-                    )}
                   </motion.div>
+
+                  {/* Overflow Badge - prominent */}
+                  <AnimatePresence>
+                    {hasOverflow && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ type: 'spring', ...SPRING.gentle }}
+                        className="mx-auto max-w-[280px] px-4 py-3 rounded-xl bg-tertiary/10 light:bg-tertiary-dark/10 border border-tertiary/10 light:border-tertiary-dark/10"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Zap className="w-3.5 h-3.5 text-accent light:text-accent-dark" />
+                          <span className="text-sm font-medium text-primary light:text-primary-dark">
+                            +{formatDuration(overflowDuration)} overflow
+                          </span>
+                        </div>
+                        <p className="text-xs text-tertiary light:text-tertiary-dark pl-[22px]">
+                          {formatDuration(plannedDuration)} planned → {formatDuration(duration)} actual
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Task input */}
                   <motion.div variants={itemVariants}>
