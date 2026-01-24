@@ -172,6 +172,56 @@ pnpm test         # Run tests
 - `src/lib/timer-worker.ts` - Web Worker for timer
 - `tailwind.config.js` - Design tokens
 
+## Architektur-Entscheidungen
+
+### ParticleDetailOverlay (DRY-Prinzip)
+
+**Single Source of Truth:** Die Komponente `src/components/timer/ParticleDetailOverlay.tsx` ist die **einzige** Komponente zum Bearbeiten von Particles. Sie wird überall verwendet:
+
+| Ort | Zugriff |
+|-----|---------|
+| Timeline | Klick auf Particle-Dot |
+| History | Klick auf Particle-Zeile |
+| Projektansicht | Klick auf Session in Projekt-Detail |
+| (Zukünftig) | Überall wo Particles angezeigt werden |
+
+**Wichtig bei Erweiterungen:**
+- Neue Features **immer** in `ParticleDetailOverlay.tsx` implementieren
+- Keine parallelen Edit-UIs bauen
+- Alle Einstiegspunkte profitieren automatisch von Verbesserungen
+- Konsistente UX über die gesamte App
+
+**Integration Pattern:**
+```typescript
+// In der Parent-Komponente:
+const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+
+// Callback für Klick auf Particle
+const handleEdit = (session: CompletedSession) => {
+  setEditingSessionId(session.id);
+};
+
+// Overlay einbinden
+<ParticleDetailOverlay
+  isOpen={editingSessionId !== null}
+  sessionId={editingSessionId}
+  onClose={() => setEditingSessionId(null)}
+  onSessionUpdated={() => refreshData()}
+  onSessionDeleted={() => { refreshData(); setEditingSessionId(null); }}
+  projects={projects}
+  recentProjectIds={recentProjectIds}
+/>
+```
+
+**Aktueller Feature-Stand:**
+- Zeitspanne (Start → Ende) mit Live-Update
+- Dauer-Anpassung (+/- Buttons, direkte Eingabe)
+- Prominenter Overflow-Badge
+- Task-Eingabe
+- Projekt-Zuordnung
+- Keyboard-Shortcuts (↑/↓, Shift+↑/↓, Enter, Esc)
+- Delete mit Confirmation
+
 ## Timer Business Logic
 
 ### COMPLETE vs. SKIP Actions
