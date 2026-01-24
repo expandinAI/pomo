@@ -5,8 +5,8 @@ priority: p2
 effort: 2
 feature: analytics
 created: 2026-01-18
-updated: 2026-01-20
-done_date: 2026-01-20
+updated: 2026-01-23
+done_date: 2026-01-23
 tags: [analytics, export, premium]
 ---
 

@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break';
+type SoundType = 'completion' | 'break' | 'autostart';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -469,6 +469,32 @@ function playBreakChimeWithDest(ctx: AudioContext, dest: AudioNode): void {
 }
 
 /**
+ * Auto-start: Gentle awakening "ding"
+ * 880 Hz (A5), 150ms, sine wave
+ * Soft and pleasant - signals session is about to begin
+ */
+function playAutoStartSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(880, now); // A5
+
+  // Soft attack, smooth decay
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(0.2, now + 0.02);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(dest);
+
+  oscillator.start(now);
+  oscillator.stop(now + 0.18);
+}
+
+/**
  * Collect: Soft, low "doop" for particle arrival
  * Gentle, warm sound that's pleasant to hear repeatedly
  * Like something softly landing in its place
@@ -565,6 +591,8 @@ export function useSound(): UseSoundReturn {
     const doPlay = () => {
       if (type === 'break') {
         playSoundWithVolume(ctx, playBreakChimeWithDest, volume);
+      } else if (type === 'autostart') {
+        playSoundWithVolume(ctx, playAutoStartSoundWithDest, volume);
       } else {
         playSound(selectedSound, volume);
       }

@@ -16,6 +16,7 @@ import {
   Repeat,
   Target,
   FastForward,
+  CalendarClock,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -157,6 +158,17 @@ export function CommandRegistration({
       ] as Command[] : []),
 
       // Navigation commands
+      {
+        id: 'open-timeline',
+        label: 'Open Timeline',
+        shortcut: 'G T',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-timeline'));
+        },
+        icon: <CalendarClock className="w-4 h-4" />,
+        keywords: ['timeline', 'day', 'view', 'sessions', 'history'],
+      },
       {
         id: 'open-settings',
         label: 'Open Settings',

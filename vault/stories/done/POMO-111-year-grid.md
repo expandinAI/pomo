@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 5
 feature: year-view
 created: 2026-01-20
 updated: 2026-01-20
-done_date: null
+done_date: 2026-01-24
 tags: [year-view, grid, visualization, p0]
 ---
 

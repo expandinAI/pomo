@@ -44,6 +44,16 @@ High-level Überblick über Features und Milestones.
 | [[features/system-integrations]] | POMO-078 bis 082 | 29 | Backlog |
 | [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | ✅ Done |
 
+---
+
+## UI Polish (Quick Wins)
+
+| Feature | ID | Priority | Status |
+|---------|-----|----------|--------|
+| Settings Overlay Polish | POMO-162 | P1 | Backlog |
+
+**Scope:** Language consistency (EN), compact layouts, shared components
+
 **P0 Total: ~118 Story Points (43 Stories)**
 
 ---
@@ -54,8 +64,8 @@ High-level Überblick über Features und Milestones.
 |---------|-----|-----------|---------|--------|
 | Weekly Focus Report | POMO-029 | P1 | M | ✅ Done |
 | Focus Heatmap | POMO-030 | P1 | M | ✅ Done |
-| Total Hours Counter | POMO-031 | P1 | S | Backlog |
-| Export Data (CSV) | POMO-032 | P2 | S | Backlog |
+| Total Hours Counter | POMO-031 | P1 | S | ✅ Done |
+| Export Data (CSV) | POMO-032 | P2 | S | ✅ Done |
 
 ---
 
@@ -126,6 +136,8 @@ Parked ideas:
 ### v1.0 - Premium Launch
 - [x] Weekly Focus Report
 - [x] Focus Heatmap
+- [x] Total Hours Counter
+- [x] Export Data (CSV)
 - [ ] Premium paywall
 - [ ] Payment integration
 - [ ] License system

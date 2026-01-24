@@ -94,9 +94,9 @@ Session hat gezeigt: Harte Timer-Stops sind frustrierend. Wenn jemand im Flow is
 - [x] Text-Hint: "Im Flow? Arbeite weiter." (dezent)
 
 **Edge Cases:**
-- [ ] Overflow funktioniert für alle Presets (25/5, 52/17, 90/20)
-- [ ] Bei Custom-Presets auch verfügbar
-- [ ] Overflow-Zeit wird in Session-History gespeichert
+- [x] Overflow funktioniert für alle Presets (25/5, 52/17, 90/20)
+- [x] Bei Custom-Presets auch verfügbar
+- [x] Overflow-Zeit wird in Session-History gespeichert
 
 ---
 
@@ -176,9 +176,9 @@ interface Session {
 
 #### Nicht im Scope (v1)
 
-- [ ] Automatischer Break nach X Minuten Overflow
-- [ ] Overflow-Warnung nach langer Zeit
-- [ ] Unterschiedliche Overflow-Modi pro Preset
+- [x] Automatischer Break nach X Minuten Overflow
+- [x] Overflow-Warnung nach langer Zeit
+- [x] Unterschiedliche Overflow-Modi pro Preset
 
 ---
 
