@@ -444,25 +444,21 @@ export function ParticleDetailOverlay({
                         transition={{ duration: 0.15 }}
                         className="flex items-center justify-between"
                       >
-                        <span className="text-sm text-secondary light:text-secondary-dark">
-                          Delete this particle?
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setShowDeleteConfirm(false)}
-                            className="px-3 py-1.5 rounded-lg text-sm text-secondary light:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                          >
-                            Cancel
-                            <kbd className="ml-1.5 text-xs opacity-70">Esc</kbd>
-                          </button>
-                          <button
-                            onClick={handleDelete}
-                            className="px-3 py-1.5 rounded-lg text-sm text-red-400 light:text-red-600 bg-red-500/10 hover:bg-red-500/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                          >
-                            Delete
-                            <kbd className="ml-1.5 text-xs opacity-70">Enter</kbd>
-                          </button>
-                        </div>
+                        {/* Cancel - text link (same position as Delete link) */}
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className="flex items-center gap-1.5 text-sm text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+                        >
+                          Cancel
+                        </button>
+
+                        {/* Delete - same size as Done button */}
+                        <button
+                          onClick={handleDelete}
+                          className="px-4 py-2 rounded-xl text-sm font-medium bg-primary light:bg-primary-dark text-background light:text-background-dark hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        >
+                          Delete
+                        </button>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -476,7 +472,7 @@ export function ParticleDetailOverlay({
                         {/* Delete - subtle text link */}
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
-                          className="flex items-center gap-1.5 text-sm text-tertiary light:text-tertiary-dark hover:text-red-400 light:hover:text-red-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+                          className="flex items-center gap-1.5 text-sm text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Delete
