@@ -9,10 +9,10 @@ import { ProjectParticleViz } from './ProjectParticleViz';
 import { ProjectStatsCards } from './ProjectStatsCards';
 import { ProjectSessionList } from './ProjectSessionList';
 import { ProjectForm } from './ProjectForm';
+import { ParticleDetailOverlay } from '@/components/timer/ParticleDetailOverlay';
 import type { Project, ProjectWithStats } from '@/lib/projects';
-import { getSessionsForProject } from '@/lib/projects';
+import { getSessionsForProject, getActiveProjects } from '@/lib/projects';
 import type { CompletedSession } from '@/lib/session-storage';
-import { loadSessions } from '@/lib/session-storage';
 
 interface ProjectDetailModalProps {
   /** The project to display (null for "No Project" view) */
@@ -47,16 +47,31 @@ export function ProjectDetailModal({
   checkDuplicateName,
 }: ProjectDetailModalProps) {
   const [showEditForm, setShowEditForm] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [sessionsVersion, setSessionsVersion] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
   const backButtonRef = useRef<HTMLButtonElement>(null);
 
   const isNoProject = project === null;
 
+  // Get all projects for the overlay
+  const allProjects = useMemo(() => getActiveProjects(), []);
+
   // Get sessions for this project
   const projectSessions = useMemo(() => {
     if (!isOpen) return [];
+    // Depend on sessionsVersion to refresh when sessions are updated
+    void sessionsVersion;
     return getSessionsForProject(project?.id ?? null);
-  }, [isOpen, project?.id]);
+  }, [isOpen, project?.id, sessionsVersion]);
+
+  // Get recent project IDs from sessions for sorting in overlay
+  const recentProjectIds = useMemo(() => {
+    return projectSessions
+      .filter((s) => s.projectId)
+      .map((s) => s.projectId as string)
+      .slice(0, 10);
+  }, [projectSessions]);
 
   // Calculate detailed stats
   const detailedStats = useMemo(() => {
@@ -108,7 +123,8 @@ export function ProjectDetailModal({
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (!isOpen || showEditForm) return;
+    // Don't handle keys when editing project or session
+    if (!isOpen || showEditForm || editingSessionId) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       // Close on Escape or Backspace
@@ -128,7 +144,7 @@ export function ProjectDetailModal({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showEditForm, isNoProject, onClose]);
+  }, [isOpen, showEditForm, editingSessionId, isNoProject, onClose]);
 
   // Handlers
   const handleClose = useCallback(() => {
@@ -142,6 +158,25 @@ export function ProjectDetailModal({
     },
     [onUpdate]
   );
+
+  // Session editing handlers
+  const handleEditSession = useCallback((session: CompletedSession) => {
+    setEditingSessionId(session.id);
+  }, []);
+
+  const handleCloseSessionEdit = useCallback(() => {
+    setEditingSessionId(null);
+  }, []);
+
+  const handleSessionUpdated = useCallback(() => {
+    // Refresh sessions list
+    setSessionsVersion((v) => v + 1);
+  }, []);
+
+  const handleSessionDeleted = useCallback(() => {
+    setEditingSessionId(null);
+    setSessionsVersion((v) => v + 1);
+  }, []);
 
   // Get display values
   const displayName = isNoProject ? 'No Project' : project?.name ?? '';
@@ -242,7 +277,10 @@ export function ProjectDetailModal({
 
                     {/* Session List */}
                     <div className="px-6 py-6">
-                      <ProjectSessionList sessions={projectSessions} />
+                      <ProjectSessionList
+                        sessions={projectSessions}
+                        onEdit={handleEditSession}
+                      />
                     </div>
                   </div>
 
@@ -273,6 +311,17 @@ export function ProjectDetailModal({
           checkDuplicateName={checkDuplicateName}
         />
       )}
+
+      {/* Particle Detail Overlay */}
+      <ParticleDetailOverlay
+        isOpen={editingSessionId !== null}
+        sessionId={editingSessionId}
+        onClose={handleCloseSessionEdit}
+        onSessionUpdated={handleSessionUpdated}
+        onSessionDeleted={handleSessionDeleted}
+        projects={allProjects}
+        recentProjectIds={recentProjectIds}
+      />
     </>
   );
 }
