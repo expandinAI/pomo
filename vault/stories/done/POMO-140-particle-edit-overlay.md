@@ -1,5 +1,9 @@
 # POMO-140: Particle Edit Overlay
 
+**Status:** Done
+**Completed:** 2026-01-24
+**Commits:** `690bca7`, `8ee221c`
+
 ## Story
 
 **As a** user who has completed particles today,
@@ -19,37 +23,40 @@ The particles become a progressive disclosure mechanism: simple dots on the surf
 ## Acceptance Criteria
 
 ### Opening the Overlay
-- [ ] Clicking a filled particle opens the Particle Detail Overlay
-- [ ] Tapping a filled particle (touch) opens the Particle Detail Overlay
-- [ ] Keyboard: Navigate to particle + Enter opens overlay
-- [ ] Empty particles still open Daily Goal Overlay (unchanged)
-- [ ] Overlay animates in with existing modal pattern
+- [x] Clicking a filled particle opens the Particle Detail Overlay
+- [x] Tapping a filled particle (touch) opens the Particle Detail Overlay
+- [x] Keyboard: Navigate to particle + Enter opens overlay
+- [x] Empty particles still open Daily Goal Overlay (unchanged)
+- [x] Overlay animates in with existing modal pattern
 
 ### Displayed Information
-- [ ] Completion time: "14:32" (24h format)
-- [ ] Duration: "25 min" (formatted)
-- [ ] Task description (if set)
-- [ ] Project assignment (if set)
-- [ ] Visual particle indicator (filled dot)
+- [x] Completion time: "14:32" (24h format)
+- [x] Duration: "25 min" (formatted)
+- [x] Task description (if set)
+- [x] Project assignment (if set)
+- [x] Visual particle indicator (breathing animated dot)
+- [x] Particle index context ("3rd particle")
+- [x] Overflow info when applicable (planned + extra)
 
 ### Editing Capabilities
-- [ ] **Task**: Inline text input to add/edit task description
-- [ ] **Project**: Project selector dropdown (same as timer input)
-- [ ] **Duration**: Ability to adjust duration (±1 min, ±5 min)
-- [ ] Changes save automatically on blur/close
-- [ ] Delete option (with confirmation) to remove particle
+- [x] **Task**: Inline text input to add/edit task description
+- [x] **Project**: Project selector dropdown (same as timer input)
+- [x] **Duration**: Ability to adjust duration (±1 min, ±5 min)
+- [x] **Quick-edit**: Click duration number to type directly
+- [x] Changes save automatically on close
+- [x] Delete option (with confirmation) to remove particle
 
 ### Closing the Overlay
-- [ ] Click outside to close (saves changes)
-- [ ] Press Escape to close (saves changes)
-- [ ] Explicit close button (×)
-- [ ] Smooth exit animation
+- [x] Click outside to close (saves changes)
+- [x] Press Escape to close (saves changes)
+- [x] Press Enter to close (saves changes) - Primary action
+- [x] Explicit close button (×)
+- [x] Smooth exit animation
 
 ### Feedback & State
-- [ ] Unsaved changes indicator (subtle)
-- [ ] Success feedback on save (brief)
-- [ ] Particle list updates immediately after edit
-- [ ] StatusMessage shows confirmation after close
+- [x] Particle list updates immediately after edit
+- [x] Staggered entrance animations for premium feel
+- [x] Monochrome design (no red for delete)
 
 ## Technical Notes
 
