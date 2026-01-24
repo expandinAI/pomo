@@ -968,6 +968,93 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
   }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal]);
 
+  // End session early with success (E key confirmation)
+  // This is a proper completion with elapsed time - user earns the particle
+  const handleEndEarly = useCallback(() => {
+    const sessionMode = state.mode;
+    // Use one-off duration if set, otherwise use preset
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[sessionMode];
+    // Calculate elapsed time (how much they actually worked)
+    const elapsedTime = fullDuration - state.timeRemaining;
+    const wasWorkSession = sessionMode === 'work';
+
+    // Save session with ELAPSED time (user earned this time)
+    const taskData = {
+      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      presetId: activePresetIdRef.current,
+      ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+    };
+
+    addSession(sessionMode, elapsedTime, taskData);
+
+    // Save task to recent tasks (only for work sessions with a task)
+    if (wasWorkSession && state.currentTask) {
+      addRecentTask({
+        text: state.currentTask,
+        lastUsed: new Date().toISOString(),
+      });
+    }
+
+    // Proper COMPLETE action (increments counter, shows celebration)
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
+
+    // Reset worker to next session
+    const isWork = sessionMode === 'work';
+    const newCount = isWork ? state.completedPomodoros + 1 : state.completedPomodoros;
+    const nextMode: SessionType = isWork
+      ? (newCount % sessionsUntilLongRef.current === 0 ? 'longBreak' : 'shortBreak')
+      : 'work';
+    workerReset(durationsRef.current[nextMode]);
+    elapsedRef.current = 0;
+
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
+    // Clear task after completion (only for work sessions)
+    if (wasWorkSession) {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
+
+    // Reset one-off duration (next session uses preset)
+    setOneOffDuration(null);
+
+    vibrate('medium');
+
+    // Play completion sound
+    if (completionSoundEnabled) {
+      playSound('break');
+    }
+
+    // Trigger auto-start countdown if enabled and conditions are met
+    const isWorkToBreak = sessionMode === 'work';
+    const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
+
+    // Calculate new today count after this session (for daily goal check)
+    const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+    const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
+
+    const shouldAutoStart =
+      autoStartEnabledRef.current &&
+      autoStartAllowed &&
+      !dailyGoalReached;
+
+    const countdownDelay = autoStartDelayRef.current;
+
+    // Show toast if auto-start was blocked by daily goal
+    if (autoStartEnabledRef.current && autoStartAllowed && dailyGoalReached) {
+      window.dispatchEvent(new CustomEvent('particle:toast', {
+        detail: { message: 'Daily goal reached · Auto-start paused' }
+      }));
+    }
+
+    if (shouldAutoStart) {
+      setTimeout(() => {
+        dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
+      }, 100);
+    }
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal]);
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1229,10 +1316,11 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   }, [workerStart, vibrate]);
 
   // Handle end confirmation (must be before early return to follow hooks rules)
+  // Uses handleEndEarly for proper completion with elapsed time (user earns the particle)
   const handleEndConfirm = useCallback(() => {
-    handleSkip();
+    handleEndEarly();
     setShowEndConfirmation(false);
-  }, [handleSkip]);
+  }, [handleEndEarly]);
 
   const handleEndCancel = useCallback(() => {
     setShowEndConfirmation(false);
