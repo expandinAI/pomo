@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import {
   Play,
   Pause,
-  RotateCcw,
   SkipForward,
   Moon,
   Settings,
@@ -16,6 +15,7 @@ import {
   Plus,
   Repeat,
   Target,
+  FastForward,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -23,28 +23,30 @@ interface CommandRegistrationProps {
   timerIsRunning: boolean;
   timerIsPaused: boolean;
   isMuted: boolean;
+  autoStartEnabled?: boolean;
   onStart: () => void;
   onPause: () => void;
-  onReset: () => void;
   onSkip: () => void;
   onToggleTheme: () => void;
   onOpenSettings: () => void;
   onToggleMute: () => void;
   onPresetChange?: (presetId: string) => void;
+  onToggleAutoStart?: () => void;
 }
 
 export function CommandRegistration({
   timerIsRunning,
   timerIsPaused,
   isMuted,
+  autoStartEnabled,
   onStart,
   onPause,
-  onReset,
   onSkip,
   onToggleTheme,
   onOpenSettings,
   onToggleMute,
   onPresetChange,
+  onToggleAutoStart,
 }: CommandRegistrationProps) {
   useEffect(() => {
     const commands: Command[] = [
@@ -68,15 +70,6 @@ export function CommandRegistration({
         icon: <Pause className="w-4 h-4" />,
         keywords: ['stop', 'halt', 'break'],
         disabled: () => !timerIsRunning,
-      },
-      {
-        id: 'reset-timer',
-        label: 'Reset Timer',
-        shortcut: 'R',
-        category: 'timer',
-        action: onReset,
-        icon: <RotateCcw className="w-4 h-4" />,
-        keywords: ['restart', 'clear'],
       },
       {
         id: 'skip-session',
@@ -107,6 +100,17 @@ export function CommandRegistration({
         icon: isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />,
         keywords: ['sound', 'audio', 'volume', 'mute', 'unmute'],
       },
+      ...(onToggleAutoStart ? [
+        {
+          id: 'toggle-auto-start',
+          label: autoStartEnabled ? 'Disable Auto-Start' : 'Enable Auto-Start',
+          shortcut: '⇧A',
+          category: 'settings',
+          action: onToggleAutoStart,
+          icon: <FastForward className="w-4 h-4" />,
+          keywords: ['auto', 'start', 'automatic', 'flow', 'next', 'session'],
+        },
+      ] as Command[] : []),
 
       // Preset commands
       ...(onPresetChange ? [
@@ -219,14 +223,15 @@ export function CommandRegistration({
     timerIsRunning,
     timerIsPaused,
     isMuted,
+    autoStartEnabled,
     onStart,
     onPause,
-    onReset,
     onSkip,
     onToggleTheme,
     onOpenSettings,
     onToggleMute,
     onPresetChange,
+    onToggleAutoStart,
   ]);
 
   return null;

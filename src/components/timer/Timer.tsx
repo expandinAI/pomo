@@ -47,7 +47,6 @@ interface TimerState {
 type TimerAction =
   | { type: 'START' }
   | { type: 'PAUSE' }
-  | { type: 'RESET'; durations: TimerDurations }
   | { type: 'SET_TIME'; time: number }
   | { type: 'COMPLETE'; durations: TimerDurations; sessionsUntilLong: number }
   | { type: 'SKIP'; durations: TimerDurations; sessionsUntilLong: number }
@@ -69,15 +68,6 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
     case 'PAUSE':
       return { ...state, isRunning: false, isPaused: true };
-
-    case 'RESET':
-      return {
-        ...state,
-        timeRemaining: action.durations[state.mode],
-        isRunning: false,
-        isPaused: false,
-        autoStartCountdown: null,
-      };
 
     case 'SET_TIME':
       return { ...state, timeRemaining: action.time };
@@ -1033,10 +1023,6 @@ export function Timer() {
             }
           }
           break;
-        case 'r':
-        case 'R':
-          dispatch({ type: 'RESET', durations: durationsRef.current });
-          break;
         case 's':
         case 'S':
           handleSkip();
@@ -1172,16 +1158,6 @@ export function Timer() {
     vibrate('double');
     dispatch({ type: 'PAUSE' });
   }, [vibrate]);
-
-  const handleReset = useCallback(() => {
-    vibrate('heavy');
-    dispatch({ type: 'RESET', durations: durationsRef.current });
-    workerReset(durationsRef.current[state.mode]);
-    elapsedRef.current = 0;
-    // Reset overflow state
-    setIsOverflow(false);
-    setOverflowSeconds(0);
-  }, [workerReset, state.mode, vibrate]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -1333,7 +1309,6 @@ export function Timer() {
         autoStartEnabled={autoStartEnabled}
         onStart={handleStart}
         onPause={handlePause}
-        onReset={handleReset}
         onSkip={handleSkip}
         onToggleTheme={toggleTheme}
         onOpenSettings={handleOpenSettings}
@@ -1386,7 +1361,6 @@ export function Timer() {
         isPaused={state.isPaused}
         onStart={handleStart}
         onPause={handlePause}
-        onReset={handleReset}
         onComplete={handleCompleteFromOverflow}
         mode={state.mode}
         isOverflow={isOverflow}

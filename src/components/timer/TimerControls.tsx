@@ -1,9 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Check } from 'lucide-react';
+import { Play, Pause, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
 import { KeyboardHint } from '@/components/ui/KeyboardHint';
 import { SPRING, type SessionType, SESSION_LABELS } from '@/styles/design-tokens';
 
@@ -12,7 +11,6 @@ interface TimerControlsProps {
   isPaused: boolean;
   onStart: () => void;
   onPause: () => void;
-  onReset: () => void;
   onComplete?: () => void;
   mode: SessionType;
   isOverflow?: boolean;
@@ -23,7 +21,6 @@ export function TimerControls({
   isPaused,
   onStart,
   onPause,
-  onReset,
   onComplete,
   mode,
   isOverflow = false,
@@ -35,23 +32,14 @@ export function TimerControls({
 
   return (
     <motion.div
-      className="flex items-center gap-4"
+      className="relative flex items-center justify-center"
       role="group"
       aria-label="Timer controls"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', ...SPRING.gentle, delay: 0.1 }}
     >
-      {/* Reset button */}
-      <IconButton
-        label="Reset timer to beginning"
-        onClick={onReset}
-        size="md"
-      >
-        <RotateCcw className="w-full h-full" />
-      </IconButton>
-
-      {/* Main action button */}
+      {/* Main action button - always centered */}
       <Button
         variant="primary"
         size="lg"
@@ -74,45 +62,43 @@ export function TimerControls({
         )}
       </Button>
 
-      {/* Done button - morphs out when in overflow */}
+      {/* Done button - appears to the right, doesn't shift main button */}
       <AnimatePresence>
         {isOverflow && isRunning && onComplete && (
           <motion.button
             onClick={onComplete}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-light"
+            className="absolute left-full ml-4 flex items-center justify-center w-10 h-10 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-light"
             aria-label="Complete session"
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.9, x: 8 }}
             animate={{
-              scale: 1,
               opacity: 1,
+              scale: 1,
+              x: 0,
               boxShadow: [
-                '0 0 0 0 rgba(255, 255, 255, 0.4)',
-                '0 0 20px 4px rgba(255, 255, 255, 0.2)',
-                '0 0 0 0 rgba(255, 255, 255, 0.4)',
+                '0 0 0 0 rgba(255, 255, 255, 0)',
+                '0 0 12px 2px rgba(255, 255, 255, 0.15)',
+                '0 0 0 0 rgba(255, 255, 255, 0)',
               ],
             }}
-            exit={{ scale: 0, opacity: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: 8 }}
             transition={{
               type: 'spring',
               ...SPRING.gentle,
+              // Faster exit than entrance
+              exit: { duration: 0.15 },
               boxShadow: {
-                duration: 2,
+                duration: 2.5,
                 repeat: Infinity,
                 ease: 'easeInOut',
               },
             }}
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
           >
             <Check className="w-5 h-5" strokeWidth={3} />
           </motion.button>
         )}
       </AnimatePresence>
-
-      {/* Spacer for visual balance (only when not in overflow) */}
-      {!(isOverflow && isRunning) && (
-        <div className="w-10 h-10" aria-hidden="true" />
-      )}
     </motion.div>
   );
 }
