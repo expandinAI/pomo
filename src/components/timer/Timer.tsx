@@ -211,7 +211,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -1445,6 +1445,21 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           onHoverChange={setIsTimerHovered}
         />
       </button>
+
+      {/* End Time Preview - shows when setting is enabled and timer is running */}
+      <AnimatePresence>
+        {showEndTime && state.isRunning && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="text-sm text-tertiary light:text-tertiary-dark font-medium tabular-nums -mt-4"
+          >
+            {formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow)}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (

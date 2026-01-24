@@ -13,6 +13,7 @@ import { CustomPresetEditor } from './CustomPresetEditor';
 import { WeekStartSetting } from './WeekStartSetting';
 import { OverflowSettings } from './OverflowSettings';
 import { AutoStartSettings } from './AutoStartSettings';
+import { EndTimeSettings } from './EndTimeSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -166,6 +167,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Overflow Mode Toggle */}
                   <OverflowSettings />
+
+                  {/* End Time Preview Toggle */}
+                  <EndTimeSettings />
 
                   {/* Auto-Start Settings */}
                   <AutoStartSettings />

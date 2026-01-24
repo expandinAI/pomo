@@ -17,11 +17,13 @@ const DAILY_GOAL_KEY = 'particle_daily_goal';
 const AUTO_START_KEY = 'particle_auto_start_enabled';
 const AUTO_START_DELAY_KEY = 'particle_auto_start_delay';
 const AUTO_START_MODE_KEY = 'particle_auto_start_mode';
+const SHOW_END_TIME_KEY = 'particle_show_end_time';
 const DEFAULT_PRESET_ID = 'classic';
 const DEFAULT_OVERFLOW_ENABLED = true; // Overflow is ON by default
 const DEFAULT_AUTO_START_ENABLED = false;
 const DEFAULT_AUTO_START_DELAY: AutoStartDelay = 5;
 const DEFAULT_AUTO_START_MODE: AutoStartMode = 'all';
+const DEFAULT_SHOW_END_TIME = false;
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -215,6 +217,24 @@ function saveAutoStartMode(mode: AutoStartMode): void {
   localStorage.setItem(AUTO_START_MODE_KEY, mode);
 }
 
+function loadShowEndTime(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_SHOW_END_TIME;
+  try {
+    const stored = localStorage.getItem(SHOW_END_TIME_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_SHOW_END_TIME;
+}
+
+function saveShowEndTime(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(SHOW_END_TIME_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -253,6 +273,9 @@ interface TimerSettingsContextValue {
   // Auto-start mode: 'all' or 'breaks-only'
   autoStartMode: AutoStartMode;
   setAutoStartMode: (mode: AutoStartMode) => void;
+  // Show end time preview below timer
+  showEndTime: boolean;
+  setShowEndTime: (enabled: boolean) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -272,6 +295,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [autoStartEnabled, setAutoStartEnabledState] = useState<boolean>(DEFAULT_AUTO_START_ENABLED);
   const [autoStartDelay, setAutoStartDelayState] = useState<AutoStartDelay>(DEFAULT_AUTO_START_DELAY);
   const [autoStartMode, setAutoStartModeState] = useState<AutoStartMode>(DEFAULT_AUTO_START_MODE);
+  const [showEndTime, setShowEndTimeState] = useState<boolean>(DEFAULT_SHOW_END_TIME);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -297,6 +321,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const autoStartModeVal = loadAutoStartMode();
     setAutoStartModeState(autoStartModeVal);
+
+    const showEndTimeVal = loadShowEndTime();
+    setShowEndTimeState(showEndTimeVal);
 
     setIsLoaded(true);
   }, []);
@@ -382,6 +409,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveAutoStartMode(mode);
   }, []);
 
+  // Set show end time
+  const setShowEndTime = useCallback((enabled: boolean) => {
+    setShowEndTimeState(enabled);
+    saveShowEndTime(enabled);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -409,6 +442,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setAutoStartDelay,
       autoStartMode,
       setAutoStartMode,
+      showEndTime,
+      setShowEndTime,
     }),
     [
       durations,
@@ -433,6 +468,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setAutoStartDelay,
       autoStartMode,
       setAutoStartMode,
+      showEndTime,
+      setShowEndTime,
     ]
   );
 
