@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer, useCallback, useRef, useState } from 'react';
+import { useEffect, useReducer, useCallback, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TimerDisplay } from './TimerDisplay';
 import { TimerControls } from './TimerControls';
@@ -26,7 +26,7 @@ import {
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
-import { addSession, getTodaySessions } from '@/lib/session-storage';
+import { addSession, getTodaySessions, type CompletedSession } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
@@ -319,6 +319,12 @@ export function Timer() {
   // Today's completed sessions count (for daily goal)
   const [todayCount, setTodayCount] = useState(0);
 
+  // Today's sessions list (for particle hover info)
+  const [todaySessions, setTodaySessions] = useState<CompletedSession[]>([]);
+
+  // Particle hover info state
+  const [particleHoverInfo, setParticleHoverInfo] = useState<string | null>(null);
+
   // Daily goal celebration
   const [showDailyGoalReached, setShowDailyGoalReached] = useState(false);
   const prevTodayCountRef = useRef(0);
@@ -336,12 +342,27 @@ export function Timer() {
     selectProject,
     recentProjectIds,
     isLoading: projectsLoading,
+    getById,
   } = useProjects();
 
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
     selectedProjectIdRef.current = selectedProjectId;
   }, [selectedProjectId]);
+
+  // Build project name map for particle hover info
+  const projectNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const session of todaySessions) {
+      if (session.projectId && !map.has(session.projectId)) {
+        const project = getById(session.projectId);
+        if (project) {
+          map.set(session.projectId, project.name);
+        }
+      }
+    }
+    return map;
+  }, [todaySessions, getById]);
 
   // Sync durations when settings load or change
   useEffect(() => {
@@ -350,10 +371,12 @@ export function Timer() {
     }
   }, [durations, isLoaded]);
 
-  // Load and update today's session count
+  // Load and update today's session count and list
   useEffect(() => {
     if (isLoaded) {
-      const newCount = getTodaySessions().length;
+      const sessions = getTodaySessions();
+      setTodaySessions(sessions);
+      const newCount = sessions.length;
       setTodayCount(newCount);
 
       // Check for daily goal reached (only when count increases to match goal)
@@ -1248,6 +1271,9 @@ export function Timer() {
         dailyGoal={dailyGoal}
         todayCount={todayCount}
         onCounterClick={() => setShowDailyGoalOverlay(true)}
+        todaySessions={todaySessions}
+        projectNameMap={projectNameMap}
+        onParticleHover={(info) => setParticleHoverInfo(info?.displayText ?? null)}
       />
 
       {/* Screen reader live regions */}
@@ -1283,11 +1309,13 @@ export function Timer() {
                   ? `Skipped to ${SESSION_LABELS[state.mode]}`
                   : showDailyGoalReached
                     ? 'Daily Goal reached!'
-                    : isTimerHovered && state.isRunning
-                      ? isOverflow
-                        ? formatEndTime(overflowSeconds, true)
-                        : formatEndTime(state.timeRemaining, false)
-                      : null
+                    : particleHoverInfo
+                      ? particleHoverInfo
+                      : isTimerHovered && state.isRunning
+                        ? isOverflow
+                          ? formatEndTime(overflowSeconds, true)
+                          : formatEndTime(state.timeRemaining, false)
+                        : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}

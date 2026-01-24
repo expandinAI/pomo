@@ -177,3 +177,30 @@ export function getTodaySessions(): CompletedSession[] {
     return sessionDate >= today && session.type === 'work';
   });
 }
+
+// Format time in 24-hour format (HH:MM)
+export function formatTime24h(dateString: string): string {
+  return new Date(dateString).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+// Format session info for hover display
+export function formatSessionInfo(
+  session: CompletedSession,
+  projectName?: string
+): string {
+  const time = formatTime24h(session.completedAt);
+  const duration = formatDuration(session.duration);
+  const parts = [time, duration];
+
+  if (session.task) {
+    parts.push(session.task.length > 30 ? session.task.slice(0, 27) + '...' : session.task);
+  }
+  if (projectName) {
+    parts.push(projectName);
+  }
+  return parts.join(' · ');
+}
