@@ -242,7 +242,7 @@ export function VisualEffectsSettings() {
             <Circle className="w-3 h-3" />
             Particle Style
           </label>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {PARTICLE_STYLE_OPTIONS.map((option) => (
               <motion.button
                 key={option.value}

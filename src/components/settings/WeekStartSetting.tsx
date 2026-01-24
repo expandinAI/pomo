@@ -12,14 +12,14 @@ export function WeekStartSetting() {
   const { weekStart, setWeekStart } = useWeekStart();
 
   const options = [
-    { value: 'monday' as const, label: 'Montag' },
-    { value: 'sunday' as const, label: 'Sonntag' },
+    { value: 'monday' as const, label: 'Monday' },
+    { value: 'sunday' as const, label: 'Sunday' },
   ];
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-tertiary light:text-tertiary-light uppercase tracking-wider">
-        Wochenstart
+      <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
+        Week Start
       </label>
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => {
@@ -39,8 +39,8 @@ export function WeekStartSetting() {
           );
         })}
       </div>
-      <p className="text-xs text-tertiary light:text-tertiary-light">
-        Erster Tag der Woche in Kalenderansichten
+      <p className="text-xs text-tertiary light:text-tertiary-dark">
+        First day of week in calendar views
       </p>
     </div>
   );

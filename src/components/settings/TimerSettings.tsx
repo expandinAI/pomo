@@ -12,6 +12,7 @@ import { VisualEffectsSettings } from './VisualEffectsSettings';
 import { CustomPresetEditor } from './CustomPresetEditor';
 import { WeekStartSetting } from './WeekStartSetting';
 import { OverflowSettings } from './OverflowSettings';
+import { AutoStartSettings } from './AutoStartSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -129,7 +130,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                 </div>
 
                 {/* Content */}
-                <div className="p-4 space-y-5 overflow-y-auto flex-1">
+                <div className="p-4 space-y-4 overflow-y-auto flex-1">
                   {/* Presets */}
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
@@ -165,6 +166,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Overflow Mode Toggle */}
                   <OverflowSettings />
+
+                  {/* Auto-Start Settings */}
+                  <AutoStartSettings />
 
                   {/* Sound Settings */}
                   <SoundSettings />
