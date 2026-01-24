@@ -32,6 +32,11 @@ import { addRecentTask } from '@/lib/task-storage';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 
+interface TimerProps {
+  /** Callback when user clicks timer display to open timeline */
+  onTimelineOpen?: () => void;
+}
+
 interface TimerState {
   mode: SessionType;
   timeRemaining: number;
@@ -202,7 +207,7 @@ const initialState: TimerState = {
   autoStartCountdown: null,
 };
 
-export function Timer() {
+export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
@@ -1328,16 +1333,22 @@ export function Timer() {
         autoStartEnabled={autoStartEnabled}
       />
 
-      {/* Timer display */}
-      <TimerDisplay
-        timeRemaining={state.timeRemaining}
-        isRunning={state.isRunning}
-        showCelebration={state.showCelebration}
-        isOverflow={isOverflow}
-        overflowSeconds={overflowSeconds}
-        sessionDuration={oneOffDuration ?? durations[state.mode]}
-        onHoverChange={setIsTimerHovered}
-      />
+      {/* Timer display - clickable to open timeline */}
+      <button
+        onClick={onTimelineOpen}
+        className="bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-0 rounded-xl p-2 -m-2 transition-opacity hover:opacity-80"
+        aria-label="Open timeline"
+      >
+        <TimerDisplay
+          timeRemaining={state.timeRemaining}
+          isRunning={state.isRunning}
+          showCelebration={state.showCelebration}
+          isOverflow={isOverflow}
+          overflowSeconds={overflowSeconds}
+          sessionDuration={oneOffDuration ?? durations[state.mode]}
+          onHoverChange={setIsTimerHovered}
+        />
+      </button>
 
       {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (

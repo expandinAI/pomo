@@ -443,7 +443,7 @@ export function SessionCounter({
 
   return (
     <div
-      className={`flex items-center gap-3 focus:outline-none ${onCounterClick ? 'cursor-pointer' : ''}`}
+      className={`flex items-center gap-3 focus:outline-none focus-visible:ring-0 ${onCounterClick ? 'cursor-pointer' : ''}`}
       onClick={onCounterClick}
       onKeyDown={onCounterClick ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
