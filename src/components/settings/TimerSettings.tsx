@@ -14,6 +14,7 @@ import { WeekStartSetting } from './WeekStartSetting';
 import { OverflowSettings } from './OverflowSettings';
 import { AutoStartSettings } from './AutoStartSettings';
 import { EndTimeSettings } from './EndTimeSettings';
+import { VisualTimerSettings } from './VisualTimerSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -170,6 +171,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* End Time Preview Toggle */}
                   <EndTimeSettings />
+
+                  {/* Visual Timer Toggle */}
+                  <VisualTimerSettings />
 
                   {/* Auto-Start Settings */}
                   <AutoStartSettings />

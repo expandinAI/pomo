@@ -4,6 +4,8 @@ import { useRef, useEffect, useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, prefersReducedMotion } from '@/lib/utils';
 import { SPRING, ANIMATION, MICRO_ANIMATION } from '@/styles/design-tokens';
+import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
+import { ProgressRing } from './ProgressRing';
 
 interface TimerDisplayProps {
   timeRemaining: number;
@@ -75,6 +77,8 @@ export function TimerDisplay({
   sessionDuration = 0,
   onHoverChange,
 }: TimerDisplayProps) {
+  const { visualTimerEnabled } = useTimerSettingsContext();
+
   // In overflow: show total worked time (session duration + overflow)
   // Normal: show remaining time
   const displayTime = isOverflow ? (sessionDuration + overflowSeconds) : timeRemaining;
@@ -84,6 +88,10 @@ export function TimerDisplay({
   const [isHovered, setIsHovered] = useState(false);
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reducedMotion = prefersReducedMotion();
+
+  // Calculate progress for the ring (1 = full, 0 = empty)
+  const progress = sessionDuration > 0 ? timeRemaining / sessionDuration : 1;
+  const isPaused = !isRunning && timeRemaining > 0 && timeRemaining < sessionDuration;
 
   // Handle tap on touch devices - show end time for 3 seconds
   const handleTap = useCallback(() => {
@@ -148,6 +156,45 @@ export function TimerDisplay({
     },
   };
 
+  // Timer content (digits + colon)
+  const timerContent = (
+    <motion.div
+      className="relative flex items-center justify-center"
+      animate={
+        reducedMotion
+          ? {}
+          : isOverflow && isRunning
+            ? overflowPulse
+            : justStarted
+              ? { scale: [1, 1.03, 1] }
+              : { scale: 1, opacity: 1 }
+      }
+      transition={{ type: 'spring', ...SPRING.gentle }}
+    >
+      {/* Time display with animated digits and custom colon */}
+      <div
+        className={`timer-display font-mono font-semibold tabular-nums text-primary light:text-primary-light flex items-center justify-center ${
+          visualTimerEnabled
+            ? 'text-[2.5rem] sm:text-[3rem]'
+            : 'text-timer sm:text-timer-lg'
+        }`}
+      >
+        {/* Minutes */}
+        {minuteChars.map((char, index) => (
+          <AnimatedDigit key={`m-${index}`} char={char} index={index} />
+        ))}
+
+        {/* Custom Colon */}
+        <TimerColon isRunning={isRunning} />
+
+        {/* Seconds */}
+        {secondChars.map((char, index) => (
+          <AnimatedDigit key={`s-${index}`} char={char} index={minuteChars.length + index} />
+        ))}
+      </div>
+    </motion.div>
+  );
+
   return (
     <div
       className="relative flex flex-col items-center justify-center"
@@ -158,38 +205,20 @@ export function TimerDisplay({
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTap}
     >
-      {/* Floating timer display (no circle) */}
-      <motion.div
-        className="relative flex items-center justify-center"
-        animate={
-          reducedMotion
-            ? {}
-            : isOverflow && isRunning
-              ? overflowPulse
-              : justStarted
-                ? { scale: [1, 1.03, 1] }
-                : { scale: 1, opacity: 1 }
-        }
-        transition={{ type: 'spring', ...SPRING.gentle }}
-      >
-        {/* Time display with animated digits and custom colon */}
-        <div
-          className="timer-display font-mono font-semibold tabular-nums text-timer sm:text-timer-lg text-primary light:text-primary-light flex items-center justify-center"
+      {visualTimerEnabled ? (
+        <ProgressRing
+          progress={progress}
+          size={200}
+          isRunning={isRunning}
+          isPaused={isPaused}
+          isOverflow={isOverflow}
+          timeRemaining={timeRemaining}
         >
-          {/* Minutes */}
-          {minuteChars.map((char, index) => (
-            <AnimatedDigit key={`m-${index}`} char={char} index={index} />
-          ))}
-
-          {/* Custom Colon */}
-          <TimerColon isRunning={isRunning} />
-
-          {/* Seconds */}
-          {secondChars.map((char, index) => (
-            <AnimatedDigit key={`s-${index}`} char={char} index={minuteChars.length + index} />
-          ))}
-        </div>
-      </motion.div>
+          {timerContent}
+        </ProgressRing>
+      ) : (
+        timerContent
+      )}
     </div>
   );
 }

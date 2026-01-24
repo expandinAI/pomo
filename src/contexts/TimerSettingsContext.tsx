@@ -18,12 +18,14 @@ const AUTO_START_KEY = 'particle_auto_start_enabled';
 const AUTO_START_DELAY_KEY = 'particle_auto_start_delay';
 const AUTO_START_MODE_KEY = 'particle_auto_start_mode';
 const SHOW_END_TIME_KEY = 'particle_show_end_time';
+const VISUAL_TIMER_KEY = 'particle_visual_timer';
 const DEFAULT_PRESET_ID = 'classic';
 const DEFAULT_OVERFLOW_ENABLED = true; // Overflow is ON by default
 const DEFAULT_AUTO_START_ENABLED = false;
 const DEFAULT_AUTO_START_DELAY: AutoStartDelay = 5;
 const DEFAULT_AUTO_START_MODE: AutoStartMode = 'all';
 const DEFAULT_SHOW_END_TIME = false;
+const DEFAULT_VISUAL_TIMER = false;
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -235,6 +237,24 @@ function saveShowEndTime(enabled: boolean): void {
   localStorage.setItem(SHOW_END_TIME_KEY, JSON.stringify(enabled));
 }
 
+function loadVisualTimerEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_VISUAL_TIMER;
+  try {
+    const stored = localStorage.getItem(VISUAL_TIMER_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_VISUAL_TIMER;
+}
+
+function saveVisualTimerEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(VISUAL_TIMER_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -276,6 +296,9 @@ interface TimerSettingsContextValue {
   // Show end time preview below timer
   showEndTime: boolean;
   setShowEndTime: (enabled: boolean) => void;
+  // Visual timer (progress ring around countdown)
+  visualTimerEnabled: boolean;
+  setVisualTimerEnabled: (enabled: boolean) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -296,6 +319,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [autoStartDelay, setAutoStartDelayState] = useState<AutoStartDelay>(DEFAULT_AUTO_START_DELAY);
   const [autoStartMode, setAutoStartModeState] = useState<AutoStartMode>(DEFAULT_AUTO_START_MODE);
   const [showEndTime, setShowEndTimeState] = useState<boolean>(DEFAULT_SHOW_END_TIME);
+  const [visualTimerEnabled, setVisualTimerEnabledState] = useState<boolean>(DEFAULT_VISUAL_TIMER);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -324,6 +348,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const showEndTimeVal = loadShowEndTime();
     setShowEndTimeState(showEndTimeVal);
+
+    const visualTimerVal = loadVisualTimerEnabled();
+    setVisualTimerEnabledState(visualTimerVal);
 
     setIsLoaded(true);
   }, []);
@@ -415,6 +442,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveShowEndTime(enabled);
   }, []);
 
+  // Set visual timer enabled
+  const setVisualTimerEnabled = useCallback((enabled: boolean) => {
+    setVisualTimerEnabledState(enabled);
+    saveVisualTimerEnabled(enabled);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -444,6 +477,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setAutoStartMode,
       showEndTime,
       setShowEndTime,
+      visualTimerEnabled,
+      setVisualTimerEnabled,
     }),
     [
       durations,
@@ -470,6 +505,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setAutoStartMode,
       showEndTime,
       setShowEndTime,
+      visualTimerEnabled,
+      setVisualTimerEnabled,
     ]
   );
 
