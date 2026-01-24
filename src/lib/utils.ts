@@ -64,7 +64,7 @@ export function prefersDarkMode(): boolean {
 }
 
 /**
- * Format end time for display (e.g., "Endet um 14:30" or "Im Flow seit 14:07")
+ * Format end time for display (e.g., "Ends at 14:30" or "In flow since 14:07")
  */
 export function formatEndTime(
   secondsRemaining: number,
@@ -86,8 +86,8 @@ export function formatEndTime(
   const isBreak = sessionType === 'shortBreak' || sessionType === 'longBreak';
 
   if (isOverflow) {
-    return isBreak ? `Pause seit ${timeStr}` : `Im Flow seit ${timeStr}`;
+    return isBreak ? `On break since ${timeStr}` : `In flow since ${timeStr}`;
   }
 
-  return isToday ? `Endet um ${timeStr}` : `Endet morgen um ${timeStr}`;
+  return isToday ? `Ends at ${timeStr}` : `Ends tomorrow at ${timeStr}`;
 }
