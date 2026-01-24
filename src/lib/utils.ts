@@ -66,7 +66,11 @@ export function prefersDarkMode(): boolean {
 /**
  * Format end time for display (e.g., "Endet um 14:30" or "Im Flow seit 14:07")
  */
-export function formatEndTime(secondsRemaining: number, isOverflow: boolean = false): string {
+export function formatEndTime(
+  secondsRemaining: number,
+  isOverflow: boolean = false,
+  sessionType: 'work' | 'shortBreak' | 'longBreak' = 'work'
+): string {
   const targetDate = isOverflow
     ? new Date(Date.now() - secondsRemaining * 1000) // When timer hit 0
     : new Date(Date.now() + secondsRemaining * 1000); // When timer will end
@@ -79,8 +83,10 @@ export function formatEndTime(secondsRemaining: number, isOverflow: boolean = fa
     minute: '2-digit',
   });
 
+  const isBreak = sessionType === 'shortBreak' || sessionType === 'longBreak';
+
   if (isOverflow) {
-    return `Im Flow seit ${timeStr}`;
+    return isBreak ? `Pause seit ${timeStr}` : `Im Flow seit ${timeStr}`;
   }
 
   return isToday ? `Endet um ${timeStr}` : `Endet morgen um ${timeStr}`;

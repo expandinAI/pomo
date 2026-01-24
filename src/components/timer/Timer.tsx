@@ -1457,7 +1457,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
             transition={{ duration: 0.15 }}
             className="text-sm text-tertiary light:text-tertiary-dark font-medium tabular-nums -mt-4"
           >
-            {formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow)}
+            {formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow, state.mode)}
           </motion.div>
         )}
       </AnimatePresence>
@@ -1545,8 +1545,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
                         ? particleHoverInfo
                         : isTimerHovered && state.isRunning
                           ? isOverflow
-                            ? formatEndTime(overflowSeconds, true)
-                            : formatEndTime(state.timeRemaining, false)
+                            ? formatEndTime(overflowSeconds, true, state.mode)
+                            : formatEndTime(state.timeRemaining, false, state.mode)
                           : null
         }
         autoStartCountdown={state.autoStartCountdown}
