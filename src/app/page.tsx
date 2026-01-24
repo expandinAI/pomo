@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ActionBar } from '@/components/ui/ActionBar';
+import { useTheme } from '@/hooks/useTheme';
+import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
+import { TimelineOverlay } from '@/components/timeline';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -16,16 +19,8 @@ const TimerSettings = dynamic(
   () => import('@/components/settings/TimerSettings').then(mod => ({ default: mod.TimerSettings })),
   { ssr: false }
 );
-const SessionHistory = dynamic(
-  () => import('@/components/insights/SessionHistory').then(mod => ({ default: mod.SessionHistory })),
-  { ssr: false }
-);
 const StatisticsDashboard = dynamic(
   () => import('@/components/insights/StatisticsDashboard').then(mod => ({ default: mod.StatisticsDashboard })),
-  { ssr: false }
-);
-const FocusHeatmap = dynamic(
-  () => import('@/components/insights/FocusHeatmap').then(mod => ({ default: mod.FocusHeatmap })),
   { ssr: false }
 );
 const YearViewModal = dynamic(
@@ -38,19 +33,25 @@ const ProjectListModal = dynamic(
 );
 
 export default function Home() {
+  // Timeline overlay state
+  const [showTimeline, setShowTimeline] = useState(false);
+
+  // Theme and command palette
+  const { theme, toggleTheme } = useTheme();
+  const { open: openCommandPalette } = useCommandPalette();
+
   // G-prefix navigation callbacks
   const gPrefixCallbacks = useMemo(
     () => ({
-      onTimer: () => {
-        // Close all modals by dispatching close events
-        // The modals handle their own Escape key, but this is for "go to timer"
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      onTimeline: () => {
+        setShowTimeline(true);
       },
       onStats: () => {
         window.dispatchEvent(new CustomEvent('particle:open-dashboard'));
       },
       onHistory: () => {
-        window.dispatchEvent(new CustomEvent('particle:open-history'));
+        // History is now accessed via Timeline
+        setShowTimeline(true);
       },
       onSettings: () => {
         window.dispatchEvent(new CustomEvent('particle:open-settings'));
@@ -69,6 +70,16 @@ export default function Home() {
   );
 
   const { isGPressed } = useGPrefixNavigation(gPrefixCallbacks);
+
+  // Listen for timeline open event (from Command Palette)
+  useEffect(() => {
+    function handleOpenTimeline() {
+      setShowTimeline(true);
+    }
+
+    window.addEventListener('particle:open-timeline', handleOpenTimeline);
+    return () => window.removeEventListener('particle:open-timeline', handleOpenTimeline);
+  }, []);
 
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
@@ -95,15 +106,26 @@ export default function Home() {
       tabIndex={-1}
       className="relative min-h-screen flex flex-col items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom focus:outline-none"
     >
-      {/* Analytics, Settings and Theme toggle in top-right corner */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        <FocusHeatmap />
-        <SessionHistory />
-        <TimerSettings />
-        <ThemeToggle />
+      {/* Action Bar - Discoverable entry point for all features */}
+      <div className="absolute top-4 right-4">
+        <ActionBar
+          onOpenTimeline={() => setShowTimeline(true)}
+          onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
+          onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
+          onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
+          onOpenCommands={openCommandPalette}
+          onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
+          onToggleTheme={toggleTheme}
+          theme={theme}
+        />
       </div>
 
-      {/* Statistics Dashboard (opened via G+S keyboard shortcut) */}
+      {/* TimerSettings modal - hidden trigger, responds to events */}
+      <div className="absolute -left-[9999px]" aria-hidden="true">
+        <TimerSettings />
+      </div>
+
+      {/* Statistics Dashboard (opened via ActionBar or G+S) */}
       <StatisticsDashboard />
 
       {/* Year View Modal (opened via G+Y keyboard shortcut) */}
@@ -112,7 +134,13 @@ export default function Home() {
       {/* Project List Modal (opened via G+P keyboard shortcut) */}
       <ProjectListModal />
 
-      <Timer />
+      {/* Timeline Overlay (opened via G+T, timer click, or Command Palette) */}
+      <TimelineOverlay
+        isOpen={showTimeline}
+        onClose={() => setShowTimeline(false)}
+      />
+
+      <Timer onTimelineOpen={() => setShowTimeline(true)} />
 
       {/* Shortcuts help in bottom-left corner */}
       <div className="absolute bottom-4 left-4">
