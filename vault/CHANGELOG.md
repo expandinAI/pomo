@@ -7,6 +7,18 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Particle History & Search (POMO-161, 5 SP)**:
+  - Vollständiger History Tab im Statistics Dashboard
+  - Debounced Suchfeld (300ms) für Task-Namen
+  - Type-Filter: All/Work/Break Toggle
+  - Project-Filter: Dropdown mit allen Projekten
+  - Paginierte Liste mit "Load More" (50 initial)
+  - Gruppierung nach Datum mit Focus-Zeit pro Tag
+  - Edit Modal: Task-Name und Projekt bearbeiten
+  - Delete mit Confirmation
+  - Keyboard: `/` fokussiert Suchfeld, `Escape` schließt Modal
+  - Counter: "Showing X of Y particles"
+  - Empty States für keine Particles / keine Treffer
 - **Smart Task Input (POMO-136, 3 SP)**:
   - "Meeting 30" → Task "Meeting" + 30min Timer startet sofort
   - Patterns: "30m Meeting", "1h", "Deep work 1.5h"
@@ -178,6 +190,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-161-particle-history-search]]
 - [[stories/done/POMO-134-daily-goals]]
 - [[stories/done/POMO-066-preset-selector]]
 - [[stories/done/POMO-067-deep-work-preset]]

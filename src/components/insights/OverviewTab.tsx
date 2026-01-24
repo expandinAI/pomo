@@ -1,9 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import { SPRING } from '@/styles/design-tokens';
 import { prefersReducedMotion } from '@/lib/utils';
 import {
   type TimeRange,
@@ -11,20 +8,18 @@ import {
   formatHoursDecimal,
   formatTrendMessage,
 } from '@/lib/session-analytics';
-import type { CompletedSession } from '@/lib/session-storage';
 import type { ProjectBreakdown } from '@/lib/projects';
 import { DashboardHeroMetrics } from './DashboardHeroMetrics';
 import { DashboardHeatmap } from './DashboardHeatmap';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { StatsProjectBreakdown } from './StatsProjectBreakdown';
-import { SessionTimeline } from './SessionTimeline';
+import { TimeRangeSelector } from './TimeRangeSelector';
 import { ExportButton } from './ExportButton';
 
 interface OverviewTabProps {
   // Core data
-  sessions: CompletedSession[];
-  filteredSessions: CompletedSession[];
   timeRange: TimeRange;
+  onTimeRangeChange: (range: TimeRange) => void;
   refreshTrigger?: number;
 
   // Computed metrics
@@ -35,47 +30,25 @@ interface OverviewTabProps {
   projectBreakdown: ProjectBreakdown[];
 
   // Callbacks
-  onSwitchToHistory: () => void;
   onProjectClick: (projectId: string | null) => void;
 }
 
-// Maximum particles to show in recent list
-const MAX_RECENT_PARTICLES = 25;
-
 /**
  * Overview Tab - Main dashboard view with all statistics
- * Contains: Hero Metrics, Heatmap, Weekly Chart, Projects, Recent Particles
+ * Contains: Hero Metrics, Heatmap, Weekly Chart, Projects
  */
 export function OverviewTab({
-  filteredSessions,
   timeRange,
+  onTimeRangeChange,
   refreshTrigger,
   totalHours,
   particleCount,
   focusScore,
   weeklyStats,
   projectBreakdown,
-  onSwitchToHistory,
   onProjectClick,
 }: OverviewTabProps) {
   const reducedMotion = prefersReducedMotion();
-
-  // Get time range label for empty state message
-  const timeRangeLabel = useMemo(() => {
-    switch (timeRange) {
-      case 'day': return 'today';
-      case 'week': return 'this week';
-      case 'month': return 'this month';
-      case 'all': return 'all time';
-    }
-  }, [timeRange]);
-
-  // Limit particles for the recent list
-  const recentParticles = useMemo(() => {
-    return filteredSessions.slice(0, MAX_RECENT_PARTICLES);
-  }, [filteredSessions]);
-
-  const hasMoreParticles = filteredSessions.length > MAX_RECENT_PARTICLES;
 
   return (
     <div
@@ -83,6 +56,12 @@ export function OverviewTab({
       role="tabpanel"
       aria-label="Overview tab"
     >
+      {/* Time Range Filter */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-tertiary light:text-tertiary-dark">Time Range</span>
+        <TimeRangeSelector value={timeRange} onChange={onTimeRangeChange} />
+      </div>
+
       {/* Hero Metrics */}
       <DashboardHeroMetrics
         totalHours={totalHours}
@@ -144,34 +123,6 @@ export function OverviewTab({
           />
         </motion.section>
       )}
-
-      {/* Recent Particles */}
-      <motion.section
-        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={reducedMotion ? { duration: 0 } : { delay: 0.3 }}
-      >
-        <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3">
-          Recent Particles
-        </h3>
-        <SessionTimeline
-          sessions={recentParticles}
-          emptyMessage={`No Particles ${timeRangeLabel}`}
-          emptyDescription="Collect a Particle to see it here"
-          maxHeight="max-h-[25vh]"
-        />
-
-        {/* Show "View all" link if there are more particles */}
-        {hasMoreParticles && (
-          <button
-            onClick={onSwitchToHistory}
-            className="mt-3 flex items-center justify-center gap-1.5 w-full py-2 text-xs text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
-          >
-            <span>View all {filteredSessions.length} particles</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        )}
-      </motion.section>
 
       {/* Export Button */}
       <div className="pt-2 border-t border-tertiary/10 light:border-tertiary-dark/10">

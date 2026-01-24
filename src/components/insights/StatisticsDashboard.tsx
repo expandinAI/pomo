@@ -15,7 +15,6 @@ import {
   formatHoursMinutes,
   type TimeRange,
 } from '@/lib/session-analytics';
-import { TimeRangeSelector } from './TimeRangeSelector';
 import { DashboardTabs, type DashboardTab } from './DashboardTabs';
 import { OverviewTab } from './OverviewTab';
 import { HistoryTab } from './HistoryTab';
@@ -133,11 +132,6 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     }, 150); // Small delay to let modal close animation complete
   };
 
-  // Handle switch to history tab
-  const handleSwitchToHistory = () => {
-    setActiveTab('history');
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -175,17 +169,14 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                   >
                     Statistics
                   </h2>
-                  <div className="flex items-center gap-3">
-                    <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
-                    <button
-                      ref={closeButtonRef}
-                      onClick={() => setIsOpen(false)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                      aria-label="Close statistics"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    ref={closeButtonRef}
+                    onClick={() => setIsOpen(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    aria-label="Close statistics"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {/* Tab Navigation */}
@@ -197,20 +188,21 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                 {/* Tab Content */}
                 {activeTab === 'overview' ? (
                   <OverviewTab
-                    sessions={sessions}
-                    filteredSessions={filteredSessions}
                     timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
                     refreshTrigger={refreshTrigger}
                     totalHours={totalHours}
                     particleCount={particleCount}
                     focusScore={focusScore}
                     weeklyStats={weeklyStats}
                     projectBreakdown={projectBreakdown}
-                    onSwitchToHistory={handleSwitchToHistory}
                     onProjectClick={handleProjectClick}
                   />
                 ) : (
-                  <HistoryTab />
+                  <HistoryTab
+                    sessions={sessions}
+                    onSessionUpdate={() => setSessions(loadSessions())}
+                  />
                 )}
               </div>
             </motion.div>

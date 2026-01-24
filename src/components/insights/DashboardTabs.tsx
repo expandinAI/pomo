@@ -54,7 +54,7 @@ function TabButton({ active, onClick, children }: TabButtonProps) {
 export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
   return (
     <div
-      className="flex gap-1 px-4 pb-3 border-b border-tertiary/10 light:border-tertiary-dark/10"
+      className="flex justify-center gap-1 px-4 py-3 border-b border-tertiary/10 light:border-tertiary-dark/10"
       role="tablist"
       aria-label="Dashboard views"
     >
