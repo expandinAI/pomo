@@ -25,6 +25,7 @@ interface SessionCounterProps {
   projectNameMap?: Map<string, string>;  // Map of projectId -> project name
   onParticleHover?: (info: ParticleHoverInfo | null) => void;  // Hover callback
   onParticleClick?: (sessionId: string) => void;  // Click handler for filled particles
+  particleSelectMode?: boolean;  // Show particle numbers for keyboard selection
 }
 
 // Standard dot-based view (under threshold)
@@ -38,6 +39,8 @@ function StandardView({
   getSessionForIndex,
   onParticleClick,
   getSessionIdForIndex,
+  particleSelectMode,
+  getParticleNumber,
 }: {
   totalDots: number;
   filledCount: number;
@@ -48,6 +51,8 @@ function StandardView({
   getSessionForIndex?: (index: number) => string | null;
   onParticleClick?: (sessionId: string) => void;
   getSessionIdForIndex?: (index: number) => string | null;
+  particleSelectMode?: boolean;
+  getParticleNumber?: (index: number) => number | null;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -112,7 +117,7 @@ function StandardView({
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.5, opacity: 0 }}
                   transition={{ type: 'spring', ...SPRING.bouncy }}
-                  className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer relative flex items-center justify-center"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onParticleClick && getSessionIdForIndex) {
@@ -120,7 +125,22 @@ function StandardView({
                       if (sessionId) onParticleClick(sessionId);
                     }
                   }}
-                />
+                >
+                  {/* Particle number overlay in select mode */}
+                  <AnimatePresence>
+                    {particleSelectMode && getParticleNumber && (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: 'spring', ...SPRING.bouncy, delay: index * 0.03 }}
+                        className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-background light:text-background-light select-none"
+                      >
+                        {getParticleNumber(index)}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               ) : (
                 <motion.div
                   key="empty"
@@ -264,6 +284,7 @@ export function SessionCounter({
   projectNameMap,
   onParticleHover,
   onParticleClick,
+  particleSelectMode = false,
 }: SessionCounterProps) {
   // Goal mode: show daily goal progress
   // Non-goal mode: show cycle progress (sessions until long break)
@@ -398,6 +419,20 @@ export function SessionCounter({
     return todaySessions[0].id;
   }, [todaySessions]);
 
+  // Get particle number for a given index (1-9, only for filled particles)
+  // Returns null if the particle shouldn't show a number
+  const getParticleNumber = useCallback((index: number): number | null => {
+    if (!todaySessions || todaySessions.length === 0) return null;
+    // Particles are displayed oldest-first (left to right)
+    // index 0 = oldest = particle 1, index 1 = particle 2, etc.
+    // Only show numbers for filled particles
+    if (index >= todaySessions.length) return null;
+    const particleNumber = index + 1;
+    // Only show 1-9 (single digit)
+    if (particleNumber > 9) return null;
+    return particleNumber;
+  }, [todaySessions]);
+
   // Get compact view summary (for hover display)
   const getCompactSummary = useCallback((): string | null => {
     if (!todaySessions || todaySessions.length === 0) return null;
@@ -464,6 +499,8 @@ export function SessionCounter({
               getSessionForIndex={getSessionForIndex}
               onParticleClick={onParticleClick}
               getSessionIdForIndex={getSessionIdForIndex}
+              particleSelectMode={particleSelectMode}
+              getParticleNumber={getParticleNumber}
             />
           </motion.div>
         )}

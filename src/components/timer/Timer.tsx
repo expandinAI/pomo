@@ -321,6 +321,10 @@ export function Timer() {
   const [selectedParticleId, setSelectedParticleId] = useState<string | null>(null);
   const [showParticleDetailOverlay, setShowParticleDetailOverlay] = useState(false);
 
+  // Particle select mode (O + number to open particle)
+  const [particleSelectMode, setParticleSelectMode] = useState(false);
+  const particleSelectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Today's completed sessions count (for daily goal)
   const [todayCount, setTodayCount] = useState(0);
 
@@ -970,10 +974,43 @@ export function Timer() {
           }
           break;
         case 'Escape':
+          // Cancel particle select mode if active
+          if (particleSelectMode) {
+            e.preventDefault();
+            setParticleSelectMode(false);
+            if (particleSelectTimeoutRef.current) {
+              clearTimeout(particleSelectTimeoutRef.current);
+              particleSelectTimeoutRef.current = null;
+            }
+            break;
+          }
           // Cancel auto-start countdown if active
           if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
             e.preventDefault();
             dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
+          }
+          break;
+        // O = Open particle select mode
+        case 'o':
+        case 'O':
+          if (!showParticleDetailOverlay && !showDailyGoalOverlay) {
+            // Get fresh sessions from localStorage to ensure we have current data
+            const freshSessions = getTodaySessions();
+            if (freshSessions.length > 0) {
+              e.preventDefault();
+              // Update state to sync with localStorage
+              setTodaySessions(freshSessions);
+              setTodayCount(freshSessions.length);
+              setParticleSelectMode(true);
+              // Auto-cancel after 2 seconds
+              if (particleSelectTimeoutRef.current) {
+                clearTimeout(particleSelectTimeoutRef.current);
+              }
+              particleSelectTimeoutRef.current = setTimeout(() => {
+                setParticleSelectMode(false);
+                particleSelectTimeoutRef.current = null;
+              }, 2000);
+            }
           }
           break;
         case 'r':
@@ -988,25 +1025,46 @@ export function Timer() {
         case 'D':
           toggleTheme();
           break;
-        // Preset switching (1-4)
+        // Number keys: Particle select (when in mode) or Preset switching (1-4)
         case '1':
-          if (!state.isRunning) {
-            applyPreset('classic');
-          }
-          break;
         case '2':
-          if (!state.isRunning) {
-            applyPreset('deepWork');
-          }
-          break;
         case '3':
-          if (!state.isRunning) {
-            applyPreset('ultradian');
-          }
-          break;
         case '4':
-          if (!state.isRunning) {
-            applyPreset('custom');
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          if (particleSelectMode) {
+            e.preventDefault();
+            const particleNum = parseInt(e.key, 10);
+            // Get fresh sessions from localStorage to avoid stale state
+            const currentSessions = getTodaySessions();
+            // Sessions are newest-first, so index = length - particleNum
+            const sessionIndex = currentSessions.length - particleNum;
+            if (sessionIndex >= 0 && sessionIndex < currentSessions.length) {
+              const session = currentSessions[sessionIndex];
+              setSelectedParticleId(session.id);
+              setShowParticleDetailOverlay(true);
+            }
+            // Cancel select mode
+            setParticleSelectMode(false);
+            if (particleSelectTimeoutRef.current) {
+              clearTimeout(particleSelectTimeoutRef.current);
+              particleSelectTimeoutRef.current = null;
+            }
+          } else if (!state.isRunning) {
+            // Preset switching (only 1-4)
+            const presets: Record<string, string> = {
+              '1': 'classic',
+              '2': 'deepWork',
+              '3': 'ultradian',
+              '4': 'custom',
+            };
+            const preset = presets[e.key];
+            if (preset) {
+              applyPreset(preset as 'classic' | 'deepWork' | 'ultradian' | 'custom');
+            }
           }
           break;
         // Time adjustment (only when not running)
@@ -1083,7 +1141,7 @@ export function Timer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -1325,6 +1383,7 @@ export function Timer() {
         projectNameMap={projectNameMap}
         onParticleHover={(info) => setParticleHoverInfo(info?.displayText ?? null)}
         onParticleClick={handleParticleClick}
+        particleSelectMode={particleSelectMode}
       />
 
       {/* Screen reader live regions */}
@@ -1360,13 +1419,15 @@ export function Timer() {
                   ? `Skipped to ${SESSION_LABELS[state.mode]}`
                   : showDailyGoalReached
                     ? 'Daily Goal reached!'
-                    : particleHoverInfo
-                      ? particleHoverInfo
-                      : isTimerHovered && state.isRunning
-                        ? isOverflow
-                          ? formatEndTime(overflowSeconds, true)
-                          : formatEndTime(state.timeRemaining, false)
-                        : null
+                    : particleSelectMode
+                      ? 'Select particle...'
+                      : particleHoverInfo
+                        ? particleHoverInfo
+                        : isTimerHovered && state.isRunning
+                          ? isOverflow
+                            ? formatEndTime(overflowSeconds, true)
+                            : formatEndTime(state.timeRemaining, false)
+                          : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}
