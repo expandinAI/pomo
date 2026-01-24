@@ -249,8 +249,16 @@ export function Timer() {
   const [isOverflow, setIsOverflow] = useState(false);
   const [overflowSeconds, setOverflowSeconds] = useState(0);
 
+  // Ref to always have current overflowSeconds (for session save callbacks)
+  const overflowSecondsRef = useRef(0);
+  overflowSecondsRef.current = overflowSeconds;
+
   // One-off duration from smart input (e.g., "Meeting 30" → 30 min)
   const [oneOffDuration, setOneOffDuration] = useState<number | null>(null);
+
+  // Ref to always have current oneOffDuration (for worker sync and overflow calculation)
+  const oneOffDurationRef = useRef<number | null>(null);
+  oneOffDurationRef.current = oneOffDuration;
 
   // Show max limit message when duration was capped
   const [showMaxLimitMessage, setShowMaxLimitMessage] = useState(false);
@@ -448,6 +456,9 @@ export function Timer() {
     if (overflow !== undefined && overflow > 0) {
       setIsOverflow(true);
       setOverflowSeconds(overflow);
+      // Update ref immediately (state update is async, ref is sync)
+      // This ensures callbacks have the current value even before re-render
+      overflowSecondsRef.current = overflow;
     }
   }, []);
 
@@ -556,13 +567,15 @@ export function Timer() {
   useEffect(() => {
     if (state.isRunning) {
       // In overflow: show total worked time (session duration + overflow)
-      const sessionDuration = durationsRef.current[state.mode];
+      // Use oneOffDuration if set (custom duration from smart input), otherwise preset
+      const sessionDuration = oneOffDuration ?? durationsRef.current[state.mode];
       const displayTime = isOverflow
         ? formatTime(sessionDuration + overflowSeconds)
         : formatTime(state.timeRemaining);
       document.title = TAB_TITLES.running(displayTime, SESSION_LABELS[state.mode]);
     } else if (state.isPaused) {
-      const sessionDuration = durationsRef.current[state.mode];
+      // Use oneOffDuration if set (custom duration from smart input), otherwise preset
+      const sessionDuration = oneOffDuration ?? durationsRef.current[state.mode];
       const displayTime = isOverflow
         ? formatTime(sessionDuration + overflowSeconds)
         : formatTime(state.timeRemaining);
@@ -570,18 +583,21 @@ export function Timer() {
     } else {
       document.title = TAB_TITLES.idle;
     }
-  }, [state.isRunning, state.isPaused, state.timeRemaining, state.mode, isOverflow, overflowSeconds]);
+  }, [state.isRunning, state.isPaused, state.timeRemaining, state.mode, isOverflow, overflowSeconds, oneOffDuration]);
 
   // Sync worker with running state
   useEffect(() => {
     if (state.isRunning) {
-      const duration = durationsRef.current[state.mode];
+      // Use oneOffDuration if set (custom duration from smart input), otherwise preset
+      const duration = oneOffDurationRef.current ?? durationsRef.current[state.mode];
       const elapsed = duration - state.timeRemaining;
       // Pass overflowEnabled to worker
       workerStart(duration, elapsed, overflowEnabledRef.current);
     } else if (!state.isRunning && state.isPaused) {
       workerPause();
-      elapsedRef.current = durationsRef.current[state.mode] - state.timeRemaining;
+      // Use oneOffDuration if set for elapsed calculation
+      const duration = oneOffDurationRef.current ?? durationsRef.current[state.mode];
+      elapsedRef.current = duration - state.timeRemaining;
     }
   }, [state.isRunning, state.isPaused, state.mode, state.timeRemaining, workerStart, workerPause]);
 
@@ -809,11 +825,13 @@ export function Timer() {
   // Skip session (complete early with actual elapsed time)
   const handleSkip = useCallback(() => {
     const sessionMode = state.mode;
+    // Use refs to get current values (avoid closure issues)
+    const currentOverflowSeconds = overflowSecondsRef.current;
     // Use one-off duration if set, otherwise use preset
-    const fullDuration = oneOffDuration ?? durationsRef.current[sessionMode];
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[sessionMode];
     // Include overflow time in elapsed calculation
     const elapsedTime = isOverflow
-      ? fullDuration + overflowSeconds
+      ? fullDuration + currentOverflowSeconds
       : fullDuration - state.timeRemaining;
     const isWorkSession = sessionMode === 'work';
 
@@ -824,7 +842,7 @@ export function Timer() {
         presetId: activePresetIdRef.current,
         ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
         // Track overflow separately
-        ...(isOverflow && overflowSeconds > 0 && { overflowDuration: overflowSeconds }),
+        ...(isOverflow && currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
       };
 
       // Save ACTUAL elapsed time (including overflow)
@@ -866,7 +884,7 @@ export function Timer() {
 
     // Reset one-off duration (next session uses preset)
     setOneOffDuration(null);
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, overflowSeconds, playSound, vibrate, workerReset, oneOffDuration]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, playSound, vibrate, workerReset]);
 
   // Complete session from overflow mode (Enter key in overflow)
   // This is a proper completion that increments the counter
@@ -874,9 +892,11 @@ export function Timer() {
     if (!isOverflow) return;
 
     const sessionMode = state.mode;
+    // Use refs to get current values (avoid closure issues)
+    const currentOverflowSeconds = overflowSecondsRef.current;
     // Use one-off duration if set, otherwise use preset
-    const fullDuration = oneOffDuration ?? durationsRef.current[sessionMode];
-    const totalDuration = fullDuration + overflowSeconds;
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[sessionMode];
+    const totalDuration = fullDuration + currentOverflowSeconds;
     const wasWorkSession = sessionMode === 'work';
 
     // Save session with full duration + overflow
@@ -885,7 +905,7 @@ export function Timer() {
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
       // Track overflow separately
-      ...(overflowSeconds > 0 && { overflowDuration: overflowSeconds }),
+      ...(currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
     };
 
     addSession(sessionMode, totalDuration, taskData);
@@ -951,7 +971,7 @@ export function Timer() {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [isOverflow, overflowSeconds, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, oneOffDuration, todayCount, dailyGoal]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1218,6 +1238,9 @@ export function Timer() {
       setShowMaxLimitMessage(true);
     }
 
+    // Set time to custom duration (prevents worker-sync effect from overriding)
+    dispatch({ type: 'SET_TIME', time: durationSeconds });
+
     // Start timer with custom duration
     workerStart(durationSeconds, 0, overflowEnabledRef.current);
     dispatch({ type: 'START' });
@@ -1337,7 +1360,7 @@ export function Timer() {
         showCelebration={state.showCelebration}
         isOverflow={isOverflow}
         overflowSeconds={overflowSeconds}
-        sessionDuration={durations[state.mode]}
+        sessionDuration={oneOffDuration ?? durations[state.mode]}
         onHoverChange={setIsTimerHovered}
       />
 
