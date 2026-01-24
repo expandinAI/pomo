@@ -24,6 +24,7 @@ interface SessionCounterProps {
   todaySessions?: CompletedSession[];  // Today's sessions for hover info
   projectNameMap?: Map<string, string>;  // Map of projectId -> project name
   onParticleHover?: (info: ParticleHoverInfo | null) => void;  // Hover callback
+  onParticleClick?: (sessionId: string) => void;  // Click handler for filled particles
 }
 
 // Standard dot-based view (under threshold)
@@ -35,6 +36,8 @@ function StandardView({
   slotRefs,
   onParticleHover,
   getSessionForIndex,
+  onParticleClick,
+  getSessionIdForIndex,
 }: {
   totalDots: number;
   filledCount: number;
@@ -43,6 +46,8 @@ function StandardView({
   slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
   onParticleHover?: (info: ParticleHoverInfo | null) => void;
   getSessionForIndex?: (index: number) => string | null;
+  onParticleClick?: (sessionId: string) => void;
+  getSessionIdForIndex?: (index: number) => string | null;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -108,6 +113,13 @@ function StandardView({
                   exit={{ scale: 0.5, opacity: 0 }}
                   transition={{ type: 'spring', ...SPRING.bouncy }}
                   className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onParticleClick && getSessionIdForIndex) {
+                      const sessionId = getSessionIdForIndex(index);
+                      if (sessionId) onParticleClick(sessionId);
+                    }
+                  }}
                 />
               ) : (
                 <motion.div
@@ -134,6 +146,8 @@ function CompactView({
   isSlotFilled,
   onParticleHover,
   getCompactSummary,
+  onParticleClick,
+  getMostRecentSessionId,
 }: {
   completedCount: number;
   showGlow: boolean;
@@ -141,6 +155,8 @@ function CompactView({
   isSlotFilled: boolean;
   onParticleHover?: (info: ParticleHoverInfo | null) => void;
   getCompactSummary?: () => string | null;
+  onParticleClick?: (sessionId: string) => void;
+  getMostRecentSessionId?: () => string | null;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -193,7 +209,16 @@ function CompactView({
       </motion.span>
 
       {/* Filled particle symbol */}
-      <div className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark" />
+      <div
+        className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (onParticleClick && getMostRecentSessionId) {
+            const sessionId = getMostRecentSessionId();
+            if (sessionId) onParticleClick(sessionId);
+          }
+        }}
+      />
 
       {/* Active slot (target for convergence animation) */}
       <motion.div
@@ -238,6 +263,7 @@ export function SessionCounter({
   todaySessions = [],
   projectNameMap,
   onParticleHover,
+  onParticleClick,
 }: SessionCounterProps) {
   // Goal mode: show daily goal progress
   // Non-goal mode: show cycle progress (sessions until long break)
@@ -357,6 +383,21 @@ export function SessionCounter({
     return formatSessionInfo(session, projectName || undefined);
   }, [todaySessions, projectNameMap]);
 
+  // Get session ID for a given particle index (for click handler)
+  const getSessionIdForIndex = useCallback((index: number): string | null => {
+    if (!todaySessions || todaySessions.length === 0) return null;
+    // Reverse index: index 0 (leftmost) = oldest session
+    const sessionIndex = todaySessions.length - 1 - index;
+    if (sessionIndex < 0 || sessionIndex >= todaySessions.length) return null;
+    return todaySessions[sessionIndex].id;
+  }, [todaySessions]);
+
+  // Get most recent session ID (for compact view click)
+  const getMostRecentSessionId = useCallback((): string | null => {
+    if (!todaySessions || todaySessions.length === 0) return null;
+    return todaySessions[0].id;
+  }, [todaySessions]);
+
   // Get compact view summary (for hover display)
   const getCompactSummary = useCallback((): string | null => {
     if (!todaySessions || todaySessions.length === 0) return null;
@@ -367,7 +408,7 @@ export function SessionCounter({
 
   return (
     <div
-      className={`flex items-center gap-3 ${onCounterClick ? 'cursor-pointer' : ''}`}
+      className={`flex items-center gap-3 focus:outline-none ${onCounterClick ? 'cursor-pointer' : ''}`}
       onClick={onCounterClick}
       onKeyDown={onCounterClick ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -400,6 +441,8 @@ export function SessionCounter({
               isSlotFilled={isSlotFilled}
               onParticleHover={onParticleHover}
               getCompactSummary={getCompactSummary}
+              onParticleClick={onParticleClick}
+              getMostRecentSessionId={getMostRecentSessionId}
             />
           </motion.div>
         ) : (
@@ -419,6 +462,8 @@ export function SessionCounter({
               slotRefs={slotRefs}
               onParticleHover={onParticleHover}
               getSessionForIndex={getSessionForIndex}
+              onParticleClick={onParticleClick}
+              getSessionIdForIndex={getSessionIdForIndex}
             />
           </motion.div>
         )}

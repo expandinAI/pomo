@@ -57,6 +57,39 @@ export interface TaskData {
   overflowDuration?: number;
 }
 
+export function getSessionById(id: string): CompletedSession | null {
+  const sessions = loadSessions();
+  return sessions.find(s => s.id === id) || null;
+}
+
+export function updateSession(
+  id: string,
+  updates: Partial<Pick<CompletedSession, 'task' | 'projectId' | 'duration'>>
+): CompletedSession | null {
+  const sessions = loadSessions();
+  const index = sessions.findIndex(s => s.id === id);
+  if (index === -1) return null;
+
+  const updated = { ...sessions[index] };
+  if (updates.task !== undefined) updated.task = updates.task || undefined;
+  if (updates.projectId !== undefined) updated.projectId = updates.projectId || undefined;
+  if (updates.duration !== undefined) updated.duration = updates.duration;
+
+  sessions[index] = updated;
+  saveSessions(sessions);
+  return updated;
+}
+
+export function deleteSession(id: string): boolean {
+  const sessions = loadSessions();
+  const index = sessions.findIndex(s => s.id === id);
+  if (index === -1) return false;
+
+  sessions.splice(index, 1);
+  saveSessions(sessions);
+  return true;
+}
+
 export function addSession(
   type: SessionType,
   duration: number,

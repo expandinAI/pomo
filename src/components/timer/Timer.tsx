@@ -9,6 +9,7 @@ import { SessionCounter } from './SessionCounter';
 import { StatusMessage } from './StatusMessage';
 import { EndConfirmationModal } from './EndConfirmationModal';
 import { DailyGoalOverlay } from './DailyGoalOverlay';
+import { ParticleDetailOverlay } from './ParticleDetailOverlay';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
 import { useTheme } from '@/hooks/useTheme';
@@ -315,6 +316,10 @@ export function Timer() {
 
   // Daily goal overlay
   const [showDailyGoalOverlay, setShowDailyGoalOverlay] = useState(false);
+
+  // Particle detail overlay
+  const [selectedParticleId, setSelectedParticleId] = useState<string | null>(null);
+  const [showParticleDetailOverlay, setShowParticleDetailOverlay] = useState(false);
 
   // Today's completed sessions count (for daily goal)
   const [todayCount, setTodayCount] = useState(0);
@@ -1171,6 +1176,39 @@ export function Timer() {
     setShowEndConfirmation(false);
   }, []);
 
+  // Particle detail overlay handlers
+  const handleParticleClick = useCallback((sessionId: string) => {
+    setSelectedParticleId(sessionId);
+    setShowParticleDetailOverlay(true);
+  }, []);
+
+  // Calculate particle index (1-based, oldest first) for display
+  const selectedParticleIndex = useMemo(() => {
+    if (!selectedParticleId || todaySessions.length === 0) return undefined;
+    // todaySessions is newest-first, so we reverse the index
+    const newestFirstIndex = todaySessions.findIndex(s => s.id === selectedParticleId);
+    if (newestFirstIndex === -1) return undefined;
+    // Convert to 1-based oldest-first index
+    return todaySessions.length - newestFirstIndex;
+  }, [selectedParticleId, todaySessions]);
+
+  const handleParticleOverlayClose = useCallback(() => {
+    setShowParticleDetailOverlay(false);
+    setSelectedParticleId(null);
+  }, []);
+
+  const handleSessionUpdated = useCallback(() => {
+    const sessions = getTodaySessions();
+    setTodaySessions(sessions);
+    setTodayCount(sessions.length);
+  }, []);
+
+  const handleSessionDeleted = useCallback(() => {
+    const sessions = getTodaySessions();
+    setTodaySessions(sessions);
+    setTodayCount(sessions.length);
+  }, []);
+
   // Show skeleton while settings are loading to prevent layout shift
   if (!isLoaded) {
     return <TimerSkeleton />;
@@ -1192,6 +1230,18 @@ export function Timer() {
         currentGoal={dailyGoal}
         todayCount={todayCount}
         onGoalChange={setDailyGoal}
+      />
+
+      {/* Particle Detail Overlay */}
+      <ParticleDetailOverlay
+        isOpen={showParticleDetailOverlay}
+        sessionId={selectedParticleId}
+        particleIndex={selectedParticleIndex}
+        onClose={handleParticleOverlayClose}
+        onSessionUpdated={handleSessionUpdated}
+        onSessionDeleted={handleSessionDeleted}
+        projects={activeProjects}
+        recentProjectIds={recentProjectIds}
       />
 
       {/* Command Palette Registration */}
@@ -1274,6 +1324,7 @@ export function Timer() {
         todaySessions={todaySessions}
         projectNameMap={projectNameMap}
         onParticleHover={(info) => setParticleHoverInfo(info?.displayText ?? null)}
+        onParticleClick={handleParticleClick}
       />
 
       {/* Screen reader live regions */}
