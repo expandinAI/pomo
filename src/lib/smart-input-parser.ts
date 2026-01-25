@@ -21,11 +21,17 @@ export interface ParsedTask {
   text: string;
   /** Duration in minutes, 0 if no time detected */
   duration: number;
+  /** Whether task is marked as completed (prefixed with -) */
+  completed: boolean;
 }
 
 export interface MultiLineResult {
   tasks: ParsedTask[];
   totalMinutes: number;
+  /** Total minutes of completed tasks */
+  completedMinutes: number;
+  /** Number of completed tasks */
+  completedCount: number;
 }
 
 const MIN_DURATION_MINUTES = 1;
@@ -178,21 +184,38 @@ export function formatDurationPreview(seconds: number): string {
 
 /**
  * Parse multi-line input, one task per line
+ * Lines starting with "-" are marked as completed (e.g., "- Emails 5" or "-Emails 5")
  */
 export function parseMultiLineInput(input: string): MultiLineResult {
   const lines = input.split('\n').filter(line => line.trim());
 
   const tasks: ParsedTask[] = lines.map(line => {
-    const parsed = parseSmartInput(line);
+    const trimmed = line.trim();
+
+    // Check for completion marker at start (- or -<space>)
+    const isCompleted = trimmed.startsWith('-');
+
+    // Remove marker for parsing (handle both "- task" and "-task")
+    const cleanLine = isCompleted
+      ? trimmed.replace(/^-\s*/, '')
+      : trimmed;
+
+    const parsed = parseSmartInput(cleanLine);
+
     return {
-      text: parsed.taskName || line.trim(),
+      text: parsed.taskName || cleanLine.trim(),
       duration: parsed.durationSeconds ? Math.round(parsed.durationSeconds / 60) : 0,
+      completed: isCompleted,
     };
   });
 
   const totalMinutes = tasks.reduce((sum, t) => sum + t.duration, 0);
+  const completedMinutes = tasks
+    .filter(t => t.completed)
+    .reduce((sum, t) => sum + t.duration, 0);
+  const completedCount = tasks.filter(t => t.completed).length;
 
-  return { tasks, totalMinutes };
+  return { tasks, totalMinutes, completedMinutes, completedCount };
 }
 
 /**

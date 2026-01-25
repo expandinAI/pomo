@@ -265,9 +265,13 @@ export function UnifiedTaskInput({
               {multiLineParsed.tasks.map((task, i) => (
                 <span key={i}>
                   {i > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
-                  <span className="text-primary light:text-primary-dark">{task.text}</span>
+                  <span className={task.completed ? 'line-through opacity-50' : 'text-primary light:text-primary-dark'}>
+                    {task.text}
+                  </span>
                   {task.duration > 0 && (
-                    <span className="ml-1 text-tertiary light:text-tertiary-dark">{task.duration}</span>
+                    <span className={`ml-1 ${task.completed ? 'line-through opacity-50' : 'text-tertiary light:text-tertiary-dark'}`}>
+                      {task.duration}
+                    </span>
                   )}
                 </span>
               ))}
@@ -374,9 +378,13 @@ export function UnifiedTaskInput({
               {multiLineParsed.tasks.map((task, i) => (
                 <span key={i}>
                   {i > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
-                  <span className="text-primary light:text-primary-dark">{task.text}</span>
+                  <span className={task.completed ? 'line-through opacity-50' : 'text-primary light:text-primary-dark'}>
+                    {task.text}
+                  </span>
                   {task.duration > 0 && (
-                    <span className="ml-1 text-tertiary light:text-tertiary-dark">{task.duration}</span>
+                    <span className={`ml-1 ${task.completed ? 'line-through opacity-50' : 'text-tertiary light:text-tertiary-dark'}`}>
+                      {task.duration}
+                    </span>
                   )}
                 </span>
               ))}
@@ -388,6 +396,11 @@ export function UnifiedTaskInput({
                 <span className="ml-2 text-primary light:text-primary-dark font-medium">
                   {formatTotalTime(totalMinutes)}
                 </span>
+                {multiLineParsed.completedCount > 0 && (
+                  <span className="ml-2 text-tertiary/70 light:text-tertiary-dark/70">
+                    ({multiLineParsed.completedCount} done)
+                  </span>
+                )}
               </span>
               <span className="text-tertiary light:text-tertiary-dark text-xs">⌘↵</span>
             </div>
