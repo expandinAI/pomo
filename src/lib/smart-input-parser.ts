@@ -183,27 +183,32 @@ export function formatDurationPreview(seconds: number): string {
 }
 
 /**
- * Parse multi-line input, one task per line
- * Lines starting with "-" are marked as completed (e.g., "- Emails 5" or "-Emails 5")
+ * Parse task input, separated by comma
+ * Tasks starting with "-" are marked as completed (e.g., "-Emails 5")
+ *
+ * Examples:
+ * - "Emails 10, Call 15, Report 30" → 3 tasks
+ * - "-Emails 10, Call 15" → Emails completed, Call pending
  */
 export function parseMultiLineInput(input: string): MultiLineResult {
-  const lines = input.split('\n').filter(line => line.trim());
+  // Split by comma
+  const segments = input.split(',').filter(segment => segment.trim());
 
-  const tasks: ParsedTask[] = lines.map(line => {
-    const trimmed = line.trim();
+  const tasks: ParsedTask[] = segments.map(segment => {
+    const trimmed = segment.trim();
 
     // Check for completion marker at start (- or -<space>)
     const isCompleted = trimmed.startsWith('-');
 
     // Remove marker for parsing (handle both "- task" and "-task")
-    const cleanLine = isCompleted
+    const cleanSegment = isCompleted
       ? trimmed.replace(/^-\s*/, '')
       : trimmed;
 
-    const parsed = parseSmartInput(cleanLine);
+    const parsed = parseSmartInput(cleanSegment);
 
     return {
-      text: parsed.taskName || cleanLine.trim(),
+      text: parsed.taskName || cleanSegment.trim(),
       duration: parsed.durationSeconds ? Math.round(parsed.durationSeconds / 60) : 0,
       completed: isCompleted,
     };
@@ -236,8 +241,8 @@ export function formatTotalTime(minutes: number): string {
  *
  * Examples:
  * - "Emails 10" → "Emails"
- * - "Emails 10\nCall 15\nReport 30" → "Emails · Call · Report"
- * - "-Emails 10\nCall 15" → "Emails · Call"
+ * - "Emails 10, Call 15, Report 30" → "Emails · Call · Report"
+ * - "-Emails 10, Call 15" → "Emails · Call"
  * - "30m" (only time) → ""
  */
 export function formatTasksForStorage(input: string): string {

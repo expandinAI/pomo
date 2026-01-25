@@ -358,7 +358,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [isCollapsedHovered, setIsCollapsedHovered] = useState(false);
 
   // Task input ref for T shortcut
-  const taskInputRef = useRef<HTMLTextAreaElement>(null);
+  const taskInputRef = useRef<HTMLInputElement>(null);
 
   // Projects
   const {
@@ -1530,6 +1530,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           recentProjectIds={recentProjectIds}
           disabled={false}
           inputRef={taskInputRef}
+          isSessionRunning={state.isRunning}
         />
       )}
 
