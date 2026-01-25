@@ -44,7 +44,7 @@ const GOLD_COLORS = [
 const INTENSITY_CONFIG = {
   subtle: { count: 12, duration: 0.8, distance: 80 },
   full: { count: 80, duration: 2.0, distance: 200 },
-  deluxe: { count: 100, duration: 1.8, distance: 240 },
+  deluxe: { count: 100, duration: 3.0, distance: 280 },
 };
 
 /**
