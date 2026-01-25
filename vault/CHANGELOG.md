@@ -7,6 +7,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Gold Particle Celebration (POMO-142, 3 SP)**:
+  - Opt-in Celebration Animation bei Session-Ende
+  - Drei Intensitätsstufen: Subtle, Full, Deluxe
+  - Deluxe: 100 goldene Partikel mit Glow und Sound
+  - Gold als "verdiente Farbe" - bricht bewusst das S/W-Schema
+  - Trigger-Optionen: Every Session oder nur bei Daily Goal
+  - Settings UI mit Toggle und Sub-Options
+  - Respektiert prefers-reduced-motion
 - **Particle History & Search (POMO-161, 5 SP)**:
   - Vollständiger History Tab im Statistics Dashboard
   - Debounced Suchfeld (300ms) für Task-Namen
