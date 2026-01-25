@@ -1,3 +1,5 @@
+import { parseMultiLineInput } from './smart-input-parser';
+
 const STORAGE_KEY = 'particle_recent_tasks';
 const OLD_STORAGE_KEY = 'pomo_recent_tasks';
 const MAX_RECENT_TASKS = 10;
@@ -59,6 +61,35 @@ export function addRecentTask(task: RecentTask): void {
 export function clearRecentTasks(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
+}
+
+/**
+ * Parse multi-line input and add each task individually to recent tasks.
+ * Extracts clean task names without times, minus signs, or other formatting.
+ *
+ * Examples:
+ * - "Emails 10min" → adds "Emails"
+ * - "Emails 10\nCall 15\n-Report 30" → adds "Emails", "Call", "Report"
+ */
+export function addRecentTasksFromInput(input: string): void {
+  if (typeof window === 'undefined') return;
+  if (!input.trim()) return;
+
+  const { tasks } = parseMultiLineInput(input);
+  const now = new Date().toISOString();
+
+  // Add each task individually (in reverse order so first task is most recent)
+  const uniqueTasks = tasks
+    .map(t => t.text.trim())
+    .filter(t => t.length > 0)
+    .reverse();
+
+  for (const taskText of uniqueTasks) {
+    addRecentTask({
+      text: taskText,
+      lastUsed: now,
+    });
+  }
 }
 
 // Filter tasks by search query (fuzzy match)

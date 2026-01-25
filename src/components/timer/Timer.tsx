@@ -28,7 +28,7 @@ import {
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
 import { addSession, getTodaySessions, type CompletedSession } from '@/lib/session-storage';
-import { addRecentTask } from '@/lib/task-storage';
+import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
@@ -502,10 +502,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
-      addRecentTask({
-        text: state.currentTask,
-        lastUsed: new Date().toISOString(),
-      });
+      addRecentTasksFromInput(state.currentTask);
     }
 
     dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
@@ -947,10 +944,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
-      addRecentTask({
-        text: state.currentTask,
-        lastUsed: new Date().toISOString(),
-      });
+      addRecentTasksFromInput(state.currentTask);
     }
 
     // Proper COMPLETE action (increments counter, shows celebration)
@@ -1045,10 +1039,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
-      addRecentTask({
-        text: state.currentTask,
-        lastUsed: new Date().toISOString(),
-      });
+      addRecentTasksFromInput(state.currentTask);
     }
 
     // Proper COMPLETE action (increments counter, shows celebration)
