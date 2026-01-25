@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING, type SessionType } from '@/styles/design-tokens';
 import type { TimerDurations } from '@/contexts/TimerSettingsContext';
+import { type SessionFeedback, formatFeedbackMessage } from '@/lib/session-feedback';
 
 interface StatusMessageProps {
   message: string | null;
@@ -20,6 +21,8 @@ interface StatusMessageProps {
   isCollapsedHovered?: boolean;
   /** Whether the next break will be a long break */
   nextBreakIsLong?: boolean;
+  /** Session feedback after completion (kontextueller Moment) */
+  sessionFeedback?: SessionFeedback | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -51,6 +54,7 @@ export function StatusMessage({
   mode,
   isCollapsedHovered,
   nextBreakIsLong,
+  sessionFeedback,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -59,8 +63,9 @@ export function StatusMessage({
    * Get display message with priority:
    * 1. Auto-Start Countdown (highest priority)
    * 2. Explicit message (toast, celebration, skip, etc.)
-   * 3. Preset hover (only when idle)
-   * 4. Session status (when running)
+   * 3. Session Feedback (kontextueller Moment after completion)
+   * 4. Preset hover (only when idle)
+   * 5. Session status (when running)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -73,12 +78,17 @@ export function StatusMessage({
       return message;
     }
 
-    // 3. Preset hover (only when idle)
+    // 3. Session Feedback (kontextueller Moment after completion)
+    if (sessionFeedback) {
+      return formatFeedbackMessage(sessionFeedback);
+    }
+
+    // 4. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 4. Session status (only when hovering collapsed view)
+    // 5. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);

@@ -245,3 +245,9 @@ export function formatSessionInfo(
   }
   return parts.join(' · ');
 }
+
+// Get total count of all completed work sessions
+export function getTotalSessionCount(): number {
+  const sessions = loadSessions();
+  return sessions.filter(s => s.type === 'work').length;
+}

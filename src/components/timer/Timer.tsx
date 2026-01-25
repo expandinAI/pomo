@@ -27,7 +27,8 @@ import {
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
-import { addSession, getTodaySessions, type CompletedSession } from '@/lib/session-storage';
+import { addSession, getTodaySessions, getTotalSessionCount, type CompletedSession } from '@/lib/session-storage';
+import { calculateSessionFeedback, type SessionFeedback } from '@/lib/session-feedback';
 import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
@@ -351,6 +352,9 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   // Toast message (for Shift+A toggle, etc.)
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Session feedback (kontextueller Moment after completion)
+  const [sessionFeedback, setSessionFeedback] = useState<SessionFeedback | null>(null);
+
   // Hovered preset ID (for StatusMessage contextual display)
   const [hoveredPresetId, setHoveredPresetId] = useState<string | null>(null);
 
@@ -457,6 +461,16 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
   }, [toastMessage]);
 
+  // Auto-clear session feedback after 6 seconds
+  useEffect(() => {
+    if (sessionFeedback) {
+      const timeout = setTimeout(() => {
+        setSessionFeedback(null);
+      }, 6000);
+      return () => clearTimeout(timeout);
+    }
+  }, [sessionFeedback]);
+
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
     dispatch({ type: 'SET_TIME', time: remaining });
@@ -547,6 +561,20 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       if (shouldTrigger) {
         setShouldTriggerBurst(true);
       }
+    }
+
+    // Calculate and set session feedback (only for work sessions)
+    if (wasWorkSession) {
+      const totalCount = getTotalSessionCount();
+      const feedback = calculateSessionFeedback(
+        newTodayCount,
+        totalCount,
+        Math.round(sessionDuration / 60),
+        0, // No overflow in normal completion
+        state.currentTask || undefined,
+        dailyGoal
+      );
+      setSessionFeedback(feedback);
     }
 
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
@@ -993,6 +1021,20 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       }
     }
 
+    // Calculate and set session feedback (only for work sessions)
+    if (wasWorkSession) {
+      const totalSessionCount = getTotalSessionCount();
+      const feedback = calculateSessionFeedback(
+        newTodayCount,
+        totalSessionCount,
+        Math.round(totalDuration / 60),
+        currentOverflowSeconds,
+        state.currentTask || undefined,
+        dailyGoal
+      );
+      setSessionFeedback(feedback);
+    }
+
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
 
     const shouldAutoStart =
@@ -1091,6 +1133,20 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       if (shouldTrigger) {
         setShouldTriggerBurst(true);
       }
+    }
+
+    // Calculate and set session feedback (only for work sessions)
+    if (wasWorkSession) {
+      const totalSessionCount = getTotalSessionCount();
+      const feedback = calculateSessionFeedback(
+        newTodayCount,
+        totalSessionCount,
+        Math.round(elapsedTime / 60),
+        0, // No overflow when ending early
+        state.currentTask || undefined,
+        dailyGoal
+      );
+      setSessionFeedback(feedback);
     }
 
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
@@ -1589,23 +1645,17 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
             ? toastMessage
             : showMaxLimitMessage
               ? 'Maximum 180 min'
-              : state.showCelebration
-                ? showDailyGoalReached
-                  ? 'Daily Goal reached!'
-                  : 'Well done!'
-                : state.showSkipMessage
-                  ? `Skipped to ${SESSION_LABELS[state.mode]}`
-                  : showDailyGoalReached
-                    ? 'Daily Goal reached!'
-                    : particleSelectMode
-                      ? 'Select particle...'
-                      : particleHoverInfo
-                        ? particleHoverInfo
-                        : isTimerHovered && state.isRunning
-                          ? isOverflow
-                            ? formatEndTime(overflowSeconds, true, state.mode)
-                            : formatEndTime(state.timeRemaining, false, state.mode)
-                          : null
+              : state.showSkipMessage
+                ? `Skipped to ${SESSION_LABELS[state.mode]}`
+                : particleSelectMode
+                  ? 'Select particle...'
+                  : particleHoverInfo
+                    ? particleHoverInfo
+                    : isTimerHovered && state.isRunning
+                      ? isOverflow
+                        ? formatEndTime(overflowSeconds, true, state.mode)
+                        : formatEndTime(state.timeRemaining, false, state.mode)
+                      : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}
@@ -1615,6 +1665,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         mode={state.mode}
         isCollapsedHovered={isCollapsedHovered}
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
+        sessionFeedback={sessionFeedback}
       />
     </div>
   );
