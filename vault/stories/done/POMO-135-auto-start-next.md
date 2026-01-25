@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: timer-enhancements
 created: 2026-01-23
-updated: 2026-01-23
-done_date: null
+updated: 2026-01-25
+done_date: 2026-01-25
 tags: [timer, flow, power-user, keyboard]
 ---
 

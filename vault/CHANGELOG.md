@@ -24,6 +24,15 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Timer läuft weiter bei Esc (nur visuelles Update)
   - Cmd+Enter startet neue Session
   - ADHD-friendly: Mini-Erfolge ohne Flow-Unterbrechung
+- **Auto-Start Next Session (POMO-135, 3 SP)**:
+  - Automatischer Start der nächsten Session nach Countdown
+  - Konfigurierbare Countdown-Dauer (3s / 5s / 10s)
+  - StatusMessage zeigt "Break in 5 · Space to cancel"
+  - Space/Escape zum Abbrechen des Countdowns
+  - Shift+A Shortcut zum Togglen
+  - Command Palette Integration
+  - Autostart-Chime Sound
+  - Overflow-Kompatibilität
 - **Multi-Task Input (POMO-141, 3 SP)**:
   - Multi-Line Task-Eingabe für schnelle Planung
   - Enter für neue Zeile, Cmd+Enter zum Starten
@@ -223,6 +232,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-135-auto-start-next]]
 - [[stories/done/POMO-143-estimation-trend-analytics]]
 - [[stories/done/POMO-141-total-list-time]]
 - [[stories/done/POMO-161-particle-history-search]]
