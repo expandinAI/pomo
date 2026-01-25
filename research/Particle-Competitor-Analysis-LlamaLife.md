@@ -377,10 +377,10 @@ Particle → Pro-User (produktiv, scharf, effizient)
 > **damit** ich meine Zeit besser planen kann.
 
 **Akzeptanzkriterien:**
-- [ ] "Fertig um: 14:35" unter Task-Liste anzeigen
-- [ ] Aktualisiert sich bei Task-Änderung
-- [ ] Berücksichtigt Pausen zwischen Sessions
-- [ ] Optional ein/ausschaltbar
+- [x] "Fertig um: 14:35" unter Task-Liste anzeigen
+- [x] Aktualisiert sich bei Task-Änderung
+- [x] Berücksichtigt Pausen zwischen Sessions
+- [x] Optional ein/ausschaltbar
 
 **Story Points:** 2
 
@@ -424,10 +424,10 @@ Particle → Pro-User (produktiv, scharf, effizient)
 > **damit** ich ohne Bildschirmblick weiß, dass die Session vorbei ist.
 
 **Akzeptanzkriterien:**
-- [ ] Sanfter Chime (nicht erschreckend)
-- [ ] Lautstärke einstellbar
-- [ ] Sound auswählbar (3-5 Optionen)
-- [ ] Komplett abschaltbar
+- [x] Sanfter Chime (nicht erschreckend)
+- [x] Lautstärke einstellbar
+- [x] Sound auswählbar (3-5 Optionen)
+- [x] Komplett abschaltbar
 
 **Story Points:** 2
 
@@ -440,8 +440,8 @@ Particle → Pro-User (produktiv, scharf, effizient)
 > **damit** ich meine Zeitschätzungen verbessern kann.
 
 **Akzeptanzkriterien:**
-- [ ] Nach Session: "Geschätzt: 25min, Tatsächlich: 32min"
-- [ ] In History/Stats sichtbar
+- [x] Nach Session: "Geschätzt: 25min, Tatsächlich: 32min"
+- [x] In History/Stats sichtbar
 - [ ] Trend über Zeit: "Du unterschätzt Tasks um ~20%"
 
 **Story Points:** 3

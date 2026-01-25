@@ -7,6 +7,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Multi-Task Input (POMO-141, 3 SP)**:
+  - Multi-Line Task-Eingabe für schnelle Planung
+  - Enter für neue Zeile, Cmd+Enter zum Starten
+  - Live Total-Zeit Berechnung aus allen Tasks
+  - Kompakte Anzeige mit Styling (Task weiß, Dauer grau)
+  - Edit-Modus beim Klick auf kompakte Anzeige
+  - Konsistent für Single- und Multi-Task Eingaben
+  - Patterns: "Emails 10", "Call 15", "Meeting 30" → Total: 55min
 - **Gold Particle Celebration (POMO-142, 3 SP)**:
   - Opt-in Celebration Animation bei Session-Ende
   - Drei Intensitätsstufen: Subtle, Full, Deluxe
@@ -198,6 +206,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-141-total-list-time]]
 - [[stories/done/POMO-161-particle-history-search]]
 - [[stories/done/POMO-134-daily-goals]]
 - [[stories/done/POMO-066-preset-selector]]
