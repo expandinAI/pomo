@@ -2,7 +2,6 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import { SPRING } from '@/styles/design-tokens';
 
 interface ProgressRingProps {
   progress: number; // 0-1 (1=full, 0=empty)
@@ -16,26 +15,27 @@ interface ProgressRingProps {
 }
 
 // Intensification logic for final minutes
+// NOTE: strokeWidth is intentionally NOT changed dynamically to prevent jump bugs
+// when Framer Motion animates strokeDashoffset while strokeWidth changes
 function getRingIntensity(timeRemaining: number): {
-  strokeWidth: number;
   opacity: number;
   glow: boolean;
   pulsing: boolean;
 } {
   if (timeRemaining <= 60) {
-    // Final minute: thick, glow, pulsing
-    return { strokeWidth: 8, opacity: 1, glow: true, pulsing: true };
+    // Final minute: glow, pulsing
+    return { opacity: 1, glow: true, pulsing: true };
   }
   if (timeRemaining <= 120) {
-    // Final 2 minutes: thick, glow, no pulse
-    return { strokeWidth: 8, opacity: 1, glow: true, pulsing: false };
+    // Final 2 minutes: glow, no pulse
+    return { opacity: 1, glow: true, pulsing: false };
   }
   if (timeRemaining <= 300) {
-    // Final 5 minutes: slightly thicker
-    return { strokeWidth: 7, opacity: 0.95, glow: false, pulsing: false };
+    // Final 5 minutes
+    return { opacity: 0.95, glow: false, pulsing: false };
   }
   // Default state
-  return { strokeWidth: 6, opacity: 0.9, glow: false, pulsing: false };
+  return { opacity: 0.9, glow: false, pulsing: false };
 }
 
 export function ProgressRing({
@@ -50,20 +50,22 @@ export function ProgressRing({
 }: ProgressRingProps) {
   const reducedMotion = useReducedMotion();
 
-  // Get intensification state
+  // Get intensification state (no strokeWidth - kept constant to prevent jump bugs)
   const intensity = useMemo(
-    () => (isOverflow ? { strokeWidth: baseStrokeWidth, opacity: 0.5, glow: false, pulsing: true } : getRingIntensity(timeRemaining)),
-    [timeRemaining, isOverflow, baseStrokeWidth]
+    () => (isOverflow
+      ? { opacity: 0.5, glow: false, pulsing: true }
+      : getRingIntensity(timeRemaining)),
+    [timeRemaining, isOverflow]
   );
 
   // SVG calculations
   const center = size / 2;
-  const radius = center - intensity.strokeWidth;
+  const radius = center - baseStrokeWidth;
   const circumference = 2 * Math.PI * radius;
 
   // Progress ring depletes clockwise from 12 o'clock
-  // Start at top (rotate -90deg), show (1 - progress) * circumference as offset
-  const strokeDashoffset = circumference * (1 - Math.max(0, Math.min(1, progress)));
+  // Negative offset makes the gap grow clockwise (default SVG is counter-clockwise)
+  const strokeDashoffset = -circumference * (1 - Math.max(0, Math.min(1, progress)));
 
   // Milestone positions (25%, 50%, 75%) as small dots
   const milestonePositions = useMemo(() => {
@@ -83,9 +85,9 @@ export function ProgressRing({
   }, [center, radius]);
 
   // Animation variants
+  // NOTE: No scale animation - scaling a rotated SVG causes visual jumps
   const pulseAnimation = {
-    opacity: [0.6, 1, 0.6],
-    scale: [1, 1.02, 1],
+    opacity: [0.7, 1, 0.7],
     transition: {
       duration: 2,
       repeat: Infinity,
@@ -117,7 +119,7 @@ export function ProgressRing({
         width={size}
         height={size}
         className="absolute inset-0"
-        style={{ transform: 'rotate(-90deg)' }} // Start from top
+        style={{ transform: 'rotate(-90deg)' }} // Start from 12 o'clock
         animate={getAnimation()}
       >
         {/* Background ring (full circle, subtle) */}
@@ -127,7 +129,7 @@ export function ProgressRing({
           r={radius}
           fill="none"
           stroke="currentColor"
-          strokeWidth={intensity.strokeWidth}
+          strokeWidth={baseStrokeWidth}
           className="text-tertiary/10 light:text-tertiary-dark/10"
         />
 
@@ -138,10 +140,10 @@ export function ProgressRing({
           r={radius}
           fill="none"
           stroke="currentColor"
-          strokeWidth={intensity.strokeWidth}
+          strokeWidth={baseStrokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={{ strokeDashoffset: 0 }}
+          initial={false}
           animate={{
             strokeDashoffset,
             opacity: intensity.opacity,
