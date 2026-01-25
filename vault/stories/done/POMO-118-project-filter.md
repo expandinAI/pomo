@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 1
 feature: year-view
 created: 2026-01-20
 updated: 2026-01-25
-done_date: null
+done_date: 2026-01-25
 tags: [year-view, projects, filter, p1]
 ---
 
@@ -201,7 +201,7 @@ Reuses existing:
 ## Work Log
 
 ### Started:
-<!-- Claude: Note what you're doing -->
+2026-01-25: Implementation using existing ProjectFilterDropdown
 
 ### Completed:
-<!-- Auto-filled when story moves to done/ -->
+2026-01-25: Shipped in commit 5817a46
