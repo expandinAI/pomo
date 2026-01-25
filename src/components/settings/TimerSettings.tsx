@@ -15,6 +15,7 @@ import { OverflowSettings } from './OverflowSettings';
 import { AutoStartSettings } from './AutoStartSettings';
 import { EndTimeSettings } from './EndTimeSettings';
 import { VisualTimerSettings } from './VisualTimerSettings';
+import { CelebrationSettings } from './CelebrationSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -177,6 +178,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Auto-Start Settings */}
                   <AutoStartSettings />
+
+                  {/* Celebration Settings */}
+                  <CelebrationSettings />
 
                   {/* Sound Settings */}
                   <SoundSettings />

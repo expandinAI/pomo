@@ -51,6 +51,14 @@ interface AmbientEffectsContextValue {
   setPace: (pace: ParticlePace) => void;
   paceMultiplier: number;
 
+  // Burst position (for celebration animation)
+  burstPosition: { x: number; y: number } | null;
+  setBurstPosition: (pos: { x: number; y: number } | null) => void;
+
+  // Trigger burst animation (controlled by Timer based on celebration settings)
+  shouldTriggerBurst: boolean;
+  setShouldTriggerBurst: (value: boolean) => void;
+
   // Loading state
   isLoaded: boolean;
 }
@@ -65,6 +73,8 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
   const [visualState, setVisualStateInternal] = useState<VisualState>('idle');
   const [isPaused, setIsPausedInternal] = useState(false);
   const [convergenceTarget, setConvergenceTargetInternal] = useState<{ x: number; y: number } | null>(null);
+  const [burstPosition, setBurstPositionInternal] = useState<{ x: number; y: number } | null>(null);
+  const [shouldTriggerBurst, setShouldTriggerBurstInternal] = useState(false);
   const { effectsEnabled, setEffectsEnabled, toggleEffects, isLoaded: settingsLoaded } = useAmbientEffectsSettings();
   const {
     visualMode,
@@ -100,6 +110,14 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
     setConvergenceTargetInternal(target);
   }, []);
 
+  const setBurstPosition = useCallback((pos: { x: number; y: number } | null) => {
+    setBurstPositionInternal(pos);
+  }, []);
+
+  const setShouldTriggerBurst = useCallback((value: boolean) => {
+    setShouldTriggerBurstInternal(value);
+  }, []);
+
   // All settings must be loaded before we consider the context ready
   const isLoaded = settingsLoaded && qualityLoaded && styleLoaded;
 
@@ -129,6 +147,10 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       pace,
       setPace,
       paceMultiplier,
+      burstPosition,
+      setBurstPosition,
+      shouldTriggerBurst,
+      setShouldTriggerBurst,
       isLoaded,
     }),
     [
@@ -156,6 +178,10 @@ export function AmbientEffectsProvider({ children }: AmbientEffectsProviderProps
       pace,
       setPace,
       paceMultiplier,
+      burstPosition,
+      setBurstPosition,
+      shouldTriggerBurst,
+      setShouldTriggerBurst,
       isLoaded,
     ]
   );

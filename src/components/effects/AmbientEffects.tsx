@@ -1,6 +1,7 @@
 'use client';
 
 import { useAmbientEffects } from '@/contexts/AmbientEffectsContext';
+import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { ParticleField } from './ParticleField';
 import { ParticleBurst } from './ParticleBurst';
 
@@ -35,7 +36,11 @@ export function AmbientEffects() {
     parallaxEnabled,
     paceMultiplier,
     convergenceTarget,
+    burstPosition,
+    shouldTriggerBurst,
   } = useAmbientEffects();
+
+  const { celebrationIntensity } = useTimerSettingsContext();
 
   // Don't render anything if:
   // - Settings haven't loaded yet
@@ -48,7 +53,8 @@ export function AmbientEffects() {
 
   // Determine effect configuration based on visual state
   const particleMode: 'work' | 'break' = visualState === 'break' ? 'break' : 'work';
-  const shouldShowBurst = showBurst && visualState === 'completed';
+  // Burst only shows if shouldTriggerBurst (set by Timer based on celebration settings) AND showBurst (from quality)
+  const shouldShowBurst = showBurst && shouldTriggerBurst;
   const isConverging = visualState === 'converging';
   const isCompleted = visualState === 'completed';
 
@@ -71,7 +77,11 @@ export function AmbientEffects() {
           convergenceTarget={convergenceTarget}
         />
       )}
-      <ParticleBurst isActive={shouldShowBurst} />
+      <ParticleBurst
+        isActive={shouldShowBurst}
+        position={burstPosition}
+        intensity={celebrationIntensity}
+      />
     </>
   );
 }

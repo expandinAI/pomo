@@ -211,7 +211,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -236,6 +236,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   autoStartDelayRef.current = autoStartDelay;
   const autoStartModeRef = useRef(autoStartMode);
   autoStartModeRef.current = autoStartMode;
+
+  // Ref for celebration settings (to use in callbacks)
+  const celebrationEnabledRef = useRef(celebrationEnabled);
+  celebrationEnabledRef.current = celebrationEnabled;
+  const celebrationTriggerRef = useRef(celebrationTrigger);
+  celebrationTriggerRef.current = celebrationTrigger;
 
   // Ref for selectedProjectId (to use in callbacks)
   const selectedProjectIdRef = useRef<string | null>(null);
@@ -289,7 +295,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
 
   // Ambient visual effects
-  const { setVisualState, setIsPaused: setParticlesPaused, setConvergenceTarget } = useAmbientEffects();
+  const { setVisualState, setIsPaused: setParticlesPaused, setConvergenceTarget, setShouldTriggerBurst } = useAmbientEffects();
 
   // Track next slot position for convergence animation
   const [nextSlotPosition, setNextSlotPosition] = useState<{ x: number; y: number } | null>(null);
@@ -527,8 +533,22 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const isWorkToBreak = sessionMode === 'work';
     const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
 
-    // Calculate new today count after this session (for daily goal check)
+    // Calculate new today count after this session (for daily goal check and celebration)
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+
+    // Trigger celebration burst if enabled and conditions are met
+    if (wasWorkSession && celebrationEnabledRef.current) {
+      const shouldTrigger =
+        celebrationTriggerRef.current === 'every-session' ||
+        (celebrationTriggerRef.current === 'daily-goal' &&
+          dailyGoal !== null &&
+          newTodayCount === dailyGoal);
+
+      if (shouldTrigger) {
+        setShouldTriggerBurst(true);
+      }
+    }
+
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
 
     const shouldAutoStart =
@@ -551,7 +571,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst]);
 
   // Initialize Web Worker timer
   const {
@@ -611,6 +631,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [state.showCelebration]);
+
+  // Reset celebration burst trigger when celebration ends
+  useEffect(() => {
+    if (!state.showCelebration) {
+      setShouldTriggerBurst(false);
+    }
+  }, [state.showCelebration, setShouldTriggerBurst]);
 
   // Hide skip message after 2 seconds
   useEffect(() => {
@@ -949,8 +976,22 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const isWorkToBreak = sessionMode === 'work';
     const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
 
-    // Calculate new today count after this session (for daily goal check)
+    // Calculate new today count after this session (for daily goal check and celebration)
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+
+    // Trigger celebration burst if enabled and conditions are met
+    if (wasWorkSession && celebrationEnabledRef.current) {
+      const shouldTrigger =
+        celebrationTriggerRef.current === 'every-session' ||
+        (celebrationTriggerRef.current === 'daily-goal' &&
+          dailyGoal !== null &&
+          newTodayCount === dailyGoal);
+
+      if (shouldTrigger) {
+        setShouldTriggerBurst(true);
+      }
+    }
+
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
 
     const shouldAutoStart =
@@ -972,7 +1013,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal, setShouldTriggerBurst]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1036,8 +1077,22 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const isWorkToBreak = sessionMode === 'work';
     const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
 
-    // Calculate new today count after this session (for daily goal check)
+    // Calculate new today count after this session (for daily goal check and celebration)
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
+
+    // Trigger celebration burst if enabled and conditions are met
+    if (wasWorkSession && celebrationEnabledRef.current) {
+      const shouldTrigger =
+        celebrationTriggerRef.current === 'every-session' ||
+        (celebrationTriggerRef.current === 'daily-goal' &&
+          dailyGoal !== null &&
+          newTodayCount === dailyGoal);
+
+      if (shouldTrigger) {
+        setShouldTriggerBurst(true);
+      }
+    }
+
     const dailyGoalReached = dailyGoal !== null && newTodayCount >= dailyGoal;
 
     const shouldAutoStart =
@@ -1059,7 +1114,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst]);
 
   // Keyboard shortcuts
   useEffect(() => {

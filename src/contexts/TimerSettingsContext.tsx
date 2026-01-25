@@ -26,9 +26,18 @@ const DEFAULT_AUTO_START_DELAY: AutoStartDelay = 5;
 const DEFAULT_AUTO_START_MODE: AutoStartMode = 'all';
 const DEFAULT_SHOW_END_TIME = false;
 const DEFAULT_VISUAL_TIMER = false;
+const DEFAULT_CELEBRATION_ENABLED = false;
+const DEFAULT_CELEBRATION_TRIGGER: CelebrationTrigger = 'every-session';
+const DEFAULT_CELEBRATION_INTENSITY: CelebrationIntensity = 'subtle';
+
+const CELEBRATION_ENABLED_KEY = 'particle_celebration_enabled';
+const CELEBRATION_TRIGGER_KEY = 'particle_celebration_trigger';
+const CELEBRATION_INTENSITY_KEY = 'particle_celebration_intensity';
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
+export type CelebrationTrigger = 'daily-goal' | 'every-session';
+export type CelebrationIntensity = 'subtle' | 'full' | 'deluxe';
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_timer_settings';
@@ -255,6 +264,60 @@ function saveVisualTimerEnabled(enabled: boolean): void {
   localStorage.setItem(VISUAL_TIMER_KEY, JSON.stringify(enabled));
 }
 
+function loadCelebrationEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_CELEBRATION_ENABLED;
+  try {
+    const stored = localStorage.getItem(CELEBRATION_ENABLED_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_CELEBRATION_ENABLED;
+}
+
+function saveCelebrationEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CELEBRATION_ENABLED_KEY, JSON.stringify(enabled));
+}
+
+function loadCelebrationTrigger(): CelebrationTrigger {
+  if (typeof window === 'undefined') return DEFAULT_CELEBRATION_TRIGGER;
+  try {
+    const stored = localStorage.getItem(CELEBRATION_TRIGGER_KEY);
+    if (stored === 'daily-goal' || stored === 'every-session') {
+      return stored;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_CELEBRATION_TRIGGER;
+}
+
+function saveCelebrationTrigger(trigger: CelebrationTrigger): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CELEBRATION_TRIGGER_KEY, trigger);
+}
+
+function loadCelebrationIntensity(): CelebrationIntensity {
+  if (typeof window === 'undefined') return DEFAULT_CELEBRATION_INTENSITY;
+  try {
+    const stored = localStorage.getItem(CELEBRATION_INTENSITY_KEY);
+    if (stored === 'subtle' || stored === 'full' || stored === 'deluxe') {
+      return stored;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_CELEBRATION_INTENSITY;
+}
+
+function saveCelebrationIntensity(intensity: CelebrationIntensity): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CELEBRATION_INTENSITY_KEY, intensity);
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -299,6 +362,13 @@ interface TimerSettingsContextValue {
   // Visual timer (progress ring around countdown)
   visualTimerEnabled: boolean;
   setVisualTimerEnabled: (enabled: boolean) => void;
+  // Celebration animation (particle burst on completion)
+  celebrationEnabled: boolean;
+  setCelebrationEnabled: (enabled: boolean) => void;
+  celebrationTrigger: CelebrationTrigger;
+  setCelebrationTrigger: (trigger: CelebrationTrigger) => void;
+  celebrationIntensity: CelebrationIntensity;
+  setCelebrationIntensity: (intensity: CelebrationIntensity) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -320,6 +390,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [autoStartMode, setAutoStartModeState] = useState<AutoStartMode>(DEFAULT_AUTO_START_MODE);
   const [showEndTime, setShowEndTimeState] = useState<boolean>(DEFAULT_SHOW_END_TIME);
   const [visualTimerEnabled, setVisualTimerEnabledState] = useState<boolean>(DEFAULT_VISUAL_TIMER);
+  const [celebrationEnabled, setCelebrationEnabledState] = useState<boolean>(DEFAULT_CELEBRATION_ENABLED);
+  const [celebrationTrigger, setCelebrationTriggerState] = useState<CelebrationTrigger>(DEFAULT_CELEBRATION_TRIGGER);
+  const [celebrationIntensity, setCelebrationIntensityState] = useState<CelebrationIntensity>(DEFAULT_CELEBRATION_INTENSITY);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -351,6 +424,15 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const visualTimerVal = loadVisualTimerEnabled();
     setVisualTimerEnabledState(visualTimerVal);
+
+    const celebrationEnabledVal = loadCelebrationEnabled();
+    setCelebrationEnabledState(celebrationEnabledVal);
+
+    const celebrationTriggerVal = loadCelebrationTrigger();
+    setCelebrationTriggerState(celebrationTriggerVal);
+
+    const celebrationIntensityVal = loadCelebrationIntensity();
+    setCelebrationIntensityState(celebrationIntensityVal);
 
     setIsLoaded(true);
   }, []);
@@ -448,6 +530,24 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveVisualTimerEnabled(enabled);
   }, []);
 
+  // Set celebration enabled
+  const setCelebrationEnabled = useCallback((enabled: boolean) => {
+    setCelebrationEnabledState(enabled);
+    saveCelebrationEnabled(enabled);
+  }, []);
+
+  // Set celebration trigger
+  const setCelebrationTrigger = useCallback((trigger: CelebrationTrigger) => {
+    setCelebrationTriggerState(trigger);
+    saveCelebrationTrigger(trigger);
+  }, []);
+
+  // Set celebration intensity
+  const setCelebrationIntensity = useCallback((intensity: CelebrationIntensity) => {
+    setCelebrationIntensityState(intensity);
+    saveCelebrationIntensity(intensity);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -479,6 +579,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setShowEndTime,
       visualTimerEnabled,
       setVisualTimerEnabled,
+      celebrationEnabled,
+      setCelebrationEnabled,
+      celebrationTrigger,
+      setCelebrationTrigger,
+      celebrationIntensity,
+      setCelebrationIntensity,
     }),
     [
       durations,
@@ -507,6 +613,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setShowEndTime,
       visualTimerEnabled,
       setVisualTimerEnabled,
+      celebrationEnabled,
+      setCelebrationEnabled,
+      celebrationTrigger,
+      setCelebrationTrigger,
+      celebrationIntensity,
+      setCelebrationIntensity,
     ]
   );
 

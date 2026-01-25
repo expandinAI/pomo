@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break' | 'autostart';
+type SoundType = 'completion' | 'break' | 'autostart' | 'celebration';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -523,6 +523,79 @@ function playCollectSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
   tone.stop(now + 0.18);
 }
 
+/**
+ * Celebration: Triumphant ascending fanfare for deluxe celebration
+ * Rich, rewarding sound with multiple harmonics and ascending progression
+ * Like unlocking an achievement - dopamine-inducing!
+ */
+function playCelebrationSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Ascending major chord arpeggio (C5 → E5 → G5 → C6)
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  const noteDuration = 0.15;
+  const noteSpacing = 0.08;
+
+  notes.forEach((freq, index) => {
+    const startTime = now + index * noteSpacing;
+
+    // Main tone
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration + 0.2);
+
+    osc.connect(gain);
+    gain.connect(dest);
+
+    osc.start(startTime);
+    osc.stop(startTime + noteDuration + 0.3);
+
+    // Harmonic overtone for richness
+    const harmonic = ctx.createOscillator();
+    const harmGain = ctx.createGain();
+
+    harmonic.type = 'sine';
+    harmonic.frequency.setValueAtTime(freq * 2, startTime);
+
+    harmGain.gain.setValueAtTime(0, startTime);
+    harmGain.gain.linearRampToValueAtTime(0.08, startTime + 0.02);
+    harmGain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration + 0.15);
+
+    harmonic.connect(harmGain);
+    harmGain.connect(dest);
+
+    harmonic.start(startTime);
+    harmonic.stop(startTime + noteDuration + 0.2);
+  });
+
+  // Final shimmer/sparkle effect
+  const shimmerStart = now + notes.length * noteSpacing + 0.1;
+  for (let i = 0; i < 3; i++) {
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+
+    shimmer.type = 'sine';
+    const shimmerFreq = 2000 + Math.random() * 1000;
+    shimmer.frequency.setValueAtTime(shimmerFreq, shimmerStart + i * 0.05);
+
+    shimmerGain.gain.setValueAtTime(0, shimmerStart + i * 0.05);
+    shimmerGain.gain.linearRampToValueAtTime(0.05, shimmerStart + i * 0.05 + 0.01);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, shimmerStart + i * 0.05 + 0.1);
+
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(dest);
+
+    shimmer.start(shimmerStart + i * 0.05);
+    shimmer.stop(shimmerStart + i * 0.05 + 0.15);
+  }
+}
+
 const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: AudioNode) => void> = {
   default: playDefaultChimeWithDest,
   soft: playSoftChimeWithDest,
@@ -593,6 +666,8 @@ export function useSound(): UseSoundReturn {
         playSoundWithVolume(ctx, playBreakChimeWithDest, volume);
       } else if (type === 'autostart') {
         playSoundWithVolume(ctx, playAutoStartSoundWithDest, volume);
+      } else if (type === 'celebration') {
+        playSoundWithVolume(ctx, playCelebrationSoundWithDest, volume);
       } else {
         playSound(selectedSound, volume);
       }
