@@ -2,313 +2,206 @@
 type: story
 status: backlog
 priority: p1
-effort: 2
+effort: 1
 feature: year-view
 created: 2026-01-20
-updated: 2026-01-20
+updated: 2026-01-25
 done_date: null
 tags: [year-view, projects, filter, p1]
 ---
 
-# POMO-118: Projekt-Filter – Fokussiere dein Jahr
+# POMO-118: Year View Project Filter
 
 ## User Story
 
-> Als **Particle-Nutzer mit mehreren Projekten**
-> möchte ich **die Year View nach einem Projekt filtern können**,
-> damit **ich sehen kann, wie viel Zeit ich in ein bestimmtes Projekt investiert habe**.
+> As a **Particle user with multiple projects**
+> I want to **filter the Year View by project**
+> so that **I can see how much time I invested in a specific project this year**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/year-view]]
+Link to feature: [[features/year-view]]
 
-Abhängigkeiten:
-- [[stories/backlog/POMO-110-year-view-data]] (projectId Parameter vorbereitet)
-- [[features/project-tracking]]
+**Use Case:** Freelancers can see "How much did I work for Client A this year?" — visualized as a focused grid showing only that project's particles.
 
-Der Projekt-Filter ermöglicht eine fokussierte Sicht auf ein einzelnes Projekt. Freelancer können so sehen: "Wie viel habe ich dieses Jahr für Client A gearbeitet?" – visualisiert als eigenständiges Grid.
+**DRY Principle:** Reuse existing `ProjectFilterDropdown` component from insights.
 
-**Priorität P1:** Abhängig von Project Tracking, daher nachgelagert.
+## Acceptance Criteria
 
-## Akzeptanzkriterien
+### Filter Integration
+- [ ] **Given** the Year View modal, **When** projects exist, **Then** I see a ProjectFilterDropdown in the header
+- [ ] **Given** I select a project, **When** the grid updates, **Then** it shows only particles of that project
+- [ ] **Given** no projects exist, **When** I open Year View, **Then** no filter is shown
 
-### Filter-UI
-- [ ] **Given** die Year View, **When** Projekte existieren, **Then** sehe ich ein Dropdown "Alle Projekte"
-- [ ] **Given** das Dropdown, **When** ich es öffne, **Then** sehe ich alle aktiven Projekte + "Alle Projekte"
-- [ ] **Given** ich wähle ein Projekt, **When** das Grid aktualisiert, **Then** zeigt es nur Partikel dieses Projekts
+### Grid Adaptation
+- [ ] **Given** a project is filtered, **When** I see the grid, **Then** brightness is relative to that project's personal max
+- [ ] **Given** a project is filtered, **When** I see the grid, **Then** peak day is within that project's data
 
-### Grid Anpassung
-- [ ] **Given** ein Projekt ist gefiltert, **When** ich das Grid sehe, **Then** zeigt die Brightness nur dieses Projekts Daten
-- [ ] **Given** ein Projekt ist gefiltert, **When** ich das Grid sehe, **Then** ist das Personal Max relativ zu diesem Projekt
+### Summary Adaptation
+- [ ] **Given** a project is filtered, **When** I see the summary, **Then** it shows only that project's data
+- [ ] **Given** a project is filtered, **When** I look at the header, **Then** I see "Filtered: [Project Name]" indicator
 
-### Summary Anpassung
-- [ ] **Given** ein Projekt ist gefiltert, **When** ich die Summary sehe, **Then** zeigt sie nur Daten dieses Projekts
-- [ ] **Given** ein Projekt ist gefiltert, **When** ich "Partikel" sehe, **Then** zeigt es den Projekt-Namen daneben
+### State Reset
+- [ ] **Given** I close the Year View, **When** I reopen it, **Then** filter is reset to "All Projects"
+- [ ] **Given** I change the year, **When** the view updates, **Then** filter persists within the session
 
-### Tooltip Anpassung
-- [ ] **Given** ein Projekt ist gefiltert, **When** ich über einen Tag hovere, **Then** zeigt der Tooltip "Projekt: [Name]" nicht mehr (redundant)
+## Technical Details
 
-### URL State
-- [ ] **Given** ich filtere nach Projekt, **When** ich die URL sehe, **Then** enthält sie `?project=xyz`
-- [ ] **Given** ich öffne eine URL mit `?project=xyz`, **When** die View lädt, **Then** ist das Projekt vorausgewählt
+### Implementation Approach
 
-## Technische Details
-
-### ProjectFilter Component
+**1. Enable projectId filtering in data API** (`src/lib/year-view/aggregation.ts`):
 
 ```typescript
-// src/components/year-view/ProjectFilter.tsx
-
-interface ProjectFilterProps {
-  projects: Project[];
-  selectedProjectId: string | null;
-  onProjectChange: (projectId: string | null) => void;
-}
-
-export function ProjectFilter({
-  projects,
-  selectedProjectId,
-  onProjectChange,
-}: ProjectFilterProps) {
-  const selectedProject = projects.find(p => p.id === selectedProjectId);
-
-  return (
-    <Dropdown
-      trigger={
-        <button className="project-filter-trigger">
-          <span>
-            {selectedProject ? selectedProject.name : 'Alle Projekte'}
-          </span>
-          <ChevronDown />
-        </button>
-      }
-    >
-      <DropdownItem
-        selected={selectedProjectId === null}
-        onClick={() => onProjectChange(null)}
-      >
-        Alle Projekte
-      </DropdownItem>
-
-      <DropdownSeparator />
-
-      {projects.map((project) => (
-        <DropdownItem
-          key={project.id}
-          selected={project.id === selectedProjectId}
-          onClick={() => onProjectChange(project.id)}
-        >
-          <ProjectDot brightness={project.brightness} />
-          {project.name}
-        </DropdownItem>
-      ))}
-    </Dropdown>
-  );
+export function filterWorkSessionsForYear(
+  sessions: CompletedSession[],
+  year: number,
+  projectId?: string | null  // Add parameter
+): CompletedSession[] {
+  return sessions.filter((session) => {
+    if (session.type !== 'work') return false;
+    const sessionDate = new Date(session.completedAt);
+    if (sessionDate.getFullYear() !== year) return false;
+    // Filter by project if specified
+    if (projectId && session.projectId !== projectId) return false;
+    return true;
+  });
 }
 ```
 
-### Year View mit Filter
+**2. Update data.ts** to pass projectId:
 
 ```typescript
-// src/components/year-view/YearView.tsx
+export async function getYearViewData(
+  year: number,
+  projectId?: string | null
+): Promise<YearViewData> {
+  const sessions = loadSessions();
+  const workSessions = filterWorkSessionsForYear(sessions, year, projectId);
+  // ... rest unchanged
+}
+```
 
-export function YearView() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+**3. Add filter to YearViewModal** (`src/components/year-view/YearViewModal.tsx`):
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    searchParams.get('project')
-  );
+```typescript
+import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdown';
+import { useProjects } from '@/hooks/useProjects';
 
-  const { data, isLoading } = useYearViewData(currentYear, selectedProjectId);
-  const { projects } = useProjects();
+export function YearViewModal() {
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const { activeProjects } = useProjects();
 
-  const handleProjectChange = (projectId: string | null) => {
-    setSelectedProjectId(projectId);
-
-    // URL updaten
-    const params = new URLSearchParams(searchParams);
-    if (projectId) {
-      params.set('project', projectId);
-    } else {
-      params.delete('project');
+  // Load data with project filter
+  useEffect(() => {
+    if (isOpen && !useMockData) {
+      getYearViewData(currentYear, selectedProjectId).then(setRealData);
     }
-    router.replace(`/year?${params.toString()}`);
-  };
+  }, [isOpen, currentYear, useMockData, selectedProjectId]);
 
-  return (
-    <div className="year-view">
-      <header className="year-header">
-        <BackButton />
-        <YearSelector ... />
-        <ProjectFilter
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onProjectChange={handleProjectChange}
-        />
-      </header>
+  // Reset filter when modal closes
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setSelectedProjectId(null);  // Reset filter
+    setHoveredCell(null);
+  }, []);
 
-      <YearGrid data={data} />
+  // In header, next to Demo toggle:
+  {activeProjects.length > 0 && (
+    <ProjectFilterDropdown
+      value={selectedProjectId}
+      onChange={setSelectedProjectId}
+      projects={activeProjects}
+    />
+  )}
 
-      <YearSummary
-        summary={data.summary}
-        projectName={selectedProjectId ? getProject(selectedProjectId)?.name : null}
-      />
-    </div>
-  );
+  // Show filter indicator below year selector when filtered:
+  {selectedProjectId && (
+    <p className="text-xs text-tertiary">
+      Filtered: {activeProjects.find(p => p.id === selectedProjectId)?.name}
+    </p>
+  )}
 }
 ```
 
-### Summary mit Projekt-Name
+### Files to Change
 
-```typescript
-// src/components/year-view/YearSummary.tsx
+| File | Change |
+|------|--------|
+| `src/lib/year-view/aggregation.ts` | Add `projectId` parameter to `filterWorkSessionsForYear` |
+| `src/lib/year-view/data.ts` | Pass `projectId` to filter function |
+| `src/components/year-view/YearViewModal.tsx` | Add state, dropdown, indicator |
 
-interface YearSummaryProps {
-  summary: YearViewSummary;
-  projectName?: string | null;
-}
+### No New Files Needed
 
-export function YearSummary({ summary, projectName }: YearSummaryProps) {
-  return (
-    <div className="year-summary">
-      <SummaryCard
-        value={summary.totalParticles.toLocaleString('de-DE')}
-        label={projectName ? `Partikel für ${projectName}` : 'Partikel'}
-      />
-      {/* ... other cards ... */}
-    </div>
-  );
-}
-```
+Reuses existing:
+- `ProjectFilterDropdown` from `src/components/insights/`
+- `useProjects` hook
 
-### Betroffene Dateien
+## UI Design
+
+### Header with Project Filter
 
 ```
-src/
-└── components/
-    └── year-view/
-        ├── YearView.tsx         # Filter Integration
-        ├── ProjectFilter.tsx    # NEU
-        ├── YearSummary.tsx      # projectName Prop
-        └── project-filter.css
+┌─────────────────────────────────────────────────────────────────┐
+│  Year View              [All Projects ▼]        [Demo]    [×]  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## UI/UX
-
-### Header mit Project Filter
+### With Active Filter
 
 ```
-┌───────────────────────────────────────────────────────────────────┐
-│                                                                   │
-│  ← Zurück                     2025                                │
-│                           [<]      [>]                            │
-│                                                                   │
-│              [Alle Projekte ▼]                                    │
-│                                                                   │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-### Dropdown geöffnet
-
-```
-              [Website Redesign ▼]
-              ┌─────────────────────────┐
-              │ ✓ Alle Projekte         │
-              │ ─────────────────────── │
-              │   ● Website Redesign    │
-              │   ● Mobile App          │
-              │   ● Freelance: Client A │
-              └─────────────────────────┘
-```
-
-### Gefilterte Summary
-
-```
-┌───────────────────────────────────────────────────────────────────┐
-│                                                                   │
-│    312              130h 15m          12 Tage          78         │
-│  PARTIKEL FÜR      FOKUSZEIT      LÄNGSTE SERIE   AKTIVE TAGE    │
-│ WEBSITE REDESIGN                                                  │
-│                                                                   │
-└───────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Year View              [● Client A ▼]          [Demo]    [×]  │
+│                                                                 │
+│                           ◀  2025  ▶                           │
+│                       Filtered: Client A                        │
+│                                                                 │
+│   ┌─────────────────────────────────────────────────────────┐  │
+│   │                    [Year Grid]                          │  │
+│   │              (only Client A particles)                  │  │
+│   └─────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│      127 particles  ·  53h 20m  ·  8 days  ·  34 active        │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Dropdown zeigt alle Projekte
-- [ ] "Alle Projekte" zeigt komplettes Grid
-- [ ] Projekt-Filter zeigt nur dieses Projekt
-- [ ] Brightness passt sich an (neues Personal Max)
-- [ ] Summary zeigt Projekt-Name
-- [ ] URL enthält `?project=xyz`
-- [ ] URL-Parameter wird bei Load angewendet
-- [ ] Peak Day ist relativ zum gefilterten Projekt
-
-### Automatisierte Tests
-
-```typescript
-describe('ProjectFilter', () => {
-  it('filters year view data by project', async () => {
-    const { result } = renderHook(() =>
-      useYearViewData(2025, 'project-123')
-    );
-
-    await waitFor(() => {
-      expect(result.current.data.summary.totalParticles).toBeLessThan(
-        allParticles
-      );
-    });
-  });
-
-  it('updates URL when project changes', () => {
-    render(<YearView />);
-
-    fireEvent.click(screen.getByText('Website Redesign'));
-
-    expect(window.location.search).toContain('project=');
-  });
-
-  it('loads project from URL parameter', () => {
-    // Mock URL with project param
-    mockSearchParams({ project: 'project-123' });
-
-    render(<YearView />);
-
-    expect(screen.getByText('Website Redesign')).toHaveClass('selected');
-  });
-});
-```
+### Manual Testing
+- [ ] Filter dropdown appears when projects exist
+- [ ] "All Projects" shows complete grid
+- [ ] Project filter shows only that project's data
+- [ ] Brightness adapts (new personal max for filtered data)
+- [ ] Summary shows filtered totals
+- [ ] Filter indicator visible when active
+- [ ] Filter resets when modal closes
+- [ ] Filter persists across year changes
 
 ## Definition of Done
 
-- [ ] ProjectFilter Component implementiert
-- [ ] Dropdown mit Projekten
-- [ ] Grid zeigt gefilterte Daten
-- [ ] Brightness relativ zu gefiltertem Max
-- [ ] Summary zeigt Projekt-Name
-- [ ] URL State (`?project=xyz`)
-- [ ] Tests geschrieben & grün
-- [ ] Code reviewed
+- [ ] `filterWorkSessionsForYear` accepts projectId parameter
+- [ ] `getYearViewData` passes projectId to filter
+- [ ] YearViewModal has filter state
+- [ ] ProjectFilterDropdown integrated in header
+- [ ] Filter indicator shown when active
+- [ ] Filter resets on modal close
+- [ ] No TypeScript errors
+- [ ] No console errors
 
-## Notizen
+## Out of Scope
 
-**UX-Überlegung:**
-- Filter-State ist Teil der URL → Shareable
-- Bei Projekt-Wechsel: Animation spielt erneut
-- "Alle Projekte" als erster Eintrag (Clear-Filter)
-
-**Abhängigkeit:**
-- Braucht Project Tracking Feature (POMO-100 bis POMO-107)
-- Daher P1, nicht P0
+- URL state persistence (modal-based, not needed)
+- Keyboard shortcut to open filter (dropdown has its own)
+- Custom tests (later)
+- Filter in tooltip (redundant when filtered)
 
 ---
 
-## Arbeitsverlauf
+## Work Log
 
-### Gestartet:
-<!-- Claude: Notiere hier was du tust -->
+### Started:
+<!-- Claude: Note what you're doing -->
 
-### Erledigt:
-<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->
+### Completed:
+<!-- Auto-filled when story moves to done/ -->

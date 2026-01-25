@@ -32,14 +32,11 @@ export async function getYearViewData(
   year: number,
   projectId?: string | null
 ): Promise<YearViewData> {
-  // Note: projectId parameter is prepared for future use but currently ignored
-  // CompletedSession doesn't have projectId field
-
   // 1. Load all sessions
   const sessions = loadSessions();
 
-  // 2. Filter to work sessions in the specified year
-  const workSessions = filterWorkSessionsForYear(sessions, year);
+  // 2. Filter to work sessions in the specified year (and optionally by project)
+  const workSessions = filterWorkSessionsForYear(sessions, year, projectId);
 
   // 3. Group sessions by day
   const dayMap = groupSessionsByDay(workSessions);

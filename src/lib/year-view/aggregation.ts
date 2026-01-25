@@ -30,15 +30,20 @@ export function formatDateKey(date: Date): string {
 
 /**
  * Filter sessions to only work sessions within a specific year
+ * Optionally filter by project ID
  */
 export function filterWorkSessionsForYear(
   sessions: CompletedSession[],
-  year: number
+  year: number,
+  projectId?: string | null
 ): CompletedSession[] {
   return sessions.filter((session) => {
     if (session.type !== 'work') return false;
     const sessionDate = new Date(session.completedAt);
-    return sessionDate.getFullYear() === year;
+    if (sessionDate.getFullYear() !== year) return false;
+    // Filter by project if specified
+    if (projectId && session.projectId !== projectId) return false;
+    return true;
   });
 }
 

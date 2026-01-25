@@ -12,6 +12,8 @@ import { generateMockYearData } from '@/lib/year-view/mock-data';
 import type { YearViewData } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
 import { YearGrid, YearTooltip, YearSummary, YearSelector } from './index';
+import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdown';
+import { useProjects } from '@/hooks/useProjects';
 
 // Available years for navigation
 const CURRENT_YEAR = new Date().getFullYear();
@@ -33,8 +35,10 @@ export function YearViewModal() {
   const [gridAnimationComplete, setGridAnimationComplete] = useState(false);
   const [useMockData, setUseMockData] = useState(false);
   const [realData, setRealData] = useState<YearViewData | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const { weekStartsOnMonday } = useWeekStart();
+  const { activeProjects } = useProjects();
   const reducedMotion = prefersReducedMotion();
 
   // Focus management
@@ -42,12 +46,12 @@ export function YearViewModal() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
 
-  // Load real data when modal opens or year changes
+  // Load real data when modal opens, year changes, or project filter changes
   useEffect(() => {
     if (isOpen && !useMockData) {
-      getYearViewData(currentYear).then(setRealData);
+      getYearViewData(currentYear, selectedProjectId).then(setRealData);
     }
-  }, [isOpen, currentYear, useMockData]);
+  }, [isOpen, currentYear, useMockData, selectedProjectId]);
 
   // Get data based on toggle
   const data: YearViewData = useMemo(() => {
@@ -102,6 +106,7 @@ export function YearViewModal() {
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setHoveredCell(null);
+    setSelectedProjectId(null); // Reset filter on close
   }, []);
 
   // Close on Escape
@@ -183,6 +188,14 @@ export function YearViewModal() {
                     Year View
                   </h2>
                   <div className="flex items-center gap-3">
+                    {/* Project Filter - only show if projects exist */}
+                    {activeProjects.length > 0 && (
+                      <ProjectFilterDropdown
+                        value={selectedProjectId}
+                        onChange={setSelectedProjectId}
+                        projects={activeProjects}
+                      />
+                    )}
                     {/* Data Toggle */}
                     <button
                       onClick={() => setUseMockData(!useMockData)}
