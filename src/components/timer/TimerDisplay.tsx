@@ -15,6 +15,8 @@ interface TimerDisplayProps {
   overflowSeconds?: number;
   sessionDuration?: number; // Original session duration for overflow display
   onHoverChange?: (isHovered: boolean) => void;
+  isBreak?: boolean;
+  breakBreathingEnabled?: boolean;
 }
 
 // Custom colon component with two stacked dots for better vertical alignment
@@ -76,6 +78,8 @@ export function TimerDisplay({
   overflowSeconds = 0,
   sessionDuration = 0,
   onHoverChange,
+  isBreak = false,
+  breakBreathingEnabled = false,
 }: TimerDisplayProps) {
   const { visualTimerEnabled } = useTimerSettingsContext();
 
@@ -146,13 +150,24 @@ export function TimerDisplay({
   const minuteChars = minutePart.split('');
   const secondChars = secondPart.split('');
 
-  // Overflow pulse animation
+  // Overflow pulse animation (subtle, keeps time readable)
   const overflowPulse = {
-    opacity: [0.7, 1, 0.7],
+    opacity: [0.9, 1, 0.9],
     transition: {
       duration: 2,
       repeat: Infinity,
       ease: 'easeInOut',
+    },
+  };
+
+  // Box Breathing animation: 4s expand → 4s hold → 4s contract → 4s hold = 16s cycle
+  const breakBreathingAnimation = {
+    scale: [1.00, 1.08, 1.08, 1.00, 1.00],
+    transition: {
+      duration: 16,
+      repeat: Infinity,
+      ease: 'easeInOut',
+      times: [0, 0.25, 0.5, 0.75, 1],
     },
   };
 
@@ -163,11 +178,13 @@ export function TimerDisplay({
       animate={
         reducedMotion
           ? {}
-          : isOverflow && isRunning
-            ? overflowPulse
-            : justStarted
-              ? { scale: [1, 1.03, 1] }
-              : { scale: 1, opacity: 1 }
+          : isBreak && breakBreathingEnabled && isRunning
+            ? breakBreathingAnimation
+            : isOverflow && isRunning
+              ? overflowPulse
+              : justStarted
+                ? { scale: [1, 1.03, 1] }
+                : { scale: 1, opacity: 1 }
       }
       transition={{ type: 'spring', ...SPRING.gentle }}
     >
@@ -213,6 +230,8 @@ export function TimerDisplay({
           isPaused={isPaused}
           isOverflow={isOverflow}
           timeRemaining={timeRemaining}
+          isBreak={isBreak}
+          breakBreathingEnabled={breakBreathingEnabled}
         >
           {timerContent}
         </ProgressRing>

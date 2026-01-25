@@ -12,6 +12,8 @@ interface ProgressRingProps {
   isOverflow?: boolean;
   timeRemaining?: number; // for intensification logic
   children?: React.ReactNode; // countdown in center
+  isBreak?: boolean;
+  breakBreathingEnabled?: boolean;
 }
 
 // Intensification logic for final minutes
@@ -32,10 +34,10 @@ function getRingIntensity(timeRemaining: number): {
   }
   if (timeRemaining <= 300) {
     // Final 5 minutes
-    return { opacity: 0.95, glow: false, pulsing: false };
+    return { opacity: 1, glow: false, pulsing: false };
   }
   // Default state
-  return { opacity: 0.9, glow: false, pulsing: false };
+  return { opacity: 1, glow: false, pulsing: false };
 }
 
 export function ProgressRing({
@@ -47,13 +49,15 @@ export function ProgressRing({
   isOverflow = false,
   timeRemaining = Infinity,
   children,
+  isBreak = false,
+  breakBreathingEnabled = false,
 }: ProgressRingProps) {
   const reducedMotion = useReducedMotion();
 
   // Get intensification state (no strokeWidth - kept constant to prevent jump bugs)
   const intensity = useMemo(
     () => (isOverflow
-      ? { opacity: 0.5, glow: false, pulsing: true }
+      ? { opacity: 1, glow: false, pulsing: true }
       : getRingIntensity(timeRemaining)),
     [timeRemaining, isOverflow]
   );
@@ -87,7 +91,7 @@ export function ProgressRing({
   // Animation variants
   // NOTE: No scale animation - scaling a rotated SVG causes visual jumps
   const pulseAnimation = {
-    opacity: [0.7, 1, 0.7],
+    opacity: [0.9, 1, 0.9],
     transition: {
       duration: 2,
       repeat: Infinity,
@@ -96,12 +100,30 @@ export function ProgressRing({
   };
 
   const breatheAnimation = {
-    opacity: [0.4, 0.8, 0.4],
+    opacity: [0.85, 1, 0.85],
     transition: {
       duration: 3,
       repeat: Infinity,
       ease: 'easeInOut',
     },
+  };
+
+  // Box Breathing animation for breaks: 4s expand → 4s hold → 4s contract → 4s hold = 16s cycle
+  const breakBreathingAnimation = {
+    scale: [1.00, 1.08, 1.08, 1.00, 1.00],
+    transition: {
+      duration: 16,
+      repeat: Infinity,
+      ease: 'easeInOut',
+      times: [0, 0.25, 0.5, 0.75, 1],
+    },
+  };
+
+  // Determine container animation (for break breathing)
+  const getContainerAnimation = () => {
+    if (reducedMotion) return {};
+    if (isBreak && breakBreathingEnabled && isRunning) return breakBreathingAnimation;
+    return {};
   };
 
   // Determine animation state
@@ -113,7 +135,11 @@ export function ProgressRing({
   };
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+    <motion.div
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size }}
+      animate={getContainerAnimation()}
+    >
       {/* SVG Ring */}
       <motion.svg
         width={size}
@@ -193,6 +219,6 @@ export function ProgressRing({
       >
         {children}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

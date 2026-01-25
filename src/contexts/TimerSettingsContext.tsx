@@ -33,6 +33,8 @@ const DEFAULT_CELEBRATION_INTENSITY: CelebrationIntensity = 'subtle';
 const CELEBRATION_ENABLED_KEY = 'particle_celebration_enabled';
 const CELEBRATION_TRIGGER_KEY = 'particle_celebration_trigger';
 const CELEBRATION_INTENSITY_KEY = 'particle_celebration_intensity';
+const BREAK_BREATHING_KEY = 'particle_break_breathing_enabled';
+const DEFAULT_BREAK_BREATHING = false;
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -318,6 +320,24 @@ function saveCelebrationIntensity(intensity: CelebrationIntensity): void {
   localStorage.setItem(CELEBRATION_INTENSITY_KEY, intensity);
 }
 
+function loadBreakBreathingEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_BREAK_BREATHING;
+  try {
+    const stored = localStorage.getItem(BREAK_BREATHING_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_BREAK_BREATHING;
+}
+
+function saveBreakBreathingEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(BREAK_BREATHING_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -369,6 +389,9 @@ interface TimerSettingsContextValue {
   setCelebrationTrigger: (trigger: CelebrationTrigger) => void;
   celebrationIntensity: CelebrationIntensity;
   setCelebrationIntensity: (intensity: CelebrationIntensity) => void;
+  // Break breathing animation
+  breakBreathingEnabled: boolean;
+  setBreakBreathingEnabled: (enabled: boolean) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -393,6 +416,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [celebrationEnabled, setCelebrationEnabledState] = useState<boolean>(DEFAULT_CELEBRATION_ENABLED);
   const [celebrationTrigger, setCelebrationTriggerState] = useState<CelebrationTrigger>(DEFAULT_CELEBRATION_TRIGGER);
   const [celebrationIntensity, setCelebrationIntensityState] = useState<CelebrationIntensity>(DEFAULT_CELEBRATION_INTENSITY);
+  const [breakBreathingEnabled, setBreakBreathingEnabledState] = useState<boolean>(DEFAULT_BREAK_BREATHING);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -433,6 +457,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const celebrationIntensityVal = loadCelebrationIntensity();
     setCelebrationIntensityState(celebrationIntensityVal);
+
+    const breakBreathingVal = loadBreakBreathingEnabled();
+    setBreakBreathingEnabledState(breakBreathingVal);
 
     setIsLoaded(true);
   }, []);
@@ -548,6 +575,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveCelebrationIntensity(intensity);
   }, []);
 
+  // Set break breathing enabled
+  const setBreakBreathingEnabled = useCallback((enabled: boolean) => {
+    setBreakBreathingEnabledState(enabled);
+    saveBreakBreathingEnabled(enabled);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -585,6 +618,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setCelebrationTrigger,
       celebrationIntensity,
       setCelebrationIntensity,
+      breakBreathingEnabled,
+      setBreakBreathingEnabled,
     }),
     [
       durations,
@@ -619,6 +654,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setCelebrationTrigger,
       celebrationIntensity,
       setCelebrationIntensity,
+      breakBreathingEnabled,
+      setBreakBreathingEnabled,
     ]
   );
 

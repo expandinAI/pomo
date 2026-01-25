@@ -212,7 +212,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -1499,6 +1499,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           overflowSeconds={overflowSeconds}
           sessionDuration={oneOffDuration ?? durations[state.mode]}
           onHoverChange={setIsTimerHovered}
+          isBreak={state.mode !== 'work'}
+          breakBreathingEnabled={breakBreathingEnabled}
         />
       </button>
 
