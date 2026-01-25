@@ -7,6 +7,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Rhythm View – Estimation Insights (POMO-143, 3 SP)**:
+  - Neuer "Rhythmus" Navigations-Punkt (G R Shortcut)
+  - Globale Rhythmus-Berechnung aus allen Partikeln mit Schätzung
+  - Drei Rhythmus-Typen: Flow, Struktur, Präzision
+  - Zahlen-Visualisierung: "25 min → 32 min" (geschätzt → tatsächlich)
+  - Pro-Projekt-Aufschlüsselung mit Mini-Zahlen
+  - Projekt-Filter Dropdown im Header
+  - Rückwärts-Kompatibilität: Alte Partikel ohne Overflow werden einbezogen
+  - `estimatedDuration` Feld im Datenmodell für neue Sessions
+  - Philosophie: "Particle ist ein Spiegel, kein Richter"
 - **Inline Task Completion (POMO-148, 2 SP)**:
   - Tasks mit `-` Prefix als erledigt markieren
   - Live-Preview mit Durchstreichen-Styling
@@ -213,6 +223,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-143-estimation-trend-analytics]]
 - [[stories/done/POMO-141-total-list-time]]
 - [[stories/done/POMO-161-particle-history-search]]
 - [[stories/done/POMO-134-daily-goals]]

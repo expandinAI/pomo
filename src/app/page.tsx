@@ -31,10 +31,17 @@ const ProjectListModal = dynamic(
   () => import('@/components/projects/ProjectListModal').then(mod => ({ default: mod.ProjectListModal })),
   { ssr: false }
 );
+const RhythmView = dynamic(
+  () => import('@/components/rhythm/RhythmView').then(mod => ({ default: mod.RhythmView })),
+  { ssr: false }
+);
 
 export default function Home() {
   // Timeline overlay state
   const [showTimeline, setShowTimeline] = useState(false);
+
+  // Rhythm view state
+  const [showRhythm, setShowRhythm] = useState(false);
 
   // Theme and command palette
   const { theme, toggleTheme } = useTheme();
@@ -65,6 +72,9 @@ export default function Home() {
       onGoals: () => {
         window.dispatchEvent(new CustomEvent('particle:open-goals'));
       },
+      onRhythm: () => {
+        setShowRhythm(true);
+      },
     }),
     []
   );
@@ -79,6 +89,16 @@ export default function Home() {
 
     window.addEventListener('particle:open-timeline', handleOpenTimeline);
     return () => window.removeEventListener('particle:open-timeline', handleOpenTimeline);
+  }, []);
+
+  // Listen for rhythm open event (from Command Palette)
+  useEffect(() => {
+    function handleOpenRhythm() {
+      setShowRhythm(true);
+    }
+
+    window.addEventListener('particle:open-rhythm', handleOpenRhythm);
+    return () => window.removeEventListener('particle:open-rhythm', handleOpenRhythm);
   }, []);
 
   // Global keyboard shortcut for Cmd+, to open settings
@@ -110,6 +130,7 @@ export default function Home() {
       <div className="absolute top-4 right-4">
         <ActionBar
           onOpenTimeline={() => setShowTimeline(true)}
+          onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
           onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
@@ -133,6 +154,9 @@ export default function Home() {
 
       {/* Project List Modal (opened via G+P keyboard shortcut) */}
       <ProjectListModal />
+
+      {/* Rhythm View (opened via G+R keyboard shortcut or Command Palette) */}
+      <RhythmView isOpen={showRhythm} onClose={() => setShowRhythm(false)} />
 
       {/* Timeline Overlay (opened via G+T, timer click, or Command Palette) */}
       <TimelineOverlay
@@ -161,7 +185,7 @@ export default function Home() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/s/h/y/p/o/,
+              t/r/s/h/y/p/o/,
             </span>
           </motion.div>
         )}

@@ -10,12 +10,14 @@ import {
   Settings,
   Sun,
   Moon,
+  Activity,
 } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 
 interface ActionBarProps {
   onOpenTimeline: () => void;
+  onOpenRhythm: () => void;
   onOpenProjects: () => void;
   onOpenGoals: () => void;
   onOpenStats: () => void;
@@ -69,6 +71,7 @@ function Divider() {
  */
 export function ActionBar({
   onOpenTimeline,
+  onOpenRhythm,
   onOpenProjects,
   onOpenGoals,
   onOpenStats,
@@ -88,6 +91,14 @@ export function ActionBar({
         tooltip="Timeline · G T"
       >
         <CalendarDays className="w-5 h-5" />
+      </ActionButton>
+
+      <ActionButton
+        onClick={onOpenRhythm}
+        label="Open rhythm"
+        tooltip="Rhythmus · G R"
+      >
+        <Activity className="w-5 h-5" />
       </ActionButton>
 
       <ActionButton

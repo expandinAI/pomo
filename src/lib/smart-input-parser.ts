@@ -229,3 +229,28 @@ export function formatTotalTime(minutes: number): string {
   if (mins === 0) return `${hours}h`;
   return `${hours}h ${mins}min`;
 }
+
+/**
+ * Format tasks for particle storage
+ * Extracts clean task names, removes times and completion markers
+ *
+ * Examples:
+ * - "Emails 10" → "Emails"
+ * - "Emails 10\nCall 15\nReport 30" → "Emails · Call · Report"
+ * - "-Emails 10\nCall 15" → "Emails · Call"
+ * - "30m" (only time) → ""
+ */
+export function formatTasksForStorage(input: string): string {
+  if (!input.trim()) return '';
+
+  const { tasks } = parseMultiLineInput(input);
+
+  const taskNames = tasks
+    .map(t => t.text.trim())
+    .filter(t => t.length > 0);
+
+  if (taskNames.length === 0) return '';
+  if (taskNames.length === 1) return taskNames[0];
+
+  return taskNames.join(' · ');
+}

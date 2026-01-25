@@ -59,7 +59,7 @@ Wir starten bewusst einfach, um zu validieren ob Nutzer Multi-Tasks überhaupt n
 
 ### UI/UX
 - [x] **Given** Textarea mit Tasks, **When** angezeigt, **Then** Gesamtzeit unter Textarea
-- [ ] **Given** Gesamtzeit, **When** End Time Preview aktiv, **Then** auch "Fertig um: HH:MM" zeigen *(deferred)*
+- [x] **Given** Gesamtzeit, **When** End Time Preview aktiv, **Then** auch "Fertig um: HH:MM" zeigen
 - [x] **Given** Keine Tasks mit Zeit, **When** berechnet, **Then** Total ausblenden oder "0min"
 - [x] **Given** Textarea, **When** leer, **Then** Placeholder "What are you working on?"
 

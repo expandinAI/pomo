@@ -29,6 +29,7 @@ import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
 import { addSession, getTodaySessions, type CompletedSession } from '@/lib/session-storage';
 import { addRecentTask } from '@/lib/task-storage';
+import { formatTasksForStorage } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 
@@ -489,10 +490,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const wasWorkSession = sessionMode === 'work';
 
     // Save completed session to history with task data, preset info, and project
+    const formattedTask = formatTasksForStorage(state.currentTask);
     const taskData = {
-      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      ...(wasWorkSession && formattedTask && { task: formattedTask }),
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+      estimatedDuration: sessionDuration, // Planned duration (for rhythm tracking)
     };
 
     addSession(sessionMode, sessionDuration, taskData);
@@ -865,12 +868,14 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     // Only save if > 60 seconds elapsed (minimum threshold)
     if (elapsedTime > 60) {
+      const formattedTask = formatTasksForStorage(state.currentTask);
       const taskData = {
-        ...(isWorkSession && state.currentTask && { task: state.currentTask }),
+        ...(isWorkSession && formattedTask && { task: formattedTask }),
         presetId: activePresetIdRef.current,
         ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
         // Track overflow separately
         ...(isOverflow && currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
+        estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
       };
 
       // Save ACTUAL elapsed time (including overflow)
@@ -928,12 +933,14 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const wasWorkSession = sessionMode === 'work';
 
     // Save session with full duration + overflow
+    const formattedTask = formatTasksForStorage(state.currentTask);
     const taskData = {
-      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      ...(wasWorkSession && formattedTask && { task: formattedTask }),
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
       // Track overflow separately
       ...(currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
+      estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
     };
 
     addSession(sessionMode, totalDuration, taskData);
@@ -1026,10 +1033,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const wasWorkSession = sessionMode === 'work';
 
     // Save session with ELAPSED time (user earned this time)
+    const formattedTask = formatTasksForStorage(state.currentTask);
     const taskData = {
-      ...(wasWorkSession && state.currentTask && { task: state.currentTask }),
+      ...(wasWorkSession && formattedTask && { task: formattedTask }),
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+      estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
     };
 
     addSession(sessionMode, elapsedTime, taskData);

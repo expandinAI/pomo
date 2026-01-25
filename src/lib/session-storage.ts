@@ -10,6 +10,7 @@ export interface CompletedSession {
   presetId?: string; // ID of the preset used for this session
   projectId?: string; // Optional project assignment
   overflowDuration?: number; // Time spent past 0:00 (in seconds)
+  estimatedDuration?: number; // Planned duration in seconds (from Smart Input or preset)
 }
 
 const STORAGE_KEY = 'particle_session_history';
@@ -55,6 +56,7 @@ export interface TaskData {
   presetId?: string;
   projectId?: string;
   overflowDuration?: number;
+  estimatedDuration?: number;
 }
 
 export function getSessionById(id: string): CompletedSession | null {
@@ -105,6 +107,7 @@ export function addSession(
     ...(taskData?.presetId && { presetId: taskData.presetId }),
     ...(taskData?.projectId && { projectId: taskData.projectId }),
     ...(taskData?.overflowDuration && { overflowDuration: taskData.overflowDuration }),
+    ...(taskData?.estimatedDuration && { estimatedDuration: taskData.estimatedDuration }),
   };
 
   const sessions = loadSessions();

@@ -17,6 +17,7 @@ import {
   Target,
   FastForward,
   CalendarClock,
+  Activity,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -199,6 +200,17 @@ export function CommandRegistration({
         },
         icon: <Target className="w-4 h-4" />,
         keywords: ['goal', 'daily', 'target', 'particles', 'objective'],
+      },
+      {
+        id: 'open-rhythm',
+        label: 'Open Rhythm',
+        shortcut: 'G R',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-rhythm'));
+        },
+        icon: <Activity className="w-4 h-4" />,
+        keywords: ['rhythm', 'estimation', 'trend', 'analytics', 'flow', 'structure', 'precision'],
       },
 
       // Project commands
