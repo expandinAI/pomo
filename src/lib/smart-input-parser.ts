@@ -16,6 +16,18 @@ export interface ParsedInput {
   raw: string;
 }
 
+export interface ParsedTask {
+  /** Original line or parsed task name */
+  text: string;
+  /** Duration in minutes, 0 if no time detected */
+  duration: number;
+}
+
+export interface MultiLineResult {
+  tasks: ParsedTask[];
+  totalMinutes: number;
+}
+
 const MIN_DURATION_MINUTES = 1;
 const MAX_DURATION_MINUTES = 180;
 
@@ -162,4 +174,35 @@ export function formatDurationPreview(seconds: number): string {
   }
 
   return `${minutes} min`;
+}
+
+/**
+ * Parse multi-line input, one task per line
+ */
+export function parseMultiLineInput(input: string): MultiLineResult {
+  const lines = input.split('\n').filter(line => line.trim());
+
+  const tasks: ParsedTask[] = lines.map(line => {
+    const parsed = parseSmartInput(line);
+    return {
+      text: parsed.taskName || line.trim(),
+      duration: parsed.durationSeconds ? Math.round(parsed.durationSeconds / 60) : 0,
+    };
+  });
+
+  const totalMinutes = tasks.reduce((sum, t) => sum + t.duration, 0);
+
+  return { tasks, totalMinutes };
+}
+
+/**
+ * Format total time for display
+ */
+export function formatTotalTime(minutes: number): string {
+  if (minutes === 0) return '';
+  if (minutes < 60) return `${minutes}min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}min`;
 }

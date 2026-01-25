@@ -6,7 +6,7 @@ import { SPRING } from '@/styles/design-tokens';
 import { TaskSuggestions } from './TaskSuggestions';
 import { ProjectDropdown } from './ProjectDropdown';
 import { getRecentTasks, filterTasks, type RecentTask } from '@/lib/task-storage';
-import { parseSmartInput, formatDurationPreview } from '@/lib/smart-input-parser';
+import { parseSmartInput, formatDurationPreview, parseMultiLineInput, formatTotalTime } from '@/lib/smart-input-parser';
 import type { Project, ProjectWithStats } from '@/lib/projects';
 
 interface UnifiedTaskInputProps {
@@ -25,7 +25,7 @@ interface UnifiedTaskInputProps {
 
   // General
   disabled?: boolean;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
+  inputRef?: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const MAX_TASK_LENGTH = 100;
@@ -48,7 +48,7 @@ export function UnifiedTaskInput({
   disabled = false,
   inputRef: externalRef,
 }: UnifiedTaskInputProps) {
-  const internalRef = useRef<HTMLInputElement>(null);
+  const internalRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = externalRef || internalRef;
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -62,8 +62,18 @@ export function UnifiedTaskInput({
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
 
   // Parse smart input for duration detection
-  const parsed = useMemo(() => parseSmartInput(taskText), [taskText]);
-  const showSmartPreview = parsed.durationSeconds !== null;
+  const multiLineParsed = useMemo(() => parseMultiLineInput(taskText), [taskText]);
+  const hasMultipleLines = taskText.includes('\n');
+  const totalMinutes = multiLineParsed.totalMinutes;
+
+  // For single-line, still show smart preview
+  const singleLineParsed = useMemo(() => {
+    if (hasMultipleLines) return null;
+    return parseSmartInput(taskText);
+  }, [taskText, hasMultipleLines]);
+
+  const showSmartPreview = !hasMultipleLines && singleLineParsed?.durationSeconds !== null;
+  const showTotalTime = hasMultipleLines && totalMinutes > 0;
 
   // Load recent tasks on focus
   useEffect(() => {
@@ -84,12 +94,34 @@ export function UnifiedTaskInput({
 
   // Handle task input change
   const handleTaskChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value.slice(0, MAX_TASK_LENGTH);
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newValue = e.target.value.slice(0, MAX_TASK_LENGTH * 10);
       onTaskChange(newValue);
     },
     [onTaskChange]
   );
+
+  // Auto-grow textarea height (also triggers on focus to expand multi-line)
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 128)}px`;
+    }
+  }, [taskText, inputRef, isFocused]);
+
+  // Focus textarea when switching from compact view to edit mode
+  useEffect(() => {
+    if (isFocused && inputRef.current) {
+      inputRef.current.focus();
+      // Trigger height recalculation after focus
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.style.height = 'auto';
+          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 128)}px`;
+        }
+      });
+    }
+  }, [isFocused, inputRef]);
 
   // Handle task selection from suggestions
   const handleSelectTask = useCallback(
@@ -113,9 +145,35 @@ export function UnifiedTaskInput({
 
   // Handle input keyboard navigation
   const handleInputKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      // Task suggestion navigation
-      if (showSuggestions && filteredTasks.length > 0) {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // Cmd/Ctrl+Enter = Submit
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        inputRef.current?.blur();
+
+        if (totalMinutes > 0 && onSubmitWithDuration) {
+          // Keep multi-line format for editing, display handles compact view
+          onSubmitWithDuration(taskText, totalMinutes * 60, false);
+        } else if (singleLineParsed?.durationSeconds && onSubmitWithDuration) {
+          // Single-line with duration - keep full text for styled display
+          onSubmitWithDuration(taskText, singleLineParsed.durationSeconds, singleLineParsed.wasLimited);
+        } else {
+          onEnter?.();
+        }
+        return;
+      }
+
+      // Escape = close
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowSuggestions(false);
+        setSuggestionIndex(-1);
+        inputRef.current?.blur();
+        return;
+      }
+
+      // Arrow navigation for suggestions (only single-line)
+      if (!hasMultipleLines && showSuggestions && filteredTasks.length > 0) {
         switch (e.key) {
           case 'ArrowDown':
             e.preventDefault();
@@ -128,40 +186,20 @@ export function UnifiedTaskInput({
             setSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
             break;
           case 'Enter':
-            if (suggestionIndex >= 0 && suggestionIndex < filteredTasks.length) {
+            if (suggestionIndex >= 0) {
               e.preventDefault();
               handleSelectTask(filteredTasks[suggestionIndex]);
-            } else if (parsed.durationSeconds !== null && onSubmitWithDuration) {
-              // Smart input with duration detected
-              e.preventDefault();
-              inputRef.current?.blur();
-              onSubmitWithDuration(parsed.taskName, parsed.durationSeconds, parsed.wasLimited);
-            } else {
-              // Blur input to release focus for keyboard shortcuts
-              inputRef.current?.blur();
-              onEnter?.();
             }
-            break;
-          case 'Escape':
-            e.preventDefault();
-            setShowSuggestions(false);
-            setSuggestionIndex(-1);
+            // Else: normal new line (default textarea behavior)
             break;
         }
-      } else if (e.key === 'Enter') {
-        if (parsed.durationSeconds !== null && onSubmitWithDuration) {
-          // Smart input with duration detected
-          e.preventDefault();
-          inputRef.current?.blur();
-          onSubmitWithDuration(parsed.taskName, parsed.durationSeconds, parsed.wasLimited);
-        } else {
-          // Blur input to release focus for keyboard shortcuts
-          inputRef.current?.blur();
-          onEnter?.();
-        }
+        return;
       }
+
+      // Enter = always new line (multi-line mode)
+      // This allows users to type multiple tasks before submitting
     },
-    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, parsed, inputRef]
+    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, singleLineParsed, inputRef, hasMultipleLines, totalMinutes, multiLineParsed]
   );
 
   // Global keyboard shortcuts for P key
@@ -216,33 +254,56 @@ export function UnifiedTaskInput({
         }}
         transition={{ type: 'spring', ...SPRING.gentle }}
       >
-        {/* Single row: Input + Project Badge */}
-        <div className="flex items-center gap-3">
-          <input
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            type="text"
-            value={taskText}
-            onChange={handleTaskChange}
-            onKeyDown={handleInputKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 150)}
-            disabled={disabled}
-            placeholder="What are you working on?"
-            maxLength={MAX_TASK_LENGTH}
-            className={`
-              flex-1 bg-transparent
-              text-primary light:text-primary-dark
-              placeholder:text-tertiary/60 light:placeholder:text-tertiary-dark/60
-              text-sm
-              focus:outline-none
-              ${disabled ? 'cursor-not-allowed' : ''}
-            `}
-            aria-label="Task description"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-          />
+        {/* Textarea + Project Badge */}
+        <div className="flex items-start gap-3">
+          {/* Unfocused with duration: Show compact styled display */}
+          {!isFocused && totalMinutes > 0 ? (
+            <div
+              onClick={() => setIsFocused(true)}
+              className="flex-1 text-sm leading-relaxed cursor-text truncate"
+            >
+              {multiLineParsed.tasks.map((task, i) => (
+                <span key={i}>
+                  {i > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
+                  <span className="text-primary light:text-primary-dark">{task.text}</span>
+                  {task.duration > 0 && (
+                    <span className="ml-1 text-tertiary light:text-tertiary-dark">{task.duration}</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <textarea
+              ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+              value={taskText}
+              onChange={handleTaskChange}
+              onKeyDown={handleInputKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 150)}
+              disabled={disabled}
+              placeholder="What are you working on?"
+              maxLength={MAX_TASK_LENGTH * 10}
+              rows={1}
+              className={`
+                flex-1 bg-transparent resize-none
+                text-primary light:text-primary-dark
+                placeholder:text-tertiary/60 light:placeholder:text-tertiary-dark/60
+                text-sm leading-relaxed
+                focus:outline-none
+                ${disabled ? 'cursor-not-allowed' : ''}
+              `}
+              style={{
+                minHeight: '1.5rem',
+                maxHeight: '8rem',
+                height: 'auto',
+              }}
+              aria-label="Task description"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+            />
+          )}
 
           <ProjectDropdown
             projectId={projectId}
@@ -256,7 +317,7 @@ export function UnifiedTaskInput({
         </div>
       </motion.div>
 
-      {/* Smart Input Preview - shows detected duration */}
+      {/* Smart Input Preview - shows detected duration (single-line) */}
       <AnimatePresence>
         {showSmartPreview && isFocused && !showSuggestions && !showProjectDropdown && (
           <motion.div
@@ -275,17 +336,61 @@ export function UnifiedTaskInput({
             "
           >
             <span className="text-sm text-secondary light:text-secondary-dark">
-              {parsed.taskName ? (
+              {singleLineParsed?.taskName ? (
                 <>
-                  <span className="text-primary light:text-primary-dark">{parsed.taskName}</span>
+                  <span className="text-primary light:text-primary-dark">{singleLineParsed.taskName}</span>
                   <span className="mx-2 text-tertiary light:text-tertiary-dark">·</span>
-                  <span>{formatDurationPreview(parsed.durationSeconds!)}</span>
+                  <span>{formatDurationPreview(singleLineParsed.durationSeconds!)}</span>
                 </>
               ) : (
-                <span>{formatDurationPreview(parsed.durationSeconds!)}</span>
+                <span>{formatDurationPreview(singleLineParsed!.durationSeconds!)}</span>
               )}
             </span>
-            <span className="text-tertiary light:text-tertiary-dark text-xs">↵</span>
+            <span className="text-tertiary light:text-tertiary-dark text-xs">⌘↵</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Multi-Line Total Time - Compact Preview */}
+      <AnimatePresence>
+        {showTotalTime && isFocused && !showSuggestions && !showProjectDropdown && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ type: 'spring', ...SPRING.gentle }}
+            className="
+              absolute left-0 right-0 top-full mt-1 z-10
+              px-4 py-2.5
+              bg-surface/60 light:bg-surface-dark/60
+              backdrop-blur-sm
+              border border-white/[0.08] light:border-black/[0.05]
+              rounded-lg
+              flex flex-col gap-1.5
+            "
+          >
+            {/* Compact task list */}
+            <div className="text-sm text-secondary light:text-secondary-dark truncate">
+              {multiLineParsed.tasks.map((task, i) => (
+                <span key={i}>
+                  {i > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
+                  <span className="text-primary light:text-primary-dark">{task.text}</span>
+                  {task.duration > 0 && (
+                    <span className="ml-1 text-tertiary light:text-tertiary-dark">{task.duration}</span>
+                  )}
+                </span>
+              ))}
+            </div>
+            {/* Total row */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-secondary light:text-secondary-dark">
+                <span className="text-tertiary light:text-tertiary-dark">Total:</span>
+                <span className="ml-2 text-primary light:text-primary-dark font-medium">
+                  {formatTotalTime(totalMinutes)}
+                </span>
+              </span>
+              <span className="text-tertiary light:text-tertiary-dark text-xs">⌘↵</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
