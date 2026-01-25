@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Inline Task Completion (POMO-148, 2 SP)**:
+  - Tasks mit `-` Prefix als erledigt markieren
+  - Live-Preview mit Durchstreichen-Styling
+  - "(X done)" Zähler in Total-Zeile
+  - Timer läuft weiter bei Esc (nur visuelles Update)
+  - Cmd+Enter startet neue Session
+  - ADHD-friendly: Mini-Erfolge ohne Flow-Unterbrechung
 - **Multi-Task Input (POMO-141, 3 SP)**:
   - Multi-Line Task-Eingabe für schnelle Planung
   - Enter für neue Zeile, Cmd+Enter zum Starten

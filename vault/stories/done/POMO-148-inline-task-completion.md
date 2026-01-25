@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 2
 feature: "[[features/task-management]]"
 created: 2026-01-25
 updated: 2026-01-25
-done_date: null
+done_date: 2026-01-25
 tags: [tasks, adhd-friendly, multi-line, inline-editing, p1]
 ---
 
