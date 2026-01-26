@@ -220,10 +220,10 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
                 <button
                   ref={closeButtonRef}
                   onClick={onClose}
-                  className="p-2 -mr-1 text-tertiary light:text-tertiary-dark hover:text-primary light:hover:text-primary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   aria-label="Close milestones"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>

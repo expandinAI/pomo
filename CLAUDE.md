@@ -222,6 +222,48 @@ const handleEdit = (session: CompletedSession) => {
 - Keyboard-Shortcuts (↑/↓, Shift+↑/↓, Enter, Esc)
 - Delete mit Confirmation
 
+### Overlay & Modal Standards
+
+**Einheitliches Design für alle Overlays/Modals.** Konsistenz schafft Vertrauen und reduziert kognitive Last.
+
+**Close-Button Standard:**
+```tsx
+<button
+  onClick={onClose}
+  className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+  aria-label="Close"
+>
+  <X className="w-4 h-4" />
+</button>
+```
+
+| Eigenschaft | Wert | Begründung |
+|-------------|------|------------|
+| Form | `rounded-full` | Kreis = Particle-Ästhetik |
+| Größe | `w-8 h-8` (32px) | Touch-friendly |
+| Icon | `w-4 h-4` (16px) | Proportional zur Button-Größe |
+| Farbe | `text-tertiary` → `hover:text-secondary` | Subtil, nicht dominant |
+| Hintergrund | `hover:bg-tertiary/10` | Sanftes Hover-Feedback |
+| Focus | `focus-visible:ring-2 ring-accent` | Accessibility |
+
+**Warum rund?**
+- Das Particle (weißer Punkt) ist ein Kreis – der Close-Button spiegelt das
+- Apple-Konsistenz (macOS Traffic Lights)
+- Einfachste geometrische Form = maximale Reduktion
+
+**Overlay-Container Standard:**
+```tsx
+className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10"
+```
+
+**Header-Layout:**
+```tsx
+<div className="flex items-center justify-between px-5 py-4 border-b border-tertiary/10">
+  <h2 className="text-base font-semibold text-primary">Title</h2>
+  {/* Close Button hier */}
+</div>
+```
+
 ## Timer Business Logic
 
 ### COMPLETE vs. SKIP Actions
