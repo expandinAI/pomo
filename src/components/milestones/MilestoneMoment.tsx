@@ -57,19 +57,20 @@ export function MilestoneMoment({
     }
   }, [isOpen, milestone, muted, volume, isRelive]);
 
-  // Handle keyboard dismiss
+  // Handle keyboard dismiss - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onDismiss();
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onDismiss]);
 
   return (

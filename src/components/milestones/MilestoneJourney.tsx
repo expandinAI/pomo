@@ -92,7 +92,7 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
     }
   }, [isOpen]);
 
-  // Handle keyboard navigation
+  // Handle keyboard navigation - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
@@ -100,20 +100,24 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
       switch (e.key) {
         case 'Escape':
           e.preventDefault();
+          e.stopImmediatePropagation();
           onClose();
           break;
         case 'ArrowUp':
         case 'k':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setFocusedIndex((prev) => Math.max(0, prev - 1));
           break;
         case 'ArrowDown':
         case 'j':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setFocusedIndex((prev) => Math.min(milestoneList.length - 1, prev + 1));
           break;
         case 'Enter':
           e.preventDefault();
+          e.stopImmediatePropagation();
           const focused = milestoneList[focusedIndex];
           if (focused?.earned) {
             onRelive(focused.milestone);
@@ -122,8 +126,8 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onClose, onRelive, focusedIndex, milestoneList]);
 
   // Scroll focused milestone into view
