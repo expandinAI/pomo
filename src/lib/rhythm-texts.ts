@@ -5,10 +5,10 @@ import type { RhythmType } from './rhythm';
  * Following Particle's philosophy: Pride, not guilt
  */
 export const RHYTHM_DESCRIPTIONS: Record<RhythmType, string> = {
-  flow: 'Du nimmst dir mehr Zeit als geplant. Das ist kein Fehler – das ist Flow.',
+  flow: "You take more time than planned. That's not a mistake – that's flow.",
   structure:
-    'Du arbeitest fokussierter als du denkst. Deine Puffer sind eingebaut.',
-  precision: 'Dein innerer Timer ist präzise. Du kennst deinen Rhythmus.',
+    "You work more focused than you think. Your buffers are built in.",
+  precision: 'Your inner timer is precise. You know your rhythm.',
 };
 
 /**
@@ -16,15 +16,15 @@ export const RHYTHM_DESCRIPTIONS: Record<RhythmType, string> = {
  */
 export const RHYTHM_LABELS: Record<RhythmType, string> = {
   flow: 'Flow',
-  structure: 'Struktur',
-  precision: 'Präzision',
+  structure: 'Structure',
+  precision: 'Precision',
 };
 
 /**
  * Rhythm hints for not-enough-data state
  */
 export const RHYTHM_NOT_ENOUGH_DATA_HINT =
-  'Sammle mindestens 5 Partikel mit Schätzung, um deinen Rhythmus zu sehen.';
+  'Collect at least 5 particles with estimates to discover your rhythm.';
 
 /**
  * Get description for rhythm type

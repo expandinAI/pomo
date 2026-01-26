@@ -112,7 +112,7 @@ export function RhythmView({ isOpen, onClose }: RhythmViewProps) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-primary light:text-primary-dark">
-                  Rhythmus
+                  Rhythm
                 </h2>
                 <ProjectFilterDropdown
                   value={selectedProjectId}

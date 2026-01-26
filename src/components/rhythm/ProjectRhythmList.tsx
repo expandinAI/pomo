@@ -21,7 +21,7 @@ export function ProjectRhythmList({ projectRhythms }: ProjectRhythmListProps) {
         transition={{ type: 'spring', ...SPRING.gentle }}
         className="text-sm text-tertiary light:text-tertiary-dark text-center py-4"
       >
-        Noch keine Projekte mit genügend Daten.
+        No projects with enough data yet.
       </motion.p>
     );
   }
@@ -36,7 +36,7 @@ export function ProjectRhythmList({ projectRhythms }: ProjectRhythmListProps) {
         className="pb-2 mb-2 border-b border-tertiary/10 light:border-tertiary-dark/10"
       >
         <p className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wide">
-          Pro Projekt
+          By Project
         </p>
       </motion.div>
 
