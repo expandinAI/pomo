@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { TimelineOverlay } from '@/components/timeline';
+import { MilestoneProvider, useMilestones } from '@/components/milestones';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -36,7 +37,10 @@ const RhythmView = dynamic(
   { ssr: false }
 );
 
-export default function Home() {
+/**
+ * Inner component that uses milestone context
+ */
+function HomeContent() {
   // Timeline overlay state
   const [showTimeline, setShowTimeline] = useState(false);
 
@@ -46,6 +50,9 @@ export default function Home() {
   // Theme and command palette
   const { theme, toggleTheme } = useTheme();
   const { open: openCommandPalette } = useCommandPalette();
+
+  // Milestones
+  const { setShowJourney } = useMilestones();
 
   // G-prefix navigation callbacks
   const gPrefixCallbacks = useMemo(
@@ -75,8 +82,11 @@ export default function Home() {
       onRhythm: () => {
         setShowRhythm(true);
       },
+      onMilestones: () => {
+        setShowJourney(true);
+      },
     }),
-    []
+    [setShowJourney]
   );
 
   const { isGPressed } = useGPrefixNavigation(gPrefixCallbacks);
@@ -100,6 +110,16 @@ export default function Home() {
     window.addEventListener('particle:open-rhythm', handleOpenRhythm);
     return () => window.removeEventListener('particle:open-rhythm', handleOpenRhythm);
   }, []);
+
+  // Listen for milestones open event (from Command Palette)
+  useEffect(() => {
+    function handleOpenMilestones() {
+      setShowJourney(true);
+    }
+
+    window.addEventListener('particle:open-milestones', handleOpenMilestones);
+    return () => window.removeEventListener('particle:open-milestones', handleOpenMilestones);
+  }, [setShowJourney]);
 
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
@@ -185,11 +205,22 @@ export default function Home() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/r/s/h/y/p/o/,
+              t/r/s/h/y/p/o/m/,
             </span>
           </motion.div>
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+/**
+ * Main page component with MilestoneProvider wrapper
+ */
+export default function Home() {
+  return (
+    <MilestoneProvider>
+      <HomeContent />
+    </MilestoneProvider>
   );
 }

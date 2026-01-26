@@ -18,6 +18,7 @@ import {
   FastForward,
   CalendarClock,
   Activity,
+  Award,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -211,6 +212,17 @@ export function CommandRegistration({
         },
         icon: <Activity className="w-4 h-4" />,
         keywords: ['rhythm', 'estimation', 'trend', 'analytics', 'flow', 'structure', 'precision'],
+      },
+      {
+        id: 'open-milestones',
+        label: 'Open Milestones',
+        shortcut: 'G M',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-milestones'));
+        },
+        icon: <Award className="w-4 h-4" />,
+        keywords: ['milestones', 'achievements', 'journey', 'progress', 'badges'],
       },
 
       // Project commands

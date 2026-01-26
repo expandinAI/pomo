@@ -11,6 +11,7 @@ interface GPrefixCallbacks {
   onProjects?: () => void;
   onGoals?: () => void;
   onRhythm?: () => void;
+  onMilestones?: () => void;
 }
 
 /**
@@ -23,6 +24,7 @@ interface GPrefixCallbacks {
  * G P = Open Projects
  * G O = Open Goals (Daily Goal)
  * G R = Open Rhythm (estimation insights)
+ * G M = Open Milestones
  * G , = Open Settings
  *
  * After pressing G, user has 1 second to press the second key
@@ -102,6 +104,11 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
             e.preventDefault();
             e.stopImmediatePropagation();
             callbacks.onRhythm?.();
+            break;
+          case 'm':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onMilestones?.();
             break;
           case ',':
             e.preventDefault();

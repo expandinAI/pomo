@@ -33,6 +33,7 @@ import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
+import { useMilestones } from '@/components/milestones';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -374,6 +375,9 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     getById,
   } = useProjects();
 
+  // Milestones
+  const { checkForMilestones } = useMilestones();
+
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
     selectedProjectIdRef.current = selectedProjectId;
@@ -519,6 +523,16 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       addRecentTasksFromInput(state.currentTask);
     }
 
+    // Check for milestones (only for work sessions)
+    // If a milestone is earned, the MilestoneMoment will show instead of normal celebration
+    let milestoneEarned = false;
+    if (wasWorkSession) {
+      const milestone = checkForMilestones({
+        lastSessionDurationSeconds: sessionDuration,
+      });
+      milestoneEarned = milestone !== undefined;
+    }
+
     dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
     elapsedRef.current = 0;
 
@@ -538,7 +552,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     vibrate('medium');
 
     // Play completion sound (same sound for work and break sessions)
-    if (completionSoundEnabled) {
+    // Skip if milestone was earned (milestone has its own sound)
+    if (completionSoundEnabled && !milestoneEarned) {
       playSound('break');
     }
 
@@ -551,7 +566,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
 
     // Trigger celebration burst if enabled and conditions are met
-    if (wasWorkSession && celebrationEnabledRef.current) {
+    // Skip if milestone was earned (milestone has its own celebration)
+    if (wasWorkSession && celebrationEnabledRef.current && !milestoneEarned) {
       const shouldTrigger =
         celebrationTriggerRef.current === 'every-session' ||
         (celebrationTriggerRef.current === 'daily-goal' &&
@@ -564,7 +580,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
 
     // Calculate and set session feedback (only for work sessions)
-    if (wasWorkSession) {
+    // Skip if milestone was earned (milestone has its own feedback)
+    if (wasWorkSession && !milestoneEarned) {
       const totalCount = getTotalSessionCount();
       const feedback = calculateSessionFeedback(
         newTodayCount,
@@ -599,7 +616,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
 
   // Initialize Web Worker timer
   const {
@@ -1040,6 +1057,15 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       addRecentTasksFromInput(state.currentTask);
     }
 
+    // Check for milestones (only for work sessions)
+    let milestoneEarned = false;
+    if (wasWorkSession) {
+      const milestone = checkForMilestones({
+        lastSessionDurationSeconds: totalDuration,
+      });
+      milestoneEarned = milestone !== undefined;
+    }
+
     // Proper COMPLETE action (increments counter, shows celebration)
     dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
 
@@ -1074,7 +1100,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
 
     // Trigger celebration burst if enabled and conditions are met
-    if (wasWorkSession && celebrationEnabledRef.current) {
+    // Skip if milestone was earned (milestone has its own celebration)
+    if (wasWorkSession && celebrationEnabledRef.current && !milestoneEarned) {
       const shouldTrigger =
         celebrationTriggerRef.current === 'every-session' ||
         (celebrationTriggerRef.current === 'daily-goal' &&
@@ -1087,7 +1114,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
 
     // Calculate and set session feedback (only for work sessions)
-    if (wasWorkSession) {
+    // Skip if milestone was earned (milestone has its own feedback)
+    if (wasWorkSession && !milestoneEarned) {
       const totalSessionCount = getTotalSessionCount();
       const feedback = calculateSessionFeedback(
         newTodayCount,
@@ -1121,7 +1149,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal, setShouldTriggerBurst]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1147,6 +1175,15 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
       addRecentTasksFromInput(state.currentTask);
+    }
+
+    // Check for milestones (only for work sessions)
+    let milestoneEarned = false;
+    if (wasWorkSession) {
+      const milestone = checkForMilestones({
+        lastSessionDurationSeconds: elapsedTime,
+      });
+      milestoneEarned = milestone !== undefined;
     }
 
     // Proper COMPLETE action (increments counter, shows celebration)
@@ -1176,7 +1213,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     vibrate('medium');
 
     // Play completion sound
-    if (completionSoundEnabled) {
+    // Skip if milestone was earned (milestone has its own sound)
+    if (completionSoundEnabled && !milestoneEarned) {
       playSound('break');
     }
 
@@ -1188,7 +1226,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     const newTodayCount = isWorkToBreak ? todayCount + 1 : todayCount;
 
     // Trigger celebration burst if enabled and conditions are met
-    if (wasWorkSession && celebrationEnabledRef.current) {
+    // Skip if milestone was earned (milestone has its own celebration)
+    if (wasWorkSession && celebrationEnabledRef.current && !milestoneEarned) {
       const shouldTrigger =
         celebrationTriggerRef.current === 'every-session' ||
         (celebrationTriggerRef.current === 'daily-goal' &&
@@ -1201,7 +1240,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
 
     // Calculate and set session feedback (only for work sessions)
-    if (wasWorkSession) {
+    // Skip if milestone was earned (milestone has its own feedback)
+    if (wasWorkSession && !milestoneEarned) {
       const totalSessionCount = getTotalSessionCount();
       const feedback = calculateSessionFeedback(
         newTodayCount,
@@ -1235,7 +1275,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
 
   // Keyboard shortcuts
   useEffect(() => {
