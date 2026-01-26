@@ -264,6 +264,44 @@ className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-
 </div>
 ```
 
+**Focus-Management bei Keyboard-Navigation:**
+
+Wenn Modals per Tastatur geöffnet werden (z.B. `G M`, `G S`), muss der initiale Fokus korrekt gesetzt werden. **Falsch:** Close-Button fokussieren → zeigt sichtbaren Focus-Ring. **Falsch:** Inneren Content-Bereich fokussieren → kann Scroll-Probleme verursachen.
+
+**Richtig:** Den Modal-Container selbst fokussieren:
+
+```tsx
+// Focus management
+const modalRef = useRef<HTMLDivElement>(null);
+// Focus the modal container itself to avoid visible ring on close button
+useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
+
+// Modal-Container braucht tabIndex und focus:outline-none
+<div
+  ref={modalRef}
+  tabIndex={-1}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  className="... focus:outline-none"
+>
+```
+
+| Aspekt | Lösung |
+|--------|--------|
+| `tabIndex={-1}` | Macht Container fokussierbar, aber nicht in Tab-Reihenfolge |
+| `focus:outline-none` | Verhindert sichtbaren Focus-Ring auf Container |
+| `initialFocusRef: modalRef` | Fokussiert den Dialog selbst statt Close-Button |
+| Tab-Navigation | Funktioniert normal (springt zu erstem interaktiven Element) |
+
+**Warum nicht Close-Button fokussieren?**
+- `focus-visible` zeigt Ring wenn letzte Interaktion Keyboard war
+- Sieht aus wie ein Bug (weißer Ring um Close-Button)
+
+**Warum nicht Content-Bereich fokussieren?**
+- Browser scrollt fokussiertes Element ins Sichtfeld
+- Kann Header aus dem Viewport scrollen
+
 ## Timer Business Logic
 
 ### COMPLETE vs. SKIP Actions
