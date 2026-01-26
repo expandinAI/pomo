@@ -280,6 +280,12 @@ Variationen:
 
 > "Focus is about saying no." – Steve Jobs
 
+### The Particle Mantra
+
+> **"Forest kills your tree. Particle doesn't."**
+
+No guilt. No punishment. No dead particles. A session that isn't completed simply doesn't exist – and that's okay.
+
 ---
 
 ## Die Prüffrage
