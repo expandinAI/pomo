@@ -2,12 +2,12 @@
 type: story
 status: backlog
 priority: p2
-effort: 1
+effort: 2
 feature: "[[features/timer-core]]"
 created: 2026-01-25
 updated: 2026-01-26
 done_date: null
-tags: [timer, cancel, particle-philosophy]
+tags: [timer, cancel, particle-philosophy, time-tracking]
 ---
 
 # POMO-149: Session Cancel Behavior
@@ -15,86 +15,149 @@ tags: [timer, cancel, particle-philosophy]
 ## User Story
 
 > As a **user who cancels a session**
-> I want **the timer to stop without drama or judgment**
-> so that **I can move on without feeling guilty**.
+> I want **my actual focus time to be saved without judgment**
+> so that **my work counts – even when life interrupts**.
 
 ## Philosophy
 
 **Forest kills your tree. Particle doesn't.**
 
-A particle that isn't completed simply doesn't exist. No ghosts. No gray dots. No visual reminder of "what could have been."
+A cancelled session is not a failure. It's reality. Sometimes a client calls. Sometimes a meeting runs over. Sometimes life happens.
 
-Canceling is not a failure. It's a decision. Sometimes the timing isn't right. Sometimes life interrupts. That's okay.
+The time was real. The work was real. So we save it.
 
-**Particle is a mirror, not a judge.**
+**Particle is honest, not punishing.**
 
 ## Design Principles
 
-1. **No confirmation dialog** – Asking "are you sure?" implies doubt and guilt
-2. **No visual consequence** – No "dead particles", no gray dots in timeline
-3. **No drama** – Timer stops, life continues
-4. **Minimal feedback** – Brief acknowledgment, then back to ready state
+1. **Honor the work** – 10 minutes of focus is 10 minutes of focus
+2. **No visual punishment** – No gray dots, no "dead" particles
+3. **Honest tracking** – Save actual duration, not planned duration
+4. **No drama** – Timer stops, particle is saved, life continues
+
+## The Rule
+
+```
+Cancelled after < 60 seconds  →  Nothing saved (accidental)
+Cancelled after ≥ 60 seconds  →  Particle saved with actual duration
+```
 
 ## Acceptance Criteria
 
 ### Cancel Action
 
 - [ ] **Given** session running, **When** user presses `Escape`, **Then** timer stops immediately
-- [ ] **Given** timer stopped, **When** cancel complete, **Then** show brief "Session ended" text (2s)
-- [ ] **Given** session < 60 seconds, **When** cancelled, **Then** nothing is saved (already implemented)
-- [ ] **Given** session ≥ 60 seconds, **When** cancelled, **Then** nothing is saved (no partial logging)
+- [ ] **Given** elapsed time < 60s, **When** cancelled, **Then** nothing is saved
+- [ ] **Given** elapsed time ≥ 60s, **When** cancelled, **Then** particle is saved with actual duration
+- [ ] **Given** particle saved, **When** cancel complete, **Then** show "Session ended · X min saved"
+
+### Saved Particle
+
+- [ ] **Given** 10:34 worked of 25:00 planned, **When** saved, **Then** duration = 10:34
+- [ ] **Given** cancelled particle, **When** in Timeline, **Then** looks identical to completed particles
+- [ ] **Given** cancelled particle, **When** Particle counter, **Then** counts as +1 particle
+- [ ] **Given** cancelled particle, **When** Focus Time stats, **Then** adds actual duration
 
 ### Visual Feedback
 
-- [ ] **Given** cancel complete, **When** feedback shown, **Then** text appears where celebration would appear
+- [ ] **Given** particle saved, **When** feedback shown, **Then** "Session ended · 10 min saved"
+- [ ] **Given** nothing saved (<60s), **When** feedback shown, **Then** "Session ended"
 - [ ] **Given** feedback shown, **When** 2 seconds pass, **Then** text fades out
-- [ ] **Given** cancel complete, **When** timer resets, **Then** shows ready state (full duration)
 
 ### What We DON'T Do
 
 - [ ] No confirmation dialog before cancel
-- [ ] No "cancelled" status in data model
-- [ ] No gray/dimmed particles in timeline
-- [ ] No undo mechanism (keep it simple)
-- [ ] No statistics tracking of cancellations
+- [ ] No visual difference for "cancelled" vs "completed" particles
+- [ ] No separate "cancelled" status in data model
+- [ ] No guilt, no judgment, no punishment
 
 ## Technical Details
 
 ### Implementation
 
 ```typescript
-// In Timer.tsx, handleCancel (currently handleSkip for Escape)
+// In Timer.tsx
 const handleCancel = useCallback(() => {
-  // Stop timer immediately
+  const elapsedSeconds = totalSeconds - timeRemaining;
+
+  // Stop timer
   dispatch({ type: 'STOP' });
 
-  // Show brief feedback
-  setStatusMessage('Session ended');
+  if (elapsedSeconds >= 60 && mode === 'work') {
+    // Save particle with actual duration
+    const session: CompletedSession = {
+      id: crypto.randomUUID(),
+      startTime: sessionStartTime,
+      endTime: new Date().toISOString(),
+      duration: elapsedSeconds,
+      plannedDuration: totalSeconds,
+      mode: 'work',
+      projectId: currentProjectId,
+      task: currentTask,
+    };
+
+    saveSession(session);
+    incrementParticleCount();
+
+    const minutes = Math.round(elapsedSeconds / 60);
+    setStatusMessage(`Session ended · ${minutes} min saved`);
+  } else {
+    setStatusMessage('Session ended');
+  }
 
   // Clear after 2 seconds
   setTimeout(() => setStatusMessage(null), 2000);
 
   // Reset to ready state
   dispatch({ type: 'RESET' });
-}, []);
+}, [timeRemaining, totalSeconds, mode, ...]);
 ```
 
-### Keyboard
+### Data Model
 
-- `Escape` → Cancel session (no confirmation)
-- No `Cmd+Z` undo needed
+No changes needed. We already store `duration` (actual) and `plannedDuration` (intended).
 
-## Out of Scope
+```typescript
+interface CompletedSession {
+  duration: number;        // Actual seconds worked (e.g., 634 = 10:34)
+  plannedDuration: number; // Planned seconds (e.g., 1500 = 25:00)
+  // ... rest unchanged
+}
+```
 
-- Partial session logging (see POMO-155 if needed later)
-- Cancel reason tracking
-- "Cancelled sessions" view
-- Any form of cancel statistics
+### Timeline Display
+
+```
+Timeline (Today)
+───────────────────────────────────────
+●  09:15  Design Review       25:00
+●  10:00  Code Review         52:00
+●  11:30  Client Call Prep    10:34  ← Cancelled, but still a particle
+●  14:00  Deep Work           90:00
+```
+
+No visual difference. A particle is a particle.
+
+## Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Cancel at 0:45 | Nothing saved, "Session ended" |
+| Cancel at 1:30 | Particle saved, "Session ended · 2 min saved" |
+| Cancel at 24:59 | Particle saved, "Session ended · 25 min saved" |
+| Cancel during break | Nothing saved (breaks don't create particles) |
+
+## Supersedes
+
+This story incorporates the intent of **POMO-155 (Partial Session Logging)**. That story can be closed or archived.
 
 ## Definition of Done
 
 - [ ] Escape cancels session immediately (no dialog)
-- [ ] Brief "Session ended" feedback appears
-- [ ] Timer resets to ready state
-- [ ] No data is saved for cancelled sessions
-- [ ] **The test:** Does it feel neutral? No guilt, no judgment?
+- [ ] Sessions ≥60s are saved as particles with actual duration
+- [ ] Sessions <60s are not saved
+- [ ] Feedback shows "X min saved" when applicable
+- [ ] No visual distinction in Timeline
+- [ ] Particle counter increments for saved cancellations
+- [ ] Focus Time stats include actual duration
+- [ ] **The test:** Does a freelancer feel their 10 minutes counted?
