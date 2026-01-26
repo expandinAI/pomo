@@ -27,22 +27,24 @@ export function EndConfirmationModal({
   // Focus trap
   useFocusTrap(modalRef, isOpen, { initialFocusRef: cancelButtonRef });
 
-  // Handle keyboard shortcuts within modal
+  // Handle keyboard shortcuts within modal - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onCancel();
       } else if (e.key === 'Enter') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onConfirm();
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onCancel, onConfirm]);
 
   return (

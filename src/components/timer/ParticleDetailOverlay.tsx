@@ -149,7 +149,7 @@ export function ParticleDetailOverlay({
     setIsDirty(true);
   }, []);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
@@ -162,19 +162,19 @@ export function ParticleDetailOverlay({
       if (isEditingDuration) {
         if (e.key === 'Escape') {
           e.preventDefault();
+          e.stopImmediatePropagation();
           setIsEditingDuration(false);
         } else if (e.key === 'Enter') {
           e.preventDefault();
+          e.stopImmediatePropagation();
           commitDurationEdit();
         }
         return;
       }
 
-      // Stop propagation for all keys to prevent Timer shortcuts
-      e.stopPropagation();
-
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         if (showDeleteConfirm) {
           setShowDeleteConfirm(false);
         } else {
@@ -182,6 +182,7 @@ export function ParticleDetailOverlay({
         }
       } else if (e.key === 'Enter') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         if (showDeleteConfirm) {
           handleDelete();
         } else {
@@ -192,17 +193,19 @@ export function ParticleDetailOverlay({
         // Duration adjustment shortcuts (only when not typing in task input)
         if (e.key === 'ArrowUp' || e.key === '+' || e.key === '=') {
           e.preventDefault();
+          e.stopImmediatePropagation();
           const delta = e.shiftKey ? 5 * 60 : 60; // Shift = +5 min, else +1 min
           adjustDuration(delta);
         } else if (e.key === 'ArrowDown' || e.key === '-') {
           e.preventDefault();
+          e.stopImmediatePropagation();
           const delta = e.shiftKey ? -5 * 60 : -60; // Shift = -5 min, else -1 min
           adjustDuration(delta);
         }
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration]);
 

@@ -47,30 +47,31 @@ export function DailyGoalOverlay({
   // Focus trap
   useFocusTrap(modalRef, isOpen, { initialFocusRef: noGoalButtonRef });
 
-  // Handle keyboard shortcuts within modal
+  // Handle keyboard shortcuts within modal - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      // Stop propagation for all keys to prevent Timer shortcuts (1-4 presets, etc.)
-      e.stopPropagation();
-
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       } else if (e.key === 'Enter') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         // Save and close
         onGoalChange(previewGoal);
         onClose();
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setPreviewGoal(prev => {
           const current = prev ?? MIN_GOAL;
           return Math.min(MAX_GOAL, current + 1);
         });
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setPreviewGoal(prev => {
           const current = prev ?? MIN_GOAL;
           return Math.max(MIN_GOAL, current - 1);
@@ -78,17 +79,18 @@ export function DailyGoalOverlay({
       } else if (e.key >= '1' && e.key <= '9') {
         // Direct number input (1-9)
         e.preventDefault();
+        e.stopImmediatePropagation();
         setPreviewGoal(parseInt(e.key, 10));
       } else if (e.key === '0') {
         // 0 = No Goal
         e.preventDefault();
+        e.stopImmediatePropagation();
         onGoalChange(null);
         onClose();
       }
     }
 
-    // Use capture phase to intercept before Timer handlers
-    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onClose, onGoalChange, previewGoal]);
 

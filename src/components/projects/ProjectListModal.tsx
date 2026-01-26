@@ -161,7 +161,7 @@ export function ProjectListModal() {
     initialFocusRef: modalRef,
   });
 
-  // Keyboard navigation
+  // Keyboard navigation - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen || showCreateForm || editingProject || archivingProject || viewingProject) return;
 
@@ -169,26 +169,30 @@ export function ProjectListModal() {
       // Close on Escape
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
         return;
       }
 
-      // Navigation
+      // Navigation - stop propagation for all handled keys
       switch (e.key) {
         case 'j':
         case 'ArrowDown':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setFocusedIndex((prev) => Math.min(prev + 1, listItems.length - 1));
           break;
 
         case 'k':
         case 'ArrowUp':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setFocusedIndex((prev) => Math.max(prev - 1, 0));
           break;
 
         case 'Enter':
           e.preventDefault();
+          e.stopImmediatePropagation();
           if (listItems[focusedIndex]) {
             const item = listItems[focusedIndex];
             if (item.type === 'project' && item.id) {
@@ -204,6 +208,7 @@ export function ProjectListModal() {
         case 'e':
         case 'E':
           e.preventDefault();
+          e.stopImmediatePropagation();
           if (listItems[focusedIndex]?.type === 'project' && listItems[focusedIndex]?.id) {
             setEditingProject(listItems[focusedIndex].id);
           }
@@ -212,6 +217,7 @@ export function ProjectListModal() {
         case 'a':
         case 'A':
           e.preventDefault();
+          e.stopImmediatePropagation();
           if (listItems[focusedIndex]?.type === 'project' && listItems[focusedIndex]?.id) {
             const item = listItems[focusedIndex];
             if (item.isArchived) {
@@ -227,13 +233,14 @@ export function ProjectListModal() {
         case 'n':
         case 'N':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setShowCreateForm(true);
           break;
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, showCreateForm, editingProject, archivingProject, viewingProject, focusedIndex, listItems, restore, refresh]);
 
   // Scroll focused item into view

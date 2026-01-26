@@ -53,15 +53,10 @@ export function ShortcutsHelp() {
     return grouped;
   }, [filteredShortcuts]);
 
-  // Listen for ? key to toggle
+  // Listen for ? key to toggle (always active)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        // Allow closing with Escape even when in input
-        if (e.key === 'Escape' && isOpen) {
-          e.preventDefault();
-          setIsOpen(false);
-        }
         return;
       }
 
@@ -73,18 +68,22 @@ export function ShortcutsHelp() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleOpen, isOpen]);
+  }, [toggleOpen]);
 
-  // Close on Escape
+  // Close on Escape - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
   return (

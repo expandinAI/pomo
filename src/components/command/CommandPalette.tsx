@@ -104,6 +104,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   );
 
   // Keyboard navigation (Arrow keys + vim-style J/K)
+  // capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
@@ -113,6 +114,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         case 'j':
         case 'J':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setSelectedIndex((prev) => (prev + 1) % totalItems || 0);
           break;
 
@@ -120,11 +122,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         case 'k':
         case 'K':
           e.preventDefault();
+          e.stopImmediatePropagation();
           setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems || 0);
           break;
 
         case 'Enter': {
           e.preventDefault();
+          e.stopImmediatePropagation();
           const command = getCommandAtIndex(selectedIndex);
           if (command) {
             handleSelect(command);
@@ -134,13 +138,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
         case 'Escape':
           e.preventDefault();
+          e.stopImmediatePropagation();
           onClose();
           break;
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, totalItems, selectedIndex, getCommandAtIndex, handleSelect, onClose]);
 
   // Reset selected index when results change
@@ -152,29 +157,32 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - onMouseDown fires before blur, ensuring single-click close */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, pointerEvents: 'auto' as const }}
             exit={{ opacity: 0, pointerEvents: 'none' as const }}
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 bg-black/60 light:bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
+            onMouseDown={onClose}
             aria-hidden="true"
           />
 
-          {/* Modal */}
+          {/* Modal - pointer-events-none on container lets clicks pass through to backdrop */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ type: 'spring', ...SPRING.snappy }}
-            className="fixed inset-x-0 top-[20%] z-50 flex justify-center px-4"
+            className="fixed inset-x-0 top-[20%] z-50 flex justify-center px-4 pointer-events-none"
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
           >
-            <div className="w-full max-w-lg bg-surface light:bg-surface-dark rounded-xl shadow-2xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden">
+            <div
+              className="w-full max-w-lg bg-surface light:bg-surface-dark rounded-xl shadow-2xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden pointer-events-auto"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
               <CommandInput
                 value={searchQuery}
                 onChange={setSearchQuery}

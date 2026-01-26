@@ -122,6 +122,7 @@ export function ProjectDetailModal({
   });
 
   // Keyboard shortcuts
+  // Keyboard navigation - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     // Don't handle keys when editing project or session
     if (!isOpen || showEditForm || editingSessionId) return;
@@ -130,6 +131,7 @@ export function ProjectDetailModal({
       // Close on Escape or Backspace
       if (e.key === 'Escape' || e.key === 'Backspace') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
         return;
       }
@@ -137,13 +139,14 @@ export function ProjectDetailModal({
       // Edit on E (only for real projects)
       if ((e.key === 'e' || e.key === 'E') && !isNoProject) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setShowEditForm(true);
         return;
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, showEditForm, editingSessionId, isNoProject, onClose]);
 
   // Handlers

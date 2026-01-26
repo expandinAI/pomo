@@ -45,16 +45,20 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
     }
   }, [isOpen, refreshTrigger]);
 
-  // Close on Escape
+  // Close on Escape - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
   // Listen for external open event (G S navigation)

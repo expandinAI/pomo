@@ -46,16 +46,20 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
     }
   }, [durations, isLoaded, onSettingsChange]);
 
-  // Close on Escape
+  // Close on Escape - stopImmediatePropagation prevents Timer from receiving the event
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
   // Listen for custom event to open settings (from Cmd+, shortcut)

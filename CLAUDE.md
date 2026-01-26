@@ -302,6 +302,116 @@ useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 - Browser scrollt fokussiertes Element ins Sichtfeld
 - Kann Header aus dem Viewport scrollen
 
+**Scrollbare Modals (KRITISCH):**
+
+Modals mit scrollbarem Inhalt benötigen eine **ununterbrochene Flexbox-Kette**. Ohne diese funktioniert `overflow-y-auto` nicht.
+
+**Das Problem:** Flexbox-Items haben standardmäßig `min-height: auto`, d.h. sie können nicht kleiner als ihr Inhalt werden. Dadurch wird `overflow-y-auto` wirkungslos.
+
+**Die Lösung:** Jeder Container zwischen dem höhenbeschränkten Element und dem scrollbaren Bereich braucht:
+- `flex flex-col` (Flexbox aktivieren)
+- `min-h-0` (erlaubt dem Element, kleiner als sein Inhalt zu werden)
+
+```tsx
+{/* ✅ RICHTIG: Scrollbares Modal */}
+<motion.div className="max-h-[80vh] flex flex-col">
+  <div
+    ref={modalRef}
+    tabIndex={-1}
+    className="flex flex-col overflow-hidden focus:outline-none ..."
+  >
+    {/* Fixed header */}
+    <div className="flex-shrink-0">Header</div>
+
+    {/* Scrollable content wrapper - KRITISCH: min-h-0 */}
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Actual scrollable area */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Long content here */}
+      </div>
+    </div>
+
+    {/* Fixed footer (optional) */}
+    <div className="flex-shrink-0">Footer</div>
+  </div>
+</motion.div>
+```
+
+```tsx
+{/* ❌ FALSCH: Scroll funktioniert nicht */}
+<motion.div className="max-h-[80vh] flex flex-col">
+  <div ref={modalRef} className="overflow-hidden flex flex-col ...">
+    <div>Header</div>
+    <div>  {/* ← FEHLER: Kein flex-1, kein min-h-0! */}
+      <div className="overflow-y-auto">  {/* ← Wirkungslos! */}
+        Content
+      </div>
+    </div>
+  </div>
+</motion.div>
+```
+
+| Klasse | Zweck | Wo anwenden |
+|--------|-------|-------------|
+| `max-h-[80vh]` | Höhenbeschränkung | Äußerster Container |
+| `flex flex-col` | Flexbox aktivieren | Alle Container in der Kette |
+| `min-h-0` | Schrumpfen erlauben | Alle Container zwischen max-h und overflow |
+| `flex-shrink-0` | Nicht schrumpfen | Header, Footer, fixe Bereiche |
+| `flex-1` | Restlichen Platz füllen | Scrollbarer Bereich |
+| `overflow-y-auto` | Scrollbar aktivieren | Innerster scrollbarer Container |
+
+**Checkliste für scrollbare Modals:**
+- [ ] Äußerer Container hat `max-h-[...]` und `flex flex-col`
+- [ ] Alle Zwischen-Container haben `flex flex-col min-h-0`
+- [ ] Fixe Bereiche (Header, Footer) haben `flex-shrink-0`
+- [ ] Scrollbarer Bereich hat `flex-1 overflow-y-auto`
+
+**Keyboard Event Isolation (KRITISCH):**
+
+Modals müssen Keyboard-Events isolieren, damit sie nicht zum Timer durchsickern (z.B. ESC cancelt Timer, Space startet/stoppt Timer).
+
+**Das Problem:** Sowohl Modals als auch Timer registrieren Handler auf `window`. Normales `stopPropagation()` stoppt nur Bubbling, nicht andere Handler auf demselben Element.
+
+**Die Lösung:** `stopImmediatePropagation()` + Capture Phase:
+
+```tsx
+// ✅ RICHTIG: Event wird komplett gestoppt
+useEffect(() => {
+  if (!isOpen) return;
+
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopImmediatePropagation();  // Stoppt ALLE anderen Handler
+      onClose();
+    }
+  }
+
+  // Capture phase = wird VOR anderen Handlern ausgeführt
+  window.addEventListener('keydown', handleKeyDown, true);
+  return () => window.removeEventListener('keydown', handleKeyDown, true);
+}, [isOpen, onClose]);
+```
+
+```tsx
+// ❌ FALSCH: Timer empfängt das Event trotzdem
+window.addEventListener('keydown', handleKeyDown);  // Kein capture
+e.stopPropagation();  // Stoppt nur Bubbling, nicht andere window-Handler
+```
+
+| Methode | Effekt |
+|---------|--------|
+| `stopPropagation()` | Stoppt Bubbling zu Parent-Elementen |
+| `stopImmediatePropagation()` | Stoppt Bubbling UND alle anderen Handler auf demselben Element |
+| Capture Phase (`true`) | Handler wird in Capture-Phase ausgeführt (vor Bubble-Phase) |
+
+**Checkliste für Modal Keyboard-Handler:**
+- [ ] `if (!isOpen) return;` am Anfang des useEffect
+- [ ] `e.preventDefault()` für alle behandelten Keys
+- [ ] `e.stopImmediatePropagation()` für alle behandelten Keys
+- [ ] `window.addEventListener('keydown', handler, true)` (capture phase!)
+- [ ] Cleanup mit `true`: `removeEventListener('keydown', handler, true)`
+
 ## Timer Business Logic
 
 ### COMPLETE vs. SKIP Actions

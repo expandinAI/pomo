@@ -123,7 +123,7 @@ export function ProjectForm({
     }
   }, [project, onArchive, onClose]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
@@ -131,6 +131,7 @@ export function ProjectForm({
       // Close on Escape
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
         return;
       }
@@ -138,13 +139,14 @@ export function ProjectForm({
       // Save on Cmd+Enter or Ctrl+Enter
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         handleSave();
         return;
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onClose, handleSave]);
 
   return (

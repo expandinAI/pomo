@@ -103,16 +103,20 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
   // Check if filters are active
   const hasActiveFilters = typeFilter !== 'all' || searchQuery.trim() !== '';
 
-  // Close on Escape
+  // Close on Escape - stopImmediatePropagation prevents Timer from receiving the event
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
   // Listen for external open event (G H navigation)
@@ -166,7 +170,7 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="session-history-title"
-                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full focus:outline-none"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col min-h-0 max-h-full focus:outline-none"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">

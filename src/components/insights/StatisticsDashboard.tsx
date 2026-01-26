@@ -82,16 +82,20 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     return getProjectBreakdown(timeRange);
   }, [isOpen, timeRange, refreshTrigger]);
 
-  // Close on Escape
+  // Close on Escape - stopImmediatePropagation prevents Timer from receiving the event
   useEffect(() => {
+    if (!isOpen) return;
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
   // Listen for external open event (G S navigation)
@@ -160,7 +164,7 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="statistics-dashboard-title"
-                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full focus:outline-none"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col min-h-0 max-h-full focus:outline-none"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
@@ -179,13 +183,13 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                   </button>
                 </div>
 
-                {/* Content area */}
-                <div>
+                {/* Content area - flex-1 + min-h-0 required for nested scrolling */}
+                <div className="flex-1 flex flex-col min-h-0">
                   {/* Tab Navigation */}
                   <DashboardTabs
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                />
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                  />
 
                 {/* Tab Content */}
                 {activeTab === 'overview' ? (

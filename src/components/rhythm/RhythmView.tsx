@@ -60,19 +60,20 @@ export function RhythmView({ isOpen, onClose }: RhythmViewProps) {
     return getParticlesWithEstimate(filteredSessions).length;
   }, [filteredSessions]);
 
-  // Handle escape key
+  // Handle escape key - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, onClose]);
 
   // Handle backdrop click

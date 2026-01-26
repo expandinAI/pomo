@@ -56,31 +56,31 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
   // Focus trap - focus the modal container itself to avoid visible ring on close button
   useFocusTrap(modalRef, isOpen && !selectedSessionId, { initialFocusRef: modalRef });
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen || selectedSessionId) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      // Stop propagation to prevent Timer shortcuts
-      e.stopPropagation();
-
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         goToPreviousDay();
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         goToNextDay();
       } else if (e.key === 't' || e.key === 'T') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         goToToday();
       }
     }
 
-    // Use capture phase to intercept before other handlers
-    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, selectedSessionId, onClose, goToPreviousDay, goToNextDay, goToToday]);
 
