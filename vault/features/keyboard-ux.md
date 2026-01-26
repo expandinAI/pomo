@@ -6,7 +6,7 @@ effort: m
 business_value: high
 origin: "[[ideas/ui-transformation]]"
 stories:
-  - "[[stories/backlog/POMO-072-g-prefix-navigation]]"
+  - "[[POMO-072-g-prefix-navigation 1]]"
   - "[[stories/backlog/POMO-073-shortcut-hints]]"
   - "[[stories/backlog/POMO-074-help-modal]]"
   - "[[stories/backlog/POMO-075-timer-shortcuts]]"
@@ -14,7 +14,12 @@ stories:
   - "[[stories/backlog/POMO-077-vim-navigation]]"
 created: 2026-01-19
 updated: 2026-01-19
-tags: [ui-transformation, keyboard, accessibility, p0, mvp]
+tags:
+  - ui-transformation
+  - keyboard
+  - accessibility
+  - p0
+  - mvp
 ---
 
 # Keyboard-First UX
@@ -108,12 +113,30 @@ const useGPrefixNavigation = () => {
 };
 ```
 
-**Shortcut Hints in Buttons:**
+**Shortcut Hints: "Learn by Doing" Strategie**
+
+Siehe: `CLAUDE.md` → "Keyboard Hints Strategie"
+
+**Prinzip:** Nicht bei jedem Button einen Hint – das würde die UI zum Tastaturkurs machen.
+
+| Stufe | Methode | Wann |
+|-------|---------|------|
+| 1. Inline | `<KeyboardHint>` | Nur primäre Aktionen (Space, Enter) |
+| 2. Tooltip | `title` Attribut | Sekundäre Aktionen (G T, G S) |
+| 3. Help Modal | `?` Taste | Vollständige Liste |
+
+**"One Hint per Context" Regel:** Pro Kontext maximal ein Inline-Hint.
+
 ```tsx
-<Button shortcut="Space">
-  Start
+// Richtig: Primäre Aktion
+<Button>
+  Start Focus
+  <KeyboardHint shortcut="Space" />
 </Button>
-// Rendert: Start [Space]
+
+// Falsch: Zu viele Hints
+<PresetButton>Classic <KeyboardHint shortcut="1" /></PresetButton>  // ✗
+<PresetButton>Deep <KeyboardHint shortcut="2" /></PresetButton>     // ✗
 ```
 
 ## Akzeptanzkriterien
@@ -134,7 +157,7 @@ const useGPrefixNavigation = () => {
 ## Stories
 
 1. [[stories/backlog/POMO-076-focus-trap]] - Focus Trap (2 SP) - P0, zuerst!
-2. [[stories/backlog/POMO-072-g-prefix-navigation]] - G-Prefix Navigation (3 SP) - P0
+2. [[POMO-072-g-prefix-navigation 1]] - G-Prefix Navigation (3 SP) - P0
 3. [[stories/backlog/POMO-075-timer-shortcuts]] - Erweiterte Timer-Shortcuts (2 SP) - P0
 4. [[stories/backlog/POMO-073-shortcut-hints]] - Shortcut Hints (2 SP) - P0
 5. [[stories/backlog/POMO-074-help-modal]] - Help Modal (3 SP) - P0

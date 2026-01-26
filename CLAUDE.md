@@ -247,6 +247,80 @@ Der Timer unterscheidet zwischen **natürlicher Completion** und **manuellem Ski
 - `SKIP` Action: Zeile ~102-126
 - `handleSkip` Callback: Zeile ~455-488
 
+## Keyboard Hints Strategie
+
+### Philosophie: "Learn by Doing"
+
+Particle zeigt **nicht** bei jedem Button einen Shortcut-Hint. Das würde die minimalistische UI zerstören und zum Tastaturkurs mutieren. Stattdessen: eine **gestufte Lernkurve**.
+
+### Die Stufen
+
+| Stufe | Methode | Wann |
+|-------|---------|------|
+| **1. Inline Hints** | `<KeyboardHint>` direkt im Button | Nur primäre Aktionen |
+| **2. Tooltips** | `title` Attribut mit Shortcut | Sekundäre Aktionen (on hover) |
+| **3. Help Modal** | `?` öffnet vollständige Liste | On demand |
+| **4. Smart Hints** | Kontextuelle Tipps | (Später) Nach X Sessions ohne Shortcut |
+
+### Inline Hints: Nur primäre Aktionen
+
+**Die "One Hint per Context" Regel:** Pro Bildschirmkontext maximal **ein** inline Hint.
+
+| Kontext | Shortcut | Komponente |
+|---------|----------|------------|
+| Timer idle | `Space` | Start Button ✓ |
+| Timer running | `Space` | Pause Button ✓ |
+| Overflow mode | `↵` | Done Button |
+
+**Code-Beispiel:**
+```tsx
+<Button>
+  Start Focus
+  <KeyboardHint shortcut="Space" />
+</Button>
+```
+
+### Wo KEINE Inline Hints
+
+| Element | Shortcut | Warum nicht |
+|---------|----------|-------------|
+| Preset Buttons | `1-4` | Kompakt, würde UI überladen |
+| ActionBar Icons | `G T`, `G S` | Sequenz-Shortcuts schwer darstellbar |
+| TaskInput | `T` | Wenn fokussiert, Hint unnötig |
+| Settings Toggles | `Shift+A` | Power-User Features |
+
+**Entscheidungsbaum:**
+```
+Ist es die primäre Aktion im Kontext?
+  └─ Ja → Inline Hint
+  └─ Nein → Ist es eine häufige Aktion?
+              └─ Ja → Tooltip (title="Shortcut: G T")
+              └─ Nein → Nur im Help Modal
+```
+
+### Technische Umsetzung
+
+**Komponenten:**
+- `src/components/ui/KeyboardHint.tsx` – Inline Hint Badge
+- `src/hooks/useKeyboardHintsSettings.ts` – Toggle für Hints (default: on)
+- `src/lib/platform.ts` – `formatShortcut()` für Mac/Windows
+
+**Platform-Formatierung:**
+```typescript
+formatShortcut("Cmd+K")  // Mac: "⌘K", Windows: "Ctrl+K"
+formatShortcut("Enter")  // "↵"
+formatShortcut("Space")  // "Space"
+```
+
+### Settings
+
+User können Hints deaktivieren:
+- Hook: `useKeyboardHintsSettings()`
+- Storage: `localStorage['particle:keyboard-hints-visible']`
+- Default: `true`
+
+---
+
 ## Anti-Patterns to Avoid
 
 - **No gamification** - No points, badges, streaks – aber Partikel sammeln ist erlaubt (das ist Bedeutung, kein Spiel)

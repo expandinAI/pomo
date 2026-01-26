@@ -68,7 +68,8 @@ export function TimerControls({
           <motion.button
             onClick={onComplete}
             className="absolute left-full ml-4 flex items-center justify-center w-10 h-10 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-light"
-            aria-label="Complete session"
+            aria-label="Complete session (Enter)"
+            title="Complete session (↵)"
             initial={{ opacity: 0, scale: 0.9, x: 8 }}
             animate={{
               opacity: 1,
