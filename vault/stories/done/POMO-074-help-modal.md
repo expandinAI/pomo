@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 3
 feature: "[[features/keyboard-ux]]"
 created: 2026-01-19
-updated: 2026-01-19
-done_date: null
+updated: 2026-01-26
+done_date: 2026-01-26
 tags: [keyboard, help, modal, p0]
 ---
 
@@ -26,13 +26,13 @@ Umfassendes Help Modal mit allen Shortcuts, kategorisiert und durchsuchbar.
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** ? gedrückt, **When** kein Input fokussiert, **Then** Help Modal öffnet
-- [ ] **Given** Help Modal, **When** angezeigt, **Then** Shortcuts kategorisiert
-- [ ] **Given** Help Modal, **When** Suchfeld, **Then** Shortcuts durchsuchbar
-- [ ] **Given** Shortcut, **When** angezeigt, **Then** mit Beschreibung
-- [ ] **Given** Mac/Windows, **When** angezeigt, **Then** entsprechende Format
-- [ ] **Given** Escape/Klick außerhalb, **When** Help offen, **Then** schließt
-- [ ] **Given** Footer, **When** angezeigt, **Then** "Keyboard Shortcuts" Link
+- [x] **Given** ? gedrückt, **When** kein Input fokussiert, **Then** Help Modal öffnet
+- [x] **Given** Help Modal, **When** angezeigt, **Then** Shortcuts kategorisiert
+- [x] **Given** Help Modal, **When** Suchfeld, **Then** Shortcuts durchsuchbar
+- [x] **Given** Shortcut, **When** angezeigt, **Then** mit Beschreibung
+- [x] **Given** Mac/Windows, **When** angezeigt, **Then** entsprechende Format
+- [x] **Given** Escape/Klick außerhalb, **When** Help offen, **Then** schließt
+- [x] **Given** Footer, **When** angezeigt, **Then** "Keyboard Shortcuts" Link
 
 ## Technische Details
 
@@ -66,41 +66,31 @@ Umfassendes Help Modal mit allen Shortcuts, kategorisiert und durchsuchbar.
 └─────────────────────────────────────────────────────┘
 ```
 
-### Shortcut Data Structure
-```typescript
-interface ShortcutCategory {
-  name: string;
-  shortcuts: {
-    key: string;
-    description: string;
-  }[];
-}
+### Implementierung
 
-const shortcutCategories: ShortcutCategory[] = [
-  {
-    name: 'Timer',
-    shortcuts: [
-      { key: 'Space', description: 'Start/Pause timer' },
-      { key: 'R', description: 'Reset timer' },
-      // ...
-    ],
-  },
-  // ...
-];
-```
+**Komponente:** `src/components/ui/ShortcutsHelp.tsx`
+
+Features:
+- Keyboard Icon Button im Footer
+- Modal mit Backdrop
+- Suchfeld mit Live-Filter via `searchShortcuts()`
+- Kategorisierte Darstellung via `CATEGORY_ORDER`
+- Platform-spezifisches Format via `formatShortcut()`
+- Focus Trap für Accessibility
+- Spring Animations
 
 ## Testing
 
 ### Manuell zu testen
-- [ ] ? öffnet Modal
-- [ ] Kategorien sichtbar
-- [ ] Suche funktioniert
-- [ ] Mac/Windows Format
-- [ ] Escape schließt
+- [x] ? öffnet Modal
+- [x] Kategorien sichtbar
+- [x] Suche funktioniert
+- [x] Mac/Windows Format
+- [x] Escape schließt
 
 ## Definition of Done
 
-- [ ] Help Modal Komponente
-- [ ] Shortcut-Daten strukturiert
-- [ ] Suchfunktion
-- [ ] Platform-spezifisches Format
+- [x] Help Modal Komponente
+- [x] Shortcut-Daten strukturiert
+- [x] Suchfunktion
+- [x] Platform-spezifisches Format

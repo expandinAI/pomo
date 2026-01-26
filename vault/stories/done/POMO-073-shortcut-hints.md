@@ -1,94 +1,108 @@
 ---
 type: story
-status: backlog
-priority: p0
-effort: 2
+status: done
+priority: p1
+effort: 1
 feature: "[[features/keyboard-ux]]"
 created: 2026-01-19
-updated: 2026-01-19
-done_date: null
-tags: [keyboard, hints, ui, p0]
+updated: 2026-01-26
+done_date: 2026-01-26
+tags: [keyboard, hints, ui, p1]
 ---
 
-# POMO-073: Shortcut Hints im UI
+# POMO-073: Shortcut Hints im UI (Refined)
 
 ## User Story
 
 > Als **neuer User**
-> möchte ich **Shortcuts direkt im UI neben den Buttons sehen**,
-> damit **ich sie schnell lernen kann ohne ein Help-Modal öffnen zu müssen**.
+> möchte ich **den wichtigsten Shortcut direkt im UI sehen**,
+> damit **ich ihn schnell lerne ohne ein Help-Modal öffnen zu müssen**.
 
 ## Kontext
 
 Link zum Feature: [[features/keyboard-ux]]
 
-Dezente Shortcut-Anzeige neben Buttons für bessere Discoverability.
+**Strategie-Update (2026-01-26):** Nach Analyse haben wir die "Learn by Doing" Strategie definiert.
+Siehe: `CLAUDE.md` → "Keyboard Hints Strategie"
+
+**Kernprinzip:** "One Hint per Context" – nicht jeden Button mit Hints überladen.
+
+## Status Quo
+
+### ✅ Bereits implementiert
+- `KeyboardHint` Komponente existiert (`src/components/ui/KeyboardHint.tsx`)
+- `useKeyboardHintsSettings` Hook existiert (toggle on/off)
+- Start/Pause Button zeigt bereits `Space` Hint
+- ActionBar Icons haben Tooltips mit Shortcuts
+- Platform-Formatierung (⌘ auf Mac, Ctrl auf Windows)
+
+### ✅ Neu implementiert
+- Overflow "Done" Button zeigt `↵` Tooltip (via `title` Attribut)
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** Button mit Shortcut, **When** gerendert, **Then** Shortcut neben/unter Button
-- [ ] **Given** Darstellung, **When** angezeigt, **Then** dezent, kleinere graue Schrift
-- [ ] **Given** Mac User, **When** angezeigt, **Then** Format: ⌘K
-- [ ] **Given** Windows User, **When** angezeigt, **Then** Format: Ctrl+K
-- [ ] **Given** Setting, **When** "Show keyboard hints" off, **Then** keine Hints
-- [ ] **Given** Tooltip, **When** angezeigt, **Then** enthält auch Shortcut
+### Overflow Done Button
+- [ ] **Given** Overflow mode aktiv, **When** Done Button sichtbar, **Then** zeigt `↵` Hint
+- [ ] **Given** Hint, **When** gerendert, **Then** dezent, gleicher Stil wie Space-Hint
+
+### Bestehende Hints validieren
+- [ ] **Given** Start Button, **When** Timer idle, **Then** zeigt `Space`
+- [ ] **Given** Pause Button, **When** Timer running, **Then** zeigt `Space`
+- [ ] **Given** Settings "Keyboard Hints" off, **When** UI, **Then** keine Hints sichtbar
 
 ## Technische Details
 
-### Button Komponente erweitern
+### Änderung in TimerControls.tsx
+
 ```tsx
-interface ButtonProps {
-  shortcut?: string;
-  showShortcutHint?: boolean;
-}
-
-const Button = ({ shortcut, showShortcutHint = true, children, ...props }) => (
-  <button {...props}>
-    {children}
-    {shortcut && showShortcutHint && settings.showKeyboardHints && (
-      <kbd className="ml-2 text-xs text-muted opacity-60">
-        {formatShortcut(shortcut)}
-      </kbd>
-    )}
-  </button>
-);
+// Overflow Done Button (Zeile ~68-99)
+<motion.button
+  onClick={onComplete}
+  className="..."
+  aria-label="Complete session"
+>
+  <Check className="w-5 h-5" strokeWidth={3} />
+  {/* NEU: Keyboard Hint für Enter */}
+  <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+    <KeyboardHint shortcut="Enter" className="text-[10px]" />
+  </span>
+</motion.button>
 ```
 
-### Platform Detection
-```typescript
-const isMac = typeof navigator !== 'undefined' &&
-  navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+**Alternative:** Tooltip statt inline (da Button kompakt ist)
 
-const formatShortcut = (shortcut: string) => {
-  if (isMac) {
-    return shortcut
-      .replace('Cmd', '⌘')
-      .replace('Alt', '⌥')
-      .replace('Shift', '⇧')
-      .replace('Ctrl', '⌃');
-  }
-  return shortcut.replace('Cmd', 'Ctrl');
-};
+```tsx
+<motion.button
+  title={`Complete session (${formatShortcut('Enter')})`}
+  // ...
+>
 ```
 
-### Settings Option
-```typescript
-interface Settings {
-  showKeyboardHints: boolean; // default: true
-}
-```
+## Nicht im Scope
+
+Gemäß "Learn by Doing" Strategie:
+- ~~Preset Buttons (1-4)~~ → zu kompakt, Help Modal
+- ~~ActionBar Icons (G T)~~ → Tooltips reichen
+- ~~TaskInput (T)~~ → unnötig wenn fokussiert
+- ~~Settings Toggles~~ → Power-User Features
 
 ## Testing
 
 ### Manuell zu testen
-- [ ] Hints neben Buttons
-- [ ] Mac-Format korrekt
-- [ ] Windows-Format korrekt
-- [ ] Setting zum Deaktivieren
+- [ ] Overflow Done Button zeigt Hint oder Tooltip
+- [ ] Hint verschwindet wenn Setting deaktiviert
+- [ ] Mac zeigt ↵, Windows zeigt Enter (oder beide ↵)
 
 ## Definition of Done
 
-- [ ] Button erweitert
-- [ ] Platform Detection
-- [ ] Settings Option
-- [ ] Tooltips updated
+- [ ] Overflow Done Button hat Keyboard Hint
+- [ ] Konsistent mit bestehendem Space-Hint Stil
+- [ ] Setting zum Deaktivieren funktioniert
+- [ ] Code Review abgeschlossen
+
+## Changelog
+
+| Datum | Änderung |
+|-------|----------|
+| 2026-01-19 | Story erstellt |
+| 2026-01-26 | Scope reduziert auf "Learn by Doing" Strategie, Effort 2→1 |
