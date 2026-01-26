@@ -29,7 +29,7 @@ export function ProjectEmptyState({ onCreateNew }: ProjectEmptyStateProps) {
 
       {/* Title */}
       <h3 className="text-lg font-medium text-primary light:text-primary-dark mb-2">
-        Your life's work has many chapters.
+        Your life&apos;s work has many chapters.
       </h3>
 
       {/* Description */}

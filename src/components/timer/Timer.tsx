@@ -322,7 +322,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [timerAnnouncement, setTimerAnnouncement] = useState('');
   const lastAnnouncedMinute = useRef<number | null>(null);
 
-  // End confirmation modal
+  // End confirmation modal (legacy - kept for potential future use)
   const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
   // Daily goal overlay
@@ -878,6 +878,71 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     setAmbientType(ambientPresets[nextIndex].id);
   }, [ambientType, ambientPresets, setAmbientType]);
 
+  // Cancel session (stop without switching to next phase)
+  // "Forest kills your tree. Particle doesn't."
+  // Sessions ≥60s are saved with actual duration. No judgment, no punishment.
+  const handleCancel = useCallback(() => {
+    const sessionMode = state.mode;
+    // Use one-off duration if set, otherwise use preset
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[sessionMode];
+    // Calculate elapsed time
+    const currentOverflowSeconds = overflowSecondsRef.current;
+    const elapsedTime = isOverflow
+      ? fullDuration + currentOverflowSeconds
+      : fullDuration - state.timeRemaining;
+    const isWorkSession = sessionMode === 'work';
+
+    // Stop the timer
+    workerPause();
+
+    // Save particle if ≥60 seconds elapsed (only for work sessions)
+    if (elapsedTime >= 60 && isWorkSession) {
+      const formattedTask = formatTasksForStorage(state.currentTask);
+      const taskData = {
+        ...(formattedTask && { task: formattedTask }),
+        presetId: activePresetIdRef.current,
+        ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+        ...(isOverflow && currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
+        estimatedDuration: fullDuration,
+      };
+
+      // Save with actual elapsed time
+      addSession(sessionMode, elapsedTime, taskData);
+
+      // Update today's sessions to reflect the new particle
+      const sessions = getTodaySessions();
+      setTodaySessions(sessions);
+      setTodayCount(sessions.length);
+
+      // Show feedback with saved time
+      const minutes = Math.round(elapsedTime / 60);
+      setToastMessage(`Session ended · ${minutes} min saved`);
+    } else {
+      // Show simple feedback (nothing saved)
+      setToastMessage('Session ended');
+    }
+
+    // Reset to ready state (same mode, full duration)
+    dispatch({ type: 'SET_MODE', mode: sessionMode, durations: durationsRef.current });
+    workerReset(durationsRef.current[sessionMode]);
+    elapsedRef.current = 0;
+
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
+    // Clear task when cancelling work session
+    if (isWorkSession) {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
+
+    // Reset one-off duration
+    setOneOffDuration(null);
+
+    // Light haptic feedback
+    vibrate('light');
+  }, [state.mode, state.timeRemaining, state.currentTask, isOverflow, workerPause, workerReset, vibrate]);
+
   // Skip session (complete early with actual elapsed time)
   const handleSkip = useCallback(() => {
     const sessionMode = state.mode;
@@ -1207,6 +1272,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
             e.preventDefault();
             dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
+            break;
+          }
+          // Cancel running session
+          // "Forest kills your tree. Particle doesn't."
+          if (state.isRunning || state.isPaused) {
+            e.preventDefault();
+            handleCancel();
           }
           break;
         // O = Open particle select mode
@@ -1299,12 +1371,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
             dispatch({ type: 'ADJUST_TIME', delta: deltaDown, durations: durationsRef.current });
           }
           break;
-        // E = End session early (with confirmation)
+        // E = End/Cancel session (same as Escape, but faster to reach)
         case 'e':
         case 'E':
-          if (state.isRunning) {
+          if (state.isRunning || state.isPaused) {
             e.preventDefault();
-            setShowEndConfirmation(true);
+            handleCancel();
           }
           break;
         // Sound controls
@@ -1356,7 +1428,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
