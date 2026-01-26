@@ -41,13 +41,13 @@ function isToday(date: Date): boolean {
 
 /**
  * Format date for tooltip display
- * "Montag, 15. Januar 2025" in German
+ * "Monday, January 15, 2025"
  */
 function formatDateLong(date: Date): string {
-  return date.toLocaleDateString('de-DE', {
+  return date.toLocaleDateString('en-US', {
     weekday: 'long',
-    day: 'numeric',
     month: 'long',
+    day: 'numeric',
     year: 'numeric',
   });
 }
@@ -98,13 +98,13 @@ function calculatePosition(
  * Year View Tooltip
  *
  * Shows detailed information about a hovered day:
- * - Date (or "Heute" for today)
+ * - Date (or "Today" for today)
  * - Particle count with visual dots
  * - Focus duration
  * - Top task (if any)
  * - Top project (if any)
  * - Peak day badge
- * - "Ein Tag der Ruhe." for zero-particle days
+ * - "A day of rest." for zero-particle days
  */
 export function YearTooltip({
   cell,
@@ -166,13 +166,13 @@ export function YearTooltip({
         <div className="bg-surface light:bg-surface-light border border-border light:border-border-light rounded-lg shadow-xl p-4">
           {/* Date */}
           <div className="text-sm font-semibold text-primary light:text-primary-light mb-3">
-            {isTodayDate ? 'Heute' : formatDateLong(cell.date)}
+            {isTodayDate ? 'Today' : formatDateLong(cell.date)}
           </div>
 
           {isRestDay ? (
             /* Rest day - no particles */
             <div className="text-[13px] text-secondary light:text-secondary-light italic">
-              Ein Tag der Ruhe.
+              A day of rest.
             </div>
           ) : (
             /* Active day */
@@ -181,13 +181,13 @@ export function YearTooltip({
               <div className="flex items-center gap-2 mb-2">
                 <ParticleDots count={dayData.particleCount} max={12} />
                 <span className="text-[13px] font-medium text-primary light:text-primary-light">
-                  {dayData.particleCount} {dayData.particleCount === 1 ? 'Partikel' : 'Partikel'}
+                  {dayData.particleCount} {dayData.particleCount === 1 ? 'particle' : 'particles'}
                 </span>
               </div>
 
               {/* Focus duration */}
               <div className="text-xs text-secondary light:text-secondary-light mb-3">
-                {formatDuration(dayData.totalDuration)} Fokuszeit
+                {formatDuration(dayData.totalDuration)} focus time
               </div>
 
               {/* Top task */}
@@ -203,7 +203,7 @@ export function YearTooltip({
               {/* Top project */}
               {dayData.topProject && (
                 <div className="text-[11px] text-tertiary light:text-tertiary-light mb-3">
-                  Projekt: {dayData.topProject.name}
+                  Project: {dayData.topProject.name}
                 </div>
               )}
 
@@ -211,7 +211,7 @@ export function YearTooltip({
               {isPeakDay && (
                 <div className="pt-2 mt-2 border-t border-border light:border-border-light">
                   <span className="text-xs font-medium text-accent">
-                    🏆 Dein produktivster Tag
+                    🏆 Your most productive day
                   </span>
                 </div>
               )}

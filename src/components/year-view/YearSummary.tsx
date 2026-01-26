@@ -28,10 +28,10 @@ function formatYearDuration(seconds: number): string {
 }
 
 /**
- * Format number with German locale (dot as thousand separator)
+ * Format number with locale (comma as thousand separator)
  */
 function formatNumber(num: number): string {
-  return num.toLocaleString('de-DE');
+  return num.toLocaleString('en-US');
 }
 
 interface SummaryCardProps {
@@ -76,19 +76,19 @@ export function YearSummary({ summary }: YearSummaryProps) {
     <div className="grid grid-cols-2 sm:flex sm:justify-center gap-6 sm:gap-8 py-6 sm:py-8 px-4 mt-6 sm:mt-8 border-t border-border light:border-border-light">
       <SummaryCard
         value={formatNumber(totalParticles)}
-        label="Partikel"
+        label="Particles"
       />
       <SummaryCard
         value={formatYearDuration(totalDuration)}
-        label="Fokuszeit"
+        label="Focus Time"
       />
       <SummaryCard
         value={`${longestStreak}`}
-        label="Längste Serie"
+        label="Longest Streak"
       />
       <SummaryCard
         value={formatNumber(activeDays)}
-        label="Aktive Tage"
+        label="Active Days"
       />
     </div>
   );

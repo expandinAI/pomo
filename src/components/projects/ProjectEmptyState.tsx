@@ -29,12 +29,12 @@ export function ProjectEmptyState({ onCreateNew }: ProjectEmptyStateProps) {
 
       {/* Title */}
       <h3 className="text-lg font-medium text-primary light:text-primary-dark mb-2">
-        Dein Lebenswerk hat viele Kapitel.
+        Your life's work has many chapters.
       </h3>
 
       {/* Description */}
       <p className="text-sm text-tertiary light:text-tertiary-dark max-w-xs mb-8">
-        Erstelle dein erstes Projekt, um deine Partikel zu gruppieren und deinen Fokus zu visualisieren.
+        Create your first project to group your particles and visualize your focus.
       </p>
 
       {/* CTA Button */}
@@ -43,12 +43,12 @@ export function ProjectEmptyState({ onCreateNew }: ProjectEmptyStateProps) {
         className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-accent light:bg-accent-dark text-background light:text-background-light hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         <Plus className="w-5 h-5" />
-        Neues Projekt
+        New Project
       </button>
 
       {/* Keyboard hint */}
       <p className="mt-4 text-xs text-tertiary light:text-tertiary-dark">
-        oder drücke <kbd className="px-1.5 py-0.5 rounded bg-tertiary/10 light:bg-tertiary-dark/10">N</kbd>
+        or press <kbd className="px-1.5 py-0.5 rounded bg-tertiary/10 light:bg-tertiary-dark/10">N</kbd>
       </p>
     </motion.div>
   );

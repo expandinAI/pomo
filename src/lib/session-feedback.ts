@@ -1,7 +1,7 @@
 /**
- * Session Feedback - Kontextuelles Feedback nach Session-Completion
+ * Session Feedback - Contextual feedback after session completion
  *
- * "Centered zeigt Reports. Forest zeigt Bäume. Wir zeigen einen Satz."
+ * "Centered shows reports. Forest shows trees. We show a sentence."
  */
 
 export type SessionFeedbackType =
@@ -98,7 +98,7 @@ export function calculateSessionFeedback(
 /**
  * Format the feedback message for display.
  *
- * German text, minimalist, one line.
+ * English text, minimalist, one line.
  */
 export function formatFeedbackMessage(feedback: SessionFeedback): string {
   switch (feedback.type) {
@@ -106,26 +106,26 @@ export function formatFeedbackMessage(feedback: SessionFeedback): string {
       return getMilestoneMessage(feedback.particleCount!);
 
     case 'goal-reached':
-      return `Tagesziel erreicht · ${feedback.dailyCount} Partikel`;
+      return `Daily goal reached · ${feedback.dailyCount} particles`;
 
     case 'task':
       // Truncate task name if too long
       const task = feedback.taskName!.length > 25
         ? feedback.taskName!.slice(0, 22) + '...'
         : feedback.taskName!;
-      return `${task} · Ein Partikel`;
+      return `${task} · One particle`;
 
     case 'first-today':
-      return 'Dein erster Partikel heute.';
+      return 'Your first particle today.';
 
     case 'overflow':
-      return `${feedback.duration} min · +${feedback.overflowMinutes} im Flow`;
+      return `${feedback.duration} min · +${feedback.overflowMinutes} in flow`;
 
     case 'standard':
-      return `Ein neuer Partikel · ${feedback.duration} min fokussiert`;
+      return `A new particle · ${feedback.duration} min focused`;
 
     default:
-      return `Ein neuer Partikel · ${feedback.duration} min fokussiert`;
+      return `A new particle · ${feedback.duration} min focused`;
   }
 }
 
@@ -135,16 +135,16 @@ export function formatFeedbackMessage(feedback: SessionFeedback): string {
 function getMilestoneMessage(count: number): string {
   switch (count) {
     case 10:
-      return 'Partikel 10 · Dein Lebenswerk wächst.';
+      return "Particle 10 · Your life's work is growing.";
     case 50:
-      return '50 Partikel · Die Arbeit trägt Früchte.';
+      return '50 particles · Your work is bearing fruit.';
     case 100:
-      return '100 Partikel · Ein Fundament entsteht.';
+      return '100 particles · A foundation is forming.';
     case 500:
-      return '500 Partikel · Wenige kommen so weit.';
+      return '500 particles · Few come this far.';
     case 1000:
-      return '1.000 Partikel · Ein Lebenswerk nimmt Form an.';
+      return "1,000 particles · A life's work takes shape.";
     default:
-      return `${count} Partikel · Ein Meilenstein.`;
+      return `${count} particles · A milestone.`;
   }
 }
