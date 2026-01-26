@@ -38,8 +38,8 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
 
   // Focus management
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
+  // Focus the modal container itself to avoid visible ring on close button
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
   // Load sessions when modal opens or refresh triggers
   useEffect(() => {
@@ -156,10 +156,11 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
             >
               <div
                 ref={modalRef}
+                tabIndex={-1}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="statistics-dashboard-title"
-                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-full focus:outline-none"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
@@ -170,7 +171,6 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     Statistics
                   </h2>
                   <button
-                    ref={closeButtonRef}
                     onClick={() => setIsOpen(false)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     aria-label="Close statistics"
@@ -179,8 +179,10 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                   </button>
                 </div>
 
-                {/* Tab Navigation */}
-                <DashboardTabs
+                {/* Content area */}
+                <div>
+                  {/* Tab Navigation */}
+                  <DashboardTabs
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                 />
@@ -204,6 +206,7 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     onSessionUpdate={() => setSessions(loadSessions())}
                   />
                 )}
+                </div>
               </div>
             </motion.div>
           </motion.div>

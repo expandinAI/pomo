@@ -29,10 +29,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
   // Focus management refs
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap hook
-  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
+  // Focus trap - focus the modal container itself to avoid visible ring on close button
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
   const toggleOpen = useCallback(() => {
     if (!disabled) {
@@ -113,10 +112,11 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
               >
               <div
                 ref={modalRef}
+                tabIndex={-1}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="settings-title"
-                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh]"
+                className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden flex flex-col max-h-[85vh] focus:outline-none"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
@@ -124,7 +124,6 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                     Timer Settings
                   </h2>
                   <button
-                    ref={closeButtonRef}
                     onClick={() => setIsOpen(false)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     aria-label="Close settings"

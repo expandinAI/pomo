@@ -40,7 +40,6 @@ interface MilestoneJourneyProps {
  */
 export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: MilestoneJourneyProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Load earned milestones
   const [earnedMilestones, setEarnedMilestones] = useState<EarnedMilestone[]>([]);
@@ -81,8 +80,8 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
   // Check if this is the last item
   const isLastIndex = (index: number) => index === milestoneList.length - 1;
 
-  // Focus trap
-  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
+  // Focus trap - focus the modal container itself to avoid visible ring on close button
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
   // Load milestones when opening
   useEffect(() => {
@@ -158,10 +157,11 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
           {/* Modal - using flex centering instead of transform to avoid animation conflict */}
           <motion.div
             ref={modalRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-labelledby="journey-title"
-            className="fixed inset-4 sm:inset-0 sm:m-auto sm:w-full sm:max-w-md sm:max-h-[80vh] sm:h-fit z-50 flex flex-col bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden"
+            className="fixed inset-4 sm:inset-0 sm:m-auto sm:w-full sm:max-w-md sm:max-h-[80vh] sm:h-fit z-50 flex flex-col bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden focus:outline-none"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -218,7 +218,6 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
                   </button>
                 )}
                 <button
-                  ref={closeButtonRef}
                   onClick={onClose}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   aria-label="Close milestones"
@@ -228,7 +227,7 @@ export function MilestoneJourney({ isOpen, onClose, onRelive, onRefresh }: Miles
               </div>
             </div>
 
-            {/* Milestone list - no horizontal padding, items handle their own */}
+            {/* Milestone list */}
             <div className="flex-1 overflow-y-auto py-2">
               {earnedList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center">

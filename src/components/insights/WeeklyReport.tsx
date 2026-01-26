@@ -31,8 +31,8 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
 
   // Focus management
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  useFocusTrap(modalRef, isOpen, { initialFocusRef: closeButtonRef });
+  // Focus the modal container itself to avoid visible ring on close button
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
   const toggleOpen = useCallback(() => {
     setIsOpen(prev => !prev);
@@ -138,7 +138,8 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
               >
                 <div
                   ref={modalRef}
-                  className="bg-surface light:bg-surface-light rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden"
+                  tabIndex={-1}
+                  className="bg-surface light:bg-surface-light rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden focus:outline-none"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
@@ -149,7 +150,6 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
                       Your Week in Focus
                     </h2>
                     <button
-                      ref={closeButtonRef}
                       onClick={() => setIsOpen(false)}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-light hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label="Close report"

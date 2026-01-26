@@ -30,7 +30,6 @@ interface TimelineOverlayProps {
  */
 export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Timeline data
   const {
@@ -54,8 +53,8 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
   // Particle detail overlay state
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
-  // Focus trap
-  useFocusTrap(modalRef, isOpen && !selectedSessionId, { initialFocusRef: closeButtonRef });
+  // Focus trap - focus the modal container itself to avoid visible ring on close button
+  useFocusTrap(modalRef, isOpen && !selectedSessionId, { initialFocusRef: modalRef });
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -138,10 +137,11 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
               >
                 <div
                   ref={modalRef}
+                  tabIndex={-1}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="timeline-title"
-                  className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10"
+                  className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 focus:outline-none"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
@@ -152,7 +152,6 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                       Timeline
                     </h2>
                     <button
-                      ref={closeButtonRef}
                       onClick={onClose}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label="Close"
@@ -161,7 +160,7 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                     </button>
                   </div>
 
-                  {/* Content - fixed height for consistent layout, overflow visible for tooltips */}
+                  {/* Content */}
                   <div className="p-6 py-8 overflow-visible">
                     {/* Day navigation */}
                     <TimelineHeader

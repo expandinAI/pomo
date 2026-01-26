@@ -35,7 +35,6 @@ export function ProjectListModal() {
   const [viewingProject, setViewingProject] = useState<string | null | 'no-project'>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -157,9 +156,9 @@ export function ProjectListModal() {
       );
   }, [refresh]);
 
-  // Focus trap
+  // Focus trap - focus the modal container itself to avoid visible ring on close button
   useFocusTrap(modalRef, isOpen && !showCreateForm && !editingProject && !archivingProject && !viewingProject, {
-    initialFocusRef: closeButtonRef,
+    initialFocusRef: modalRef,
   });
 
   // Keyboard navigation
@@ -333,10 +332,11 @@ export function ProjectListModal() {
               >
                 <div
                   ref={modalRef}
+                  tabIndex={-1}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="projects-title"
-                  className="flex flex-col bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden"
+                  className="flex flex-col bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 overflow-hidden focus:outline-none"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
@@ -359,7 +359,6 @@ export function ProjectListModal() {
 
                       {/* Close button */}
                       <button
-                        ref={closeButtonRef}
                         onClick={handleClose}
                         className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         aria-label="Close"
