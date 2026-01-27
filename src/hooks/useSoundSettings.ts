@@ -23,6 +23,7 @@ const STORAGE_KEY = 'particle_sound_settings';
 const VOLUME_KEY = 'particle_sound_volume';
 const MUTED_KEY = 'particle_sound_muted';
 const COMPLETION_SOUND_KEY = 'particle_completion_sound_enabled';
+const UI_SOUNDS_KEY = 'particle_ui_sounds_enabled';
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_sound_settings';
@@ -37,11 +38,12 @@ interface SoundSettings {
   volume: number;
   muted: boolean;
   completionSoundEnabled: boolean;
+  uiSoundsEnabled: boolean;
 }
 
 function loadSettings(): SoundSettings {
   if (typeof window === 'undefined') {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true };
   }
 
   try {
@@ -63,6 +65,7 @@ function loadSettings(): SoundSettings {
     const storedVolume = localStorage.getItem(VOLUME_KEY);
     const storedMuted = localStorage.getItem(MUTED_KEY);
     const storedCompletionSound = localStorage.getItem(COMPLETION_SOUND_KEY);
+    const storedUiSounds = localStorage.getItem(UI_SOUNDS_KEY);
 
     return {
       sound: storedSound && SOUND_PRESETS.some((p) => p.id === storedSound)
@@ -71,9 +74,10 @@ function loadSettings(): SoundSettings {
       volume: storedVolume !== null ? parseFloat(storedVolume) : DEFAULT_VOLUME,
       muted: storedMuted === 'true',
       completionSoundEnabled: storedCompletionSound !== 'false', // Default: true
+      uiSoundsEnabled: storedUiSounds !== 'false', // Default: true
     };
   } catch {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true };
   }
 }
 
@@ -92,6 +96,9 @@ function saveSettings(settings: Partial<SoundSettings>): void {
   if (settings.completionSoundEnabled !== undefined) {
     localStorage.setItem(COMPLETION_SOUND_KEY, String(settings.completionSoundEnabled));
   }
+  if (settings.uiSoundsEnabled !== undefined) {
+    localStorage.setItem(UI_SOUNDS_KEY, String(settings.uiSoundsEnabled));
+  }
 }
 
 export function useSoundSettings() {
@@ -99,6 +106,7 @@ export function useSoundSettings() {
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const [muted, setMutedState] = useState(false);
   const [completionSoundEnabled, setCompletionSoundEnabledState] = useState(true);
+  const [uiSoundsEnabled, setUiSoundsEnabledState] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -108,6 +116,7 @@ export function useSoundSettings() {
     setVolumeState(settings.volume);
     setMutedState(settings.muted);
     setCompletionSoundEnabledState(settings.completionSoundEnabled);
+    setUiSoundsEnabledState(settings.uiSoundsEnabled);
     setIsLoaded(true);
   }, []);
 
@@ -145,6 +154,12 @@ export function useSoundSettings() {
     saveSettings({ completionSoundEnabled: enabled });
   }, []);
 
+  // Set UI sounds enabled
+  const setUiSoundsEnabled = useCallback((enabled: boolean) => {
+    setUiSoundsEnabledState(enabled);
+    saveSettings({ uiSoundsEnabled: enabled });
+  }, []);
+
   return {
     selectedSound,
     setSound,
@@ -155,6 +170,8 @@ export function useSoundSettings() {
     setMuted,
     completionSoundEnabled,
     setCompletionSoundEnabled,
+    uiSoundsEnabled,
+    setUiSoundsEnabled,
     isLoaded,
     presets: SOUND_PRESETS,
   };

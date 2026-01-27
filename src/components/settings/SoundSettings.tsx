@@ -1,13 +1,13 @@
 'use client';
 
-import { Volume2, VolumeX, Check, Bell } from 'lucide-react';
+import { Volume2, VolumeX, Check, Bell, MousePointerClick } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundSettings, SOUND_PRESETS, type SoundOption } from '@/hooks/useSoundSettings';
 import { useSound } from '@/hooks/useSound';
 import { SPRING } from '@/styles/design-tokens';
 
 export function SoundSettings() {
-  const { selectedSound, setSound, volume, setVolume, muted, toggleMute, completionSoundEnabled, setCompletionSoundEnabled } = useSoundSettings();
+  const { selectedSound, setSound, volume, setVolume, muted, toggleMute, completionSoundEnabled, setCompletionSoundEnabled, uiSoundsEnabled, setUiSoundsEnabled } = useSoundSettings();
   const { preview } = useSound();
 
   const handleSelect = (soundId: SoundOption) => {
@@ -126,6 +126,61 @@ export function SoundSettings() {
             <motion.div
               className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
               animate={{ left: completionSoundEnabled ? 20 : 4 }}
+              transition={{ type: 'spring', ...SPRING.default }}
+            />
+          </div>
+        </motion.button>
+      </div>
+
+      {/* UI Sounds Toggle */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
+          UI Sounds
+        </label>
+        <motion.button
+          onClick={() => setUiSoundsEnabled(!uiSoundsEnabled)}
+          className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+            uiSoundsEnabled
+              ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+              : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+          }`}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', ...SPRING.default }}
+        >
+          <div className="flex items-center gap-3">
+            <MousePointerClick
+              className={`w-4 h-4 ${
+                uiSoundsEnabled
+                  ? 'text-accent light:text-accent-dark'
+                  : 'text-tertiary light:text-tertiary-dark'
+              }`}
+            />
+            <div className="text-left">
+              <p
+                className={`text-sm font-medium ${
+                  uiSoundsEnabled
+                    ? 'text-accent light:text-accent-dark'
+                    : 'text-secondary light:text-secondary-dark'
+                }`}
+              >
+                Interaction Sounds
+              </p>
+              <p className="text-xs text-tertiary light:text-tertiary-dark">
+                Subtle click on timer start/pause
+              </p>
+            </div>
+          </div>
+          {/* Toggle Switch */}
+          <div
+            className={`relative w-10 h-6 rounded-full transition-colors ${
+              uiSoundsEnabled
+                ? 'bg-accent light:bg-accent-dark'
+                : 'bg-tertiary/30 light:bg-tertiary-dark/30'
+            }`}
+          >
+            <motion.div
+              className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+              animate={{ left: uiSoundsEnabled ? 20 : 4 }}
               transition={{ type: 'spring', ...SPRING.default }}
             />
           </div>

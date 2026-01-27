@@ -1514,15 +1514,17 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex]);
 
   const handleStart = useCallback(() => {
+    playSound('timer-start');
     vibrate('light');
     dispatch({ type: 'START' });
     setPickedTaskIndex(null); // Reset random pick when session starts
-  }, [vibrate]);
+  }, [playSound, vibrate]);
 
   const handlePause = useCallback(() => {
+    playSound('timer-pause');
     vibrate('double');
     dispatch({ type: 'PAUSE' });
-  }, [vibrate]);
+  }, [playSound, vibrate]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });

@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break' | 'autostart' | 'celebration';
+type SoundType = 'completion' | 'break' | 'autostart' | 'celebration' | 'timer-start' | 'timer-pause';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -596,6 +596,64 @@ function playCelebrationSoundWithDest(ctx: AudioContext, dest: AudioNode): void 
   }
 }
 
+/**
+ * Timer Start: Soft organic "pop" - like a particle settling into place
+ * Round, warm, natural - not mechanical
+ */
+function playTimerStartSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Soft round tone with natural frequency bounce
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  // Start higher, settle down - like something landing softly
+  osc.frequency.setValueAtTime(400, now);
+  osc.frequency.exponentialRampToValueAtTime(280, now + 0.025);
+  osc.frequency.exponentialRampToValueAtTime(260, now + 0.05);
+
+  // Soft attack, natural decay
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.15, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+  osc.connect(gain);
+  gain.connect(dest);
+
+  osc.start(now);
+  osc.stop(now + 0.08);
+}
+
+/**
+ * Timer Pause: Gentle release - like a breath out
+ * Softer, lower, settling down
+ */
+function playTimerPauseSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Soft descending tone - like exhaling
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  // Lower, gentler descent
+  osc.frequency.setValueAtTime(320, now);
+  osc.frequency.exponentialRampToValueAtTime(220, now + 0.03);
+  osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+
+  // Even softer than start
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.1, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+  osc.connect(gain);
+  gain.connect(dest);
+
+  osc.start(now);
+  osc.stop(now + 0.07);
+}
+
 const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: AudioNode) => void> = {
   default: playDefaultChimeWithDest,
   soft: playSoftChimeWithDest,
@@ -613,7 +671,7 @@ const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: Aud
  */
 export function useSound(): UseSoundReturn {
   const isSupported = useRef(true);
-  const { selectedSound, volume, muted } = useSoundSettings();
+  const { selectedSound, volume, muted, uiSoundsEnabled } = useSoundSettings();
 
   // Track user interaction to enable audio
   useEffect(() => {
@@ -655,6 +713,10 @@ export function useSound(): UseSoundReturn {
   const play = useCallback((type: SoundType = 'completion') => {
     if (muted) return;
 
+    // UI sounds require uiSoundsEnabled to be true
+    const isUiSound = type === 'timer-start' || type === 'timer-pause';
+    if (isUiSound && !uiSoundsEnabled) return;
+
     const ctx = getAudioContext();
     if (!ctx) {
       isSupported.current = false;
@@ -668,6 +730,10 @@ export function useSound(): UseSoundReturn {
         playSoundWithVolume(ctx, playAutoStartSoundWithDest, volume);
       } else if (type === 'celebration') {
         playSoundWithVolume(ctx, playCelebrationSoundWithDest, volume);
+      } else if (type === 'timer-start') {
+        playSoundWithVolume(ctx, playTimerStartSoundWithDest, volume);
+      } else if (type === 'timer-pause') {
+        playSoundWithVolume(ctx, playTimerPauseSoundWithDest, volume);
       } else {
         playSound(selectedSound, volume);
       }
@@ -678,7 +744,7 @@ export function useSound(): UseSoundReturn {
     } else {
       doPlay();
     }
-  }, [selectedSound, volume, muted, playSound]);
+  }, [selectedSound, volume, muted, uiSoundsEnabled, playSound]);
 
   const preview = useCallback((sound: SoundOption) => {
     // Preview always plays (ignores mute) but respects volume
