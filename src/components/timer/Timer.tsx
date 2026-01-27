@@ -564,6 +564,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       playSound('break');
     }
 
+    // Play transition sound (Arrival: Focus→Break, Awakening: Break→Focus)
+    if (wasWorkSession) {
+      playSound('transition-arrival');
+    } else {
+      playSound('transition-awakening');
+    }
+
     // Trigger auto-start countdown if enabled and conditions are met
     // Check: auto-start enabled, not in overflow mode, mode allows, daily goal not reached
     const isWorkToBreak = sessionMode === 'work';
@@ -1104,6 +1111,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     vibrate('medium');
 
+    // Play transition sound (Arrival: Focus→Break, Awakening: Break→Focus)
+    if (wasWorkSession) {
+      playSound('transition-arrival');
+    } else {
+      playSound('transition-awakening');
+    }
+
     // Trigger auto-start countdown if enabled and conditions are met
     const isWorkToBreak = sessionMode === 'work';
     const autoStartAllowed = autoStartModeRef.current === 'all' || isWorkToBreak;
@@ -1161,7 +1175,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1228,6 +1242,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     // Skip if milestone was earned (milestone has its own sound)
     if (completionSoundEnabled && !milestoneEarned) {
       playSound('break');
+    }
+
+    // Play transition sound (Arrival: Focus→Break, Awakening: Break→Focus)
+    if (wasWorkSession) {
+      playSound('transition-arrival');
+    } else {
+      playSound('transition-awakening');
     }
 
     // Trigger auto-start countdown if enabled and conditions are met

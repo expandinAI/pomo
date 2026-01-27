@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 
 export type SoundOption = 'default' | 'soft' | 'bell' | 'woodblock' | 'bowl' | 'minimal';
 
+export type TransitionIntensity = 'subtle' | 'normal' | 'rich';
+
 export interface SoundPreset {
   id: SoundOption;
   name: string;
@@ -24,6 +26,8 @@ const VOLUME_KEY = 'particle_sound_volume';
 const MUTED_KEY = 'particle_sound_muted';
 const COMPLETION_SOUND_KEY = 'particle_completion_sound_enabled';
 const UI_SOUNDS_KEY = 'particle_ui_sounds_enabled';
+const TRANSITION_SOUNDS_KEY = 'particle_transition_sounds_enabled';
+const TRANSITION_INTENSITY_KEY = 'particle_transition_intensity';
 
 // Old keys for migration
 const OLD_STORAGE_KEY = 'pomo_sound_settings';
@@ -39,11 +43,15 @@ interface SoundSettings {
   muted: boolean;
   completionSoundEnabled: boolean;
   uiSoundsEnabled: boolean;
+  transitionSoundsEnabled: boolean;
+  transitionIntensity: TransitionIntensity;
 }
+
+const VALID_INTENSITIES: TransitionIntensity[] = ['subtle', 'normal', 'rich'];
 
 function loadSettings(): SoundSettings {
   if (typeof window === 'undefined') {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true, transitionSoundsEnabled: true, transitionIntensity: 'normal' };
   }
 
   try {
@@ -66,6 +74,8 @@ function loadSettings(): SoundSettings {
     const storedMuted = localStorage.getItem(MUTED_KEY);
     const storedCompletionSound = localStorage.getItem(COMPLETION_SOUND_KEY);
     const storedUiSounds = localStorage.getItem(UI_SOUNDS_KEY);
+    const storedTransitionSounds = localStorage.getItem(TRANSITION_SOUNDS_KEY);
+    const storedTransitionIntensity = localStorage.getItem(TRANSITION_INTENSITY_KEY);
 
     return {
       sound: storedSound && SOUND_PRESETS.some((p) => p.id === storedSound)
@@ -75,9 +85,13 @@ function loadSettings(): SoundSettings {
       muted: storedMuted === 'true',
       completionSoundEnabled: storedCompletionSound !== 'false', // Default: true
       uiSoundsEnabled: storedUiSounds !== 'false', // Default: true
+      transitionSoundsEnabled: storedTransitionSounds !== 'false', // Default: true
+      transitionIntensity: storedTransitionIntensity && VALID_INTENSITIES.includes(storedTransitionIntensity as TransitionIntensity)
+        ? (storedTransitionIntensity as TransitionIntensity)
+        : 'normal',
     };
   } catch {
-    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true };
+    return { sound: DEFAULT_SOUND, volume: DEFAULT_VOLUME, muted: false, completionSoundEnabled: true, uiSoundsEnabled: true, transitionSoundsEnabled: true, transitionIntensity: 'normal' };
   }
 }
 
@@ -99,6 +113,12 @@ function saveSettings(settings: Partial<SoundSettings>): void {
   if (settings.uiSoundsEnabled !== undefined) {
     localStorage.setItem(UI_SOUNDS_KEY, String(settings.uiSoundsEnabled));
   }
+  if (settings.transitionSoundsEnabled !== undefined) {
+    localStorage.setItem(TRANSITION_SOUNDS_KEY, String(settings.transitionSoundsEnabled));
+  }
+  if (settings.transitionIntensity !== undefined) {
+    localStorage.setItem(TRANSITION_INTENSITY_KEY, settings.transitionIntensity);
+  }
 }
 
 export function useSoundSettings() {
@@ -107,6 +127,8 @@ export function useSoundSettings() {
   const [muted, setMutedState] = useState(false);
   const [completionSoundEnabled, setCompletionSoundEnabledState] = useState(true);
   const [uiSoundsEnabled, setUiSoundsEnabledState] = useState(true);
+  const [transitionSoundsEnabled, setTransitionSoundsEnabledState] = useState(true);
+  const [transitionIntensity, setTransitionIntensityState] = useState<TransitionIntensity>('normal');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -117,6 +139,8 @@ export function useSoundSettings() {
     setMutedState(settings.muted);
     setCompletionSoundEnabledState(settings.completionSoundEnabled);
     setUiSoundsEnabledState(settings.uiSoundsEnabled);
+    setTransitionSoundsEnabledState(settings.transitionSoundsEnabled);
+    setTransitionIntensityState(settings.transitionIntensity);
     setIsLoaded(true);
   }, []);
 
@@ -160,6 +184,18 @@ export function useSoundSettings() {
     saveSettings({ uiSoundsEnabled: enabled });
   }, []);
 
+  // Set transition sounds enabled
+  const setTransitionSoundsEnabled = useCallback((enabled: boolean) => {
+    setTransitionSoundsEnabledState(enabled);
+    saveSettings({ transitionSoundsEnabled: enabled });
+  }, []);
+
+  // Set transition intensity
+  const setTransitionIntensity = useCallback((intensity: TransitionIntensity) => {
+    setTransitionIntensityState(intensity);
+    saveSettings({ transitionIntensity: intensity });
+  }, []);
+
   return {
     selectedSound,
     setSound,
@@ -172,6 +208,10 @@ export function useSoundSettings() {
     setCompletionSoundEnabled,
     uiSoundsEnabled,
     setUiSoundsEnabled,
+    transitionSoundsEnabled,
+    setTransitionSoundsEnabled,
+    transitionIntensity,
+    setTransitionIntensity,
     isLoaded,
     presets: SOUND_PRESETS,
   };

@@ -244,7 +244,7 @@ const SOUND_PLAYERS: Record<SoundOption, (ctx: AudioContext) => void> = {
   minimal: playMinimalChime,
 };
 
-type SoundType = 'completion' | 'break' | 'autostart' | 'celebration' | 'timer-start' | 'timer-pause';
+type SoundType = 'completion' | 'break' | 'autostart' | 'celebration' | 'timer-start' | 'timer-pause' | 'transition-arrival' | 'transition-awakening';
 
 interface UseSoundReturn {
   play: (type?: SoundType) => void;
@@ -654,6 +654,368 @@ function playTimerPauseSoundWithDest(ctx: AudioContext, dest: AudioNode): void {
   osc.stop(now + 0.07);
 }
 
+// ============================================================================
+// TRANSITION SOUNDS - Three intensity levels
+// "Particle klingt wie Licht klingen würde"
+// ============================================================================
+
+/**
+ * Transition Arrival SUBTLE: Focus → Break
+ * Minimal, short (~1s), just two pure tones converging
+ */
+function playTransitionArrivalSubtle(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Root tone only (A3 = 220Hz)
+  const root = ctx.createOscillator();
+  const rootGain = ctx.createGain();
+  root.type = 'sine';
+  root.frequency.setValueAtTime(220, now);
+
+  rootGain.gain.setValueAtTime(0, now);
+  rootGain.gain.linearRampToValueAtTime(0.1, now + 0.15);
+  rootGain.gain.setValueAtTime(0.1, now + 0.5);
+  rootGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+
+  root.connect(rootGain);
+  rootGain.connect(dest);
+  root.start(now);
+  root.stop(now + 1.1);
+
+  // Fifth (E4 = 330Hz) - subtle convergence
+  const fifth = ctx.createOscillator();
+  const fifthGain = ctx.createGain();
+  fifth.type = 'sine';
+  fifth.frequency.setValueAtTime(330, now);
+
+  fifthGain.gain.setValueAtTime(0, now);
+  fifthGain.gain.linearRampToValueAtTime(0.08, now + 0.2);
+  fifthGain.gain.setValueAtTime(0.08, now + 0.4);
+  fifthGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+
+  fifth.connect(fifthGain);
+  fifthGain.connect(dest);
+  fifth.start(now + 0.05);
+  fifth.stop(now + 1.0);
+}
+
+/**
+ * Transition Arrival NORMAL: Focus → Break
+ * Two sine waves converging in harmony (root + perfect fifth = 2:3 ratio)
+ * Like light waves finding resonance. Warm, fulfilled, peaceful. (~2s)
+ */
+function playTransitionArrivalNormal(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Root tone (A3 = 220Hz) - grounding, warm
+  const root = ctx.createOscillator();
+  const rootGain = ctx.createGain();
+  root.type = 'sine';
+  root.frequency.setValueAtTime(220, now);
+
+  rootGain.gain.setValueAtTime(0, now);
+  rootGain.gain.linearRampToValueAtTime(0.15, now + 0.3);
+  rootGain.gain.setValueAtTime(0.15, now + 1.0);
+  rootGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+  root.connect(rootGain);
+  rootGain.connect(dest);
+  root.start(now);
+  root.stop(now + 2.2);
+
+  // Fifth (E4 = 330Hz) - harmony, convergence
+  const fifth = ctx.createOscillator();
+  const fifthGain = ctx.createGain();
+  fifth.type = 'sine';
+  fifth.frequency.setValueAtTime(330, now);
+
+  fifthGain.gain.setValueAtTime(0, now);
+  fifthGain.gain.linearRampToValueAtTime(0.12, now + 0.4);
+  fifthGain.gain.setValueAtTime(0.12, now + 0.9);
+  fifthGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+  fifth.connect(fifthGain);
+  fifthGain.connect(dest);
+  fifth.start(now + 0.1);
+  fifth.stop(now + 2.0);
+
+  // Subtle high overtone - shimmer of light
+  const shimmer = ctx.createOscillator();
+  const shimmerGain = ctx.createGain();
+  shimmer.type = 'sine';
+  shimmer.frequency.setValueAtTime(880, now); // A5
+
+  shimmerGain.gain.setValueAtTime(0, now);
+  shimmerGain.gain.linearRampToValueAtTime(0.04, now + 0.5);
+  shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+  shimmer.connect(shimmerGain);
+  shimmerGain.connect(dest);
+  shimmer.start(now + 0.2);
+  shimmer.stop(now + 1.7);
+}
+
+/**
+ * Transition Arrival RICH: Focus → Break
+ * Full harmonic spectrum, longer decay (~3s), extra octave
+ * Like light refracting into a warm glow
+ */
+function playTransitionArrivalRich(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Root tone (A3 = 220Hz) - foundation
+  const root = ctx.createOscillator();
+  const rootGain = ctx.createGain();
+  root.type = 'sine';
+  root.frequency.setValueAtTime(220, now);
+
+  rootGain.gain.setValueAtTime(0, now);
+  rootGain.gain.linearRampToValueAtTime(0.15, now + 0.4);
+  rootGain.gain.setValueAtTime(0.15, now + 1.5);
+  rootGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+
+  root.connect(rootGain);
+  rootGain.connect(dest);
+  root.start(now);
+  root.stop(now + 3.2);
+
+  // Lower octave (A2 = 110Hz) - deep warmth
+  const sub = ctx.createOscillator();
+  const subGain = ctx.createGain();
+  sub.type = 'sine';
+  sub.frequency.setValueAtTime(110, now);
+
+  subGain.gain.setValueAtTime(0, now);
+  subGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+  subGain.gain.setValueAtTime(0.08, now + 1.2);
+  subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+  sub.connect(subGain);
+  subGain.connect(dest);
+  sub.start(now);
+  sub.stop(now + 2.7);
+
+  // Fifth (E4 = 330Hz) - harmony
+  const fifth = ctx.createOscillator();
+  const fifthGain = ctx.createGain();
+  fifth.type = 'sine';
+  fifth.frequency.setValueAtTime(330, now);
+
+  fifthGain.gain.setValueAtTime(0, now);
+  fifthGain.gain.linearRampToValueAtTime(0.12, now + 0.5);
+  fifthGain.gain.setValueAtTime(0.12, now + 1.3);
+  fifthGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+  fifth.connect(fifthGain);
+  fifthGain.connect(dest);
+  fifth.start(now + 0.1);
+  fifth.stop(now + 2.7);
+
+  // Octave (A4 = 440Hz) - brightness
+  const octave = ctx.createOscillator();
+  const octaveGain = ctx.createGain();
+  octave.type = 'sine';
+  octave.frequency.setValueAtTime(440, now);
+
+  octaveGain.gain.setValueAtTime(0, now);
+  octaveGain.gain.linearRampToValueAtTime(0.08, now + 0.6);
+  octaveGain.gain.setValueAtTime(0.08, now + 1.0);
+  octaveGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+  octave.connect(octaveGain);
+  octaveGain.connect(dest);
+  octave.start(now + 0.2);
+  octave.stop(now + 2.2);
+
+  // High shimmer (A5 = 880Hz)
+  const shimmer = ctx.createOscillator();
+  const shimmerGain = ctx.createGain();
+  shimmer.type = 'sine';
+  shimmer.frequency.setValueAtTime(880, now);
+
+  shimmerGain.gain.setValueAtTime(0, now);
+  shimmerGain.gain.linearRampToValueAtTime(0.05, now + 0.7);
+  shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+  shimmer.connect(shimmerGain);
+  shimmerGain.connect(dest);
+  shimmer.start(now + 0.3);
+  shimmer.stop(now + 2.2);
+}
+
+/**
+ * Transition Awakening SUBTLE: Break → Focus
+ * Minimal, short (~0.8s), gentle rising tone
+ */
+function playTransitionAwakeningSubtle(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Simple rising tone
+  const rise = ctx.createOscillator();
+  const riseGain = ctx.createGain();
+  rise.type = 'sine';
+  rise.frequency.setValueAtTime(280, now);
+  rise.frequency.exponentialRampToValueAtTime(400, now + 0.5);
+
+  riseGain.gain.setValueAtTime(0, now);
+  riseGain.gain.linearRampToValueAtTime(0.1, now + 0.1);
+  riseGain.gain.setValueAtTime(0.1, now + 0.4);
+  riseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+  rise.connect(riseGain);
+  riseGain.connect(dest);
+  rise.start(now);
+  rise.stop(now + 0.9);
+}
+
+/**
+ * Transition Awakening NORMAL: Break → Focus
+ * Rising harmonics that dissolve into clarity (~1.5s)
+ * Like first light of dawn. Fresh, clear, ready.
+ */
+function playTransitionAwakeningNormal(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Rising tone - starts low, rises gently
+  const rise = ctx.createOscillator();
+  const riseGain = ctx.createGain();
+  rise.type = 'sine';
+  rise.frequency.setValueAtTime(220, now);
+  rise.frequency.exponentialRampToValueAtTime(330, now + 0.8);
+  rise.frequency.setValueAtTime(330, now + 1.2);
+
+  riseGain.gain.setValueAtTime(0, now);
+  riseGain.gain.linearRampToValueAtTime(0.12, now + 0.2);
+  riseGain.gain.setValueAtTime(0.12, now + 0.9);
+  riseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+  rise.connect(riseGain);
+  riseGain.connect(dest);
+  rise.start(now);
+  rise.stop(now + 1.7);
+
+  // Clarity tone - appears as the rise settles
+  const clarity = ctx.createOscillator();
+  const clarityGain = ctx.createGain();
+  clarity.type = 'sine';
+  clarity.frequency.setValueAtTime(440, now); // A4 - clear, bright
+
+  clarityGain.gain.setValueAtTime(0, now);
+  clarityGain.gain.linearRampToValueAtTime(0.1, now + 0.5);
+  clarityGain.gain.setValueAtTime(0.1, now + 0.8);
+  clarityGain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+
+  clarity.connect(clarityGain);
+  clarityGain.connect(dest);
+  clarity.start(now + 0.3);
+  clarity.stop(now + 1.5);
+
+  // Soft high tone - the "ready" moment
+  const ready = ctx.createOscillator();
+  const readyGain = ctx.createGain();
+  ready.type = 'sine';
+  ready.frequency.setValueAtTime(660, now); // E5
+
+  readyGain.gain.setValueAtTime(0, now);
+  readyGain.gain.linearRampToValueAtTime(0.06, now + 0.6);
+  readyGain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+
+  ready.connect(readyGain);
+  readyGain.connect(dest);
+  ready.start(now + 0.5);
+  ready.stop(now + 1.3);
+}
+
+/**
+ * Transition Awakening RICH: Break → Focus
+ * Full spectrum rising, longer duration (~2.5s)
+ * Like dawn breaking with full clarity
+ */
+function playTransitionAwakeningRich(ctx: AudioContext, dest: AudioNode): void {
+  const now = ctx.currentTime;
+
+  // Deep rising tone
+  const deepRise = ctx.createOscillator();
+  const deepRiseGain = ctx.createGain();
+  deepRise.type = 'sine';
+  deepRise.frequency.setValueAtTime(165, now); // E3
+  deepRise.frequency.exponentialRampToValueAtTime(220, now + 1.0);
+
+  deepRiseGain.gain.setValueAtTime(0, now);
+  deepRiseGain.gain.linearRampToValueAtTime(0.08, now + 0.3);
+  deepRiseGain.gain.setValueAtTime(0.08, now + 0.8);
+  deepRiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+  deepRise.connect(deepRiseGain);
+  deepRiseGain.connect(dest);
+  deepRise.start(now);
+  deepRise.stop(now + 2.0);
+
+  // Main rising tone
+  const rise = ctx.createOscillator();
+  const riseGain = ctx.createGain();
+  rise.type = 'sine';
+  rise.frequency.setValueAtTime(220, now);
+  rise.frequency.exponentialRampToValueAtTime(330, now + 1.2);
+  rise.frequency.setValueAtTime(330, now + 2.0);
+
+  riseGain.gain.setValueAtTime(0, now);
+  riseGain.gain.linearRampToValueAtTime(0.12, now + 0.3);
+  riseGain.gain.setValueAtTime(0.12, now + 1.5);
+  riseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.3);
+
+  rise.connect(riseGain);
+  riseGain.connect(dest);
+  rise.start(now + 0.1);
+  rise.stop(now + 2.5);
+
+  // Clarity tone (A4)
+  const clarity = ctx.createOscillator();
+  const clarityGain = ctx.createGain();
+  clarity.type = 'sine';
+  clarity.frequency.setValueAtTime(440, now);
+
+  clarityGain.gain.setValueAtTime(0, now);
+  clarityGain.gain.linearRampToValueAtTime(0.1, now + 0.7);
+  clarityGain.gain.setValueAtTime(0.1, now + 1.2);
+  clarityGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+  clarity.connect(clarityGain);
+  clarityGain.connect(dest);
+  clarity.start(now + 0.4);
+  clarity.stop(now + 2.2);
+
+  // Ready tone (E5)
+  const ready = ctx.createOscillator();
+  const readyGain = ctx.createGain();
+  ready.type = 'sine';
+  ready.frequency.setValueAtTime(660, now);
+
+  readyGain.gain.setValueAtTime(0, now);
+  readyGain.gain.linearRampToValueAtTime(0.07, now + 0.8);
+  readyGain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+
+  ready.connect(readyGain);
+  readyGain.connect(dest);
+  ready.start(now + 0.6);
+  ready.stop(now + 1.8);
+
+  // High sparkle (A5)
+  const sparkle = ctx.createOscillator();
+  const sparkleGain = ctx.createGain();
+  sparkle.type = 'sine';
+  sparkle.frequency.setValueAtTime(880, now);
+
+  sparkleGain.gain.setValueAtTime(0, now);
+  sparkleGain.gain.linearRampToValueAtTime(0.04, now + 1.0);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+  sparkle.connect(sparkleGain);
+  sparkleGain.connect(dest);
+  sparkle.start(now + 0.8);
+  sparkle.stop(now + 2.0);
+}
+
 const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: AudioNode) => void> = {
   default: playDefaultChimeWithDest,
   soft: playSoftChimeWithDest,
@@ -722,6 +1084,21 @@ export function useSound(): UseSoundReturn {
       if (!uiSoundsCurrentlyEnabled) return;
     }
 
+    // Transition sounds require transitionSoundsEnabled to be true
+    // Read directly from localStorage to get the latest value
+    const isTransitionSound = type === 'transition-arrival' || type === 'transition-awakening';
+    if (isTransitionSound) {
+      const storedTransitionSounds = localStorage.getItem('particle_transition_sounds_enabled');
+      const transitionSoundsCurrentlyEnabled = storedTransitionSounds !== 'false';
+      if (!transitionSoundsCurrentlyEnabled) return;
+    }
+
+    // Get transition intensity from localStorage
+    const storedIntensity = localStorage.getItem('particle_transition_intensity');
+    const transitionIntensity = (storedIntensity === 'subtle' || storedIntensity === 'rich')
+      ? storedIntensity
+      : 'normal';
+
     const ctx = getAudioContext();
     if (!ctx) {
       isSupported.current = false;
@@ -739,6 +1116,22 @@ export function useSound(): UseSoundReturn {
         playSoundWithVolume(ctx, playTimerStartSoundWithDest, volume);
       } else if (type === 'timer-pause') {
         playSoundWithVolume(ctx, playTimerPauseSoundWithDest, volume);
+      } else if (type === 'transition-arrival') {
+        // Select arrival sound based on intensity
+        const arrivalSound = transitionIntensity === 'subtle'
+          ? playTransitionArrivalSubtle
+          : transitionIntensity === 'rich'
+            ? playTransitionArrivalRich
+            : playTransitionArrivalNormal;
+        playSoundWithVolume(ctx, arrivalSound, volume);
+      } else if (type === 'transition-awakening') {
+        // Select awakening sound based on intensity
+        const awakeningSound = transitionIntensity === 'subtle'
+          ? playTransitionAwakeningSubtle
+          : transitionIntensity === 'rich'
+            ? playTransitionAwakeningRich
+            : playTransitionAwakeningNormal;
+        playSoundWithVolume(ctx, awakeningSound, volume);
       } else {
         playSound(selectedSound, volume);
       }
