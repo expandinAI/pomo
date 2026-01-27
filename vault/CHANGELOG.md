@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Night Mode (POMO-130, 2 SP)**:
+  - Dimmt alle weißen Elemente zu #A0A0A0 für reduzierte Augenbelastung
+  - Toggle via D-Taste oder ActionBar-Button (Sonne/Mond)
+  - Partikel und Glow-Effekte ebenfalls gedimmt
+  - Einstellung wird in localStorage gespeichert
+  - Philosophie: "Sanctuary of calm" – auch nachts
 - **Random Task Picker (POMO-146, 1 SP)**:
   - `R` Taste wählt zufällig einen unerledigten Task
   - Gepickter Task springt an Position 1 mit `→` Indikator
