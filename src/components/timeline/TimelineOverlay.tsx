@@ -56,6 +56,13 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
   // Focus trap - focus the modal container itself to avoid visible ring on close button
   useFocusTrap(modalRef, isOpen && !selectedSessionId, { initialFocusRef: modalRef });
 
+  // Refresh data when overlay opens to ensure fresh session data
+  useEffect(() => {
+    if (isOpen) {
+      refresh();
+    }
+  }, [isOpen, refresh]);
+
   // Handle keyboard shortcuts - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
     if (!isOpen || selectedSessionId) return;
