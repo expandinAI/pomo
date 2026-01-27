@@ -1289,6 +1289,20 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
   }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
 
+  // Start/Pause handlers with sound
+  const handleStart = useCallback(() => {
+    playSound('timer-start');
+    vibrate('light');
+    dispatch({ type: 'START' });
+    setPickedTaskIndex(null); // Reset random pick when session starts
+  }, [playSound, vibrate]);
+
+  const handlePause = useCallback(() => {
+    playSound('timer-pause');
+    vibrate('double');
+    dispatch({ type: 'PAUSE' });
+  }, [playSound, vibrate]);
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1304,9 +1318,9 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
             dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
           } else if (state.isRunning) {
-            dispatch({ type: 'PAUSE' });
+            handlePause();
           } else {
-            dispatch({ type: 'START' });
+            handleStart();
           }
           break;
         case 'Escape':
@@ -1511,20 +1525,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex]);
-
-  const handleStart = useCallback(() => {
-    playSound('timer-start');
-    vibrate('light');
-    dispatch({ type: 'START' });
-    setPickedTaskIndex(null); // Reset random pick when session starts
-  }, [playSound, vibrate]);
-
-  const handlePause = useCallback(() => {
-    playSound('timer-pause');
-    vibrate('double');
-    dispatch({ type: 'PAUSE' });
-  }, [playSound, vibrate]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
