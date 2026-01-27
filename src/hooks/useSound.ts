@@ -671,7 +671,7 @@ const SOUND_PLAYERS_WITH_DEST: Record<SoundOption, (ctx: AudioContext, dest: Aud
  */
 export function useSound(): UseSoundReturn {
   const isSupported = useRef(true);
-  const { selectedSound, volume, muted, uiSoundsEnabled } = useSoundSettings();
+  const { selectedSound, volume, muted } = useSoundSettings();
 
   // Track user interaction to enable audio
   useEffect(() => {
@@ -714,8 +714,13 @@ export function useSound(): UseSoundReturn {
     if (muted) return;
 
     // UI sounds require uiSoundsEnabled to be true
+    // Read directly from localStorage to get the latest value
     const isUiSound = type === 'timer-start' || type === 'timer-pause';
-    if (isUiSound && !uiSoundsEnabled) return;
+    if (isUiSound) {
+      const storedUiSounds = localStorage.getItem('particle_ui_sounds_enabled');
+      const uiSoundsCurrentlyEnabled = storedUiSounds !== 'false';
+      if (!uiSoundsCurrentlyEnabled) return;
+    }
 
     const ctx = getAudioContext();
     if (!ctx) {
@@ -744,7 +749,7 @@ export function useSound(): UseSoundReturn {
     } else {
       doPlay();
     }
-  }, [selectedSound, volume, muted, uiSoundsEnabled, playSound]);
+  }, [selectedSound, volume, muted, playSound]);
 
   const preview = useCallback((sound: SoundOption) => {
     // Preview always plays (ignores mute) but respects volume
