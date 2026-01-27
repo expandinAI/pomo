@@ -40,11 +40,12 @@ export function TimerControls({
       transition={{ type: 'spring', ...SPRING.gentle, delay: 0.1 }}
     >
       {/* Main action button - always centered */}
+      {/* No focus ring - Space is a global shortcut, not a direct button interaction */}
       <Button
         variant="primary"
         size="lg"
         onClick={isRunning ? onPause : onStart}
-        className="group min-w-[140px] gap-2"
+        className="group min-w-[140px] gap-2 focus-visible:ring-0 focus-visible:ring-offset-0"
         aria-label={isRunning ? pauseLabel : startLabel}
       >
         {isRunning ? (
