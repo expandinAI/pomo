@@ -23,6 +23,8 @@ interface StatusMessageProps {
   nextBreakIsLong?: boolean;
   /** Session feedback after completion (kontextueller Moment) */
   sessionFeedback?: SessionFeedback | null;
+  /** End time preview (when setting enabled and timer running) */
+  endTimePreview?: string | null;
   /** Wellbeing hint to display during breaks (lowest priority) */
   wellbeingHint?: string | null;
 }
@@ -57,6 +59,7 @@ export function StatusMessage({
   isCollapsedHovered,
   nextBreakIsLong,
   sessionFeedback,
+  endTimePreview,
   wellbeingHint,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
@@ -107,7 +110,12 @@ export function StatusMessage({
       }
     }
 
-    // 6. Wellbeing Hint (only during break, lowest priority)
+    // 6. End Time Preview (when setting enabled and timer running)
+    if (endTimePreview) {
+      return endTimePreview;
+    }
+
+    // 7. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }

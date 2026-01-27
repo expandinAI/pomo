@@ -268,9 +268,6 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   // Show max limit message when duration was capped
   const [showMaxLimitMessage, setShowMaxLimitMessage] = useState(false);
 
-  // Timer hover state (for end time preview)
-  const [isTimerHovered, setIsTimerHovered] = useState(false);
-
   // Track elapsed time for pause/resume
   const elapsedRef = useRef(0);
 
@@ -1731,26 +1728,10 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           isOverflow={isOverflow}
           overflowSeconds={overflowSeconds}
           sessionDuration={oneOffDuration ?? durations[state.mode]}
-          onHoverChange={setIsTimerHovered}
           isBreak={state.mode !== 'work'}
           breakBreathingEnabled={breakBreathingEnabled}
         />
       </button>
-
-      {/* End Time Preview - shows when setting is enabled and timer is running */}
-      <AnimatePresence>
-        {showEndTime && state.isRunning && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="text-sm text-tertiary light:text-tertiary-dark font-medium tabular-nums -mt-4"
-          >
-            {formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow, state.mode)}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (
@@ -1829,11 +1810,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
                   ? 'Select particle...'
                   : particleHoverInfo
                     ? particleHoverInfo
-                    : isTimerHovered && state.isRunning
-                      ? isOverflow
-                        ? formatEndTime(overflowSeconds, true, state.mode)
-                        : formatEndTime(state.timeRemaining, false, state.mode)
-                      : null
+                    : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}
@@ -1844,6 +1821,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         isCollapsedHovered={isCollapsedHovered}
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
         sessionFeedback={sessionFeedback}
+        endTimePreview={showEndTime && state.isRunning ? formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow, state.mode) : null}
         wellbeingHint={wellbeingHint}
       />
     </div>
