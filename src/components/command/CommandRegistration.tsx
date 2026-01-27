@@ -19,6 +19,7 @@ import {
   CalendarClock,
   Activity,
   Award,
+  BarChart3,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -162,7 +163,7 @@ export function CommandRegistration({
       // Navigation commands
       {
         id: 'open-timeline',
-        label: 'Open Timeline',
+        label: 'Go to Timeline',
         shortcut: 'G T',
         category: 'navigation',
         action: () => {
@@ -173,7 +174,7 @@ export function CommandRegistration({
       },
       {
         id: 'open-settings',
-        label: 'Open Settings',
+        label: 'Go to Settings',
         shortcut: '⌘,',
         category: 'navigation',
         action: onOpenSettings,
@@ -204,7 +205,7 @@ export function CommandRegistration({
       },
       {
         id: 'open-rhythm',
-        label: 'Open Rhythm',
+        label: 'Go to Rhythm',
         shortcut: 'G R',
         category: 'navigation',
         action: () => {
@@ -215,7 +216,7 @@ export function CommandRegistration({
       },
       {
         id: 'open-milestones',
-        label: 'Open Milestones',
+        label: 'Go to Milestones',
         shortcut: 'G M',
         category: 'navigation',
         action: () => {
@@ -223,6 +224,17 @@ export function CommandRegistration({
         },
         icon: <Award className="w-4 h-4" />,
         keywords: ['milestones', 'achievements', 'journey', 'progress', 'badges'],
+      },
+      {
+        id: 'open-statistics',
+        label: 'Go to Statistics',
+        shortcut: 'G S',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-dashboard'));
+        },
+        icon: <BarChart3 className="w-4 h-4" />,
+        keywords: ['statistics', 'stats', 'dashboard', 'charts', 'analytics', 'insights'],
       },
 
       // Project commands
