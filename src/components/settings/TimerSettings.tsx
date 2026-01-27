@@ -207,7 +207,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
                 </div>
 
                 {/* Footer hint */}
-                <div className="px-4 pb-4">
+                <div className="px-4 py-3 border-t border-tertiary/10 light:border-tertiary-dark/10">
                   <p className="text-xs text-center text-tertiary light:text-tertiary-dark">
                     Settings are saved automatically
                   </p>
