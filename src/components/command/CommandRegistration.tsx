@@ -20,6 +20,7 @@ import {
   Activity,
   Award,
   BarChart3,
+  Shuffle,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -36,6 +37,8 @@ interface CommandRegistrationProps {
   onToggleMute: () => void;
   onPresetChange?: (presetId: string) => void;
   onToggleAutoStart?: () => void;
+  pendingTaskCount?: number;
+  onPickRandomTask?: () => void;
 }
 
 export function CommandRegistration({
@@ -51,6 +54,8 @@ export function CommandRegistration({
   onToggleMute,
   onPresetChange,
   onToggleAutoStart,
+  pendingTaskCount = 0,
+  onPickRandomTask,
 }: CommandRegistrationProps) {
   useEffect(() => {
     const commands: Command[] = [
@@ -84,6 +89,16 @@ export function CommandRegistration({
         icon: <SkipForward className="w-4 h-4" />,
         keywords: ['next', 'complete', 'finish'],
       },
+      ...(onPickRandomTask ? [{
+        id: 'pick-random-task',
+        label: 'Random Pick',
+        shortcut: 'R',
+        category: 'timer',
+        action: onPickRandomTask,
+        icon: <Shuffle className="w-4 h-4" />,
+        keywords: ['random', 'pick', 'task', 'shuffle', 'choose'],
+        disabled: () => pendingTaskCount < 2,
+      }] as Command[] : []),
 
       // Settings commands
       {
@@ -280,6 +295,8 @@ export function CommandRegistration({
     onToggleMute,
     onPresetChange,
     onToggleAutoStart,
+    pendingTaskCount,
+    onPickRandomTask,
   ]);
 
   return null;

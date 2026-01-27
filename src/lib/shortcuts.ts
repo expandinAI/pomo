@@ -18,7 +18,7 @@ export interface Shortcut {
 export const SHORTCUTS: Shortcut[] = [
   // Timer shortcuts
   { key: 'Space', description: 'Start / Pause timer', category: 'timer' },
-  { key: 'R', description: 'Reset timer', category: 'timer' },
+  { key: 'R', description: 'Random Pick (2+ tasks)', category: 'timer' },
   { key: 'S', description: 'Skip to next session', category: 'timer' },
   { key: 'E', description: 'End session early', category: 'timer' },
   { key: 'T', description: 'Focus task input', category: 'timer' },

@@ -30,7 +30,7 @@ import { formatTime, formatEndTime } from '@/lib/utils';
 import { addSession, getTodaySessions, getTotalSessionCount, type CompletedSession } from '@/lib/session-storage';
 import { calculateSessionFeedback, type SessionFeedback } from '@/lib/session-feedback';
 import { addRecentTasksFromInput } from '@/lib/task-storage';
-import { formatTasksForStorage } from '@/lib/smart-input-parser';
+import { formatTasksForStorage, parseMultiLineInput } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/components/milestones';
@@ -337,6 +337,9 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [particleSelectMode, setParticleSelectMode] = useState(false);
   const particleSelectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Random task picker (Shift+R)
+  const [pickedTaskIndex, setPickedTaskIndex] = useState<number | null>(null);
+
   // Today's completed sessions count (for daily goal)
   const [todayCount, setTodayCount] = useState(0);
 
@@ -396,6 +399,12 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }
     return map;
   }, [todaySessions, getById]);
+
+  // Count of pending (uncompleted) tasks for random picker
+  const pendingTaskCount = useMemo(() => {
+    if (!state.currentTask) return 0;
+    return parseMultiLineInput(state.currentTask).tasks.filter(t => !t.completed).length;
+  }, [state.currentTask]);
 
   // Sync durations when settings load or change
   useEffect(() => {
@@ -1463,16 +1472,41 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
             handleCompleteFromOverflow();
           }
           break;
+        // R = Pick random task
+        case 'r':
+        case 'R':
+          e.preventDefault();
+          {
+            const parsed = parseMultiLineInput(state.currentTask);
+            const pendingIndices = parsed.tasks
+              .map((t, i) => ({ task: t, index: i }))
+              .filter(({ task }) => !task.completed)
+              .map(({ index }) => index);
+
+            if (pendingIndices.length < 2) {
+              window.dispatchEvent(new CustomEvent('particle:toast', {
+                detail: { message: 'Need 2+ tasks to pick' }
+              }));
+              return;
+            }
+
+            // Exclude current pick to ensure a different task is picked
+            const pickable = pendingIndices.filter(i => i !== pickedTaskIndex);
+            const randomIdx = pickable[Math.floor(Math.random() * pickable.length)];
+            setPickedTaskIndex(randomIdx);
+          }
+          break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
     dispatch({ type: 'START' });
+    setPickedTaskIndex(null); // Reset random pick when session starts
   }, [vibrate]);
 
   const handlePause = useCallback(() => {
@@ -1504,9 +1538,31 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     }));
   }, [autoStartEnabled, setAutoStartEnabled]);
 
+  // Pick random task (for command palette)
+  const handlePickRandomTask = useCallback(() => {
+    const parsed = parseMultiLineInput(state.currentTask);
+    const pendingIndices = parsed.tasks
+      .map((t, i) => ({ task: t, index: i }))
+      .filter(({ task }) => !task.completed)
+      .map(({ index }) => index);
+
+    if (pendingIndices.length < 2) {
+      window.dispatchEvent(new CustomEvent('particle:toast', {
+        detail: { message: 'Need 2+ tasks to pick' }
+      }));
+      return;
+    }
+
+    // Exclude current pick to ensure a different task is picked
+    const pickable = pendingIndices.filter(i => i !== pickedTaskIndex);
+    const randomIdx = pickable[Math.floor(Math.random() * pickable.length)];
+    setPickedTaskIndex(randomIdx);
+  }, [state.currentTask, pickedTaskIndex]);
+
   // Task handlers
   const handleTaskChange = useCallback((task: string) => {
     dispatch({ type: 'SET_TASK', task });
+    setPickedTaskIndex(null); // Reset random pick when task text changes
   }, []);
 
   // Start session when pressing Enter in task input
@@ -1542,6 +1598,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
     workerStart(durationSeconds, 0, overflowEnabledRef.current);
     dispatch({ type: 'START' });
     vibrate('light');
+    setPickedTaskIndex(null); // Reset random pick when session starts
   }, [workerStart, vibrate]);
 
   // Handle end confirmation (must be before early return to follow hooks rules)
@@ -1637,6 +1694,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         onToggleMute={toggleMute}
         onPresetChange={applyPreset}
         onToggleAutoStart={handleToggleAutoStart}
+        pendingTaskCount={pendingTaskCount}
+        onPickRandomTask={handlePickRandomTask}
       />
 
       {/* Preset selector */}
@@ -1701,6 +1760,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           disabled={false}
           inputRef={taskInputRef}
           isSessionRunning={state.isRunning}
+          pickedTaskIndex={pickedTaskIndex}
         />
       )}
 

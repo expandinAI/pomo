@@ -7,6 +7,23 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Random Task Picker (POMO-146, 1 SP)**:
+  - `R` Taste wählt zufällig einen unerledigten Task
+  - Gepickter Task springt an Position 1 mit `→` Indikator
+  - Sanfte Animation: Andere Tasks dimmen, gepickter Task highlighted
+  - Toast "Need 2+ tasks to pick" bei weniger als 2 Tasks
+  - Reset bei Task-Änderung oder Session-Start
+  - Command Palette: "Random Pick" (R)
+  - Dezenter Keyboard Hint im Task-Input bei 2+ Tasks
+  - Philosophie: Entscheidungslähmung überwinden – "Just pick one"
+- **Milestones – Quiet Markers on Your Journey (POMO-148, 5 SP)**:
+  - 10 bedeutungsvolle Milestones (First Particle bis Thousand Particles)
+  - "Moment" Overlay mit Partikel-Konvergenz-Animation
+  - Gong-Sound (Singing Bowl, 2.5s Decay)
+  - Journey View als vertikale Timeline (G M Shortcut)
+  - "Relive" Feature: Vergangene Milestones erneut erleben
+  - Keyboard-Navigation (↑/↓, Enter, Escape)
+  - Philosophie: "Markers, not badges" – Reflexion statt Gamification
 - **Rhythm View – Estimation Insights (POMO-143, 3 SP)**:
   - Neuer "Rhythmus" Navigations-Punkt (G R Shortcut)
   - Globale Rhythmus-Berechnung aus allen Partikeln mit Schätzung

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import { TaskSuggestions } from './TaskSuggestions';
 import { ProjectDropdown } from './ProjectDropdown';
+import { KeyboardHint } from '@/components/ui/KeyboardHint';
 import { getRecentTasks, filterTasks, type RecentTask } from '@/lib/task-storage';
 import { parseSmartInput, formatDurationPreview, parseMultiLineInput, formatTotalTime } from '@/lib/smart-input-parser';
 import type { Project, ProjectWithStats } from '@/lib/projects';
@@ -28,6 +29,8 @@ interface UnifiedTaskInputProps {
   inputRef?: React.RefObject<HTMLInputElement | null>;
   /** If true, session is running - Enter will just recalculate, not start */
   isSessionRunning?: boolean;
+  /** Index of the randomly picked task (Shift+R feature) */
+  pickedTaskIndex?: number | null;
 }
 
 const MAX_TASK_LENGTH = 100;
@@ -50,6 +53,7 @@ export function UnifiedTaskInput({
   disabled = false,
   inputRef: externalRef,
   isSessionRunning = false,
+  pickedTaskIndex = null,
 }: UnifiedTaskInputProps) {
   const internalRef = useRef<HTMLInputElement>(null);
   const inputRef = externalRef || internalRef;
@@ -77,6 +81,11 @@ export function UnifiedTaskInput({
 
   const showSmartPreview = !hasMultipleTasks && singleLineParsed?.durationSeconds !== null;
   const showTotalTime = hasMultipleTasks && totalMinutes > 0;
+
+  // Count pending (uncompleted) tasks for Random Pick hint
+  const pendingTaskCount = useMemo(() => {
+    return parsedTasks.tasks.filter(t => !t.completed).length;
+  }, [parsedTasks.tasks]);
 
   // Load recent tasks on focus
   useEffect(() => {
@@ -248,21 +257,63 @@ export function UnifiedTaskInput({
           {!isFocused && totalMinutes > 0 ? (
             <div
               onClick={() => setIsFocused(true)}
-              className="flex-1 text-sm leading-relaxed cursor-text truncate"
+              className="flex-1 flex items-center gap-2 text-sm leading-relaxed cursor-text"
             >
-              {parsedTasks.tasks.map((task, i) => (
-                <span key={i}>
-                  {i > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
-                  <span className={task.completed ? 'line-through opacity-50' : 'text-primary light:text-primary-dark'}>
-                    {task.text}
-                  </span>
-                  {task.duration > 0 && (
-                    <span className={`ml-1 ${task.completed ? 'line-through opacity-50' : 'text-tertiary light:text-tertiary-dark'}`}>
-                      {task.duration}
-                    </span>
-                  )}
-                </span>
-              ))}
+              <div className="truncate">
+                <AnimatePresence mode="popLayout">
+                  {(() => {
+                    // Add metadata for sorting
+                    const tasksWithMeta = parsedTasks.tasks.map((task, i) => ({
+                      ...task,
+                      originalIndex: i,
+                      isPicked: i === pickedTaskIndex,
+                    }));
+
+                    // Picked task first, then original order
+                    const sorted = [...tasksWithMeta].sort((a, b) => {
+                      if (a.isPicked) return -1;
+                      if (b.isPicked) return 1;
+                      return a.originalIndex - b.originalIndex;
+                    });
+
+                    return sorted.map((task, displayIndex) => (
+                      <motion.span
+                        key={task.originalIndex}
+                        layout
+                        animate={{
+                          opacity: task.isPicked ? 1 : (pickedTaskIndex !== null ? 0.5 : 1),
+                          scale: task.isPicked ? 1.02 : 1,
+                        }}
+                        transition={{ type: 'spring', ...SPRING.gentle }}
+                      >
+                        {displayIndex > 0 && <span className="mx-1.5 text-tertiary/50 light:text-tertiary-dark/50">·</span>}
+                        {task.isPicked && (
+                          <motion.span
+                            initial={{ opacity: 0, x: -4 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-accent light:text-accent-dark mr-1"
+                          >→</motion.span>
+                        )}
+                        <span className={task.completed ? 'line-through opacity-50' : 'text-primary light:text-primary-dark'}>
+                          {task.text}
+                        </span>
+                        {task.duration > 0 && (
+                          <span className={`ml-1 ${task.completed ? 'line-through opacity-50' : 'text-tertiary light:text-tertiary-dark'}`}>
+                            {task.duration}
+                          </span>
+                        )}
+                      </motion.span>
+                    ));
+                  })()}
+                </AnimatePresence>
+              </div>
+              {/* Random Pick hint - shows when 2+ pending tasks and none picked yet */}
+              {pendingTaskCount >= 2 && pickedTaskIndex === null && (
+                <KeyboardHint
+                  shortcut="R"
+                  className="ml-auto flex-shrink-0 !opacity-50 hover:!opacity-80 !text-secondary light:!text-secondary-dark !border-white/[0.08] light:!border-black/[0.05]"
+                />
+              )}
             </div>
           ) : (
             <input
