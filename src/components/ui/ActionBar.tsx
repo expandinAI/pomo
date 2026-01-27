@@ -23,8 +23,8 @@ interface ActionBarProps {
   onOpenStats: () => void;
   onOpenCommands: () => void;
   onOpenSettings: () => void;
-  onToggleTheme: () => void;
-  theme: 'light' | 'dark';
+  onToggleNightMode: () => void;
+  nightModeEnabled: boolean;
 }
 
 interface ActionButtonProps {
@@ -77,10 +77,9 @@ export function ActionBar({
   onOpenStats,
   onOpenCommands,
   onOpenSettings,
-  onToggleTheme,
-  theme,
+  onToggleNightMode,
+  nightModeEnabled,
 }: ActionBarProps) {
-  const isDark = theme === 'dark';
 
   return (
     <div className="flex items-center gap-0.5">
@@ -147,9 +146,9 @@ export function ActionBar({
         <Settings className="w-5 h-5" />
       </ActionButton>
 
-      {/* Theme Toggle with rotation animation */}
+      {/* Night Mode Toggle with rotation animation */}
       <motion.button
-        onClick={onToggleTheme}
+        onClick={onToggleNightMode}
         className={cn(
           'w-10 h-10 rounded-full flex items-center justify-center',
           'text-tertiary light:text-tertiary-dark',
@@ -158,22 +157,22 @@ export function ActionBar({
           'transition-colors duration-fast',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
         )}
-        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        title="Theme · D"
+        aria-label={nightModeEnabled ? 'Switch to day mode' : 'Switch to night mode'}
+        title="Night Mode · D"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', ...SPRING.default }}
       >
         <motion.div
           initial={false}
-          animate={{ rotate: isDark ? 180 : 0, opacity: 1 }}
+          animate={{ rotate: nightModeEnabled ? 180 : 0, opacity: 1 }}
           transition={{ type: 'spring', ...SPRING.gentle }}
           aria-hidden="true"
         >
-          {isDark ? (
-            <Moon className="w-5 h-5" />
-          ) : (
+          {nightModeEnabled ? (
             <Sun className="w-5 h-5" />
+          ) : (
+            <Moon className="w-5 h-5" />
           )}
         </motion.div>
       </motion.button>

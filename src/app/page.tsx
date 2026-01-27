@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
 import { ActionBar } from '@/components/ui/ActionBar';
-import { useTheme } from '@/hooks/useTheme';
+import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { TimelineOverlay } from '@/components/timeline';
@@ -47,8 +47,8 @@ function HomeContent() {
   // Rhythm view state
   const [showRhythm, setShowRhythm] = useState(false);
 
-  // Theme and command palette
-  const { theme, toggleTheme } = useTheme();
+  // Night mode and command palette
+  const { nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
   const { open: openCommandPalette } = useCommandPalette();
 
   // Milestones
@@ -156,8 +156,8 @@ function HomeContent() {
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
           onOpenCommands={openCommandPalette}
           onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
-          onToggleTheme={toggleTheme}
-          theme={theme}
+          onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
+          nightModeEnabled={nightModeEnabled}
         />
       </div>
 
