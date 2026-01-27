@@ -105,7 +105,7 @@ Der ruhige, gedämpfte Modus für spätes Arbeiten.
 ┌─────────────────────────────────────┐
 │                                     │
 │             25:00                   │  ← Gedämpftes Weiß
-│           ◯─────◯                   │  ← Ring gedämpft (30% opacity)
+│           ◯─────◯                   │  ← Ring gedämpft (15% opacity)
 │                                     │
 │         [Start Focus]               │
 │            Space                    │
@@ -141,8 +141,8 @@ Der ruhige, gedämpfte Modus für spätes Arbeiten.
   --color-primary: #C8C8C8;
   --color-secondary: #888888;
   --color-tertiary: #505050;
-  --particle-brightness: 0.6;
-  --ring-opacity: 0.3;
+  --particle-brightness: 0.35;
+  --ring-opacity: 0.15;
   --animation-duration: 500ms;
   --effects-enabled: 0;
 }
@@ -197,8 +197,8 @@ if (celebrationEnabled && !isNightMode) {
 ### Visual Changes
 
 - [ ] **Given** Night Mode, **When** Text, **Then** gedämpftes Weiß (#C8C8C8)
-- [ ] **Given** Night Mode, **When** Visual Ring, **Then** 30% Opacity
-- [ ] **Given** Night Mode, **When** Session Particles, **Then** 60% Brightness
+- [ ] **Given** Night Mode, **When** Visual Ring, **Then** 15% Opacity
+- [ ] **Given** Night Mode, **When** Session Particles, **Then** 35% Brightness
 - [ ] **Given** Night Mode, **When** Session Complete, **Then** keine Celebration
 
 ### Settings Integration
@@ -265,8 +265,8 @@ Nach Toggle:
 - [ ] Settings Toggle vorhanden
 - [ ] Keyboard Shortcut `Shift+N` funktioniert
 - [ ] Celebrations deaktiviert in Night Mode
-- [ ] Visual Timer Ring gedämpft in Night Mode (30% opacity)
-- [ ] Session Particles gedämpft in Night Mode (60% brightness)
+- [ ] Visual Timer Ring gedämpft in Night Mode (15% opacity)
+- [ ] Session Particles gedämpft in Night Mode (35% brightness)
 - [ ] Breathing Animation deaktiviert in Night Mode
 - [ ] Text-Kontrast reduziert in Night Mode
 - [ ] Mode wird persistiert
