@@ -199,6 +199,20 @@ export function UnifiedTaskInput({
     [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, singleLineParsed, inputRef, totalMinutes, taskText, isSessionRunning]
   );
 
+  // Listen for T key to enter edit mode (even when showing compact view)
+  useEffect(() => {
+    function handleFocusRequest() {
+      setIsFocused(true);
+      // Focus input after state update (next tick)
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+
+    window.addEventListener('particle:focus-task-input', handleFocusRequest);
+    return () => window.removeEventListener('particle:focus-task-input', handleFocusRequest);
+  }, [inputRef]);
+
   // Global keyboard shortcuts for P key
   useEffect(() => {
     function handleGlobalKeyDown(e: KeyboardEvent) {
@@ -254,12 +268,12 @@ export function UnifiedTaskInput({
         {/* Input + Project Badge */}
         <div className="flex items-center gap-3">
           {/* Unfocused with tasks: Show compact styled display */}
-          {!isFocused && totalMinutes > 0 ? (
+          {!isFocused && parsedTasks.tasks.length > 0 ? (
             <div
               onClick={() => setIsFocused(true)}
-              className="flex-1 flex items-center gap-2 text-sm leading-relaxed cursor-text"
+              className="flex-1 flex items-center gap-2 text-sm leading-relaxed cursor-text min-w-0"
             >
-              <div className="truncate">
+              <div className="truncate min-w-0 flex-1 overflow-hidden">
                 <AnimatePresence mode="popLayout">
                   {(() => {
                     // Add metadata for sorting

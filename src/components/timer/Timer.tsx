@@ -1454,7 +1454,8 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           // Always allow focusing task input in work mode
           if (state.mode === 'work') {
             e.preventDefault();
-            taskInputRef.current?.focus();
+            // Dispatch event to trigger edit mode in UnifiedTaskInput
+            window.dispatchEvent(new CustomEvent('particle:focus-task-input'));
           }
           break;
         // Enter = Complete from overflow (Done)

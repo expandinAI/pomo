@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 5
 feature: "[[features/reflection]]"
 created: 2026-01-25
-updated: 2026-01-26
-done_date: null
+updated: 2026-01-27
+done_date: 2026-01-27
 tags: [milestones, reflection, meaning, visual, p2]
 ---
 
