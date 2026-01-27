@@ -34,6 +34,7 @@ import { formatTasksForStorage, parseMultiLineInput } from '@/lib/smart-input-pa
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/components/milestones';
+import { useWellbeingHint } from '@/hooks/useWellbeingHint';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -214,7 +215,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled, wellbeingHintsEnabled } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -380,6 +381,10 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
   // Milestones
   const { checkForMilestones } = useMilestones();
+
+  // Wellbeing hints (only during breaks, when enabled)
+  const isBreak = state.mode === 'shortBreak' || state.mode === 'longBreak';
+  const wellbeingHint = useWellbeingHint({ isBreak, enabled: wellbeingHintsEnabled });
 
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
@@ -1839,6 +1844,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         isCollapsedHovered={isCollapsedHovered}
         nextBreakIsLong={(state.completedPomodoros + 1) % sessionsUntilLong === 0}
         sessionFeedback={sessionFeedback}
+        wellbeingHint={wellbeingHint}
       />
     </div>
   );

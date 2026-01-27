@@ -23,6 +23,8 @@ interface StatusMessageProps {
   nextBreakIsLong?: boolean;
   /** Session feedback after completion (kontextueller Moment) */
   sessionFeedback?: SessionFeedback | null;
+  /** Wellbeing hint to display during breaks (lowest priority) */
+  wellbeingHint?: string | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -55,6 +57,7 @@ export function StatusMessage({
   isCollapsedHovered,
   nextBreakIsLong,
   sessionFeedback,
+  wellbeingHint,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -102,6 +105,11 @@ export function StatusMessage({
         const breakMin = Math.floor(durations[mode] / 60);
         return `${breakType} · ${breakMin} min to recharge`;
       }
+    }
+
+    // 6. Wellbeing Hint (only during break, lowest priority)
+    if (wellbeingHint) {
+      return wellbeingHint;
     }
 
     return null;

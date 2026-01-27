@@ -17,6 +17,7 @@ import { EndTimeSettings } from './EndTimeSettings';
 import { VisualTimerSettings } from './VisualTimerSettings';
 import { CelebrationSettings } from './CelebrationSettings';
 import { BreakBreathingSettings } from './BreakBreathingSettings';
+import { WellbeingHintsSettings } from './WellbeingHintsSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -188,6 +189,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Break Breathing Settings */}
                   <BreakBreathingSettings />
+
+                  {/* Wellbeing Hints Settings */}
+                  <WellbeingHintsSettings />
 
                   {/* Sound Settings */}
                   <SoundSettings />

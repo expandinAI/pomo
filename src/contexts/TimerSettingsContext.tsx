@@ -35,6 +35,8 @@ const CELEBRATION_TRIGGER_KEY = 'particle_celebration_trigger';
 const CELEBRATION_INTENSITY_KEY = 'particle_celebration_intensity';
 const BREAK_BREATHING_KEY = 'particle_break_breathing_enabled';
 const DEFAULT_BREAK_BREATHING = false;
+const WELLBEING_HINTS_KEY = 'particle_wellbeing_hints_enabled';
+const DEFAULT_WELLBEING_HINTS = false;
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -338,6 +340,24 @@ function saveBreakBreathingEnabled(enabled: boolean): void {
   localStorage.setItem(BREAK_BREATHING_KEY, JSON.stringify(enabled));
 }
 
+function loadWellbeingHintsEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_WELLBEING_HINTS;
+  try {
+    const stored = localStorage.getItem(WELLBEING_HINTS_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_WELLBEING_HINTS;
+}
+
+function saveWellbeingHintsEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(WELLBEING_HINTS_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -392,6 +412,9 @@ interface TimerSettingsContextValue {
   // Break breathing animation
   breakBreathingEnabled: boolean;
   setBreakBreathingEnabled: (enabled: boolean) => void;
+  // Wellbeing hints during breaks
+  wellbeingHintsEnabled: boolean;
+  setWellbeingHintsEnabled: (enabled: boolean) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -417,6 +440,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [celebrationTrigger, setCelebrationTriggerState] = useState<CelebrationTrigger>(DEFAULT_CELEBRATION_TRIGGER);
   const [celebrationIntensity, setCelebrationIntensityState] = useState<CelebrationIntensity>(DEFAULT_CELEBRATION_INTENSITY);
   const [breakBreathingEnabled, setBreakBreathingEnabledState] = useState<boolean>(DEFAULT_BREAK_BREATHING);
+  const [wellbeingHintsEnabled, setWellbeingHintsEnabledState] = useState<boolean>(DEFAULT_WELLBEING_HINTS);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -460,6 +484,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const breakBreathingVal = loadBreakBreathingEnabled();
     setBreakBreathingEnabledState(breakBreathingVal);
+
+    const wellbeingHintsVal = loadWellbeingHintsEnabled();
+    setWellbeingHintsEnabledState(wellbeingHintsVal);
 
     setIsLoaded(true);
   }, []);
@@ -581,6 +608,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveBreakBreathingEnabled(enabled);
   }, []);
 
+  // Set wellbeing hints enabled
+  const setWellbeingHintsEnabled = useCallback((enabled: boolean) => {
+    setWellbeingHintsEnabledState(enabled);
+    saveWellbeingHintsEnabled(enabled);
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -620,6 +653,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setCelebrationIntensity,
       breakBreathingEnabled,
       setBreakBreathingEnabled,
+      wellbeingHintsEnabled,
+      setWellbeingHintsEnabled,
     }),
     [
       durations,
@@ -656,6 +691,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setCelebrationIntensity,
       breakBreathingEnabled,
       setBreakBreathingEnabled,
+      wellbeingHintsEnabled,
+      setWellbeingHintsEnabled,
     ]
   );
 
