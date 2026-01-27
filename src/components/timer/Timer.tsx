@@ -12,7 +12,6 @@ import { DailyGoalOverlay } from './DailyGoalOverlay';
 import { ParticleDetailOverlay } from './ParticleDetailOverlay';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
-import { useTheme } from '@/hooks/useTheme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useAmbientSoundContext } from '@/contexts/AmbientSoundContext';
 import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
@@ -215,7 +214,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled, wellbeingHintsEnabled } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled, wellbeingHintsEnabled, nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -273,9 +272,6 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
   // Sound notification
   const { play: playSound } = useSound();
-
-  // Theme management
-  const { toggleTheme } = useTheme();
 
   // Haptic feedback
   const { vibrate } = useHaptics();
@@ -998,6 +994,11 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
       // Save ACTUAL elapsed time (including overflow)
       addSession(sessionMode, elapsedTime, taskData);
+
+      // Refresh today's sessions to show the new particle
+      const sessions = getTodaySessions();
+      setTodaySessions(sessions);
+      setTodayCount(sessions.length);
     }
 
     // Calculate next mode (same logic as reducer)
@@ -1361,7 +1362,13 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
           break;
         case 'd':
         case 'D':
-          toggleTheme();
+          {
+            const newEnabled = !nightModeEnabled;
+            setNightModeEnabled(newEnabled);
+            window.dispatchEvent(new CustomEvent('particle:toast', {
+              detail: { message: newEnabled ? 'Night mode' : 'Day mode' }
+            }));
+          }
           break;
         // Number keys: Particle select (when in mode) or Preset switching (1-4)
         case '1':
@@ -1504,7 +1511,7 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, toggleTheme, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex]);
 
   const handleStart = useCallback(() => {
     vibrate('light');
@@ -1689,14 +1696,15 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         timerIsPaused={state.isPaused}
         isMuted={muted}
         autoStartEnabled={autoStartEnabled}
+        nightModeEnabled={nightModeEnabled}
         onStart={handleStart}
         onPause={handlePause}
         onSkip={handleSkip}
-        onToggleTheme={toggleTheme}
         onOpenSettings={handleOpenSettings}
         onToggleMute={toggleMute}
         onPresetChange={applyPreset}
         onToggleAutoStart={handleToggleAutoStart}
+        onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
         pendingTaskCount={pendingTaskCount}
         onPickRandomTask={handlePickRandomTask}
       />

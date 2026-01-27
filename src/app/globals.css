@@ -27,6 +27,38 @@
     --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   }
 
+  /*
+   * Night Mode - All white becomes dimmed white
+   * No pure white (#FAFAFA), only dimmed white (#A0A0A0)
+   */
+  .night-mode .text-primary,
+  .night-mode .text-primary\/90,
+  .night-mode .timer-display {
+    color: #A0A0A0 !important;
+  }
+
+  .night-mode .bg-primary {
+    background-color: #A0A0A0 !important;
+  }
+
+  .night-mode .bg-white {
+    background-color: #A0A0A0 !important;
+  }
+
+  .night-mode .bg-accent {
+    background-color: #1A1A1A !important;
+    color: #A0A0A0 !important;
+  }
+
+  .night-mode .border-primary {
+    border-color: #A0A0A0 !important;
+  }
+
+  /* Ring stroke color */
+  .night-mode .stroke-current.text-primary {
+    stroke: #A0A0A0 !important;
+  }
+
   /* Light Mode - Alternative Theme */
   .light {
     --color-background: #FAFAFA;

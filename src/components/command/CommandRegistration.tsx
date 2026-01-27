@@ -6,6 +6,7 @@ import {
   Pause,
   SkipForward,
   Moon,
+  Sun,
   Settings,
   VolumeX,
   Volume2,
@@ -29,14 +30,15 @@ interface CommandRegistrationProps {
   timerIsPaused: boolean;
   isMuted: boolean;
   autoStartEnabled?: boolean;
+  nightModeEnabled?: boolean;
   onStart: () => void;
   onPause: () => void;
   onSkip: () => void;
-  onToggleTheme: () => void;
   onOpenSettings: () => void;
   onToggleMute: () => void;
   onPresetChange?: (presetId: string) => void;
   onToggleAutoStart?: () => void;
+  onToggleNightMode?: () => void;
   pendingTaskCount?: number;
   onPickRandomTask?: () => void;
 }
@@ -46,14 +48,15 @@ export function CommandRegistration({
   timerIsPaused,
   isMuted,
   autoStartEnabled,
+  nightModeEnabled,
   onStart,
   onPause,
   onSkip,
-  onToggleTheme,
   onOpenSettings,
   onToggleMute,
   onPresetChange,
   onToggleAutoStart,
+  onToggleNightMode,
   pendingTaskCount = 0,
   onPickRandomTask,
 }: CommandRegistrationProps) {
@@ -101,15 +104,15 @@ export function CommandRegistration({
       }] as Command[] : []),
 
       // Settings commands
-      {
-        id: 'toggle-theme',
-        label: 'Toggle Dark/Light',
+      ...(onToggleNightMode ? [{
+        id: 'toggle-night-mode',
+        label: nightModeEnabled ? 'Day Mode' : 'Night Mode',
         shortcut: 'D',
         category: 'settings',
-        action: onToggleTheme,
-        icon: <Moon className="w-4 h-4" />,
-        keywords: ['dark', 'light', 'mode', 'theme', 'appearance'],
-      },
+        action: onToggleNightMode,
+        icon: nightModeEnabled ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />,
+        keywords: ['night', 'day', 'mode', 'dim', 'bright'],
+      }] as Command[] : []),
       {
         id: 'toggle-mute',
         label: isMuted ? 'Unmute Sound' : 'Mute Sound',
@@ -287,14 +290,15 @@ export function CommandRegistration({
     timerIsPaused,
     isMuted,
     autoStartEnabled,
+    nightModeEnabled,
     onStart,
     onPause,
     onSkip,
-    onToggleTheme,
     onOpenSettings,
     onToggleMute,
     onPresetChange,
     onToggleAutoStart,
+    onToggleNightMode,
     pendingTaskCount,
     onPickRandomTask,
   ]);

@@ -37,6 +37,8 @@ const BREAK_BREATHING_KEY = 'particle_break_breathing_enabled';
 const DEFAULT_BREAK_BREATHING = false;
 const WELLBEING_HINTS_KEY = 'particle_wellbeing_hints_enabled';
 const DEFAULT_WELLBEING_HINTS = false;
+const NIGHT_MODE_KEY = 'particle_night_mode_enabled';
+const DEFAULT_NIGHT_MODE = false;
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -358,6 +360,24 @@ function saveWellbeingHintsEnabled(enabled: boolean): void {
   localStorage.setItem(WELLBEING_HINTS_KEY, JSON.stringify(enabled));
 }
 
+function loadNightModeEnabled(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_NIGHT_MODE;
+  try {
+    const stored = localStorage.getItem(NIGHT_MODE_KEY);
+    if (stored !== null) {
+      return JSON.parse(stored) === true;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return DEFAULT_NIGHT_MODE;
+}
+
+function saveNightModeEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(NIGHT_MODE_KEY, JSON.stringify(enabled));
+}
+
 interface TimerSettingsContextValue {
   // Current durations (from active preset)
   durations: TimerDurations;
@@ -415,6 +435,9 @@ interface TimerSettingsContextValue {
   // Wellbeing hints during breaks
   wellbeingHintsEnabled: boolean;
   setWellbeingHintsEnabled: (enabled: boolean) => void;
+  // Night mode (dimmed white)
+  nightModeEnabled: boolean;
+  setNightModeEnabled: (enabled: boolean) => void;
 }
 
 export type { AutoStartDelay, AutoStartMode };
@@ -441,6 +464,7 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [celebrationIntensity, setCelebrationIntensityState] = useState<CelebrationIntensity>(DEFAULT_CELEBRATION_INTENSITY);
   const [breakBreathingEnabled, setBreakBreathingEnabledState] = useState<boolean>(DEFAULT_BREAK_BREATHING);
   const [wellbeingHintsEnabled, setWellbeingHintsEnabledState] = useState<boolean>(DEFAULT_WELLBEING_HINTS);
+  const [nightModeEnabled, setNightModeEnabledState] = useState<boolean>(DEFAULT_NIGHT_MODE);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings on mount
@@ -487,6 +511,13 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const wellbeingHintsVal = loadWellbeingHintsEnabled();
     setWellbeingHintsEnabledState(wellbeingHintsVal);
+
+    const nightModeVal = loadNightModeEnabled();
+    setNightModeEnabledState(nightModeVal);
+    // Apply night-mode class on initial load
+    if (nightModeVal && typeof document !== 'undefined') {
+      document.documentElement.classList.add('night-mode');
+    }
 
     setIsLoaded(true);
   }, []);
@@ -614,6 +645,20 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveWellbeingHintsEnabled(enabled);
   }, []);
 
+  // Set night mode enabled
+  const setNightModeEnabled = useCallback((enabled: boolean) => {
+    setNightModeEnabledState(enabled);
+    saveNightModeEnabled(enabled);
+    // Apply/remove class on document root
+    if (typeof document !== 'undefined') {
+      if (enabled) {
+        document.documentElement.classList.add('night-mode');
+      } else {
+        document.documentElement.classList.remove('night-mode');
+      }
+    }
+  }, []);
+
   // All available presets as array
   const presets = useMemo(() => Object.values(PRESETS), []);
 
@@ -655,6 +700,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setBreakBreathingEnabled,
       wellbeingHintsEnabled,
       setWellbeingHintsEnabled,
+      nightModeEnabled,
+      setNightModeEnabled,
     }),
     [
       durations,
@@ -693,6 +740,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setBreakBreathingEnabled,
       wellbeingHintsEnabled,
       setWellbeingHintsEnabled,
+      nightModeEnabled,
+      setNightModeEnabled,
     ]
   );
 

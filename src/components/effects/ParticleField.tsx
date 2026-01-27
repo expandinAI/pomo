@@ -3,7 +3,12 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import type { ResolvedParticleStyle } from '@/hooks/useParticleStyle';
+
+// Night mode dims white to this color
+const NIGHT_MODE_COLOR = '#A0A0A0';
+const NORMAL_COLOR = '#FFFFFF';
 
 interface ParticleFieldProps {
   isActive: boolean;
@@ -97,6 +102,11 @@ export function ParticleField({
   convergenceTarget = null,
 }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
+  const { nightModeEnabled } = useTimerSettingsContext();
+
+  // Particle color based on night mode
+  const particleColor = nightModeEnabled ? NIGHT_MODE_COLOR : NORMAL_COLOR;
+  const glowColorRgb = nightModeEnabled ? '160, 160, 160' : '255, 255, 255';
 
   // Refs for tracking particle positions
   const particleRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -293,12 +303,12 @@ export function ParticleField({
             1,                                   // 100%
           ];
 
-          // Glow: subtle → intense
+          // Glow: subtle → intense (uses glowColorRgb for night mode support)
           const glowKeyframes = [
-            `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
-            `0 0 ${particle.size * 2.5}px ${particle.size * 1.2}px rgba(255, 255, 255, 0.4)`,
-            `0 0 ${particle.size * 3}px ${particle.size * 1.5}px rgba(255, 255, 255, 0.6)`,
-            `0 0 ${particle.size * 4}px ${particle.size * 2}px rgba(255, 255, 255, 0.95)`,
+            `0 0 ${particle.size * 2}px ${particle.size}px rgba(${glowColorRgb}, 0.3)`,
+            `0 0 ${particle.size * 2.5}px ${particle.size * 1.2}px rgba(${glowColorRgb}, 0.4)`,
+            `0 0 ${particle.size * 3}px ${particle.size * 1.5}px rgba(${glowColorRgb}, 0.6)`,
+            `0 0 ${particle.size * 4}px ${particle.size * 2}px rgba(${glowColorRgb}, 0.95)`,
           ];
 
           // Rotation: gentle wobble → accelerating spin → fast spin at arrival
@@ -313,7 +323,7 @@ export function ParticleField({
           return (
             <motion.div
               key={particle.id}
-              className="rounded-full bg-white fixed will-change-transform"
+              className="rounded-full fixed will-change-transform"
               initial={{
                 left: startPos.x,
                 top: startPos.y,
@@ -322,7 +332,8 @@ export function ParticleField({
                 scale: baseScale,
                 opacity: particle.opacity,
                 rotate: 0,
-                boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
+                boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(${glowColorRgb}, 0.3)`,
+                backgroundColor: particleColor,
               }}
               animate={{
                 left: positionKeyframes.left,
@@ -372,7 +383,7 @@ export function ParticleField({
         <div
           key={particle.id}
           ref={(el) => { particleRefs.current[index] = el; }}
-          className={`rounded-full bg-white ${animationClass} will-change-[transform,opacity] ${usesCenterPosition ? '' : 'absolute'}`}
+          className={`rounded-full ${animationClass} will-change-[transform,opacity] ${usesCenterPosition ? '' : 'absolute'}`}
           style={{
             // Position based on style
             ...(usesCenterPosition
@@ -384,7 +395,8 @@ export function ParticleField({
                 }),
             width: `${particle.size}px`,
             height: `${particle.size}px`,
-            boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(255, 255, 255, 0.3)`,
+            backgroundColor: particleColor,
+            boxShadow: `0 0 ${particle.size * 2}px ${particle.size}px rgba(${glowColorRgb}, 0.3)`,
             filter: particle.blur > 0 ? `blur(${particle.blur}px)` : 'none',
             animationPlayState: isPaused ? 'paused' : 'running',
             '--particle-duration': `${particle.duration}s`,
