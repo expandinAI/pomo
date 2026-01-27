@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **UI Interaction Sounds (POMO-124, 2 SP)**:
+  - Sanftes organisches "Pop" bei Timer-Start (wie ein Partikel, das an seinen Platz gleitet)
+  - Weiches "Release" bei Timer-Pause (wie ein sanftes Ausatmen)
+  - Default aktiviert, kann in Settings deaktiviert werden
+  - Respektiert globale Lautstärke und Mute-Einstellungen
+  - Philosophie: Sound als taktiles Feedback – fühlbar, nicht störend
 - **Night Mode (POMO-130, 2 SP)**:
   - Dimmt alle weißen Elemente zu #A0A0A0 für reduzierte Augenbelastung
   - Toggle via D-Taste oder ActionBar-Button (Sonne/Mond)
@@ -255,6 +261,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-124-ui-sounds]]
 - [[stories/done/POMO-135-auto-start-next]]
 - [[stories/done/POMO-143-estimation-trend-analytics]]
 - [[stories/done/POMO-141-total-list-time]]
