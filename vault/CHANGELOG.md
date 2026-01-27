@@ -7,6 +7,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Transition Chimes (POMO-121, 3 SP)**:
+  - Phase-Übergangssounds: "Arrival" (Focus→Break) und "Awakening" (Break→Focus)
+  - Philosophie: "Particle klingt wie Licht klingen würde" – reine Sinuswellen in harmonischen Verhältnissen
+  - Drei Intensitätsstufen: Subtle (~1s), Normal (~2s), Rich (~3s)
+  - Arrival: Warme, konvergierende Harmonien (Root + Fifth + Shimmer)
+  - Awakening: Aufsteigende Töne in Klarheit (Rising + Clarity + Ready)
+  - Toggle in Settings → Sound, 3er-Segment-Control für Intensität
+  - Default aktiviert mit "Normal" Intensität
 - **UI Interaction Sounds (POMO-124, 2 SP)**:
   - Sanftes organisches "Pop" bei Timer-Start (wie ein Partikel, das an seinen Platz gleitet)
   - Weiches "Release" bei Timer-Pause (wie ein sanftes Ausatmen)

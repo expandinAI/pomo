@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 3
 feature: sound-design-2
 created: 2026-01-20
-updated: 2026-01-20
-done_date: null
+updated: 2026-01-27
+done_date: 2026-01-27
 tags: [sound, chimes, transitions, emotional, p0]
 ---
 Vielen Dank! 
