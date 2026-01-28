@@ -8,6 +8,9 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { cn } from '@/lib/utils';
 import { LearnMenu, type LearnView } from './LearnMenu';
 import { RhythmContent } from './RhythmContent';
+import { BreaksContent } from './BreaksContent';
+import { ScienceContent } from './ScienceContent';
+import { PhilosophyContent } from './PhilosophyContent';
 
 interface LearnPanelProps {
   onClose: () => void;
@@ -21,6 +24,7 @@ const VIEW_TITLES: Record<LearnView, string> = {
   rhythms: 'The Three Rhythms',
   breaks: 'Why Breaks Matter',
   science: 'The Science',
+  philosophy: 'The Particle Philosophy',
 };
 
 const FOOTER_HINTS: Record<LearnView, string> = {
@@ -28,6 +32,7 @@ const FOOTER_HINTS: Record<LearnView, string> = {
   rhythms: '1/2/3 select rhythm · ← back · L close',
   breaks: '← back · L close',
   science: '← back · L close',
+  philosophy: '← back · L close',
 };
 
 const panelVariants = {
@@ -192,14 +197,13 @@ export function LearnPanel({
           />
         )}
         {view === 'breaks' && (
-          <div className="text-secondary light:text-secondary-dark text-sm">
-            Coming soon...
-          </div>
+          <BreaksContent onBack={() => setView('menu')} />
         )}
         {view === 'science' && (
-          <div className="text-secondary light:text-secondary-dark text-sm">
-            Coming soon...
-          </div>
+          <ScienceContent onBack={() => setView('menu')} />
+        )}
+        {view === 'philosophy' && (
+          <PhilosophyContent onBack={() => setView('menu')} />
         )}
       </div>
 

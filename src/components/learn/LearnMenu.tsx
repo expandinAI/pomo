@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Book, Brain, FlaskConical } from 'lucide-react';
+import { Book, Brain, FlaskConical, Sparkles } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 
-export type LearnView = 'menu' | 'rhythms' | 'breaks' | 'science';
+export type LearnView = 'menu' | 'rhythms' | 'breaks' | 'science' | 'philosophy';
 
 interface LearnMenuProps {
   onNavigate: (view: LearnView) => void;
@@ -37,6 +37,12 @@ const MENU_ITEMS: MenuItem[] = [
     icon: FlaskConical,
     title: 'The Science',
     description: 'Focus isn\'t magic.',
+  },
+  {
+    id: 'philosophy',
+    icon: Sparkles,
+    title: 'The Particle Philosophy',
+    description: 'Why we built this differently.',
   },
 ];
 
