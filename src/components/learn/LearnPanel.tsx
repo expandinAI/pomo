@@ -58,6 +58,9 @@ export function LearnPanel({
 
   // Keyboard event isolation - block timer shortcuts from reaching the timer
   // Uses capture phase + stopImmediatePropagation to prevent ALL other handlers
+  // IMPORTANT: Some keys must NOT be blocked depending on current view:
+  // - 'menu': ArrowUp/Down/Enter needed for navigation
+  // - 'rhythms': 1/2/3 needed for rhythm selection
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       // Escape closes the panel
@@ -68,22 +71,28 @@ export function LearnPanel({
         return;
       }
 
-      // Block timer-related keys from propagating
-      // Space = start/pause, ArrowUp/Down = adjust duration, 1-4 = presets, s = skip, r = reset
-      // Note: ArrowLeft/Right and Backspace are used for panel navigation (handled by sub-views)
-      const blockedKeys = [
+      // Build list of keys to block based on current view
+      // Base keys that are always blocked
+      const blockedKeys: string[] = [
         ' ', // Space - start/pause timer
-        'ArrowUp', // Increase timer duration
-        'ArrowDown', // Decrease timer duration
-        '1', // Preset 1
-        '2', // Preset 2
-        '3', // Preset 3
-        '4', // Preset 4
         's', // Skip
         'S', // Skip (uppercase)
         'r', // Reset
         'R', // Reset (uppercase)
+        '4', // Preset 4 (custom) - never used in Learn Panel
       ];
+
+      // In 'menu' view: Don't block ArrowUp/Down/Enter (used for navigation)
+      // In other views: Block them to prevent timer adjustment
+      if (view !== 'menu') {
+        blockedKeys.push('ArrowUp', 'ArrowDown', 'Enter');
+      }
+
+      // In 'rhythms' view: Don't block 1/2/3 (used for rhythm selection)
+      // In other views: Block them to prevent preset switching
+      if (view !== 'rhythms') {
+        blockedKeys.push('1', '2', '3');
+      }
 
       if (blockedKeys.includes(e.key)) {
         e.preventDefault();
@@ -93,7 +102,7 @@ export function LearnPanel({
 
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [onClose]);
+  }, [onClose, view]);
 
   // Handle preset change - change preset and close panel
   const handlePresetChange = (presetId: string) => {
