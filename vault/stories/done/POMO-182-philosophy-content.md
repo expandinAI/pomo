@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 2
 feature: "[[features/learn-section]]"
 created: 2026-01-28
 updated: 2026-01-28
-done_date: null
+done_date: 2026-01-28
 tags: [content, learn, philosophy, brand]
 ---
 
