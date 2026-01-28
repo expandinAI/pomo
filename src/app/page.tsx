@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
 import { ActionBar } from '@/components/ui/ActionBar';
+import { CommandButton, BottomRightControls } from '@/components/ui/CornerControls';
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
@@ -146,7 +147,7 @@ function HomeContent() {
       tabIndex={-1}
       className="relative min-h-screen flex flex-col items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom focus:outline-none"
     >
-      {/* Action Bar - Discoverable entry point for all features */}
+      {/* Action Bar - Functional navigation (top-right) */}
       <div className="absolute top-4 right-4">
         <ActionBar
           onOpenTimeline={() => setShowTimeline(true)}
@@ -154,10 +155,6 @@ function HomeContent() {
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
           onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
-          onOpenCommands={openCommandPalette}
-          onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
-          onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
-          nightModeEnabled={nightModeEnabled}
         />
       </div>
 
@@ -186,12 +183,22 @@ function HomeContent() {
 
       <Timer onTimelineOpen={() => setShowTimeline(true)} />
 
-      {/* Shortcuts help in bottom-left corner */}
-      <div className="absolute bottom-4 left-4">
+      {/* Bottom-left: Command Palette + Keyboard Shortcuts */}
+      <div className="absolute bottom-4 left-4 flex items-center gap-1">
+        <CommandButton onOpenCommands={openCommandPalette} />
         <ShortcutsHelp />
       </div>
 
-      {/* G-prefix indicator */}
+      {/* Bottom-right: Night Mode + Settings */}
+      <div className="absolute bottom-4 right-4">
+        <BottomRightControls
+          onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
+          onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
+          nightModeEnabled={nightModeEnabled}
+        />
+      </div>
+
+      {/* G-prefix indicator - positioned above bottom-right controls */}
       <AnimatePresence>
         {isGPressed && (
           <motion.div
@@ -199,7 +206,7 @@ function HomeContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-4 right-4 px-3 py-1.5 bg-surface/90 light:bg-surface-dark/90 backdrop-blur-sm rounded-lg border border-tertiary/20 light:border-tertiary-dark/20 shadow-lg z-50"
+            className="fixed bottom-16 right-4 px-3 py-1.5 bg-surface/90 light:bg-surface-dark/90 backdrop-blur-sm rounded-lg border border-tertiary/20 light:border-tertiary-dark/20 shadow-lg z-50"
           >
             <span className="text-sm font-medium text-secondary light:text-secondary-dark">
               G...
