@@ -38,6 +38,12 @@ import { useWellbeingHint } from '@/hooks/useWellbeingHint';
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
   onTimelineOpen?: () => void;
+  /**
+   * Callback before starting the timer.
+   * Return false to prevent start (e.g., to show onboarding first).
+   * If omitted, timer starts normally.
+   */
+  onBeforeStart?: () => boolean;
 }
 
 interface TimerState {
@@ -210,7 +216,7 @@ const initialState: TimerState = {
   autoStartCountdown: null,
 };
 
-export function Timer({ onTimelineOpen }: TimerProps = {}) {
+export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
@@ -350,6 +356,9 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
   // Toast message (for Shift+A toggle, etc.)
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Welcome message (shown after first rhythm onboarding)
+  const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
+
   // Session feedback (kontextueller Moment after completion)
   const [sessionFeedback, setSessionFeedback] = useState<SessionFeedback | null>(null);
 
@@ -481,6 +490,25 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [sessionFeedback]);
+
+  // Listen for first-start welcome event (after rhythm onboarding)
+  useEffect(() => {
+    function handleWelcome() {
+      setWelcomeMessage('Your first particle. Press L to explore rhythms.');
+    }
+    window.addEventListener('particle:show-welcome', handleWelcome);
+    return () => window.removeEventListener('particle:show-welcome', handleWelcome);
+  }, []);
+
+  // Auto-clear welcome message after 8 seconds (longer for readability)
+  useEffect(() => {
+    if (welcomeMessage) {
+      const timeout = setTimeout(() => {
+        setWelcomeMessage(null);
+      }, 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [welcomeMessage]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -1312,11 +1340,32 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
 
   // Start/Pause handlers with sound
   const handleStart = useCallback(() => {
+    // Check if we should intercept (e.g., for onboarding)
+    if (onBeforeStart && !onBeforeStart()) {
+      return; // Prevented - onboarding will handle it
+    }
     playSound('timer-start');
     vibrate('light');
     dispatch({ type: 'START' });
     setPickedTaskIndex(null); // Reset random pick when session starts
+  }, [onBeforeStart, playSound, vibrate]);
+
+  // Force start (bypasses onBeforeStart) - used after onboarding completes
+  const forceStart = useCallback(() => {
+    playSound('timer-start');
+    vibrate('light');
+    dispatch({ type: 'START' });
+    setPickedTaskIndex(null);
   }, [playSound, vibrate]);
+
+  // Listen for force start event (after onboarding)
+  useEffect(() => {
+    function handleForceStart() {
+      forceStart();
+    }
+    window.addEventListener('particle:start-timer', handleForceStart);
+    return () => window.removeEventListener('particle:start-timer', handleForceStart);
+  }, [forceStart]);
 
   const handlePause = useCallback(() => {
     playSound('timer-pause');
@@ -1834,15 +1883,17 @@ export function Timer({ onTimelineOpen }: TimerProps = {}) {
         message={
           toastMessage
             ? toastMessage
-            : showMaxLimitMessage
-              ? 'Maximum 180 min'
-              : state.showSkipMessage
-                ? `Skipped to ${SESSION_LABELS[state.mode]}`
-                : particleSelectMode
-                  ? 'Select particle...'
-                  : particleHoverInfo
-                    ? particleHoverInfo
-                    : null
+            : welcomeMessage
+              ? welcomeMessage
+              : showMaxLimitMessage
+                ? 'Maximum 180 min'
+                : state.showSkipMessage
+                  ? `Skipped to ${SESSION_LABELS[state.mode]}`
+                  : particleSelectMode
+                    ? 'Select particle...'
+                    : particleHoverInfo
+                      ? particleHoverInfo
+                      : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
@@ -9,6 +9,7 @@ import { CommandButton, BottomRightControls } from '@/components/ui/CornerContro
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
 
@@ -41,6 +42,10 @@ const LearnPanel = dynamic(
   () => import('@/components/learn/LearnPanel').then(mod => ({ default: mod.LearnPanel })),
   { ssr: false }
 );
+const OnboardingOverlay = dynamic(
+  () => import('@/components/onboarding/OnboardingOverlay').then(mod => ({ default: mod.OnboardingOverlay })),
+  { ssr: false }
+);
 
 /**
  * Inner component that uses milestone context
@@ -58,6 +63,32 @@ function HomeContent() {
   // Night mode, presets, and command palette
   const { nightModeEnabled, setNightModeEnabled, activePresetId, applyPreset } = useTimerSettingsContext();
   const { open: openCommandPalette } = useCommandPalette();
+
+  // Onboarding - shows on first start attempt
+  const { hasCompletedOnboarding, isOnboardingVisible, showOnboarding, completeOnboarding } = useOnboarding();
+
+  // Intercept first start attempt to show onboarding
+  const handleBeforeStart = useCallback(() => {
+    if (!hasCompletedOnboarding) {
+      showOnboarding();
+      return false; // Prevent timer start
+    }
+    return true; // Allow timer start
+  }, [hasCompletedOnboarding, showOnboarding]);
+
+  // After onboarding: apply preset, mark complete, start timer, show welcome
+  const handleOnboardingComplete = useCallback((presetId: string) => {
+    applyPreset(presetId);
+    completeOnboarding();
+    // Start the timer after a brief moment for the fade-out to feel complete
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('particle:start-timer'));
+      // Show welcome message after timer starts
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('particle:show-welcome'));
+      }, 500);
+    }, 100);
+  }, [applyPreset, completeOnboarding]);
 
   // Milestones
   const { setShowJourney } = useMilestones();
@@ -221,7 +252,10 @@ function HomeContent() {
         onClose={() => setShowTimeline(false)}
       />
 
-      <Timer onTimelineOpen={() => setShowTimeline(true)} />
+      <Timer
+        onTimelineOpen={() => setShowTimeline(true)}
+        onBeforeStart={handleBeforeStart}
+      />
 
       {/* Bottom-left: Command Palette + Keyboard Shortcuts */}
       <div className="absolute bottom-4 left-4 flex items-center gap-1">
@@ -276,6 +310,13 @@ function HomeContent() {
               t/r/s/h/y/p/o/m/l/,
             </span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* First-run onboarding overlay - appears on first start attempt */}
+      <AnimatePresence>
+        {isOnboardingVisible && (
+          <OnboardingOverlay onComplete={handleOnboardingComplete} />
         )}
       </AnimatePresence>
     </main>
