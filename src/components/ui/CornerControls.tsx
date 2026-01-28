@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Command, Settings, Sun, Moon } from 'lucide-react';
+import { Command, Settings, Sun, Moon, BookOpen } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 
@@ -56,22 +56,34 @@ export function CommandButton({ onOpenCommands }: CommandButtonProps) {
 
 /**
  * Bottom-right corner controls
+ * - Learn (L)
  * - Night Mode (D)
  * - Settings (⌘,)
  */
 interface BottomRightControlsProps {
+  onOpenLearn: () => void;
   onToggleNightMode: () => void;
   onOpenSettings: () => void;
   nightModeEnabled: boolean;
 }
 
 export function BottomRightControls({
+  onOpenLearn,
   onToggleNightMode,
   onOpenSettings,
   nightModeEnabled,
 }: BottomRightControlsProps) {
   return (
     <div className="flex items-center gap-1">
+      {/* Learn Button */}
+      <CornerButton
+        onClick={onOpenLearn}
+        label="Open learn section"
+        tooltip="Learn · L"
+      >
+        <BookOpen className="w-4 h-4" />
+      </CornerButton>
+
       {/* Night Mode Toggle with rotation animation */}
       <motion.button
         onClick={onToggleNightMode}

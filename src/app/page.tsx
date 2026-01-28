@@ -37,6 +37,10 @@ const RhythmView = dynamic(
   () => import('@/components/rhythm/RhythmView').then(mod => ({ default: mod.RhythmView })),
   { ssr: false }
 );
+const LearnPanel = dynamic(
+  () => import('@/components/learn/LearnPanel').then(mod => ({ default: mod.LearnPanel })),
+  { ssr: false }
+);
 
 /**
  * Inner component that uses milestone context
@@ -47,6 +51,9 @@ function HomeContent() {
 
   // Rhythm view state
   const [showRhythm, setShowRhythm] = useState(false);
+
+  // Learn panel state
+  const [showLearn, setShowLearn] = useState(false);
 
   // Night mode and command palette
   const { nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
@@ -86,6 +93,9 @@ function HomeContent() {
       onMilestones: () => {
         setShowJourney(true);
       },
+      onLearn: () => {
+        setShowLearn(true);
+      },
     }),
     [setShowJourney]
   );
@@ -121,6 +131,36 @@ function HomeContent() {
     window.addEventListener('particle:open-milestones', handleOpenMilestones);
     return () => window.removeEventListener('particle:open-milestones', handleOpenMilestones);
   }, [setShowJourney]);
+
+  // Listen for learn open event (from Command Palette)
+  useEffect(() => {
+    function handleOpenLearn() {
+      setShowLearn(true);
+    }
+
+    window.addEventListener('particle:open-learn', handleOpenLearn);
+    return () => window.removeEventListener('particle:open-learn', handleOpenLearn);
+  }, []);
+
+  // Global L key to toggle Learn Panel
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      // Don't trigger if any modifier is pressed
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        setShowLearn(prev => !prev);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
@@ -189,14 +229,31 @@ function HomeContent() {
         <ShortcutsHelp />
       </div>
 
-      {/* Bottom-right: Night Mode + Settings */}
+      {/* Bottom-right: Learn + Night Mode + Settings */}
       <div className="absolute bottom-4 right-4">
         <BottomRightControls
+          onOpenLearn={() => setShowLearn(true)}
           onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
           onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
           nightModeEnabled={nightModeEnabled}
         />
       </div>
+
+      {/* Learn Panel */}
+      <AnimatePresence>
+        {showLearn && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setShowLearn(false)}
+            />
+            <LearnPanel onClose={() => setShowLearn(false)} />
+          </>
+        )}
+      </AnimatePresence>
 
       {/* G-prefix indicator - positioned above bottom-right controls */}
       <AnimatePresence>
@@ -212,7 +269,7 @@ function HomeContent() {
               G...
             </span>
             <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/r/s/h/y/p/o/m/,
+              t/r/s/h/y/p/o/m/l/,
             </span>
           </motion.div>
         )}
