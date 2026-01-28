@@ -12,6 +12,7 @@ import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
+import type { LearnView } from '@/components/learn/LearnMenu';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -59,6 +60,13 @@ function HomeContent() {
 
   // Learn panel state
   const [showLearn, setShowLearn] = useState(false);
+  const [learnInitialView, setLearnInitialView] = useState<LearnView | undefined>();
+
+  // Reset initialView when panel closes
+  const handleLearnClose = useCallback(() => {
+    setShowLearn(false);
+    setLearnInitialView(undefined);
+  }, []);
 
   // Night mode, presets, and command palette
   const { nightModeEnabled, setNightModeEnabled, activePresetId, applyPreset } = useTimerSettingsContext();
@@ -125,6 +133,7 @@ function HomeContent() {
         setShowJourney(true);
       },
       onLearn: () => {
+        setLearnInitialView(undefined); // Reset to menu for G+L navigation
         setShowLearn(true);
       },
     }),
@@ -165,7 +174,12 @@ function HomeContent() {
 
   // Listen for learn open event (from Command Palette)
   useEffect(() => {
-    function handleOpenLearn() {
+    function handleOpenLearn(e: Event) {
+      const customEvent = e as CustomEvent<{ section?: string }>;
+      const section = customEvent.detail?.section;
+      if (section) {
+        setLearnInitialView(section as LearnView);
+      }
       setShowLearn(true);
     }
 
@@ -185,13 +199,18 @@ function HomeContent() {
       }
       if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
-        setShowLearn(prev => !prev);
+        if (showLearn) {
+          handleLearnClose();
+        } else {
+          setLearnInitialView(undefined); // Reset to menu for L key
+          setShowLearn(true);
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [showLearn, handleLearnClose]);
 
   // Global keyboard shortcut for Cmd+, to open settings
   useEffect(() => {
@@ -266,7 +285,10 @@ function HomeContent() {
       {/* Bottom-right: Learn + Night Mode + Settings */}
       <div className="absolute bottom-4 right-4">
         <BottomRightControls
-          onOpenLearn={() => setShowLearn(true)}
+          onOpenLearn={() => {
+            setLearnInitialView(undefined);
+            setShowLearn(true);
+          }}
           onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
           onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
           nightModeEnabled={nightModeEnabled}
@@ -282,12 +304,13 @@ function HomeContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/20 z-40"
-              onClick={() => setShowLearn(false)}
+              onClick={handleLearnClose}
             />
             <LearnPanel
-              onClose={() => setShowLearn(false)}
+              onClose={handleLearnClose}
               currentPresetId={activePresetId}
               onPresetChange={applyPreset}
+              initialView={learnInitialView}
             />
           </>
         )}

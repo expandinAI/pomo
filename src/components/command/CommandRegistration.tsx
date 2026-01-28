@@ -22,6 +22,7 @@ import {
   Award,
   BarChart3,
   Shuffle,
+  BookOpen,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -277,6 +278,67 @@ export function CommandRegistration({
         },
         icon: <Repeat className="w-4 h-4" />,
         keywords: ['change', 'select', 'switch', 'project'],
+      },
+
+      // Learn commands
+      {
+        id: 'learn-open',
+        label: 'Open Learn',
+        shortcut: 'L',
+        category: 'learn',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-learn'));
+        },
+        icon: <BookOpen className="w-4 h-4" />,
+        keywords: ['learn', 'understand', 'help', 'guide', 'why', 'explain'],
+      },
+      {
+        id: 'learn-rhythms',
+        label: 'Learn: The Three Rhythms',
+        category: 'learn',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-learn', {
+            detail: { section: 'rhythms' }
+          }));
+        },
+        icon: <BookOpen className="w-4 h-4" />,
+        keywords: ['rhythms', 'modes', 'presets', '25', '52', '90', 'three'],
+      },
+      {
+        id: 'learn-classic',
+        label: 'Learn: Classic (25/5)',
+        category: 'learn',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-learn', {
+            detail: { section: 'rhythms', rhythm: 'classic' }
+          }));
+        },
+        icon: <BookOpen className="w-4 h-4" />,
+        keywords: ['classic', 'pomodoro', '25', 'traditional', 'cirillo'],
+      },
+      {
+        id: 'learn-deepwork',
+        label: 'Learn: Deep Work (52/17)',
+        category: 'learn',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-learn', {
+            detail: { section: 'rhythms', rhythm: 'deepWork' }
+          }));
+        },
+        icon: <BookOpen className="w-4 h-4" />,
+        keywords: ['deep', 'work', '52', '17', 'desktime', 'productive'],
+      },
+      {
+        id: 'learn-ultradian',
+        label: 'Learn: 90-Min Block',
+        category: 'learn',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-learn', {
+            detail: { section: 'rhythms', rhythm: 'ultradian' }
+          }));
+        },
+        icon: <BookOpen className="w-4 h-4" />,
+        keywords: ['ultradian', '90', 'kleitman', 'long', 'block', 'natural'],
       },
     ];
 

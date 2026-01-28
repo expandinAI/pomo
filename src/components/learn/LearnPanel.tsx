@@ -13,6 +13,7 @@ interface LearnPanelProps {
   onClose: () => void;
   currentPresetId: string;
   onPresetChange: (presetId: string) => void;
+  initialView?: LearnView;
 }
 
 const VIEW_TITLES: Record<LearnView, string> = {
@@ -40,9 +41,10 @@ export function LearnPanel({
   onClose,
   currentPresetId,
   onPresetChange,
+  initialView = 'menu',
 }: LearnPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<LearnView>('menu');
+  const [view, setView] = useState<LearnView>(initialView);
 
   // Focus trap with initial focus on panel container
   useFocusTrap(panelRef, true, { initialFocusRef: panelRef });
