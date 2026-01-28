@@ -112,7 +112,6 @@ function CollapsedPresetView({
         <div className="flex items-center gap-1 ml-1">
           {overflowEnabled && (
             <div
-              className="cursor-help"
               onMouseEnter={() => onModeIndicatorHover?.('overflow')}
               onMouseLeave={() => onModeIndicatorHover?.(null)}
             >
@@ -124,7 +123,6 @@ function CollapsedPresetView({
           )}
           {autoStartEnabled && (
             <div
-              className="cursor-help"
               onMouseEnter={() => onModeIndicatorHover?.('autoStart')}
               onMouseLeave={() => onModeIndicatorHover?.(null)}
             >
