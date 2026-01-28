@@ -14,31 +14,31 @@ tags: [content, learn, science, research]
 
 ## User Story
 
-> Als **Particle-Nutzer**
-> möchte ich **die wissenschaftlichen Grundlagen hinter fokussiertem Arbeiten verstehen**,
-> damit **ich Vertrauen in die Methode habe und weiß, dass sie auf Forschung basiert – nicht auf Hype**.
+> As a **Particle user**
+> I want to **understand the scientific foundations behind focused work**,
+> so that **I trust the method and know it's based on research—not hype**.
 
-## Kontext
+## Context
 
-Nutzer fragen sich:
-- "Warum genau 25/52/90 Minuten?"
-- "Ist das wissenschaftlich belegt oder nur ein Trend?"
-- "Wer hat das erfunden?"
+Users wonder:
+- "Why exactly 25/52/90 minutes?"
+- "Is this scientifically proven or just a trend?"
+- "Who invented this?"
 
-Diese Section gibt Antworten – ohne akademisch zu klingen.
+This section provides answers—without sounding academic.
 
 ---
 
-## Content-Struktur
+## Content Structure
 
 ### Intro
-Fokus ist keine Magie. Es ist Biologie.
+Focus isn't magic. It's biology.
 
-### Kernabschnitte
-4-5 Abschnitte zu verschiedenen Forschungsbereichen.
+### Core Sections
+4-5 sections covering different research areas.
 
 ### Closing
-Ermutigung, die eigene Erfahrung ernst zu nehmen.
+Encouragement to trust their own experience.
 
 ---
 
@@ -46,139 +46,197 @@ Ermutigung, die eigene Erfahrung ernst zu nehmen.
 
 ### Intro
 
-> *Fokus ist keine Magie. Es ist Biologie.*
+> *Focus isn't magic. It's biology.*
 >
-> *Hier ist, was die Wissenschaft über dein Gehirn weiß – und wie Particle darauf aufbaut.*
+> *Here's what science knows about your brain—and how Particle builds on it.*
 
 ---
 
-### Section 1: "Der Ursprung: Francesco Cirillo (1980er)"
+### Section 1: "The Origin: Francesco Cirillo (1980s)"
 
-**Eine Küchenuhr in Form einer Tomate.**
+**A kitchen timer shaped like a tomato.**
 
-1987, Universität Rom. Francesco Cirillo, Student, kämpft mit seiner Konzentration. Er greift zu einer Küchenuhr – einer roten Tomate – und stellt sie auf 10 Minuten.
+1987, University of Rome. Francesco Cirillo, a student, struggles with focus. He reaches for a kitchen timer—a red tomato—and sets it for 10 minutes.
 
-"Kannst du dich 10 Minuten konzentrieren?"
+"Can you focus for just 10 minutes?"
 
-Er konnte. Also erhöhte er auf 25.
+He could. So he increased it to 25.
 
-**Die Pomodoro-Technik war geboren.**
+**The Pomodoro Technique was born.**
 
-Heute, Jahrzehnte später, ist sie eine der am meisten praktizierten Fokus-Methoden der Welt.
+Today, decades later, it's one of the most practiced focus methods in the world.
 
-*Particle's Classic-Rhythmus (25 Min) basiert auf Cirillos Entdeckung.*
-
----
-
-### Section 2: "Ultradian Rhythms: Nathaniel Kleitman (1950er)"
-
-**Dein Körper tickt in 90-Minuten-Zyklen.**
-
-Nathaniel Kleitman, der "Vater der Schlafforschung", entdeckte in den 1950ern etwas Erstaunliches:
-
-Nicht nur im Schlaf, auch im Wachzustand folgt dein Körper einem Rhythmus. Etwa alle 90 Minuten wechselt dein Gehirn zwischen Phasen höherer und niedrigerer Aktivität.
-
-**Der BRAC-Zyklus** (Basic Rest-Activity Cycle) erklärt, warum sich 90 Minuten oft "natürlich" anfühlen – und warum danach eine Pause fällig ist.
-
-*Particle's 90-Min-Rhythmus folgt diesem biologischen Takt.*
+*Particle's Classic rhythm (25 min) is based on Cirillo's discovery.*
 
 ---
 
-### Section 3: "Die DeskTime-Studie (2014)"
+### Section 2: "Ultradian Rhythms: Nathaniel Kleitman (1950s)"
 
-**Was machen die Produktivsten anders?**
+**Your body runs on 90-minute cycles.**
 
-Das Unternehmen DeskTime analysierte die Arbeitsgewohnheiten von Millionen Nutzern. Die Frage: Was unterscheidet die produktivsten 10%?
+Nathaniel Kleitman, the "father of sleep research," discovered something remarkable in the 1950s:
 
-Die Antwort überraschte:
+Not just during sleep—even while awake, your body follows a rhythm. About every 90 minutes, your brain shifts between phases of higher and lower activity.
 
-Sie arbeiteten nicht am längsten. Sie arbeiteten **52 Minuten am Stück** – gefolgt von **17 Minuten echter Pause**.
+**The BRAC cycle** (Basic Rest-Activity Cycle) explains why 90 minutes often feels "natural"—and why a break is due afterward.
 
-Kein Multitasking. Keine halben Pausen mit E-Mails. Volle Konzentration, dann vollständige Erholung.
+*Particle's 90-Min rhythm follows this biological clock.*
 
-*Particle's Deep Work-Rhythmus (52/17) basiert auf dieser Studie.*
+---
+
+### Section 3: "The DeskTime Study (2014)"
+
+**What do the most productive people do differently?**
+
+The company DeskTime analyzed the work habits of millions of users. The question: What sets the top 10% apart?
+
+The answer surprised everyone:
+
+They didn't work the longest. They worked **52 minutes at a stretch**—followed by **17 minutes of real rest**.
+
+No multitasking. No half-breaks with emails. Full concentration, then complete recovery.
+
+*Particle's Deep Work rhythm (52/17) is based on this study.*
 
 ---
 
 ### Section 4: "Flow State: Mihaly Csikszentmihalyi"
 
-**Der Zustand, in dem Zeit verschwindet.**
+**The state where time disappears.**
 
-Der Psychologe Mihaly Csikszentmihalyi (sprich: "Tschik-sent-mi-hai") prägte den Begriff "Flow" – jenen Zustand vollständiger Absorption, in dem Stunden wie Minuten vergehen.
+Psychologist Mihaly Csikszentmihalyi (pronounced "cheek-sent-me-hi") coined the term "Flow"—that state of complete absorption where hours feel like minutes.
 
-Flow entsteht, wenn:
-- Die Aufgabe herausfordernd genug ist (nicht langweilig)
-- Aber machbar (nicht überwältigend)
-- Du klares Feedback bekommst
-- Du ungestört bist
+Flow happens when:
+- The task is challenging enough (not boring)
+- But achievable (not overwhelming)
+- You get clear feedback
+- You're undisturbed
 
-**Particle schafft den Rahmen. Flow entsteht von selbst.**
+**Particle creates the frame. Flow emerges on its own.**
 
 ---
 
 ### Section 5: "Attention Residue: Sophie Leroy (2009)"
 
-**Warum Multitasking nicht funktioniert.**
+**Why multitasking doesn't work.**
 
-Die Forscherin Sophie Leroy entdeckte das Phänomen der "Attention Residue":
+Researcher Sophie Leroy discovered the phenomenon of "Attention Residue":
 
-Wenn du zwischen Aufgaben wechselst, bleibt ein Teil deiner Aufmerksamkeit bei der vorherigen Aufgabe hängen. Dein Gehirn braucht Zeit, um vollständig umzuschalten.
+When you switch between tasks, part of your attention stays stuck on the previous task. Your brain needs time to fully transition.
 
-Deshalb fühlt sich ständiges Hin-und-Her so erschöpfend an – und deshalb funktionieren fokussierte Blöcke so gut.
+That's why constant switching feels so exhausting—and why focused blocks work so well.
 
-**Ein Partikel. Eine Aufgabe. Volle Aufmerksamkeit.**
+**One particle. One task. Full attention.**
 
 ---
 
 ### Closing
 
-> *Die Wissenschaft gibt uns Orientierung. Aber dein Körper kennt sich selbst am besten.*
+> *Science gives us direction. But your body knows itself best.*
 >
-> *Probiere die Rhythmen aus. Beobachte, was funktioniert. Vertraue deiner Erfahrung.*
+> *Try the rhythms. Observe what works. Trust your experience.*
 >
-> *Die Forschung zeigt den Weg. Du gehst ihn.*
+> *Research shows the way. You walk it.*
 
 ---
 
-## Technische Umsetzung
+## Technical Implementation
 
-### Datei-Struktur
+### File Structure
 
 ```typescript
 // src/lib/content/science-content.ts
 
-export const SCIENCE_INTRO = "Fokus ist keine Magie. Es ist Biologie.";
-export const SCIENCE_SUBINTRO = "Hier ist, was die Wissenschaft über dein Gehirn weiß – und wie Particle darauf aufbaut.";
+export const SCIENCE_INTRO = "Focus isn't magic. It's biology.";
+export const SCIENCE_SUBINTRO = "Here's what science knows about your brain—and how Particle builds on it.";
 
 export interface ScienceSection {
   id: string;
   title: string;
-  subtitle?: string; // z.B. "Francesco Cirillo (1980er)"
+  subtitle?: string; // e.g., "Francesco Cirillo (1980s)"
   paragraphs: string[];
-  particleNote?: string; // "Particle's Classic-Rhythmus basiert auf..."
+  particleNote?: string; // "Particle's Classic rhythm is based on..."
 }
 
 export const SCIENCE_SECTIONS: ScienceSection[] = [
   {
     id: 'cirillo',
-    title: 'Der Ursprung',
-    subtitle: 'Francesco Cirillo (1980er)',
-    paragraphs: [...],
-    particleNote: "Particle's Classic-Rhythmus (25 Min) basiert auf Cirillos Entdeckung.",
+    title: 'The Origin',
+    subtitle: 'Francesco Cirillo (1980s)',
+    paragraphs: [
+      'A kitchen timer shaped like a tomato.',
+      '1987, University of Rome. Francesco Cirillo, a student, struggles with focus. He reaches for a kitchen timer—a red tomato—and sets it for 10 minutes.',
+      '"Can you focus for just 10 minutes?"',
+      'He could. So he increased it to 25.',
+      'The Pomodoro Technique was born.',
+      'Today, decades later, it\'s one of the most practiced focus methods in the world.',
+    ],
+    particleNote: "Particle's Classic rhythm (25 min) is based on Cirillo's discovery.",
   },
-  // ...
+  {
+    id: 'kleitman',
+    title: 'Ultradian Rhythms',
+    subtitle: 'Nathaniel Kleitman (1950s)',
+    paragraphs: [
+      'Your body runs on 90-minute cycles.',
+      'Nathaniel Kleitman, the "father of sleep research," discovered something remarkable in the 1950s:',
+      'Not just during sleep—even while awake, your body follows a rhythm. About every 90 minutes, your brain shifts between phases of higher and lower activity.',
+      'The BRAC cycle (Basic Rest-Activity Cycle) explains why 90 minutes often feels "natural"—and why a break is due afterward.',
+    ],
+    particleNote: "Particle's 90-Min rhythm follows this biological clock.",
+  },
+  {
+    id: 'desktime',
+    title: 'The DeskTime Study',
+    subtitle: '2014',
+    paragraphs: [
+      'What do the most productive people do differently?',
+      'The company DeskTime analyzed the work habits of millions of users. The question: What sets the top 10% apart?',
+      'The answer surprised everyone:',
+      'They didn\'t work the longest. They worked 52 minutes at a stretch—followed by 17 minutes of real rest.',
+      'No multitasking. No half-breaks with emails. Full concentration, then complete recovery.',
+    ],
+    particleNote: "Particle's Deep Work rhythm (52/17) is based on this study.",
+  },
+  {
+    id: 'flow',
+    title: 'Flow State',
+    subtitle: 'Mihaly Csikszentmihalyi',
+    paragraphs: [
+      'The state where time disappears.',
+      'Psychologist Mihaly Csikszentmihalyi (pronounced "cheek-sent-me-hi") coined the term "Flow"—that state of complete absorption where hours feel like minutes.',
+      'Flow happens when: The task is challenging enough (not boring), but achievable (not overwhelming), you get clear feedback, and you\'re undisturbed.',
+      'Particle creates the frame. Flow emerges on its own.',
+    ],
+  },
+  {
+    id: 'attention-residue',
+    title: 'Attention Residue',
+    subtitle: 'Sophie Leroy (2009)',
+    paragraphs: [
+      'Why multitasking doesn\'t work.',
+      'Researcher Sophie Leroy discovered the phenomenon of "Attention Residue":',
+      'When you switch between tasks, part of your attention stays stuck on the previous task. Your brain needs time to fully transition.',
+      'That\'s why constant switching feels so exhausting—and why focused blocks work so well.',
+      'One particle. One task. Full attention.',
+    ],
+  },
 ];
 
-export const SCIENCE_CLOSING = [...];
+export const SCIENCE_CLOSING = [
+  "Science gives us direction. But your body knows itself best.",
+  "Try the rhythms. Observe what works. Trust your experience.",
+  "Research shows the way. You walk it.",
+];
 ```
 
-### Komponente
+### Component
 
 ```typescript
 // src/components/learn/ScienceContent.tsx
 
 export function ScienceContent({ onBack }: { onBack: () => void }) {
-  // Keyboard handler für Back-Navigation
+  // Keyboard handler for back navigation
 
   return (
     <motion.div variants={staggerContainer}>
@@ -201,7 +259,7 @@ export function ScienceContent({ onBack }: { onBack: () => void }) {
             <p key={i}>{p}</p>
           ))}
           {section.particleNote && (
-            <p className="text-sm text-tertiary italic mt-2">
+            <p className="text-sm text-accent/80 italic border-l-2 border-accent/30 pl-3 mt-2">
               {section.particleNote}
             </p>
           )}
@@ -232,11 +290,11 @@ export function ScienceContent({ onBack }: { onBack: () => void }) {
 
 ---
 
-## Design-Richtlinien
+## Design Guidelines
 
-### Section-Karten
+### Section Cards
 
-Jede Section kann optional als Karte gestaltet werden (wie bei Rhythms):
+Each section can optionally be styled as a card (like Rhythms):
 
 ```typescript
 <div className={cn(
@@ -247,7 +305,7 @@ Jede Section kann optional als Karte gestaltet werden (wie bei Rhythms):
 
 ### Particle-Note Styling
 
-Die Verbindung zu Particle (z.B. "Particle's 90-Min-Rhythmus...") wird hervorgehoben:
+The connection to Particle (e.g., "Particle's 90-Min rhythm...") is highlighted:
 
 ```typescript
 <p className="text-sm text-accent/80 italic border-l-2 border-accent/30 pl-3">
@@ -255,22 +313,22 @@ Die Verbindung zu Particle (z.B. "Particle's 90-Min-Rhythmus...") wird hervorgeh
 </p>
 ```
 
-### Namen hervorheben
+### Highlighting Names
 
-Wissenschaftler-Namen dezent betonen:
+Scientist names get subtle emphasis:
 ```typescript
 <span className="font-medium">Nathaniel Kleitman</span>
 ```
 
 ---
 
-## Content-Prinzipien
+## Content Principles
 
-1. **Menschen, nicht Studien** – "Francesco Cirillo, Student" statt "Cirillo (1987)"
-2. **Geschichten erzählen** – Die Küchenuhr, der Schlafforscher
-3. **Zahlen sparsam** – Nur wo sie Gewicht haben (52/17, 90 Min)
-4. **Particle-Verbindung** – Jede Section endet mit Bezug zur App
-5. **Aussprachehilfen** – Bei schwierigen Namen (Csikszentmihalyi)
+1. **People, not studies** – "Francesco Cirillo, a student" not "Cirillo (1987)"
+2. **Tell stories** – The kitchen timer, the sleep researcher
+3. **Numbers sparingly** – Only where they carry weight (52/17, 90 min)
+4. **Particle connection** – Each section ends with a link to the app
+5. **Pronunciation help** – For difficult names (Csikszentmihalyi)
 
 ---
 
@@ -281,44 +339,44 @@ Wissenschaftler-Namen dezent betonen:
 3. All sections render with correct hierarchy
 4. Particle-Notes are visually distinct
 5. Back navigation works
-6. Scrolling works (längerer Content)
-7. Stagger-Animation beim Laden
+6. Scrolling works (longer content)
+7. Stagger animation on load
 
 ---
 
 ## Definition of Done
 
-- [ ] `science-content.ts` mit allen Texten
-- [ ] `ScienceContent.tsx` implementiert
-- [ ] In LearnPanel integriert
-- [ ] Keyboard-Navigation funktioniert
-- [ ] Particle-Notes visuell abgesetzt
+- [ ] `science-content.ts` with all texts
+- [ ] `ScienceContent.tsx` implemented
+- [ ] Integrated in LearnPanel
+- [ ] Keyboard navigation works
+- [ ] Particle-Notes visually distinct
 - [ ] Content reviewed (Particle Voice)
-- [ ] Mobile getestet
+- [ ] Mobile tested
 - [ ] TypeScript check passes
 - [ ] Build succeeds
 
 ---
 
-## Wissenschaftliche Quellen
+## Scientific Sources
 
-| Konzept | Forscher | Jahr | Kernaussage |
-|---------|----------|------|-------------|
-| Pomodoro | Francesco Cirillo | 1987 | 25-Min-Blöcke mit Pausen |
-| Ultradian Rhythms | Nathaniel Kleitman | 1950er | 90-Min-Zyklen im Wachzustand |
-| 52/17 Rhythmus | DeskTime | 2014 | Top-Performer arbeiten in Blöcken |
-| Flow State | Mihaly Csikszentmihalyi | 1990 | Vollständige Absorption |
-| Attention Residue | Sophie Leroy | 2009 | Kosten des Task-Switching |
-
----
-
-## Notizen
-
-- **Länge:** ~600-700 Wörter (3-4 Minuten Lesezeit)
-- **Tone:** Wissenschaftsjournalismus, nicht Paper
-- **Ziel:** Vertrauen schaffen, nicht belehren
-- **Easter Egg:** Die Aussprachehilfe für Csikszentmihalyi zeigt Persönlichkeit
+| Concept | Researcher | Year | Key Finding |
+|---------|------------|------|-------------|
+| Pomodoro | Francesco Cirillo | 1987 | 25-min blocks with breaks |
+| Ultradian Rhythms | Nathaniel Kleitman | 1950s | 90-min cycles while awake |
+| 52/17 Rhythm | DeskTime | 2014 | Top performers work in blocks |
+| Flow State | Mihaly Csikszentmihalyi | 1990 | Complete absorption |
+| Attention Residue | Sophie Leroy | 2009 | Cost of task-switching |
 
 ---
 
-*"Die Forschung zeigt den Weg. Du gehst ihn."*
+## Notes
+
+- **Length:** ~600-700 words (3-4 minute read)
+- **Tone:** Science journalism, not academic paper
+- **Goal:** Build trust, not lecture
+- **Easter egg:** The pronunciation guide for Csikszentmihalyi shows personality
+
+---
+
+*"Research shows the way. You walk it."*

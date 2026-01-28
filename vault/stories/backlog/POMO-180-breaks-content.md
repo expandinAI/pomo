@@ -14,34 +14,34 @@ tags: [content, learn, breaks, science]
 
 ## User Story
 
-> Als **Particle-Nutzer**
-> möchte ich **verstehen, warum Pausen Teil des Systems sind**,
-> damit **ich mich nicht schuldig fühle, wenn ich pausiere – sondern verstehe, dass es Teil meiner besten Arbeit ist**.
+> As a **Particle user**
+> I want to **understand why breaks are part of the system**,
+> so that **I don't feel guilty when I rest—but understand it's part of doing my best work**.
 
-## Kontext
+## Context
 
-Viele Nutzer:
-- Skippen Pausen, weil sie sich "im Flow" fühlen
-- Fühlen sich schuldig, wenn sie pausieren
-- Verstehen nicht, warum die App Pausen "erzwingt"
+Many users:
+- Skip breaks because they feel "in the zone"
+- Feel guilty when they take breaks
+- Don't understand why the app "forces" breaks
 
-Diese Section legitimiert Erholung wissenschaftlich und emotional.
+This section legitimizes rest—scientifically and emotionally.
 
 ---
 
-## Content-Struktur
+## Content Structure
 
 ### Intro
-Ein kurzer, poetischer Einstieg (2-3 Sätze).
+A short, poetic opening (2-3 sentences).
 
-### Kernabschnitte
-3-4 Abschnitte mit je:
-- Titel
-- 2-3 Absätze im Particle Voice
-- Optional: Quelle/Studie
+### Core Sections
+3-4 sections, each with:
+- Title
+- 2-3 paragraphs in Particle Voice
+- Optional: Source/study reference
 
 ### Closing
-Ein ermutigendes Fazit.
+An encouraging conclusion.
 
 ---
 
@@ -49,83 +49,83 @@ Ein ermutigendes Fazit.
 
 ### Intro
 
-> *Dein Gehirn arbeitet in zwei Modi. Einer davon ist Ruhe.*
+> *Your brain works in two modes. One of them is rest.*
 
 ---
 
-### Section 1: "Die zwei Modi"
+### Section 1: "The Two Modes"
 
 **Focused Mode. Diffuse Mode.**
 
-Wenn du arbeitest, ist dein Gehirn im "Focused Mode" – konzentriert auf eine Aufgabe, wie ein Scheinwerfer.
+When you work, your brain is in "Focused Mode"—locked onto a task like a spotlight.
 
-Aber Lernen, Problemlösen, Kreativität – das passiert im "Diffuse Mode". Wenn du nicht hinschaust. Wenn du spazieren gehst. Wenn du duschst.
+But learning, problem-solving, creativity—that happens in "Diffuse Mode." When you're not looking. When you're walking. When you're in the shower.
 
-**Die besten Ideen kommen nicht am Schreibtisch.**
+**The best ideas don't come at the desk.**
 
-Sie kommen, wenn du aufhörst zu suchen.
-
----
-
-### Section 2: "Warum 'durcharbeiten' nicht funktioniert"
-
-**Kognitive Ermüdung ist real.**
-
-Nach etwa 90 Minuten intensiver Arbeit sinkt deine Konzentrationsfähigkeit messbar. Dein Gehirn braucht Zeit, um Neurotransmitter wieder aufzubauen.
-
-Wer keine Pausen macht, arbeitet nicht mehr – er sitzt nur noch da.
-
-**Eine 5-Minuten-Pause ist keine verlorene Zeit.**
-
-Sie ist der Moment, in dem dein Gehirn aufräumt.
+They come when you stop searching.
 
 ---
 
-### Section 3: "Die DeskTime-Studie"
+### Section 2: "Why 'Pushing Through' Doesn't Work"
 
-**52 Minuten Arbeit. 17 Minuten Pause.**
+**Cognitive fatigue is real.**
 
-2014 analysierte DeskTime die Arbeitsgewohnheiten ihrer produktivsten Nutzer. Das Ergebnis überraschte:
+After about 90 minutes of intense work, your ability to concentrate measurably declines. Your brain needs time to replenish neurotransmitters.
 
-Die Top 10% arbeiteten nicht am längsten. Sie arbeiteten in klaren Blöcken – mit echten Pausen dazwischen.
+Those who don't take breaks aren't working anymore—they're just sitting there.
 
-Nicht am Handy scrollen. Nicht E-Mails checken. **Echte Pausen.**
+**A 5-minute break isn't lost time.**
 
-Aufstehen. Sich bewegen. Den Blick schweifen lassen.
+It's when your brain tidies up.
 
 ---
 
-### Section 4: "Was ist eine gute Pause?"
+### Section 3: "The DeskTime Study"
 
-**Aktiv schlägt passiv.**
+**52 minutes of work. 17 minutes of rest.**
 
-| Gut | Weniger gut |
-|-----|-------------|
-| Aufstehen, Stretchen | Am Schreibtisch sitzen bleiben |
-| Kurz rausgehen | Social Media checken |
-| Wasser holen | Auf einen anderen Bildschirm starren |
-| Aus dem Fenster schauen | E-Mails beantworten |
+In 2014, DeskTime analyzed the work habits of their most productive users. The result was surprising:
 
-Die beste Pause ist eine, nach der du dich erfrischt fühlst – nicht erschöpft.
+The top 10% didn't work the longest. They worked in clear blocks—with real breaks in between.
+
+Not scrolling on their phones. Not checking emails. **Real breaks.**
+
+Standing up. Moving around. Letting their gaze wander.
+
+---
+
+### Section 4: "What Makes a Good Break?"
+
+**Active beats passive.**
+
+| Good | Less Good |
+|------|-----------|
+| Stand up, stretch | Stay seated at your desk |
+| Step outside briefly | Check social media |
+| Get some water | Stare at another screen |
+| Look out the window | Answer emails |
+
+The best break is one that leaves you refreshed—not drained.
 
 ---
 
 ### Closing
 
-> *Particle zählt nicht nur deine Arbeit. Particle gibt dir Raum für das, was dazwischen passiert.*
+> *Particle doesn't just count your work. Particle gives you space for what happens in between.*
 >
-> *Denn dort entsteht deine beste Arbeit.*
+> *Because that's where your best work is born.*
 
 ---
 
-## Technische Umsetzung
+## Technical Implementation
 
-### Datei-Struktur
+### File Structure
 
 ```typescript
 // src/lib/content/breaks-content.ts
 
-export const BREAKS_INTRO = "Dein Gehirn arbeitet in zwei Modi. Einer davon ist Ruhe.";
+export const BREAKS_INTRO = "Your brain works in two modes. One of them is rest.";
 
 export interface BreaksSection {
   id: string;
@@ -136,27 +136,61 @@ export interface BreaksSection {
 export const BREAKS_SECTIONS: BreaksSection[] = [
   {
     id: 'two-modes',
-    title: 'Die zwei Modi',
+    title: 'The Two Modes',
     paragraphs: [
       'Focused Mode. Diffuse Mode.',
-      'Wenn du arbeitest, ist dein Gehirn im "Focused Mode" – konzentriert auf eine Aufgabe, wie ein Scheinwerfer.',
-      // ...
+      'When you work, your brain is in "Focused Mode"—locked onto a task like a spotlight.',
+      'But learning, problem-solving, creativity—that happens in "Diffuse Mode." When you\'re not looking. When you\'re walking. When you\'re in the shower.',
+      'The best ideas don\'t come at the desk.',
+      'They come when you stop searching.',
     ],
   },
-  // ...
+  {
+    id: 'pushing-through',
+    title: 'Why "Pushing Through" Doesn\'t Work',
+    paragraphs: [
+      'Cognitive fatigue is real.',
+      'After about 90 minutes of intense work, your ability to concentrate measurably declines. Your brain needs time to replenish neurotransmitters.',
+      'Those who don\'t take breaks aren\'t working anymore—they\'re just sitting there.',
+      'A 5-minute break isn\'t lost time.',
+      'It\'s when your brain tidies up.',
+    ],
+  },
+  {
+    id: 'desktime',
+    title: 'The DeskTime Study',
+    paragraphs: [
+      '52 minutes of work. 17 minutes of rest.',
+      'In 2014, DeskTime analyzed the work habits of their most productive users. The result was surprising:',
+      'The top 10% didn\'t work the longest. They worked in clear blocks—with real breaks in between.',
+      'Not scrolling on their phones. Not checking emails. Real breaks.',
+      'Standing up. Moving around. Letting their gaze wander.',
+    ],
+  },
+  {
+    id: 'good-break',
+    title: 'What Makes a Good Break?',
+    paragraphs: [
+      'Active beats passive.',
+      'The best break is one that leaves you refreshed—not drained.',
+    ],
+  },
 ];
 
-export const BREAKS_CLOSING = "Particle zählt nicht nur deine Arbeit...";
+export const BREAKS_CLOSING = [
+  "Particle doesn't just count your work. Particle gives you space for what happens in between.",
+  "Because that's where your best work is born.",
+];
 ```
 
-### Komponente
+### Component
 
 ```typescript
 // src/components/learn/BreaksContent.tsx
 
 export function BreaksContent({ onBack }: { onBack: () => void }) {
-  // Keyboard handler für Back-Navigation (← / Backspace)
-  // Analog zu RhythmContent.tsx
+  // Keyboard handler for back navigation (← / Backspace)
+  // Same pattern as RhythmContent.tsx
 
   return (
     <motion.div>
@@ -174,7 +208,11 @@ export function BreaksContent({ onBack }: { onBack: () => void }) {
       ))}
 
       {/* Closing */}
-      <p className="italic text-center">{BREAKS_CLOSING}</p>
+      <div className="italic text-center">
+        {BREAKS_CLOSING.map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
+      </div>
     </motion.div>
   );
 }
@@ -202,7 +240,7 @@ export function BreaksContent({ onBack }: { onBack: () => void }) {
 
 ---
 
-## Design-Richtlinien
+## Design Guidelines
 
 ### Typography
 
@@ -211,28 +249,28 @@ export function BreaksContent({ onBack }: { onBack: () => void }) {
 | Intro | `text-lg italic text-secondary` |
 | Section Title | `text-base font-semibold text-primary` |
 | Paragraph | `text-sm text-secondary leading-relaxed` |
-| Emphasis | `font-medium` (kein Bold) |
+| Emphasis | `font-medium` (not bold) |
 | Closing | `text-sm italic text-tertiary text-center` |
 
 ### Spacing
 
-- Zwischen Sections: `space-y-8`
-- Zwischen Paragraphs: `space-y-3`
-- Intro → First Section: `mb-8`
+- Between sections: `space-y-8`
+- Between paragraphs: `space-y-3`
+- Intro → First section: `mb-8`
 
-### Keine interaktiven Elemente
+### No Interactive Elements
 
-Anders als "The Three Rhythms" hat diese Section keine Buttons. Es ist reiner Lese-Content.
+Unlike "The Three Rhythms," this section has no buttons. It's pure reading content.
 
 ---
 
-## Content-Prinzipien
+## Content Principles
 
-1. **Kein Zeigefinger** – Nicht "Du solltest pausieren", sondern "Das passiert in deinem Gehirn"
-2. **Wissenschaft als Story** – DeskTime, Kleitman – Namen und Zahlen geben Glaubwürdigkeit
-3. **Kurze Absätze** – Max 2-3 Sätze
-4. **Particle Voice** – Ruhig, weise, poetisch
-5. **Kein Jargon** – "Diffuse Mode" wird erklärt, nicht vorausgesetzt
+1. **No finger-wagging** – Not "You should take breaks," but "This is what happens in your brain"
+2. **Science as story** – DeskTime, Kleitman – names and numbers add credibility
+3. **Short paragraphs** – Max 2-3 sentences
+4. **Particle Voice** – Calm, wise, poetic
+5. **No jargon** – "Diffuse Mode" is explained, not assumed
 
 ---
 
@@ -250,32 +288,32 @@ Anders als "The Three Rhythms" hat diese Section keine Buttons. Es ist reiner Le
 
 ## Definition of Done
 
-- [ ] `breaks-content.ts` mit allen Texten
-- [ ] `BreaksContent.tsx` implementiert
-- [ ] In LearnPanel integriert
-- [ ] Keyboard-Navigation funktioniert
+- [ ] `breaks-content.ts` with all texts
+- [ ] `BreaksContent.tsx` implemented
+- [ ] Integrated in LearnPanel
+- [ ] Keyboard navigation works
 - [ ] Content reviewed (Particle Voice)
-- [ ] Mobile getestet (scrollbar)
+- [ ] Mobile tested (scrollable)
 - [ ] TypeScript check passes
 - [ ] Build succeeds
 
 ---
 
-## Quellen für Content
+## Sources
 
 - Barbara Oakley: "A Mind for Numbers" (Focused/Diffuse Mode)
-- DeskTime Studie (2014): 52/17 Rhythmus
+- DeskTime Study (2014): 52/17 rhythm
 - Cal Newport: "Deep Work"
 - Nathaniel Kleitman: Ultradian Rhythms
 
 ---
 
-## Notizen
+## Notes
 
-- **Kein CTA** – Diese Section verkauft nichts, sie erklärt
-- **Länge:** ~400-500 Wörter (2-3 Minuten Lesezeit)
-- **Tone:** Wie ein weiser Freund, der etwas erklärt – nicht wie ein Lehrer
+- **No CTA** – This section doesn't sell anything, it explains
+- **Length:** ~400-500 words (2-3 minute read)
+- **Tone:** Like a wise friend explaining—not like a teacher
 
 ---
 
-*"Die beste Arbeit entsteht nicht trotz der Pausen. Sie entsteht wegen ihnen."*
+*"The best work doesn't happen despite the breaks. It happens because of them."*

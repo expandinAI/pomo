@@ -14,31 +14,31 @@ tags: [content, learn, philosophy, brand]
 
 ## User Story
 
-> Als **Particle-Nutzer**
-> möchte ich **verstehen, warum diese App anders ist als alle anderen**,
-> damit **ich eine emotionale Verbindung aufbaue und verstehe, dass hier eine tiefere Philosophie dahintersteckt**.
+> As a **Particle user**
+> I want to **understand why this app is different from all the others**,
+> so that **I build an emotional connection and realize there's a deeper philosophy behind it**.
 
-## Kontext
+## Context
 
-Nutzer sehen zunächst "nur" eine Timer-App. Aber Particle ist mehr:
-- Eine Philosophie des Fokus
-- Ein Anti-Gamification-Statement
-- Ein minimalistisches Design-Manifest
+Users initially see "just" a timer app. But Particle is more:
+- A philosophy of focus
+- An anti-gamification statement
+- A minimalist design manifesto
 
-Diese Section erklärt das "Warum" hinter Particle – und schafft die emotionale Differenzierung, die aus Nutzern Fans macht.
+This section explains the "why" behind Particle—and creates the emotional differentiation that turns users into fans.
 
 ---
 
-## Content-Struktur
+## Content Structure
 
 ### Intro
-Ein einzelner weißer Punkt auf schwarzem Grund.
+A single white dot on a black canvas.
 
-### Kernabschnitte
-4 Abschnitte, die die Kernphilosophie vermitteln.
+### Core Sections
+4 sections conveying the core philosophy.
 
 ### Closing
-Die Einladung, Teil davon zu sein.
+An invitation to be part of it.
 
 ---
 
@@ -46,135 +46,181 @@ Die Einladung, Teil davon zu sein.
 
 ### Intro
 
-> *Ein einzelner weißer Punkt auf schwarzem Grund.*
+> *A single white dot on a black canvas.*
 >
-> *Still. Unscheinbar. Und doch: Das Fundament von allem, was du erschaffst.*
+> *Still. Unassuming. And yet: the foundation of everything you create.*
 
 ---
 
-### Section 1: "Was ist ein Partikel?"
+### Section 1: "What Is a Particle?"
 
-**Die Arbeit eines Lebens besteht aus vielen Partikeln.**
+**A life's work is made of many particles.**
 
-Jeder große Roman wurde Wort für Wort geschrieben.
-Jedes Meisterwerk entstand Pinselstrich für Pinselstrich.
-Jede Karriere wurde gebaut – Fokus-Session für Fokus-Session.
+Every great novel was written word by word.
+Every masterpiece was painted brushstroke by brushstroke.
+Every career was built—focus session by focus session.
 
-**Partikel für Partikel.**
+**Particle by particle.**
 
-Andere Apps zählen Tomaten. Oder Bäume. Oder Punkte in einem Spiel.
+Other apps count tomatoes. Or trees. Or points in a game.
 
-Wir zählen etwas anderes: Die gebündelte Energie deiner Aufmerksamkeit. Sichtbar gemacht. Ein Punkt nach dem anderen.
+We count something different: The bundled energy of your attention. Made visible. One dot at a time.
 
-Am Ende eines Jahres siehst du nicht Statistiken. Du siehst dich selbst – in dem, was du erschaffen hast.
-
----
-
-### Section 2: "Stolz statt Schuld"
-
-**Keine roten Badges. Keine verlorenen Streaks.**
-
-Die meisten Produktivitäts-Apps arbeiten mit Schuld:
-- "Du hast deine Serie verloren!"
-- "Du bist heute unter deinem Ziel!"
-- "Dein Baum ist gestorben!"
-
-Particle arbeitet mit Stolz.
-
-Du sammelst keine Punkte, um eine App zufrieden zu stellen. Du sammelst Partikel, weil sie zeigen, wer du bist.
-
-**Es gibt keine Bestrafung für Pausen. Es gibt nur Schönheit für Fokus.**
-
-Wenn du auf deine Partikel schaust, siehst du nicht, was du verpasst hast. Du siehst, was du erschaffen hast.
+At the end of a year, you don't see statistics. You see yourself—in what you've created.
 
 ---
 
-### Section 3: "Weniger, aber besser"
+### Section 2: "Pride, Not Guilt"
 
-**Schwarz. Weiß. Punkte. Fertig.**
+**No red badges. No lost streaks.**
 
-In einer Welt voller bunter Apps, Notifications und Dopamin-Hits wählen wir einen anderen Weg: Reduktion.
+Most productivity apps work with guilt:
+- "You broke your streak!"
+- "You're below your goal today!"
+- "Your tree died!"
 
-Dieter Rams sagte es am besten: *"Weniger, aber besser."*
+Particle works with pride.
 
-Wir haben uns gefragt: Was können wir weglassen?
+You don't collect points to please an app. You collect particles because they show who you are.
 
-Farben? Weg.
-Badges? Weg.
-Gamification? Weg.
-Notifications, die dich unterbrechen? Weg.
+**There's no punishment for rest. There's only beauty for focus.**
 
-Was bleibt, ist das Wesentliche: Ein Timer. Ein Partikel. Deine Arbeit.
-
-**Jedes Pixel muss seinen Platz verdienen.**
+When you look at your particles, you don't see what you missed. You see what you built.
 
 ---
 
-### Section 4: "Ein Spiegel, kein Spiel"
+### Section 3: "Less, But Better"
 
-**Particle ist kein Spiel. Particle ist ein Spiegel.**
+**Black. White. Dots. Done.**
 
-Forest lässt dich Bäume züchten. Nett. Aber es ist nicht *dein* Leben. Es ist eine Simulation.
+In a world of colorful apps, notifications, and dopamine hits, we chose a different path: Reduction.
 
-Habitica macht Produktivität zum Rollenspiel. Spaßig. Aber deine Arbeit ist kein Game.
+Dieter Rams said it best: *"Less, but better."*
 
-Particle zeigt dir einfach, was du tust. Punkt für Punkt. Tag für Tag.
+We asked ourselves: What can we remove?
 
-Wenn du auf deine gesammelten Partikel schaust, siehst du dich selbst. Deine Arbeit. Deine Reise.
+Colors? Gone.
+Badges? Gone.
+Gamification? Gone.
+Notifications that interrupt you? Gone.
 
-**Nicht was die App von dir will. Sondern was du erschaffen hast.**
+What remains is the essential: A timer. A particle. Your work.
+
+**Every pixel must earn its place.**
+
+---
+
+### Section 4: "A Mirror, Not a Game"
+
+**Particle isn't a game. Particle is a mirror.**
+
+Forest lets you grow trees. Nice. But it's not *your* life. It's a simulation.
+
+Habitica turns productivity into a role-playing game. Fun. But your work isn't a game.
+
+Particle simply shows you what you do. Dot by dot. Day by day.
+
+When you look at your collected particles, you see yourself. Your work. Your journey.
+
+**Not what the app wants from you. But what you've created.**
 
 ---
 
 ### Closing
 
-> *Particle ist mehr als eine App.*
+> *Particle is more than an app.*
 >
-> *Es ist eine Einladung, anders über Fokus nachzudenken.*
+> *It's an invitation to think differently about focus.*
 >
-> *Nicht als Pflicht. Nicht als Spiel. Sondern als etwas, das sichtbar wird.*
+> *Not as a duty. Not as a game. But as something that becomes visible.*
 >
-> *Partikel für Partikel.*
+> *Particle by particle.*
 
 ---
 
-## Technische Umsetzung
+## Technical Implementation
 
-### Datei-Struktur
+### File Structure
 
 ```typescript
 // src/lib/content/philosophy-content.ts
 
 export const PHILOSOPHY_INTRO = [
-  "Ein einzelner weißer Punkt auf schwarzem Grund.",
-  "Still. Unscheinbar. Und doch: Das Fundament von allem, was du erschaffst.",
+  "A single white dot on a black canvas.",
+  "Still. Unassuming. And yet: the foundation of everything you create.",
 ];
 
 export interface PhilosophySection {
   id: string;
   title: string;
   paragraphs: string[];
-  emphasis?: string; // Hervorgehobener Satz
+  emphasis?: string; // Highlighted sentence
 }
 
 export const PHILOSOPHY_SECTIONS: PhilosophySection[] = [
   {
     id: 'what-is-particle',
-    title: 'Was ist ein Partikel?',
-    paragraphs: [...],
-    emphasis: 'Die Arbeit eines Lebens besteht aus vielen Partikeln.',
+    title: 'What Is a Particle?',
+    emphasis: "A life's work is made of many particles.",
+    paragraphs: [
+      'Every great novel was written word by word.',
+      'Every masterpiece was painted brushstroke by brushstroke.',
+      'Every career was built—focus session by focus session.',
+      'Particle by particle.',
+      'Other apps count tomatoes. Or trees. Or points in a game.',
+      'We count something different: The bundled energy of your attention. Made visible. One dot at a time.',
+      "At the end of a year, you don't see statistics. You see yourself—in what you've created.",
+    ],
   },
-  // ...
+  {
+    id: 'pride-not-guilt',
+    title: 'Pride, Not Guilt',
+    emphasis: 'No red badges. No lost streaks.',
+    paragraphs: [
+      'Most productivity apps work with guilt:',
+      '"You broke your streak!" "You\'re below your goal today!" "Your tree died!"',
+      'Particle works with pride.',
+      "You don't collect points to please an app. You collect particles because they show who you are.",
+      "There's no punishment for rest. There's only beauty for focus.",
+      "When you look at your particles, you don't see what you missed. You see what you built.",
+    ],
+  },
+  {
+    id: 'less-but-better',
+    title: 'Less, But Better',
+    emphasis: 'Black. White. Dots. Done.',
+    paragraphs: [
+      'In a world of colorful apps, notifications, and dopamine hits, we chose a different path: Reduction.',
+      'Dieter Rams said it best: "Less, but better."',
+      'We asked ourselves: What can we remove?',
+      'Colors? Gone. Badges? Gone. Gamification? Gone. Notifications that interrupt you? Gone.',
+      'What remains is the essential: A timer. A particle. Your work.',
+      'Every pixel must earn its place.',
+    ],
+  },
+  {
+    id: 'mirror-not-game',
+    title: 'A Mirror, Not a Game',
+    emphasis: "Particle isn't a game. Particle is a mirror.",
+    paragraphs: [
+      "Forest lets you grow trees. Nice. But it's not your life. It's a simulation.",
+      "Habitica turns productivity into a role-playing game. Fun. But your work isn't a game.",
+      'Particle simply shows you what you do. Dot by dot. Day by day.',
+      'When you look at your collected particles, you see yourself. Your work. Your journey.',
+      "Not what the app wants from you. But what you've created.",
+    ],
+  },
 ];
 
 export const PHILOSOPHY_CLOSING = [
-  "Particle ist mehr als eine App.",
-  "Es ist eine Einladung, anders über Fokus nachzudenken.",
-  // ...
+  "Particle is more than an app.",
+  "It's an invitation to think differently about focus.",
+  "Not as a duty. Not as a game. But as something that becomes visible.",
+  "Particle by particle.",
 ];
 ```
 
-### Komponente
+### Component
 
 ```typescript
 // src/components/learn/PhilosophyContent.tsx
@@ -184,7 +230,7 @@ export function PhilosophyContent({ onBack }: { onBack: () => void }) {
 
   return (
     <motion.div variants={staggerContainer}>
-      {/* Intro – größer, zentriert, poetisch */}
+      {/* Intro – larger, centered, poetic */}
       <motion.div variants={itemVariants} className="text-center mb-8">
         {PHILOSOPHY_INTRO.map((line, i) => (
           <p key={i} className="text-lg italic text-secondary">{line}</p>
@@ -208,7 +254,7 @@ export function PhilosophyContent({ onBack }: { onBack: () => void }) {
         </motion.div>
       ))}
 
-      {/* Closing – zentriert, poetisch */}
+      {/* Closing – centered, poetic */}
       <motion.div variants={itemVariants} className="text-center pt-4 border-t border-tertiary/10">
         {PHILOSOPHY_CLOSING.map((line, i) => (
           <p key={i} className={cn(
@@ -224,24 +270,24 @@ export function PhilosophyContent({ onBack }: { onBack: () => void }) {
 
 ---
 
-## Menu-Integration
+## Menu Integration
 
-### Neuer Menüpunkt
+### New Menu Item
 
-Das Learn Menu muss um diesen Eintrag erweitert werden:
+The Learn Menu needs to be extended with this entry:
 
 ```typescript
-// LearnMenu.tsx – MENU_ITEMS erweitern
+// LearnMenu.tsx – extend MENU_ITEMS
 
 {
   id: 'philosophy',
-  icon: Sparkles, // oder Lightbulb
+  icon: Sparkles, // or Lightbulb
   title: 'The Particle Philosophy',
   description: 'Why we built this differently.',
 },
 ```
 
-### LearnView Type erweitern
+### Extend LearnView Type
 
 ```typescript
 // LearnMenu.tsx
@@ -261,22 +307,22 @@ export type LearnView = 'menu' | 'rhythms' | 'breaks' | 'science' | 'philosophy'
 
 ---
 
-## Design-Richtlinien
+## Design Guidelines
 
-### Besondere Behandlung
+### Special Treatment
 
-Diese Section ist die emotionalste. Design soll das unterstützen:
+This is the most emotional section. Design should support that:
 
-| Element | Behandlung |
-|---------|------------|
-| Intro | Größer, zentriert, mehr Whitespace |
-| Emphasis-Sätze | `font-medium`, volle Breite |
-| Closing | Visuell abgesetzt (Border oben) |
-| Zitate | Kursiv, leicht eingerückt |
+| Element | Treatment |
+|---------|-----------|
+| Intro | Larger, centered, more whitespace |
+| Emphasis sentences | `font-medium`, full width |
+| Closing | Visually separated (border top) |
+| Quotes | Italic, slightly indented |
 
-### Particle-Animation (optional)
+### Particle Animation (optional)
 
-Am Ende der Section könnte ein einzelner pulsierender Punkt erscheinen:
+At the end of the section, a single pulsing dot could appear:
 
 ```typescript
 <motion.div
@@ -288,13 +334,13 @@ Am Ende der Section könnte ein einzelner pulsierender Punkt erscheinen:
 
 ---
 
-## Content-Prinzipien
+## Content Principles
 
-1. **Manifest-Ton** – Das ist unsere Überzeugung, keine Anleitung
-2. **Kontraste nutzen** – "Andere Apps... Wir..."
-3. **Wiederholung als Stilmittel** – "Partikel für Partikel"
-4. **Keine Selbstbeweihräucherung** – Fakten statt "wir sind die besten"
-5. **Einladung, kein Verkauf** – Der Nutzer soll sich identifizieren, nicht überzeugt werden
+1. **Manifesto tone** – This is our conviction, not a how-to
+2. **Use contrasts** – "Other apps... We..."
+3. **Repetition as style** – "Particle by particle"
+4. **No self-congratulation** – Facts, not "we're the best"
+5. **Invitation, not sales pitch** – The user should identify, not be convinced
 
 ---
 
@@ -313,36 +359,36 @@ Am Ende der Section könnte ein einzelner pulsierender Punkt erscheinen:
 
 ## Definition of Done
 
-- [ ] `philosophy-content.ts` mit allen Texten
-- [ ] `PhilosophyContent.tsx` implementiert
-- [ ] LearnMenu erweitert (neuer Eintrag)
-- [ ] LearnView type erweitert
+- [ ] `philosophy-content.ts` with all texts
+- [ ] `PhilosophyContent.tsx` implemented
+- [ ] LearnMenu extended (new entry)
+- [ ] LearnView type extended
 - [ ] LearnPanel: VIEW_TITLES, FOOTER_HINTS, render
-- [ ] Keyboard-Navigation funktioniert
+- [ ] Keyboard navigation works
 - [ ] Content reviewed (Particle Voice)
-- [ ] Mobile getestet
+- [ ] Mobile tested
 - [ ] TypeScript check passes
 - [ ] Build succeeds
 
 ---
 
-## Warum P2 statt P1?
+## Why P2 Instead of P1?
 
-Diese Section ist wichtig für **Differenzierung und Kundenbindung**, aber:
-- Nutzer suchen sie nicht aktiv (anders als "Welcher Rhythmus passt zu mir?")
-- Sie löst kein unmittelbares Problem
-- Sie ist ein "Delight"-Feature, kein "Must-Have"
+This section is important for **differentiation and customer loyalty**, but:
+- Users don't actively search for it (unlike "Which rhythm fits me?")
+- It doesn't solve an immediate problem
+- It's a "delight" feature, not a "must-have"
 
-**Trotzdem wertvoll:** Diese Section macht aus Nutzern Fans. Sie erklärt, warum Particle anders ist – und gibt Nutzern etwas, das sie teilen können.
+**Still valuable:** This section turns users into fans. It explains why Particle is different—and gives users something to share.
 
 ---
 
-## Notizen
+## Notes
 
-- **Länge:** ~500-600 Wörter (3 Minuten Lesezeit)
-- **Tone:** Manifest, nicht Tutorial
-- **Inspiration:** Apple "Think Different", Basecamp "Getting Real"
-- **Ziel:** "Aha, deshalb ist das hier anders"
+- **Length:** ~500-600 words (3 minute read)
+- **Tone:** Manifesto, not tutorial
+- **Inspiration:** Apple "Think Different," Basecamp "Getting Real"
+- **Goal:** "Ah, that's why this is different"
 
 ---
 
