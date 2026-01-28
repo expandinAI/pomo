@@ -23,6 +23,13 @@ const VIEW_TITLES: Record<LearnView, string> = {
   science: 'The Science',
 };
 
+const FOOTER_HINTS: Record<LearnView, string> = {
+  menu: '↑↓ navigate · Enter select · L close',
+  rhythms: '1/2/3 select rhythm · ← back · L close',
+  breaks: '← back · L close',
+  science: '← back · L close',
+};
+
 const panelVariants = {
   hidden: { x: '100%', opacity: 0 },
   visible: {
@@ -93,6 +100,26 @@ export function LearnPanel({
     onPresetChange(presetId);
     onClose();
   };
+
+  // Back navigation for breaks/science views (rhythms has its own handler)
+  useEffect(() => {
+    if (view === 'menu' || view === 'rhythms') return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (e.key === 'Backspace' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setView('menu');
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [view]);
 
   return (
     <motion.div
@@ -170,7 +197,7 @@ export function LearnPanel({
       {/* Footer hint */}
       <div className="px-5 py-3 border-t border-tertiary/10 light:border-tertiary-dark/10 flex-shrink-0">
         <span className="text-xs text-tertiary light:text-tertiary-dark">
-          {view === 'menu' ? 'Keyboard: L' : 'Press ← or Backspace to go back'}
+          {FOOTER_HINTS[view]}
         </span>
       </div>
     </motion.div>

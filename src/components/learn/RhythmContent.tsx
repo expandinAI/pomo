@@ -34,22 +34,41 @@ export function RhythmContent({
   onPresetChange,
   onBack,
 }: RhythmContentProps) {
-  // Keyboard handler for back navigation
+  // Keyboard handler for back navigation and rhythm selection
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
-      if (e.key === 'Backspace' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        onBack();
+
+      switch (e.key) {
+        case 'Backspace':
+        case 'ArrowLeft':
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onBack();
+          break;
+        case '1':
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onPresetChange('classic');
+          break;
+        case '2':
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onPresetChange('deepWork');
+          break;
+        case '3':
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onPresetChange('ultradian');
+          break;
       }
     }
 
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [onBack]);
+  }, [onBack, onPresetChange]);
 
   return (
     <motion.div
