@@ -511,6 +511,167 @@ User können Hints deaktivieren:
 
 ---
 
+## Onboarding Pattern
+
+### Philosophie
+
+Onboardings in Particle sind **ruhige Momente der Orientierung**, keine aufdringlichen Tutorials. Sie folgen dem Particle-Prinzip: Ein weißer Punkt, eine klare Frage, eine bewusste Entscheidung.
+
+### Drei Prinzipien
+
+1. **Eine Frage, klare Optionen** – Nie mehr als eine Entscheidung pro Onboarding
+2. **Bestätigung mit Bedeutung** – Nach der Wahl zeigen wir, was das bedeutet
+3. **Magischer Übergang** – Der Fade-out fühlt sich an wie das Öffnen einer Tür
+
+### Wann Onboarding verwenden
+
+| Anwendungsfall | Beispiel | Storage-Key |
+|----------------|----------|-------------|
+| Erste Nutzung eines Features | Rhythm-Auswahl | `particle:rhythm-onboarding-completed` |
+| Neue Feature-Einführung | Neue Funktion erklären | `particle:feature-x-onboarding-completed` |
+| Wichtige Einstellung | Benachrichtigungen | `particle:notifications-onboarding-completed` |
+
+### Architektur
+
+```
+src/components/onboarding/
+├── OnboardingOverlay.tsx    # Generische Basis-Komponente
+├── RhythmOnboarding.tsx     # Spezifische Implementierung
+├── [FeatureOnboarding.tsx]  # Zukünftige Implementierungen
+└── index.ts                 # Exports
+```
+
+**Basis-Komponente:** `OnboardingOverlay` ist generisch und wiederverwendbar.
+**Spezifische Implementierungen:** Nutzen die Basis mit eigenem Content.
+
+### Verwendung
+
+```tsx
+import { OnboardingOverlay } from '@/components/onboarding';
+
+<OnboardingOverlay
+  title="Deine Frage hier"
+  subtitle="Optionaler Hilfstext"
+  options={[
+    {
+      id: 'option-a',
+      label: 'Option A',
+      sublabel: 'Details',
+      description: 'Erklärung...',
+      confirmation: 'Option A gewählt.',
+    },
+    // ...
+  ]}
+  fallback={{
+    label: "Ich bin nicht sicher",
+    resultId: 'option-a',
+    confirmation: 'Wir starten mit Option A.',
+  }}
+  onComplete={(selectedId) => handleChoice(selectedId)}
+/>
+```
+
+**Für neue Features:** Erstelle eine spezifische Komponente wie `RhythmOnboarding`:
+
+```tsx
+// src/components/onboarding/FeatureOnboarding.tsx
+import { OnboardingOverlay, OnboardingOption } from './OnboardingOverlay';
+
+const FEATURE_OPTIONS: OnboardingOption[] = [...];
+
+export function FeatureOnboarding({ onComplete }: { onComplete: (id: string) => void }) {
+  return (
+    <OnboardingOverlay
+      title="..."
+      options={FEATURE_OPTIONS}
+      onComplete={onComplete}
+    />
+  );
+}
+```
+
+### Timing-Konstanten
+
+Exportiert aus `OnboardingOverlay` für Konsistenz:
+
+| Konstante | Wert | Verwendung |
+|-----------|------|------------|
+| `CONFIRMATION_DISPLAY_DURATION` | 3500ms | Zeit für Confirmation-Nachricht |
+| `FADE_OUT_DURATION` | 1200ms | Dauer des finalen Fade-outs |
+| `CONFIRMATION_DELAY` | 200ms | Verzögerung nach Question-Fade |
+| `CARD_STAGGER_DELAY` | 100ms | Stagger zwischen Option-Cards |
+
+### Visual Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│                          ·                                  │  ← Particle (30% von oben)
+│                                                             │
+│              [Titel]                                        │  ← Content (38% von oben)
+│              [Untertitel]                                   │
+│                                                             │
+│    ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
+│    │  Option 1   │  │  Option 2   │  │  Option 3   │       │  ← Flex-Cards
+│    └─────────────┘  └─────────────┘  └─────────────┘       │
+│                                                             │
+│                  [Fallback-Link]                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Phasen-Flow
+
+```
+question ──(Auswahl)──> confirmation ──(3.5s)──> exiting ──(1.2s)──> onComplete()
+    │                        │                       │
+    ▼                        ▼                       ▼
+ Particle                 Particle                Fade-out
+ pulsiert                 ruhig                   des Overlays
+```
+
+### Hook: useOnboarding
+
+Für jedes Onboarding gibt es einen entsprechenden Hook:
+
+```tsx
+// src/hooks/useOnboarding.ts
+const STORAGE_KEY = 'particle:rhythm-onboarding-completed';
+
+export function useOnboarding() {
+  const [hasCompleted, setHasCompleted] = useState(true); // Default true!
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    setHasCompleted(stored === 'true');
+  }, []);
+
+  const showOnboarding = useCallback(() => setIsVisible(true), []);
+  const completeOnboarding = useCallback(() => {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    setHasCompleted(true);
+    setIsVisible(false);
+  }, []);
+
+  return { hasCompletedOnboarding: hasCompleted, isOnboardingVisible: isVisible, showOnboarding, completeOnboarding };
+}
+```
+
+**Wichtig:** `hasCompleted` default auf `true`, um Flash zu vermeiden!
+
+### Checkliste für neue Onboardings
+
+- [ ] Spezifische Komponente erstellen (z.B. `FeatureOnboarding.tsx`)
+- [ ] Hook erstellen oder erweitern (für neue Storage-Keys)
+- [ ] In `index.ts` exportieren
+- [ ] In `page.tsx` integrieren mit `AnimatePresence`
+- [ ] Trigger-Logik definieren (wann zeigen?)
+- [ ] Keyboard-Blocking konfigurieren (`blockedKeys` prop)
+- [ ] Testing: localStorage löschen und Flow testen
+
+---
+
 ## Anti-Patterns to Avoid
 
 - **No gamification** - No points, badges, streaks – aber Partikel sammeln ist erlaubt (das ist Bedeutung, kein Spiel)

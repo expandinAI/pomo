@@ -42,8 +42,8 @@ const LearnPanel = dynamic(
   () => import('@/components/learn/LearnPanel').then(mod => ({ default: mod.LearnPanel })),
   { ssr: false }
 );
-const OnboardingOverlay = dynamic(
-  () => import('@/components/onboarding/OnboardingOverlay').then(mod => ({ default: mod.OnboardingOverlay })),
+const RhythmOnboarding = dynamic(
+  () => import('@/components/onboarding/RhythmOnboarding').then(mod => ({ default: mod.RhythmOnboarding })),
   { ssr: false }
 );
 
@@ -313,10 +313,10 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-      {/* First-run onboarding overlay - appears on first start attempt */}
+      {/* First-run rhythm onboarding - appears on first start attempt */}
       <AnimatePresence>
         {isOnboardingVisible && (
-          <OnboardingOverlay onComplete={handleOnboardingComplete} />
+          <RhythmOnboarding onComplete={handleOnboardingComplete} />
         )}
       </AnimatePresence>
     </main>
