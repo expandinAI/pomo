@@ -5,8 +5,14 @@ import { Book, Brain, FlaskConical } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 
+export type LearnView = 'menu' | 'rhythms' | 'breaks' | 'science';
+
+interface LearnMenuProps {
+  onNavigate: (view: LearnView) => void;
+}
+
 interface MenuItem {
-  id: string;
+  id: LearnView;
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
@@ -51,7 +57,7 @@ const itemVariants = {
   },
 };
 
-export function LearnMenu() {
+export function LearnMenu({ onNavigate }: LearnMenuProps) {
   return (
     <motion.div
       variants={staggerContainer}
@@ -73,10 +79,7 @@ export function LearnMenu() {
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
             'group'
           )}
-          onClick={() => {
-            // TODO: POMO-162 will implement content navigation
-            console.log('Navigate to:', item.id);
-          }}
+          onClick={() => onNavigate(item.id)}
         >
           <div className="flex items-start gap-3">
             <item.icon className="w-5 h-5 text-tertiary light:text-tertiary-dark group-hover:text-secondary light:group-hover:text-secondary-dark transition-colors flex-shrink-0 mt-0.5" />

@@ -55,8 +55,8 @@ function HomeContent() {
   // Learn panel state
   const [showLearn, setShowLearn] = useState(false);
 
-  // Night mode and command palette
-  const { nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
+  // Night mode, presets, and command palette
+  const { nightModeEnabled, setNightModeEnabled, activePresetId, applyPreset } = useTimerSettingsContext();
   const { open: openCommandPalette } = useCommandPalette();
 
   // Milestones
@@ -250,7 +250,11 @@ function HomeContent() {
               className="fixed inset-0 bg-black/20 z-40"
               onClick={() => setShowLearn(false)}
             />
-            <LearnPanel onClose={() => setShowLearn(false)} />
+            <LearnPanel
+              onClose={() => setShowLearn(false)}
+              currentPresetId={activePresetId}
+              onPresetChange={applyPreset}
+            />
           </>
         )}
       </AnimatePresence>

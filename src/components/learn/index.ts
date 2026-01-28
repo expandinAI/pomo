@@ -1,2 +1,4 @@
 export { LearnPanel } from './LearnPanel';
-export { LearnMenu } from './LearnMenu';
+export { LearnMenu, type LearnView } from './LearnMenu';
+export { RhythmCard } from './RhythmCard';
+export { RhythmContent } from './RhythmContent';
