@@ -34,6 +34,7 @@ import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/components/milestones';
 import { useWellbeingHint } from '@/hooks/useWellbeingHint';
+import { useContextualHints } from '@/hooks/useContextualHints';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -359,6 +360,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Welcome message (shown after first rhythm onboarding)
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
 
+  // Contextual hint (shown after session completion based on user patterns)
+  const [contextualHint, setContextualHint] = useState<string | null>(null);
+
   // Session feedback (kontextueller Moment after completion)
   const [sessionFeedback, setSessionFeedback] = useState<SessionFeedback | null>(null);
 
@@ -387,6 +391,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Wellbeing hints (only during breaks, when enabled)
   const isBreak = state.mode === 'shortBreak' || state.mode === 'longBreak';
   const wellbeingHint = useWellbeingHint({ isBreak, enabled: wellbeingHintsEnabled });
+
+  // Contextual hints (shown after session completion based on user patterns)
+  const { trackOverflow, trackEarlyStop, trackSessionStart, checkForHint, markHintShown } = useContextualHints();
 
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
@@ -509,6 +516,16 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [welcomeMessage]);
+
+  // Auto-clear contextual hint after 8 seconds
+  useEffect(() => {
+    if (contextualHint) {
+      const timeout = setTimeout(() => {
+        setContextualHint(null);
+      }, 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [contextualHint]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -658,7 +675,18 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
+
+    // Check for contextual hint after celebration (3.5s delay)
+    if (wasWorkSession) {
+      setTimeout(() => {
+        const hint = checkForHint();
+        if (hint) {
+          setContextualHint(hint);
+          markHintShown();
+        }
+      }, 3500);
+    }
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, checkForHint, markHintShown]);
 
   // Initialize Web Worker timer
   const {
@@ -1064,6 +1092,11 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     playSound('break');
     vibrate('light');
 
+    // Track early stop for contextual hints (work sessions only)
+    if (isWorkSession) {
+      trackEarlyStop();
+    }
+
     // Clear task when skipping work session
     if (isWorkSession) {
       dispatch({ type: 'CLEAR_TASK' });
@@ -1071,7 +1104,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     // Reset one-off duration (next session uses preset)
     setOneOffDuration(null);
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, playSound, vibrate, workerReset]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, playSound, vibrate, workerReset, trackEarlyStop]);
 
   // Complete session from overflow mode (Enter key in overflow)
   // This is a proper completion that increments the counter
@@ -1111,6 +1144,11 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         lastSessionDurationSeconds: totalDuration,
       });
       milestoneEarned = milestone !== undefined;
+    }
+
+    // Track overflow for contextual hints (work sessions only)
+    if (wasWorkSession) {
+      trackOverflow();
     }
 
     // Proper COMPLETE action (increments counter, shows celebration)
@@ -1203,7 +1241,18 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
+
+    // Check for contextual hint after celebration (3.5s delay)
+    if (wasWorkSession) {
+      setTimeout(() => {
+        const hint = checkForHint();
+        if (hint) {
+          setContextualHint(hint);
+          markHintShown();
+        }
+      }, 3500);
+    }
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1346,17 +1395,19 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     }
     playSound('timer-start');
     vibrate('light');
+    trackSessionStart(); // Track for contextual hints (first-week milestone)
     dispatch({ type: 'START' });
     setPickedTaskIndex(null); // Reset random pick when session starts
-  }, [onBeforeStart, playSound, vibrate]);
+  }, [onBeforeStart, playSound, vibrate, trackSessionStart]);
 
   // Force start (bypasses onBeforeStart) - used after onboarding completes
   const forceStart = useCallback(() => {
     playSound('timer-start');
     vibrate('light');
+    trackSessionStart(); // Track for contextual hints (first-week milestone)
     dispatch({ type: 'START' });
     setPickedTaskIndex(null);
-  }, [playSound, vibrate]);
+  }, [playSound, vibrate, trackSessionStart]);
 
   // Listen for force start event (after onboarding)
   useEffect(() => {
@@ -1883,17 +1934,19 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         message={
           toastMessage
             ? toastMessage
-            : welcomeMessage
-              ? welcomeMessage
-              : showMaxLimitMessage
-                ? 'Maximum 180 min'
-                : state.showSkipMessage
-                  ? `Skipped to ${SESSION_LABELS[state.mode]}`
-                  : particleSelectMode
-                    ? 'Select particle...'
-                    : particleHoverInfo
-                      ? particleHoverInfo
-                      : null
+            : contextualHint
+              ? contextualHint
+              : welcomeMessage
+                ? welcomeMessage
+                : showMaxLimitMessage
+                  ? 'Maximum 180 min'
+                  : state.showSkipMessage
+                    ? `Skipped to ${SESSION_LABELS[state.mode]}`
+                    : particleSelectMode
+                      ? 'Select particle...'
+                      : particleHoverInfo
+                        ? particleHoverInfo
+                        : null
         }
         autoStartCountdown={state.autoStartCountdown}
         nextMode={SESSION_LABELS[state.mode]}
