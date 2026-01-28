@@ -27,6 +27,12 @@ interface StatusMessageProps {
   endTimePreview?: string | null;
   /** Wellbeing hint to display during breaks (lowest priority) */
   wellbeingHint?: string | null;
+  /** Currently hovered mode indicator (overflow/autoStart) */
+  hoveredModeIndicator?: 'overflow' | 'autoStart' | null;
+  /** Whether overflow mode is enabled */
+  overflowEnabled?: boolean;
+  /** Whether auto-start is enabled */
+  autoStartEnabled?: boolean;
 }
 
 /** Preset descriptions with philosophy */
@@ -35,6 +41,18 @@ const PRESET_DESCRIPTIONS: Record<string, string> = {
   deepWork: 'Based on DeskTime research · 52 min focus, 17 or 30 min break · For demanding tasks',
   ultradian: 'Ultradian rhythm · 90 min deep sessions, 20 or 30 min break · Matches your natural cycles',
   custom: 'Your personal rhythm · Adjust in settings',
+};
+
+/** Mode indicator descriptions */
+const MODE_INDICATOR_DESCRIPTIONS = {
+  overflow: {
+    enabled: 'Overflow Mode · Timer continues past zero · Press Enter when ready',
+    disabled: 'Overflow Mode is off · Timer stops at zero',
+  },
+  autoStart: {
+    enabled: 'Auto Start · Next session begins automatically after countdown',
+    disabled: 'Auto Start is off · You control when to begin',
+  },
 };
 
 /**
@@ -61,6 +79,9 @@ export function StatusMessage({
   sessionFeedback,
   endTimePreview,
   wellbeingHint,
+  hoveredModeIndicator,
+  overflowEnabled,
+  autoStartEnabled,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -70,8 +91,11 @@ export function StatusMessage({
    * 1. Auto-Start Countdown (highest priority)
    * 2. Explicit message (toast, celebration, skip, etc.)
    * 3. Session Feedback (kontextueller Moment after completion)
-   * 4. Preset hover (only when idle)
-   * 5. Session status (when running)
+   * 4. Mode indicator hover (overflow/autoStart icons)
+   * 5. Preset hover (only when idle)
+   * 6. Session status (when running)
+   * 7. End time preview
+   * 8. Wellbeing hint (lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -89,12 +113,18 @@ export function StatusMessage({
       return formatFeedbackMessage(sessionFeedback);
     }
 
-    // 4. Preset hover (only when idle)
+    // 4. Mode indicator hover (overflow/autoStart icons)
+    if (hoveredModeIndicator) {
+      const isEnabled = hoveredModeIndicator === 'overflow' ? overflowEnabled : autoStartEnabled;
+      return MODE_INDICATOR_DESCRIPTIONS[hoveredModeIndicator][isEnabled ? 'enabled' : 'disabled'];
+    }
+
+    // 5. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 5. Session status (only when hovering collapsed view)
+    // 6. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);
@@ -110,12 +140,12 @@ export function StatusMessage({
       }
     }
 
-    // 6. End Time Preview (when setting enabled and timer running)
+    // 7. End Time Preview (when setting enabled and timer running)
     if (endTimePreview) {
       return endTimePreview;
     }
 
-    // 7. Wellbeing Hint (only during break, lowest priority)
+    // 8. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }

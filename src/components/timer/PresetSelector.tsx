@@ -24,6 +24,8 @@ interface PresetSelectorProps {
   onPresetHover?: (presetId: string | null) => void;
   /** Callback when hovering over collapsed view (during active session) */
   onCollapsedHover?: (isHovered: boolean) => void;
+  /** Callback when hovering over mode indicators (overflow/autostart icons) */
+  onModeIndicatorHover?: (mode: 'overflow' | 'autoStart' | null) => void;
 }
 
 // Get preset info text (work + break duration)
@@ -49,6 +51,7 @@ function CollapsedPresetView({
   overrideWorkDuration,
   autoStartEnabled,
   overflowEnabled,
+  onModeIndicatorHover,
 }: {
   currentMode: SessionType;
   durations: TimerDurations;
@@ -56,6 +59,7 @@ function CollapsedPresetView({
   overrideWorkDuration?: number | null;
   autoStartEnabled?: boolean;
   overflowEnabled?: boolean;
+  onModeIndicatorHover?: (mode: 'overflow' | 'autoStart' | null) => void;
 }) {
   const isWork = currentMode === 'work';
   // Use override duration if set (from smart input), otherwise use preset
@@ -107,16 +111,28 @@ function CollapsedPresetView({
       {(overflowEnabled || autoStartEnabled) && (
         <div className="flex items-center gap-1 ml-1">
           {overflowEnabled && (
-            <Timer
-              className="w-3 h-3 text-tertiary light:text-tertiary-dark"
-              aria-label="Overflow mode enabled"
-            />
+            <div
+              className="cursor-help"
+              onMouseEnter={() => onModeIndicatorHover?.('overflow')}
+              onMouseLeave={() => onModeIndicatorHover?.(null)}
+            >
+              <Timer
+                className="w-3 h-3 text-tertiary light:text-tertiary-dark"
+                aria-label="Overflow mode enabled"
+              />
+            </div>
           )}
           {autoStartEnabled && (
-            <FastForward
-              className="w-3 h-3 text-tertiary light:text-tertiary-dark"
-              aria-label="Auto-start enabled"
-            />
+            <div
+              className="cursor-help"
+              onMouseEnter={() => onModeIndicatorHover?.('autoStart')}
+              onMouseLeave={() => onModeIndicatorHover?.(null)}
+            >
+              <FastForward
+                className="w-3 h-3 text-tertiary light:text-tertiary-dark"
+                aria-label="Auto-start enabled"
+              />
+            </div>
           )}
         </div>
       )}
@@ -124,7 +140,7 @@ function CollapsedPresetView({
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, overflowEnabled, onPresetHover, onCollapsedHover }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, overflowEnabled, onPresetHover, onCollapsedHover, onModeIndicatorHover }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset, customDurations, customSessionsUntilLong } = useTimerSettingsContext();
 
   // Build a virtual custom preset with actual custom values (not dependent on active preset)
@@ -232,6 +248,7 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
               overrideWorkDuration={overrideWorkDuration}
               autoStartEnabled={autoStartEnabled}
               overflowEnabled={overflowEnabled}
+              onModeIndicatorHover={onModeIndicatorHover}
             />
           </motion.div>
         ) : (

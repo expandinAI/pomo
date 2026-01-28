@@ -372,6 +372,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Collapsed view hover (for session info display during active session)
   const [isCollapsedHovered, setIsCollapsedHovered] = useState(false);
 
+  // Hovered mode indicator (overflow/autoStart icons)
+  const [hoveredModeIndicator, setHoveredModeIndicator] = useState<'overflow' | 'autoStart' | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -1845,6 +1848,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         overflowEnabled={overflowEnabled}
         onPresetHover={setHoveredPresetId}
         onCollapsedHover={setIsCollapsedHovered}
+        onModeIndicatorHover={setHoveredModeIndicator}
       />
 
       {/* Timer display - clickable to open timeline */}
@@ -1959,6 +1963,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         sessionFeedback={sessionFeedback}
         endTimePreview={showEndTime && state.isRunning ? formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow, state.mode) : null}
         wellbeingHint={wellbeingHint}
+        hoveredModeIndicator={hoveredModeIndicator}
+        overflowEnabled={overflowEnabled}
+        autoStartEnabled={autoStartEnabled}
       />
     </div>
   );
