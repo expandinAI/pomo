@@ -8,6 +8,7 @@ interface CommandListProps {
   recentCommands: Command[];
   selectedIndex: number;
   onSelect: (command: Command) => void;
+  onHover: (index: number) => void;
   searchQuery: string;
 }
 
@@ -27,6 +28,7 @@ export function CommandList({
   recentCommands,
   selectedIndex,
   onSelect,
+  onHover,
   searchQuery,
 }: CommandListProps) {
   // Build flat list for index calculation
@@ -88,6 +90,7 @@ export function CommandList({
                   command={cmd}
                   isSelected={selectedIndex === index}
                   onSelect={onSelect}
+                  onHover={() => onHover(index)}
                 />
               );
             })}
@@ -114,6 +117,7 @@ export function CommandList({
                     command={cmd}
                     isSelected={selectedIndex === index}
                     onSelect={onSelect}
+                    onHover={() => onHover(index)}
                   />
                 );
               })}

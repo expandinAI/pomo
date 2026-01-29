@@ -192,6 +192,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 recentCommands={recentCommands}
                 selectedIndex={selectedIndex}
                 onSelect={handleSelect}
+                onHover={setSelectedIndex}
                 searchQuery={searchQuery}
               />
             </div>

@@ -1,17 +1,16 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { SPRING } from '@/styles/design-tokens';
 import type { Command } from '@/lib/commandRegistry';
 
 interface CommandItemProps {
   command: Command;
   isSelected: boolean;
   onSelect: (command: Command) => void;
+  onHover?: () => void;
 }
 
-export function CommandItem({ command, isSelected, onSelect }: CommandItemProps) {
+export function CommandItem({ command, isSelected, onSelect, onHover }: CommandItemProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const isDisabled =
@@ -28,10 +27,12 @@ export function CommandItem({ command, isSelected, onSelect }: CommandItemProps)
   }, [isSelected]);
 
   return (
-    <motion.button
+    <button
       ref={buttonRef}
-      onClick={() => !isDisabled && onSelect(command)}
-      disabled={isDisabled}
+      type="button"
+      onClick={() => onSelect(command)}
+      onMouseEnter={onHover}
+      disabled={Boolean(isDisabled)}
       className={`
         w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg
         text-left transition-colors duration-fast
@@ -44,13 +45,6 @@ export function CommandItem({ command, isSelected, onSelect }: CommandItemProps)
           : 'cursor-pointer'
         }
       `}
-      initial={false}
-      animate={{
-        backgroundColor: isSelected
-          ? 'rgba(255, 255, 255, 0.1)'
-          : 'transparent',
-      }}
-      transition={{ type: 'spring', ...SPRING.snappy }}
     >
       <div className="flex items-center gap-3 min-w-0">
         {command.icon && (
@@ -85,6 +79,6 @@ export function CommandItem({ command, isSelected, onSelect }: CommandItemProps)
           {command.shortcut}
         </kbd>
       )}
-    </motion.button>
+    </button>
   );
 }
