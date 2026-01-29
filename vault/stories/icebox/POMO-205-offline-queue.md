@@ -1,16 +1,18 @@
 ---
 type: story
-status: backlog
-priority: p0
+status: icebox
+priority: p2
 effort: 3
-feature: "[[features/local-first-persistence]]"
+feature: "[[features/cloud-sync-accounts]]"
 created: 2026-01-28
-updated: 2026-01-28
+updated: 2026-01-29
 done_date: null
-tags: [infrastructure, sync, offline]
+tags: [infrastructure, sync, offline, cloud]
 ---
 
-# Offline Queue System
+# POMO-205: Offline Queue System (Cloud Sync)
+
+> **⚠️ ICEBOX**: Diese Story gehört zur Cloud-Sync Serie (POMO-300+), nicht zur localStorage-Migration (POMO-200+). Sie wird relevant, wenn wir Cloud-Accounts implementieren.
 
 ## User Story
 
@@ -20,9 +22,14 @@ tags: [infrastructure, sync, offline]
 
 ## Kontext
 
-Link zum Feature: [[features/local-first-persistence]]
+Link zum Feature: [[features/cloud-sync-accounts]]
 
-Die Offline Queue speichert alle Änderungen, die noch nicht mit dem Server synchronisiert wurden. Sie wird später vom Sync-Service abgearbeitet.
+**Voraussetzungen:**
+- POMO-300 (Clerk Setup)
+- POMO-301 (Supabase Schema)
+- POMO-305 (Sync Service)
+
+Die Offline Queue speichert alle Änderungen, die noch nicht mit dem Server synchronisiert wurden. Sie wird vom Sync-Service abgearbeitet, sobald der User online und eingeloggt ist.
 
 ## Akzeptanzkriterien
 
