@@ -10,6 +10,7 @@ import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useIntro } from '@/hooks/useIntro';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
 import type { LearnView } from '@/components/learn/LearnMenu';
@@ -47,6 +48,8 @@ const RhythmOnboarding = dynamic(
   () => import('@/components/onboarding/RhythmOnboarding').then(mod => ({ default: mod.RhythmOnboarding })),
   { ssr: false }
 );
+// IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
+import { IntroExperience } from '@/components/intro';
 
 /**
  * Inner component that uses milestone context
@@ -72,7 +75,10 @@ function HomeContent() {
   const { nightModeEnabled, setNightModeEnabled, activePresetId, applyPreset } = useTimerSettingsContext();
   const { open: openCommandPalette } = useCommandPalette();
 
-  // Onboarding - shows on first start attempt
+  // First-run intro - shows on very first app open
+  const { isReady: introReady, showIntro, phase: introPhase, skip: skipIntro, markComplete: markIntroComplete } = useIntro();
+
+  // Onboarding - shows on first start attempt (after intro)
   const { hasCompletedOnboarding, isOnboardingVisible, showOnboarding, completeOnboarding } = useOnboarding();
 
   // Intercept first start attempt to show onboarding
@@ -231,6 +237,22 @@ function HomeContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Show intro fullscreen if active (no timer in background)
+  if (showIntro) {
+    return (
+      <IntroExperience
+        phase={introPhase}
+        onSkip={skipIntro}
+        onComplete={markIntroComplete}
+      />
+    );
+  }
+
+  // Show black screen until we know whether to show intro
+  if (!introReady) {
+    return <div className="min-h-screen bg-black" />;
+  }
+
   return (
     <main
       id="main-timer"
@@ -342,6 +364,7 @@ function HomeContent() {
           <RhythmOnboarding onComplete={handleOnboardingComplete} />
         )}
       </AnimatePresence>
+
     </main>
   );
 }
