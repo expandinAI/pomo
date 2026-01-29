@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 2
 feature: "[[features/visual-identity]]"
 created: 2026-01-27
 updated: 2026-01-27
-done_date: null
+done_date: 2026-01-29
 tags: [theme, night-mode, visual, reduction, p2]
 ---
 
