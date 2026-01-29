@@ -29,8 +29,9 @@ interface GenesisParticleProps {
 export function GenesisParticle({ phase }: GenesisParticleProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Visible from genesis until truth1 (ParticleSystem takes over at truth2)
-  const isVisible = ['genesis', 'truth1'].includes(phase);
+  // Visible from genesis through transition (fades out during transition)
+  const isVisible = ['genesis', 'truth1', 'truth2', 'invitation', 'transition'].includes(phase);
+  const isFadingOut = phase === 'transition';
 
   if (!isVisible) return null;
 
@@ -42,14 +43,19 @@ export function GenesisParticle({ phase }: GenesisParticleProps) {
       style={{ filter: 'blur(0.5px)' }}
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{
-        opacity: 1,
-        scale: prefersReducedMotion ? 1 : [1, 1.02, 1, 0.98, 1],
+        opacity: isFadingOut ? 0 : 1,
+        scale: prefersReducedMotion ? 1 : (isFadingOut ? 0.8 : [1, 1.02, 1, 0.98, 1]),
       }}
       transition={{
-        opacity: { duration: 1.5, ease: [0.33, 1, 0.68, 1] },
+        opacity: {
+          duration: isFadingOut ? (prefersReducedMotion ? 0.2 : 1.5) : 1.5,
+          ease: [0.33, 1, 0.68, 1],
+        },
         scale: prefersReducedMotion
           ? { duration: 0 }
-          : { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+          : isFadingOut
+            ? { duration: 1.5, ease: [0.33, 1, 0.68, 1] }
+            : { duration: 4, repeat: Infinity, ease: 'easeInOut' },
       }}
       aria-hidden="true"
     />

@@ -3,6 +3,8 @@
 import { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { IntroPhase } from '@/hooks/useIntro';
+import { usePrefersReducedMotion } from '@/hooks/useIntro';
+import type { DailyIntention } from '@/lib/content/daily-intentions';
 import { GenesisParticle } from './GenesisParticle';
 import { IntroTypography } from './IntroTypography';
 import { ParticleSystem } from './ParticleSystem';
@@ -14,6 +16,8 @@ import { ParticleSystem } from './ParticleSystem';
 export interface IntroExperienceProps {
   /** Current phase of the intro */
   phase: IntroPhase;
+  /** The intention/text to display */
+  intention: DailyIntention;
   /** Callback when user skips the intro */
   onSkip: () => void;
   /** Callback when intro is complete */
@@ -24,7 +28,10 @@ export interface IntroExperienceProps {
 // Component
 // ============================================================================
 
-export function IntroExperience({ phase, onSkip, onComplete }: IntroExperienceProps) {
+export function IntroExperience({ phase, intention, onSkip, onComplete }: IntroExperienceProps) {
+  // Reduced motion support
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   // Handle skip events (click, tap, keyboard)
   const handleSkip = useCallback(
     (e: KeyboardEvent | MouseEvent | TouchEvent) => {
@@ -71,40 +78,32 @@ export function IntroExperience({ phase, onSkip, onComplete }: IntroExperiencePr
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: phase === 'transition' ? 0 : 1 }}
-      transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+      transition={{
+        duration: prefersReducedMotion ? 0.2 : 1.2,
+        ease: [0.4, 0, 0.2, 1]
+      }}
       className="fixed inset-0 bg-black z-[100] flex items-center justify-center cursor-default select-none"
       role="dialog"
       aria-modal="true"
       aria-label="Particle intro"
     >
-      {/* POMO-171: Genesis particle - appears and breathes */}
+      {/* Single particle - appears and breathes throughout */}
       <GenesisParticle phase={phase} />
 
-      {/* POMO-173: Particle system - division, drift, convergence */}
-      <ParticleSystem phase={phase} />
+      {/* ParticleSystem disabled - keeping it minimal with just one particle */}
+      {/* <ParticleSystem phase={phase} /> */}
 
       {/* POMO-172: Typography/text reveals */}
-      <IntroTypography phase={phase} />
+      <IntroTypography phase={phase} intention={intention} />
 
-      {/*
-        Visual content will be added in subsequent stories:
-        - POMO-174: Transition to app
-      */}
-
-      {/* Dev mode: Show current phase */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute bottom-4 left-4 text-white/30 text-xs font-mono">
-          Phase: {phase}
-        </div>
-      )}
 
       {/* Screen reader announcement */}
       <div className="sr-only" role="status" aria-live="polite">
         {phase === 'silence' && 'Loading Particle...'}
         {phase === 'genesis' && 'A particle appears...'}
-        {phase === 'truth1' && 'Great works are not born from great moments.'}
-        {phase === 'truth2' && 'They are born from many small ones.'}
-        {phase === 'invitation' && 'Ready?'}
+        {phase === 'truth1' && intention.text}
+        {phase === 'truth2' && '...'}
+        {phase === 'invitation' && (intention.subtext || '')}
         {phase === 'transition' && 'Welcome to Particle.'}
       </div>
     </motion.div>

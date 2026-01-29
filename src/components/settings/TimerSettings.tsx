@@ -18,6 +18,7 @@ import { VisualTimerSettings } from './VisualTimerSettings';
 import { CelebrationSettings } from './CelebrationSettings';
 import { BreakBreathingSettings } from './BreakBreathingSettings';
 import { WellbeingHintsSettings } from './WellbeingHintsSettings';
+import { DailyIntentionSettings } from './DailyIntentionSettings';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -183,6 +184,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Auto-Start Settings */}
                   <AutoStartSettings />
+
+                  {/* Daily Intention Settings */}
+                  <DailyIntentionSettings />
 
                   {/* Celebration Settings */}
                   <CelebrationSettings />

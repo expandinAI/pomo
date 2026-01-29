@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
@@ -10,7 +10,8 @@ import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { useIntro } from '@/hooks/useIntro';
+import { useIntro, usePrefersReducedMotion } from '@/hooks/useIntro';
+import { useEasterEggs } from '@/hooks/useEasterEgg';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
 import type { LearnView } from '@/components/learn/LearnMenu';
@@ -76,7 +77,44 @@ function HomeContent() {
   const { open: openCommandPalette } = useCommandPalette();
 
   // First-run intro - shows on very first app open
-  const { isReady: introReady, showIntro, phase: introPhase, skip: skipIntro, markComplete: markIntroComplete } = useIntro();
+  const {
+    isReady: introReady,
+    showIntro,
+    phase: introPhase,
+    currentIntention,
+    isOriginalIntro,
+    skip: skipIntro,
+    markComplete: markIntroComplete,
+    replay: replayIntro,
+    showInspiration,
+  } = useIntro();
+
+  // Reduced motion preference
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Track intro transitions for re-triggering entrance animation
+  // Only trigger entrance animation after ORIGINAL intro, not after daily intentions
+  const prevShowIntroRef = useRef(showIntro);
+  const prevIsOriginalRef = useRef(isOriginalIntro);
+  const [entranceKey, setEntranceKey] = useState(0);
+
+  useEffect(() => {
+    // Only increment key (retrigger entrance animation) after original intro completes
+    // Daily intentions/inspirations should NOT trigger entrance animation
+    if (prevShowIntroRef.current && !showIntro && prevIsOriginalRef.current) {
+      setEntranceKey(prev => prev + 1);
+    }
+    prevShowIntroRef.current = showIntro;
+    prevIsOriginalRef.current = isOriginalIntro;
+  }, [showIntro, isOriginalIntro]);
+
+  // Easter eggs:
+  // - "intro" → Replay the original intro
+  // - "focus" → Show a random inspiration
+  useEasterEggs([
+    { word: 'intro', onTrigger: replayIntro },
+    { word: 'focus', onTrigger: showInspiration },
+  ]);
 
   // Onboarding - shows on first start attempt (after intro)
   const { hasCompletedOnboarding, isOnboardingVisible, showOnboarding, completeOnboarding } = useOnboarding();
@@ -178,6 +216,26 @@ function HomeContent() {
     return () => window.removeEventListener('particle:open-milestones', handleOpenMilestones);
   }, [setShowJourney]);
 
+  // Listen for replay intro event (from Command Palette)
+  useEffect(() => {
+    function handleReplayIntro() {
+      replayIntro();
+    }
+
+    window.addEventListener('particle:replay-intro', handleReplayIntro);
+    return () => window.removeEventListener('particle:replay-intro', handleReplayIntro);
+  }, [replayIntro]);
+
+  // Listen for show inspiration event (from Command Palette)
+  useEffect(() => {
+    function handleShowInspiration() {
+      showInspiration();
+    }
+
+    window.addEventListener('particle:show-inspiration', handleShowInspiration);
+    return () => window.removeEventListener('particle:show-inspiration', handleShowInspiration);
+  }, [showInspiration]);
+
   // Listen for learn open event (from Command Palette)
   useEffect(() => {
     function handleOpenLearn(e: Event) {
@@ -237,11 +295,13 @@ function HomeContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Show intro fullscreen if active (no timer in background)
-  if (showIntro) {
+  // First-time intro: show fullscreen (no timer in background)
+  // This only happens once, on the very first app open
+  if (showIntro && isOriginalIntro) {
     return (
       <IntroExperience
         phase={introPhase}
+        intention={currentIntention}
         onSkip={skipIntro}
         onComplete={markIntroComplete}
       />
@@ -253,11 +313,33 @@ function HomeContent() {
     return <div className="min-h-screen bg-black" />;
   }
 
+  // Daily intention / Show Inspiration: rendered as overlay below (timer continues)
+
+  // Entrance animation variants - soft, gentle reveal
+  const entranceVariants = {
+    hidden: {
+      opacity: 0,
+      scale: prefersReducedMotion ? 1 : 0.96,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: prefersReducedMotion ? 0.3 : 2,
+        ease: [0.25, 0.1, 0.25, 1], // ease-out (smooth, gentle)
+      },
+    },
+  };
+
   return (
-    <main
+    <motion.main
+      key={entranceKey}
       id="main-timer"
       tabIndex={-1}
       className="relative min-h-screen flex flex-col items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom focus:outline-none"
+      initial="hidden"
+      animate="visible"
+      variants={entranceVariants}
     >
       {/* Action Bar - Functional navigation (top-right) */}
       <div className="absolute top-4 right-4">
@@ -365,7 +447,19 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-    </main>
+      {/* Daily Intention / Show Inspiration overlay - timer continues in background */}
+      <AnimatePresence>
+        {showIntro && !isOriginalIntro && (
+          <IntroExperience
+            phase={introPhase}
+            intention={currentIntention}
+            onSkip={skipIntro}
+            onComplete={markIntroComplete}
+          />
+        )}
+      </AnimatePresence>
+
+    </motion.main>
   );
 }
 

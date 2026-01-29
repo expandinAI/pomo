@@ -23,6 +23,7 @@ import {
   BarChart3,
   Shuffle,
   BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 
@@ -278,6 +279,29 @@ export function CommandRegistration({
         },
         icon: <Repeat className="w-4 h-4" />,
         keywords: ['change', 'select', 'switch', 'project'],
+      },
+
+      // Replay intro command
+      {
+        id: 'replay-intro',
+        label: 'Replay Intro',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:replay-intro'));
+        },
+        icon: <Sparkles className="w-4 h-4" />,
+        keywords: ['intro', 'replay', 'animation', 'start', 'again', 'particle', 'welcome'],
+      },
+      // Show inspiration command
+      {
+        id: 'show-inspiration',
+        label: 'Show Inspiration',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:show-inspiration'));
+        },
+        icon: <Sparkles className="w-4 h-4" />,
+        keywords: ['inspiration', 'daily', 'intention', 'quote', 'motivation', 'mindful'],
       },
 
       // Learn commands

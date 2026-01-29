@@ -1,6 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  type DailyIntention,
+  ORIGINAL_INTRO,
+  getDailyIntention,
+  getRandomIntention,
+} from '@/lib/content/daily-intentions';
 
 // ============================================================================
 // Types
@@ -9,9 +15,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export type IntroPhase =
   | 'silence'      // Schwarzer Screen
   | 'genesis'      // Partikel erscheint
-  | 'truth1'       // "Great works..." + ein Punkt
-  | 'truth2'       // "...many small ones" + Punkte teilen sich
-  | 'invitation'   // "Ready?" + Punkte vereinen sich
+  | 'truth1'       // Main text appears
+  | 'truth2'       // Brief pause
+  | 'invitation'   // Subtext appears (if any)
   | 'transition'   // Übergang zur App
   | 'complete';    // Intro fertig
 
@@ -24,10 +30,18 @@ export interface UseIntroReturn {
   phase: IntroPhase;
   /** Whether the intro is being skipped */
   isSkipping: boolean;
+  /** Current intention to display */
+  currentIntention: DailyIntention;
+  /** Whether this is the original intro (first time) or daily intention */
+  isOriginalIntro: boolean;
   /** Skip the intro */
   skip: () => void;
   /** Mark intro as complete (called at end of transition) */
   markComplete: () => void;
+  /** Replay the intro from the beginning */
+  replay: () => void;
+  /** Show a random daily intention */
+  showInspiration: () => void;
 }
 
 // ============================================================================
@@ -35,12 +49,12 @@ export interface UseIntroReturn {
 // ============================================================================
 
 export const INTRO_TIMING: Record<Exclude<IntroPhase, 'complete'>, number> = {
-  silence: 1500,      // 1.5s - brief pause
-  genesis: 1500,      // 1.5s - particle appears
-  truth1: 3000,       // 3s - "Great works..." + one particle
-  truth2: 4500,       // 4.5s - "...many small ones" + particles divide
-  invitation: 2500,   // 2.5s - "Ready?" + particles converge
-  transition: 1200,   // 1.2s - gentle fade to app
+  silence: 1000,      // 1s - brief pause
+  genesis: 1400,      // 1.4s - particle appears, breathes
+  truth1: 2200,       // 2.2s - "Great things start small."
+  truth2: 800,        // 0.8s - brief breath between texts
+  invitation: 2200,   // 2.2s - "This small."
+  transition: 2000,   // 2s - gentle fade to app
 } as const;
 
 export const INTRO_PHASE_ORDER: IntroPhase[] = [
@@ -58,6 +72,8 @@ export const INTRO_PHASE_ORDER: IntroPhase[] = [
 // ============================================================================
 
 const STORAGE_KEY = 'particle:intro-seen';
+const DAILY_INTENTION_KEY = 'particle:daily-intention-enabled';
+const LAST_INTENTION_DATE_KEY = 'particle:last-intention-date';
 
 const hasSeenIntro = (): boolean => {
   if (typeof window === 'undefined') return true; // SSR-safe: assume seen
@@ -67,6 +83,24 @@ const hasSeenIntro = (): boolean => {
 const markIntroSeen = (): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, 'true');
+};
+
+const isDailyIntentionEnabled = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(DAILY_INTENTION_KEY) === 'true';
+};
+
+const hasSeenIntentionToday = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  const lastDate = localStorage.getItem(LAST_INTENTION_DATE_KEY);
+  const today = new Date().toISOString().split('T')[0];
+  return lastDate === today;
+};
+
+const markIntentionSeenToday = (): void => {
+  if (typeof window === 'undefined') return;
+  const today = new Date().toISOString().split('T')[0];
+  localStorage.setItem(LAST_INTENTION_DATE_KEY, today);
 };
 
 /** Reset intro state (for replay feature in POMO-175) */
@@ -97,6 +131,8 @@ export function useIntro(): UseIntroReturn {
   const [showIntro, setShowIntro] = useState(false);
   const [phase, setPhase] = useState<IntroPhase>('silence');
   const [isSkipping, setIsSkipping] = useState(false);
+  const [currentIntention, setCurrentIntention] = useState<DailyIntention>(ORIGINAL_INTRO);
+  const [isOriginalIntro, setIsOriginalIntro] = useState(true);
 
   // Track if we've initialized from localStorage
   const hasInitialized = useRef(false);
@@ -110,10 +146,24 @@ export function useIntro(): UseIntroReturn {
     hasInitialized.current = true;
 
     const seen = hasSeenIntro();
+    const dailyEnabled = isDailyIntentionEnabled();
+    const seenToday = hasSeenIntentionToday();
+
     if (!seen) {
+      // First-time user: show original intro
       setShowIntro(true);
       setPhase('silence');
+      setCurrentIntention(ORIGINAL_INTRO);
+      setIsOriginalIntro(true);
+    } else if (dailyEnabled && !seenToday) {
+      // Returning user with daily intention enabled, hasn't seen today's
+      setShowIntro(true);
+      setPhase('silence');
+      setCurrentIntention(getDailyIntention());
+      setIsOriginalIntro(false);
     }
+    // else: returning user, either daily intention off or already seen today
+
     // Mark as ready - we now know whether to show intro or not
     setIsReady(true);
   }, []);
@@ -147,9 +197,13 @@ export function useIntro(): UseIntroReturn {
   useEffect(() => {
     if (phase === 'complete' && showIntro) {
       markIntroSeen();
+      if (!isOriginalIntro) {
+        // Mark daily intention as seen for today
+        markIntentionSeenToday();
+      }
       setShowIntro(false);
     }
-  }, [phase, showIntro]);
+  }, [phase, showIntro, isOriginalIntro]);
 
   // Skip function - jumps to complete
   const skip = useCallback(() => {
@@ -167,13 +221,47 @@ export function useIntro(): UseIntroReturn {
     setShowIntro(false);
   }, []);
 
+  // Replay the intro from the beginning (always shows original)
+  const replay = useCallback(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    // Reset state to beginning with original intro
+    setPhase('silence');
+    setIsSkipping(false);
+    setCurrentIntention(ORIGINAL_INTRO);
+    setIsOriginalIntro(true);
+    setShowIntro(true);
+  }, []);
+
+  // Show a random daily intention
+  const showInspiration = useCallback(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    // Reset state to beginning with random intention
+    setPhase('silence');
+    setIsSkipping(false);
+    setCurrentIntention(getRandomIntention());
+    setIsOriginalIntro(false);
+    setShowIntro(true);
+  }, []);
+
   return {
     isReady,
     showIntro,
     phase,
     isSkipping,
+    currentIntention,
+    isOriginalIntro,
     skip,
     markComplete,
+    replay,
+    showInspiration,
   };
 }
 

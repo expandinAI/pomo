@@ -133,7 +133,8 @@ export function useParticlePhysics({
 
       setParticles((prev) =>
         prev.map((p) => {
-          let { x, y, targetX, opacity, scale } = p;
+          let { x, y, opacity, scale } = p;
+          const { targetX } = p;
 
           if (phase === 'truth2') {
             // Expansion: "...many small ones" - particles spread into line

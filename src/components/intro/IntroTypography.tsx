@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { IntroPhase } from '@/hooks/useIntro';
 import { usePrefersReducedMotion } from '@/hooks/useIntro';
+import type { DailyIntention } from '@/lib/content/daily-intentions';
 
 // ============================================================================
 // Types
@@ -11,22 +12,23 @@ import { usePrefersReducedMotion } from '@/hooks/useIntro';
 interface IntroTypographyProps {
   /** Current phase of the intro */
   phase: IntroPhase;
+  /** The intention/text to display */
+  intention: DailyIntention;
 }
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function IntroTypography({ phase }: IntroTypographyProps) {
+export function IntroTypography({ phase, intention }: IntroTypographyProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
 
   // Visibility logic based on phase
-  // Text 1 shows during truth1 and truth2
-  const showText1 = ['truth1', 'truth2'].includes(phase);
-  // Text 2 shows during truth2 (while particles divide)
-  const showText2 = phase === 'truth2';
-  // "Ready?" shows during invitation (while particles converge)
-  const showInvitation = phase === 'invitation';
+  // Main text shows during truth1
+  const showMainText = phase === 'truth1';
+  // truth2 = visual pause (particle breathes)
+  // Subtext shows during invitation
+  const showSubtext = phase === 'invitation';
 
   // Animation variants
   const textVariants = {
@@ -51,11 +53,11 @@ export function IntroTypography({ phase }: IntroTypographyProps) {
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-      {/* Text 1 - Above particle */}
+      {/* Main text - Above particle */}
       <AnimatePresence>
-        {showText1 && (
+        {showMainText && (
           <motion.p
-            key="text1"
+            key="main-text"
             variants={textVariants}
             initial="hidden"
             animate="visible"
@@ -66,38 +68,16 @@ export function IntroTypography({ phase }: IntroTypographyProps) {
                        px-6"
             style={{ bottom: 'calc(50% + 40px)' }}
           >
-            Great works are not born
-            <br />
-            from great moments.
+            {intention.text}
           </motion.p>
         )}
       </AnimatePresence>
 
-      {/* Text 2 - Below particle */}
+      {/* Subtext - Below particle (only if intention has subtext) */}
       <AnimatePresence>
-        {showText2 && (
+        {showSubtext && (
           <motion.p
-            key="text2"
-            variants={textVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            transition={transition}
-            className="absolute text-white text-center font-normal tracking-tight leading-relaxed
-                       text-lg md:text-xl lg:text-2xl
-                       px-6"
-            style={{ top: 'calc(50% + 40px)' }}
-          >
-            They are born from many small ones.
-          </motion.p>
-        )}
-      </AnimatePresence>
-
-      {/* Invitation - Below particle cloud */}
-      <AnimatePresence>
-        {showInvitation && (
-          <motion.p
-            key="invitation"
+            key="subtext"
             variants={textVariants}
             initial="hidden"
             animate="visible"
@@ -105,9 +85,9 @@ export function IntroTypography({ phase }: IntroTypographyProps) {
             transition={transition}
             className="absolute text-white text-center font-normal tracking-tight leading-relaxed
                        text-lg md:text-xl lg:text-2xl"
-            style={{ top: 'calc(50% + 60px)' }}
+            style={{ top: 'calc(50% + 50px)' }}
           >
-            Ready?
+            {intention.subtext}
           </motion.p>
         )}
       </AnimatePresence>
