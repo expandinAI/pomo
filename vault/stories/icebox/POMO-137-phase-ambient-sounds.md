@@ -1,6 +1,6 @@
 ---
 type: story
-status: backlog
+status: icebox
 priority: p2
 effort: 2
 feature: sounds

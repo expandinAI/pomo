@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: sound-design-2
 created: 2026-01-20
 updated: 2026-01-20
-done_date: null
+done_date: 2026-01-29
 tags: [sound, ambient, focus, atmosphere, p1]
 ---
 
