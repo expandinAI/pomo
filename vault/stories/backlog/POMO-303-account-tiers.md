@@ -81,17 +81,23 @@ export interface TierFeatures {
   yearView: boolean;
   /** Erweiterte Statistiken */
   advancedStats: boolean;
-  /** Unbegrenzte Custom Presets */
-  unlimitedPresets: boolean;
-  /** Alle Themes verfügbar */
+  /** Unbegrenzte aktive Projekte */
+  unlimitedProjects: boolean;
+  /** Alle Ambient Sounds (nicht nur Basis) */
+  allAmbientSounds: boolean;
+  /** Alle Themes (nicht nur Basis) */
   allThemes: boolean;
-  /** Ambient Sounds */
-  ambientSounds: boolean;
 }
 
 export interface TierLimits {
+  /** Maximale Anzahl aktive Projekte */
+  maxActiveProjects: number;
   /** Maximale Anzahl Custom Presets */
   maxPresets: number;
+  /** Anzahl verfügbarer Basis-Ambient-Sounds */
+  baseAmbientSounds: number;
+  /** Anzahl verfügbarer Basis-Themes */
+  baseThemes: number;
   /** Session-Retention in Tagen ('unlimited' = nie löschen) */
   sessionsRetention: number | 'unlimited';
 }
@@ -114,12 +120,15 @@ export const LOCAL_CONFIG: TierConfig = {
     sync: false,
     yearView: false,
     advancedStats: false,
-    unlimitedPresets: false,
+    unlimitedProjects: false,
+    allAmbientSounds: false,
     allThemes: false,
-    ambientSounds: false,
   },
   limits: {
+    maxActiveProjects: 5,
     maxPresets: 3,
+    baseAmbientSounds: 2,  // Stille, Weißes Rauschen
+    baseThemes: 1,         // Default Theme
     sessionsRetention: 365, // 1 Jahr
   },
 };
@@ -135,12 +144,15 @@ export const FREE_CONFIG: TierConfig = {
     sync: true,
     yearView: false,
     advancedStats: false,
-    unlimitedPresets: false,
+    unlimitedProjects: false,
+    allAmbientSounds: false,
     allThemes: false,
-    ambientSounds: false,
   },
   limits: {
+    maxActiveProjects: 5,
     maxPresets: 5,
+    baseAmbientSounds: 2,  // Stille, Weißes Rauschen
+    baseThemes: 2,         // Default + 1 Alternative
     sessionsRetention: 'unlimited',
   },
 };
@@ -156,12 +168,15 @@ export const FLOW_CONFIG: TierConfig = {
     sync: true,
     yearView: true,
     advancedStats: true,
-    unlimitedPresets: true,
+    unlimitedProjects: true,
+    allAmbientSounds: true,
     allThemes: true,
-    ambientSounds: true,
   },
   limits: {
+    maxActiveProjects: Infinity,
     maxPresets: Infinity,
+    baseAmbientSounds: Infinity,  // Alle Sounds
+    baseThemes: Infinity,         // Alle Themes
     sessionsRetention: 'unlimited',
   },
 };
@@ -182,9 +197,9 @@ export const FEATURE_LABELS: Record<keyof TierFeatures, string> = {
   sync: 'Cloud Sync',
   yearView: 'Jahresansicht',
   advancedStats: 'Erweiterte Statistiken',
-  unlimitedPresets: 'Unbegrenzte Presets',
+  unlimitedProjects: 'Unbegrenzte Projekte',
+  allAmbientSounds: 'Alle Ambient Sounds',
   allThemes: 'Alle Themes',
-  ambientSounds: 'Ambient Sounds',
 };
 ```
 
@@ -329,9 +344,9 @@ function UpgradePrompt({ feature }: { feature: keyof TierFeatures }) {
     sync: 'Cloud Sync synchronisiert deine Daten auf allen Geräten.',
     yearView: 'Die Jahresansicht zeigt alle deine Partikel auf einen Blick.',
     advancedStats: 'Erweiterte Statistiken geben tiefere Einblicke.',
-    unlimitedPresets: 'Erstelle unbegrenzt eigene Timer-Presets.',
+    unlimitedProjects: 'Erstelle unbegrenzt viele aktive Projekte.',
+    allAmbientSounds: 'Entspanne mit allen Ambient Sounds: Regen, Café, Wald und mehr.',
     allThemes: 'Wähle aus allen verfügbaren Themes.',
-    ambientSounds: 'Arbeite mit entspannenden Ambient-Sounds.',
   };
 
   return (
@@ -405,7 +420,7 @@ export { FeatureGate } from './FeatureGate';
   <AmbientSoundPicker />
 </FeatureGate>
 
-// Limit-basierte Logik
+// Limit-basierte Logik (Presets)
 function PresetList() {
   const maxPresets = useTierLimit('maxPresets');
   const presets = usePresets();
@@ -419,6 +434,29 @@ function PresetList() {
         <AddPresetButton />
       ) : (
         <UpgradeHint>Upgrade für mehr Presets</UpgradeHint>
+      )}
+    </div>
+  );
+}
+
+// Limit-basierte Logik (Projekte)
+function ProjectList() {
+  const maxProjects = useTierLimit('maxActiveProjects');
+  const projects = useProjects();
+  const activeProjects = projects.filter(p => !p.archived);
+
+  const canAddMore = activeProjects.length < maxProjects;
+
+  return (
+    <div>
+      {projects.map(project => <ProjectCard key={project.id} {...project} />)}
+      {canAddMore ? (
+        <AddProjectButton />
+      ) : (
+        <UpgradeHint>
+          Du hast {maxProjects} aktive Projekte.
+          Archiviere eines oder upgrade auf Flow.
+        </UpgradeHint>
       )}
     </div>
   );
@@ -439,14 +477,41 @@ function SyncIndicator() {
 | Feature | Lokal | Particle | Particle Flow |
 |---------|-------|----------|---------------|
 | Timer & Breaks | ✓ | ✓ | ✓ |
-| Projects | ✓ | ✓ | ✓ |
-| History (30 Tage) | ✓ | ✓ | ✓ |
+| History (30 Tage lokal, unbegrenzt mit Sync) | ✓ | ✓ | ✓ |
+| **Aktive Projekte** | 5 | 5 | ∞ |
 | Custom Presets | 3 | 5 | ∞ |
 | **Cloud Sync** | ✗ | ✓ | ✓ |
-| Year View | ✗ | ✗ | ✓ |
+| **Ambient Sounds** | 2 Basis | 2 Basis | Alle (8+) |
+| **Themes** | 1 | 2 | Alle |
+| Year View | ✗ | Preview | ✓ |
 | Advanced Stats | ✗ | ✗ | ✓ |
-| All Themes | ✗ | ✗ | ✓ |
-| Ambient Sounds | ✗ | ✗ | ✓ |
+
+### Upgrade-Trigger (Conversion-Strategie)
+
+| Von → Nach | Haupt-Trigger |
+|------------|---------------|
+| Lokal → Particle | "Ich will meine Daten auf allen Geräten" → **Sync** |
+| Particle → Flow | "Ich will mehr Projekte / Year View / bessere Sounds" |
+
+### Flow Value Proposition
+
+**Funktionaler Mehrwert:**
+- Unbegrenzte aktive Projekte (für Freelancer/Profis)
+- Year View (emotionaler "Wow"-Moment)
+- Alle Ambient Sounds (täglicher Mehrwert)
+- Alle Themes (sichtbarer Unterschied)
+- Advanced Stats (für Daten-Nerds)
+
+**Identitäts-Mehrwert:**
+- Flow-Badge im Profil
+- "Indie-Entwickler unterstützen"
+- Early Access zu neuen Features
+
+### Zukünftige Flow-Features (Roadmap)
+- Erweiterte Projektanalyse (Zeit pro Projekt, Trends)
+- Export & Berichte
+- Team-Features (später)
+- API-Zugang (später)
 
 ## Testing
 
@@ -532,7 +597,31 @@ describe('Tier System', () => {
 **Feature Strategie:**
 - Basis-Features sollen so gut sein, dass man die App liebt
 - Premium-Features sind "nice to have", nicht "must have"
-- Sync ist der Haupt-Grund für Account-Erstellung
+- Sync ist der Haupt-Grund für Account-Erstellung (Lokal → Particle)
+- Projekte + Year View + Sounds sind die Hebel für Flow
+
+**Upgrade-Philosophie:**
+- **Aspiration + Dankbarkeit**, nicht Frustration
+- Free-User sollen die App lieben, nicht genervt werden
+- Flow ist für Supporter UND für Power-User
+- Limits sind großzügig (5 Projekte, 5 Presets reichen für die meisten)
+
+**Projekt-Limit-Strategie:**
+- 5 aktive Projekte für Free (archivierte zählen nicht)
+- Profis/Freelancer mit vielen Kunden brauchen mehr → Flow
+- Archivieren ist immer kostenlos möglich
+- Kein hartes "Lösch dein Projekt" - sanfter Upgrade-Prompt
+
+**Ambient Sounds Strategie:**
+- 2 Basis-Sounds für alle: Stille + Weißes Rauschen
+- Premium-Sounds (Regen, Café, Wald, etc.) nur für Flow
+- Daily Touch Point: Jede Session erinnert an den Mehrwert
+
+**Theme Strategie:**
+- Lokal: 1 Default-Theme
+- Particle: 2 Themes (Default + 1 Alternative)
+- Flow: Alle Themes
+- Sichtbarer Unterschied ohne funktionale Einschränkung
 
 ---
 
