@@ -7,6 +7,7 @@ import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 import { SessionProvider } from '@/contexts/SessionContext';
 import { CommandPaletteWrapper } from '@/components/command';
+import { MigrationOverlay } from '@/components/migration';
 import './globals.css';
 
 const inter = Inter({
@@ -117,6 +118,8 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Migration overlay - runs before providers to migrate localStorage → IndexedDB */}
+        <MigrationOverlay />
         <SessionProvider>
           <TimerSettingsProvider>
             <AmbientSoundProvider>

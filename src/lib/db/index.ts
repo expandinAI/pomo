@@ -29,6 +29,7 @@ export {
   countPendingEntries,
   type MigrationResult,
   type MigrationSummary,
+  type MigrationProgress,
   // Session migration
   migrateSessionsV1,
   isSessionMigrationCompleted,
