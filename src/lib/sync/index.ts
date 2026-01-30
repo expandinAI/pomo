@@ -25,9 +25,13 @@ export {
   type SyncEventType,
   type SyncEventCallback,
   type PullResult,
+  type SyncedSettings,
+  type CustomPreset,
+  type SettingsSyncEventType,
   DEFAULT_SYNC_CONFIG,
   LAST_PULL_KEY,
   SYNC_ENABLED_KEY,
+  LAST_SETTINGS_SYNC_KEY,
 } from './types';
 
 // Sync service
@@ -72,3 +76,15 @@ export {
   isDeleted,
   type ConflictResolution,
 } from './conflict-resolution';
+
+// Settings sync (POMO-308)
+export {
+  pushSettings,
+  pullSettings,
+  extractSyncedSettings,
+  applySyncedSettings,
+  dispatchSettingsChanged,
+} from './settings-sync';
+
+export { useSettingsSync } from './use-settings-sync';
+export { useSettingsSyncActions } from './use-settings-sync-actions';

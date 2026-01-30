@@ -17,6 +17,8 @@ export type UserTier = 'free' | 'flow' | 'pro' | 'lifetime';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trialing';
 export type SessionMode = 'work' | 'break' | 'longBreak';
 export type Theme = 'light' | 'dark' | 'system';
+export type AutoStartMode = 'all' | 'breaks-only';
+export type AutoStartDelay = 3 | 5 | 10;
 
 export interface Database {
   public: {
@@ -165,6 +167,11 @@ export interface Database {
           theme: Theme;
           keyboard_hints_visible: boolean;
           settings_json: Json;
+          // Workflow settings (synced between devices) - POMO-308
+          overflow_enabled: boolean;
+          daily_goal: number | null;
+          auto_start_delay: AutoStartDelay;
+          auto_start_mode: AutoStartMode;
           created_at: string;
           updated_at: string;
         };
@@ -182,6 +189,11 @@ export interface Database {
           theme?: Theme;
           keyboard_hints_visible?: boolean;
           settings_json?: Json;
+          // Workflow settings (synced between devices) - POMO-308
+          overflow_enabled?: boolean;
+          daily_goal?: number | null;
+          auto_start_delay?: AutoStartDelay;
+          auto_start_mode?: AutoStartMode;
           created_at?: string;
           updated_at?: string;
         };
@@ -199,6 +211,11 @@ export interface Database {
           theme?: Theme;
           keyboard_hints_visible?: boolean;
           settings_json?: Json;
+          // Workflow settings (synced between devices) - POMO-308
+          overflow_enabled?: boolean;
+          daily_goal?: number | null;
+          auto_start_delay?: AutoStartDelay;
+          auto_start_mode?: AutoStartMode;
           created_at?: string;
           updated_at?: string;
         };

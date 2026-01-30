@@ -467,8 +467,8 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [nightModeEnabled, setNightModeEnabledState] = useState<boolean>(DEFAULT_NIGHT_MODE);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load settings on mount
-  useEffect(() => {
+  // Reload all synced settings from localStorage
+  const reloadSyncedSettings = useCallback(() => {
     const settings = loadSettings();
     setActivePresetId(settings.presetId);
 
@@ -490,7 +490,14 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
 
     const autoStartModeVal = loadAutoStartMode();
     setAutoStartModeState(autoStartModeVal);
+  }, []);
 
+  // Load settings on mount
+  useEffect(() => {
+    // Load synced settings
+    reloadSyncedSettings();
+
+    // Load device-local settings (not synced)
     const showEndTimeVal = loadShowEndTime();
     setShowEndTimeState(showEndTimeVal);
 
@@ -520,7 +527,19 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     }
 
     setIsLoaded(true);
-  }, []);
+  }, [reloadSyncedSettings]);
+
+  // Listen for settings sync event (POMO-308)
+  useEffect(() => {
+    function handleSettingsSynced() {
+      reloadSyncedSettings();
+    }
+
+    window.addEventListener('particle:settings-synced', handleSettingsSynced);
+    return () => {
+      window.removeEventListener('particle:settings-synced', handleSettingsSynced);
+    };
+  }, [reloadSyncedSettings]);
 
   // Get active preset object
   const getActivePreset = useCallback((): TimerPreset => {

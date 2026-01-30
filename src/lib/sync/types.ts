@@ -94,3 +94,61 @@ export const LAST_PULL_KEY = 'particle:last-sync-pull';
  * Storage key for sync enabled state
  */
 export const SYNC_ENABLED_KEY = 'particle:sync-enabled';
+
+/**
+ * Storage key for last settings sync timestamp
+ */
+export const LAST_SETTINGS_SYNC_KEY = 'particle:last-settings-sync';
+
+// ============================================================================
+// Settings Sync Types (POMO-308)
+// ============================================================================
+
+/**
+ * Custom preset configuration stored in settings_json
+ */
+export interface CustomPreset {
+  name: string;
+  workDuration: number; // seconds
+  shortBreakDuration: number; // seconds
+  longBreakDuration: number; // seconds
+  sessionsUntilLongBreak: number;
+}
+
+/**
+ * Workflow settings that are synchronized between devices.
+ * Device-specific settings (sound, theme, etc.) remain local.
+ */
+export interface SyncedSettings {
+  // Timer durations (in seconds)
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  sessionsUntilLongBreak: number;
+
+  // Active preset ID
+  presetId: string;
+
+  // Custom preset (if presetId === 'custom')
+  customPreset: CustomPreset | null;
+
+  // Workflow settings
+  overflowEnabled: boolean;
+  dailyGoal: number | null;
+
+  // Auto-start settings
+  autoStartEnabled: boolean;
+  autoStartDelay: 3 | 5 | 10;
+  autoStartMode: 'all' | 'breaks-only';
+}
+
+/**
+ * Settings sync event types
+ */
+export type SettingsSyncEventType =
+  | 'settings-pull-start'
+  | 'settings-pull-success'
+  | 'settings-pull-error'
+  | 'settings-push-start'
+  | 'settings-push-success'
+  | 'settings-push-error';

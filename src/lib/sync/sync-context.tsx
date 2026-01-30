@@ -31,6 +31,7 @@ import {
   type ProjectDeletedEvent,
 } from './sync-events';
 import type { SyncState, SyncEventType } from './types';
+import { useSettingsSync } from './use-settings-sync';
 
 /**
  * Sync context value
@@ -72,6 +73,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const getToken = useSupabaseToken();
   const [service, setService] = useState<SyncService | null>(null);
   const [state, setState] = useState<SyncState>(defaultState);
+
+  // Settings sync (POMO-308)
+  useSettingsSync();
 
   // Initialize or cleanup sync service based on auth state
   useEffect(() => {

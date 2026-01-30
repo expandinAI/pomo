@@ -104,7 +104,12 @@ CREATE TABLE IF NOT EXISTS user_settings (
   notification_enabled BOOLEAN DEFAULT TRUE,
   theme TEXT DEFAULT 'system' CHECK (theme IN ('light', 'dark', 'system')),
   keyboard_hints_visible BOOLEAN DEFAULT TRUE,
-  settings_json JSONB DEFAULT '{}', -- Extensible settings
+  settings_json JSONB DEFAULT '{}', -- Extensible settings (includes customPreset)
+  -- Workflow settings (synced between devices) - POMO-308
+  overflow_enabled BOOLEAN DEFAULT TRUE,
+  daily_goal INTEGER DEFAULT NULL CHECK (daily_goal IS NULL OR (daily_goal >= 1 AND daily_goal <= 9)),
+  auto_start_delay INTEGER DEFAULT 5 CHECK (auto_start_delay IN (3, 5, 10)),
+  auto_start_mode TEXT DEFAULT 'all' CHECK (auto_start_mode IN ('all', 'breaks-only')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
