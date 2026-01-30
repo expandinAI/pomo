@@ -42,9 +42,11 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clerk_id TEXT UNIQUE NOT NULL,
   email TEXT,
-  tier TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'lifetime')),
+  tier TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free', 'flow', 'pro', 'lifetime')),
   subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'cancelled', 'past_due', 'trialing')),
   subscription_ends_at TIMESTAMPTZ,
+  trial_started_at TIMESTAMPTZ,   -- When Flow trial was started (POMO-307)
+  trial_ends_at TIMESTAMPTZ,      -- When Flow trial expires (POMO-307)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -113,6 +115,8 @@ CREATE TABLE IF NOT EXISTS user_settings (
 
 -- Users
 CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX IF NOT EXISTS idx_users_trial_ends_at ON users(trial_ends_at)
+  WHERE subscription_status = 'trialing';
 
 -- Sessions
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);

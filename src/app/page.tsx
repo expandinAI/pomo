@@ -58,8 +58,14 @@ const UpgradeModal = dynamic(
   () => import('@/components/upgrade').then(mod => ({ default: mod.UpgradeModal })),
   { ssr: false }
 );
+const TrialStartModal = dynamic(
+  () => import('@/components/trial').then(mod => ({ default: mod.TrialStartModal })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
+import { TrialBadge, TrialExpiredBanner } from '@/components/trial';
+import { useTrialExpirationCheck } from '@/lib/trial';
 
 /**
  * Inner component that uses milestone context
@@ -70,6 +76,10 @@ function HomeContent() {
 
   // Auth state
   const auth = useParticleAuth();
+
+  // Trial management
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  useTrialExpirationCheck(); // Check and expire trials on load
 
   // Upgrade flow (Local → Cloud sync after sign-up)
   const {
@@ -349,6 +359,19 @@ function HomeContent() {
     return () => window.removeEventListener('particle:open-auth', handleOpenAuth);
   }, [router]);
 
+  // Listen for upgrade event (from FeatureGate / UpgradePrompt)
+  // Opens the trial modal for authenticated users
+  useEffect(() => {
+    function handleOpenUpgrade() {
+      if (auth.status === 'authenticated') {
+        setShowTrialModal(true);
+      }
+    }
+
+    window.addEventListener('particle:open-upgrade', handleOpenUpgrade);
+    return () => window.removeEventListener('particle:open-upgrade', handleOpenUpgrade);
+  }, [auth.status]);
+
   // Listen for trigger sync event (from AccountMenu)
   useEffect(() => {
     function handleTriggerSync() {
@@ -405,7 +428,7 @@ function HomeContent() {
       animate="visible"
       variants={entranceVariants}
     >
-      {/* Action Bar + Auth (top-right) */}
+      {/* Action Bar + Trial Badge + Auth (top-right) */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <ActionBar
           onOpenTimeline={() => setShowTimeline(true)}
@@ -414,6 +437,8 @@ function HomeContent() {
           onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
         />
+        {/* Trial Badge - shows when user has active trial */}
+        <TrialBadge />
         {/* Auth button: Sync for anonymous, AccountMenu for authenticated */}
         {auth.status === 'anonymous' && <SyncButton />}
         {auth.status === 'authenticated' && <AccountMenu />}
@@ -537,6 +562,15 @@ function HomeContent() {
           />
         )}
       </AnimatePresence>
+
+      {/* Trial Start Modal - shown when user wants to try Flow */}
+      <TrialStartModal
+        isOpen={showTrialModal}
+        onClose={() => setShowTrialModal(false)}
+      />
+
+      {/* Trial Expired Banner - shown when trial just expired */}
+      <TrialExpiredBanner />
 
     </motion.main>
   );

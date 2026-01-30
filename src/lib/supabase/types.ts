@@ -13,7 +13,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type UserTier = 'free' | 'pro' | 'lifetime';
+export type UserTier = 'free' | 'flow' | 'pro' | 'lifetime';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trialing';
 export type SessionMode = 'work' | 'break' | 'longBreak';
 export type Theme = 'light' | 'dark' | 'system';
@@ -29,6 +29,8 @@ export interface Database {
           tier: UserTier;
           subscription_status: SubscriptionStatus | null;
           subscription_ends_at: string | null;
+          trial_started_at: string | null;
+          trial_ends_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -39,6 +41,8 @@ export interface Database {
           tier?: UserTier;
           subscription_status?: SubscriptionStatus | null;
           subscription_ends_at?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -49,6 +53,8 @@ export interface Database {
           tier?: UserTier;
           subscription_status?: SubscriptionStatus | null;
           subscription_ends_at?: string | null;
+          trial_started_at?: string | null;
+          trial_ends_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

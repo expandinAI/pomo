@@ -114,8 +114,7 @@ export function AccountMenu({ className }: AccountMenuProps) {
 
   const handleUpgrade = useCallback(() => {
     setIsOpen(false);
-    // TODO: Implement upgrade modal (POMO-303)
-    // For now, this does nothing - the modal will be added in POMO-303
+    window.dispatchEvent(new CustomEvent('particle:open-upgrade'));
   }, []);
 
   const handleSyncData = useCallback(() => {
