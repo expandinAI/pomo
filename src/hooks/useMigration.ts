@@ -22,6 +22,12 @@ const SHOW_UI_THRESHOLD = 50;
 const SUCCESS_DISPLAY_DURATION = 2000;
 
 /**
+ * Demo mode settings
+ */
+const DEMO_URL_PARAM = 'demo-migration';
+const DEMO_PHASE_DURATION = 1200; // Duration per phase in demo mode
+
+/**
  * Migration state machine
  */
 export type MigrationState =
@@ -39,6 +45,26 @@ export interface MigrationStats {
 }
 
 /**
+ * Demo migration phases
+ */
+const DEMO_PHASES: MigrationProgress[] = [
+  { current: 'sessions_v1', currentLabel: 'Migrating particles...', total: 4, completed: 0 },
+  { current: 'projects_v1', currentLabel: 'Migrating projects...', total: 4, completed: 1 },
+  { current: 'settings_v1', currentLabel: 'Migrating settings...', total: 4, completed: 2 },
+  { current: 'recent_tasks_v1', currentLabel: 'Migrating tasks...', total: 4, completed: 3 },
+  { current: 'complete', currentLabel: 'Migration complete', total: 4, completed: 4 },
+];
+
+/**
+ * Demo stats shown after "migration"
+ */
+const DEMO_STATS: MigrationStats = {
+  sessions: 127,
+  projects: 12,
+  tasks: 34,
+};
+
+/**
  * Hook to manage data migration from localStorage to IndexedDB
  *
  * Features:
@@ -46,6 +72,7 @@ export interface MigrationStats {
  * - Shows UI only for large datasets (≥50 entries)
  * - Reports progress during migration
  * - Auto-closes after success
+ * - Demo mode via ?demo-migration URL parameter
  *
  * @example
  * ```tsx
@@ -79,7 +106,47 @@ export function useMigration() {
     return stats;
   }, []);
 
-  // Run migration
+  // Run demo migration (simulated)
+  const runDemoMigration = useCallback(async () => {
+    console.log('[Migration] Running in DEMO mode');
+    setShowUI(true);
+
+    // Simulate each phase with delays
+    for (let i = 0; i < DEMO_PHASES.length - 1; i++) {
+      setState({ status: 'running', progress: DEMO_PHASES[i] });
+      await new Promise((resolve) => setTimeout(resolve, DEMO_PHASE_DURATION));
+    }
+
+    // Set demo stats
+    setStats(DEMO_STATS);
+
+    // Transition to complete
+    setState({
+      status: 'complete',
+      summary: {
+        totalMigrated: DEMO_STATS.sessions + DEMO_STATS.projects + DEMO_STATS.tasks,
+        totalErrors: 0,
+        results: [
+          { name: 'sessions_v1', skipped: false, migrated: DEMO_STATS.sessions, errors: [], duration: 100 },
+          { name: 'projects_v1', skipped: false, migrated: DEMO_STATS.projects, errors: [], duration: 50 },
+          { name: 'settings_v1', skipped: false, migrated: 1, errors: [], duration: 10 },
+          { name: 'recent_tasks_v1', skipped: false, migrated: DEMO_STATS.tasks, errors: [], duration: 30 },
+        ],
+        duration: DEMO_PHASE_DURATION * 4,
+      },
+    });
+
+    // Auto-close after delay
+    setTimeout(() => {
+      setShowUI(false);
+      // Remove demo param from URL without reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete(DEMO_URL_PARAM);
+      window.history.replaceState({}, '', url.toString());
+    }, SUCCESS_DISPLAY_DURATION);
+  }, []);
+
+  // Run real migration
   const runMigrationProcess = useCallback(async () => {
     // Check if IndexedDB is available
     if (!isIndexedDBAvailable()) {
@@ -157,9 +224,17 @@ export function useMigration() {
     // Check if we're in browser
     if (typeof window === 'undefined') return;
 
-    setState({ status: 'checking' });
-    runMigrationProcess();
-  }, [runMigrationProcess]);
+    // Check for demo mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemo = urlParams.has(DEMO_URL_PARAM);
+
+    if (isDemo) {
+      runDemoMigration();
+    } else {
+      setState({ status: 'checking' });
+      runMigrationProcess();
+    }
+  }, [runMigrationProcess, runDemoMigration]);
 
   return {
     /** Current migration state */
