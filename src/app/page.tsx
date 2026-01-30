@@ -10,6 +10,7 @@ import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useUpgradeFlow } from '@/hooks/useUpgradeFlow';
 import { useIntro, usePrefersReducedMotion } from '@/hooks/useIntro';
 import { useEasterEggs } from '@/hooks/useEasterEgg';
 import { TimelineOverlay } from '@/components/timeline';
@@ -18,6 +19,7 @@ import { isIndexedDBAvailable, hasPendingMigrations, runMigrations } from '@/lib
 import { useParticleAuth } from '@/lib/auth/hooks';
 import { SyncButton, AccountMenu } from '@/components/auth';
 import type { LearnView } from '@/components/learn/LearnMenu';
+import { useRouter } from 'next/navigation';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -52,6 +54,10 @@ const RhythmOnboarding = dynamic(
   () => import('@/components/onboarding/RhythmOnboarding').then(mod => ({ default: mod.RhythmOnboarding })),
   { ssr: false }
 );
+const UpgradeModal = dynamic(
+  () => import('@/components/upgrade').then(mod => ({ default: mod.UpgradeModal })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 
@@ -59,8 +65,20 @@ import { IntroExperience } from '@/components/intro';
  * Inner component that uses milestone context
  */
 function HomeContent() {
+  // Router for navigation
+  const router = useRouter();
+
   // Auth state
   const auth = useParticleAuth();
+
+  // Upgrade flow (Local → Cloud sync after sign-up)
+  const {
+    showUpgradeModal,
+    upgradeUserId,
+    completeUpgrade,
+    skipUpgrade,
+    triggerUpgrade,
+  } = useUpgradeFlow();
 
   // Timeline overlay state
   const [showTimeline, setShowTimeline] = useState(false);
@@ -321,6 +339,26 @@ function HomeContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Listen for auth open event (from tier system / UpgradePrompt)
+  useEffect(() => {
+    function handleOpenAuth() {
+      router.push('/sign-up');
+    }
+
+    window.addEventListener('particle:open-auth', handleOpenAuth);
+    return () => window.removeEventListener('particle:open-auth', handleOpenAuth);
+  }, [router]);
+
+  // Listen for trigger sync event (from AccountMenu)
+  useEffect(() => {
+    function handleTriggerSync() {
+      triggerUpgrade();
+    }
+
+    window.addEventListener('particle:trigger-sync', handleTriggerSync);
+    return () => window.removeEventListener('particle:trigger-sync', handleTriggerSync);
+  }, [triggerUpgrade]);
+
   // First-time intro: show fullscreen (no timer in background)
   // This only happens once, on the very first app open
   if (showIntro && isOriginalIntro) {
@@ -484,6 +522,18 @@ function HomeContent() {
             intention={currentIntention}
             onSkip={skipIntro}
             onComplete={markIntroComplete}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Upgrade Modal - shown after sign-up if there's local data to sync */}
+      <AnimatePresence>
+        {showUpgradeModal && upgradeUserId && (
+          <UpgradeModal
+            isOpen={showUpgradeModal}
+            userId={upgradeUserId}
+            onComplete={completeUpgrade}
+            onSkip={skipUpgrade}
           />
         )}
       </AnimatePresence>

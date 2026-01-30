@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClerk, useUser } from '@clerk/nextjs';
-import { Settings, HelpCircle, LogOut, Sparkles } from 'lucide-react';
+import { Settings, HelpCircle, LogOut, Sparkles, Cloud } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
@@ -61,6 +61,15 @@ export function AccountMenu({ className }: AccountMenuProps) {
   const avatarUrl = user?.imageUrl;
   const initials = user?.firstName?.[0] || user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() || '?';
 
+  // Check if initial sync is pending (has local data but not synced yet)
+  const [hasPendingSync, setHasPendingSync] = useState(false);
+
+  useEffect(() => {
+    // Check if sync is completed
+    const completed = localStorage.getItem('particle:initial-sync-completed') === 'true';
+    setHasPendingSync(!completed);
+  }, [isOpen]); // Re-check when menu opens
+
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -107,6 +116,11 @@ export function AccountMenu({ className }: AccountMenuProps) {
     setIsOpen(false);
     // TODO: Implement upgrade modal (POMO-303)
     // For now, this does nothing - the modal will be added in POMO-303
+  }, []);
+
+  const handleSyncData = useCallback(() => {
+    setIsOpen(false);
+    window.dispatchEvent(new CustomEvent('particle:trigger-sync'));
   }, []);
 
   return (
@@ -182,6 +196,15 @@ export function AccountMenu({ className }: AccountMenuProps) {
                   />
                   <div className="my-2 border-t border-tertiary/10 light:border-tertiary-dark/10" />
                 </>
+              )}
+
+              {/* Sync Data option - shows if there's pending local data */}
+              {hasPendingSync && (
+                <MenuItem
+                  icon={<Cloud className="w-4 h-4" />}
+                  label="Sync Local Data"
+                  onClick={handleSyncData}
+                />
               )}
 
               <MenuItem
