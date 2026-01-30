@@ -6,12 +6,12 @@ import { X, Plus, Eye, EyeOff } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useProjects } from '@/hooks/useProjects';
+import { useSessionStore } from '@/contexts/SessionContext';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectEmptyState } from './ProjectEmptyState';
 import { ProjectForm } from './ProjectForm';
 import { ProjectArchiveDialog } from './ProjectArchiveDialog';
 import { ProjectDetailModal } from './ProjectDetailModal';
-import { getUnassignedStats } from '@/lib/projects';
 
 /**
  * Modal displaying all projects with stats
@@ -50,8 +50,47 @@ export function ProjectListModal() {
     refresh,
   } = useProjects();
 
-  // Get unassigned particle stats
-  const unassignedStats = useMemo(() => getUnassignedStats(), [projectsWithStats]);
+  const { sessions } = useSessionStore();
+
+  // Compute unassigned particle stats from session context
+  const unassignedStats = useMemo(() => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    const day = startOfWeek.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    startOfWeek.setDate(startOfWeek.getDate() - diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Work sessions without a project
+    const unassignedSessions = sessions.filter(
+      s => s.type === 'work' && !s.projectId
+    );
+
+    let weekCount = 0;
+    let monthCount = 0;
+    let totalDuration = 0;
+
+    for (const session of unassignedSessions) {
+      const date = new Date(session.completedAt);
+      totalDuration += session.duration;
+
+      if (date >= startOfWeek) {
+        weekCount++;
+      }
+      if (date >= monthStart) {
+        monthCount++;
+      }
+    }
+
+    return {
+      particleCount: unassignedSessions.length,
+      totalDuration,
+      weekParticleCount: weekCount,
+      monthParticleCount: monthCount,
+    };
+  }, [sessions]);
 
   // Build list items: active projects + (archived if shown) + "No Project"
   const listItems = useMemo(() => {

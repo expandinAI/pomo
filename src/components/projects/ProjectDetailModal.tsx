@@ -10,9 +10,9 @@ import { ProjectStatsCards } from './ProjectStatsCards';
 import { ProjectSessionList } from './ProjectSessionList';
 import { ProjectForm } from './ProjectForm';
 import { ParticleDetailOverlay } from '@/components/timer/ParticleDetailOverlay';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
+import { useProjectStore } from '@/contexts/ProjectContext';
 import type { Project, ProjectWithStats } from '@/lib/projects';
-import { getSessionsForProject, getActiveProjects } from '@/lib/projects';
-import type { CompletedSession } from '@/lib/session-storage';
 
 interface ProjectDetailModalProps {
   /** The project to display (null for "No Project" view) */
@@ -48,22 +48,32 @@ export function ProjectDetailModal({
 }: ProjectDetailModalProps) {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
-  const [sessionsVersion, setSessionsVersion] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
   const backButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Use contexts for unified storage access
+  const { sessions } = useSessionStore();
+  const { getActiveProjects } = useProjectStore();
 
   const isNoProject = project === null;
 
   // Get all projects for the overlay
-  const allProjects = useMemo(() => getActiveProjects(), []);
+  const allProjects = useMemo(() => getActiveProjects(), [getActiveProjects]);
 
-  // Get sessions for this project
-  const projectSessions = useMemo(() => {
+  // Get sessions for this project (from context, filtered)
+  const projectSessions = useMemo((): UnifiedSession[] => {
     if (!isOpen) return [];
-    // Depend on sessionsVersion to refresh when sessions are updated
-    void sessionsVersion;
-    return getSessionsForProject(project?.id ?? null);
-  }, [isOpen, project?.id, sessionsVersion]);
+
+    // Filter work sessions for this project
+    const workSessions = sessions.filter(s => s.type === 'work');
+
+    if (project === null) {
+      // "No Project" - sessions without a projectId
+      return workSessions.filter(s => !s.projectId);
+    }
+
+    return workSessions.filter(s => s.projectId === project.id);
+  }, [isOpen, project, sessions]);
 
   // Get recent project IDs from sessions for sorting in overlay
   const recentProjectIds = useMemo(() => {
@@ -163,7 +173,7 @@ export function ProjectDetailModal({
   );
 
   // Session editing handlers
-  const handleEditSession = useCallback((session: CompletedSession) => {
+  const handleEditSession = useCallback((session: UnifiedSession) => {
     setEditingSessionId(session.id);
   }, []);
 
@@ -172,13 +182,12 @@ export function ProjectDetailModal({
   }, []);
 
   const handleSessionUpdated = useCallback(() => {
-    // Refresh sessions list
-    setSessionsVersion((v) => v + 1);
+    // Sessions are automatically refreshed via SessionContext
   }, []);
 
   const handleSessionDeleted = useCallback(() => {
     setEditingSessionId(null);
-    setSessionsVersion((v) => v + 1);
+    // Sessions are automatically refreshed via SessionContext
   }, []);
 
   // Get display values
