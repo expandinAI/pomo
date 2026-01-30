@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
-import { ActionBar } from '@/components/ui/ActionBar';
+import { ParticleMenu } from '@/components/ui/ParticleMenu';
 import { CommandButton, LibraryButton } from '@/components/ui/CornerControls';
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
@@ -428,14 +428,19 @@ function HomeContent() {
       animate="visible"
       variants={entranceVariants}
     >
-      {/* Action Bar + Trial Badge + Auth (top-right) */}
+      {/* Particle Menu + Trial Badge + Auth (top-right) */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
-        <ActionBar
+        <ParticleMenu
+          isGPressed={isGPressed}
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
           onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
+          onOpenHistory={() => window.dispatchEvent(new CustomEvent('particle:open-history'))}
+          onOpenYear={() => window.dispatchEvent(new CustomEvent('particle:open-year'))}
+          onOpenMilestones={() => setShowJourney(true)}
+          onOpenLearn={() => { setLearnInitialView(undefined); setShowLearn(true); }}
         />
         {/* Trial Badge - shows when user has active trial */}
         <TrialBadge />
@@ -454,7 +459,7 @@ function HomeContent() {
         <TimerSettings />
       </div>
 
-      {/* Statistics Dashboard (opened via ActionBar or G+S) */}
+      {/* Statistics Dashboard (opened via RadialMenu or G+S) */}
       <StatisticsDashboard />
 
       {/* Year View Modal (opened via G+Y keyboard shortcut) */}

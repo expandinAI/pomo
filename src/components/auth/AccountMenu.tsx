@@ -137,7 +137,7 @@ export function AccountMenu({ className, appearanceMode, onAppearanceModeChange 
 
   return (
     <div ref={menuRef} className={cn('relative', className)}>
-      {/* Account trigger - monochrome User icon matching ActionBar style */}
+      {/* Account trigger - monochrome User icon matching ParticleMenu style */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(

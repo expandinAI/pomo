@@ -475,7 +475,7 @@ Particle zeigt **nicht** bei jedem Button einen Shortcut-Hint. Das würde die mi
 | Element | Shortcut | Warum nicht |
 |---------|----------|-------------|
 | Preset Buttons | `1-4` | Kompakt, würde UI überladen |
-| ActionBar Icons | `G T`, `G S` | Sequenz-Shortcuts schwer darstellbar |
+| ParticleMenu | `G T`, `G S` | Menu zeigt Shortcuts inline beim Öffnen |
 | TaskInput | `T` | Wenn fokussiert, Hint unnötig |
 | Settings Toggles | `Shift+A` | Power-User Features |
 

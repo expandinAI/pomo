@@ -14,7 +14,7 @@ interface SyncButtonProps {
  * SyncButton - Subtle button for anonymous users to sign in
  *
  * Displays a cloud icon with "Sync" text, linking to the sign-in page.
- * Used in the header area next to ActionBar.
+ * Used in the header area next to ParticleMenu.
  */
 export function SyncButton({ className }: SyncButtonProps) {
   return (
