@@ -30,7 +30,7 @@ Der Sync Service ist das Herzstück der Multi-Device-Experience. Er:
 - Queued Änderungen wenn offline
 - Processed die Queue wenn wieder online
 
-**Wichtig:** Der Sync Service startet nur für eingeloggte User (Plus/Flow).
+**Wichtig:** Der Sync Service startet nur für eingeloggte User (Particle/Flow).
 
 **Reihenfolge:** POMO-304 → **POMO-305** → POMO-306 → ...
 

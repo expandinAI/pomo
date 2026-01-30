@@ -10,7 +10,7 @@ done_date: null
 tags: [feature, upgrade, sync, onboarding]
 ---
 
-# POMO-304: Lokal → Plus Upgrade Flow
+# POMO-304: Lokal → Particle Upgrade Flow
 
 ## User Story
 
@@ -24,7 +24,7 @@ Link zum Feature: [[features/cloud-sync-accounts]]
 
 **Vorgänger:** POMO-303 (Tier System)
 
-Der kritischste Flow: Ein Nutzer hat vielleicht Monate lang im Lokal-Modus gearbeitet. Beim Upgrade zu Plus müssen alle lokalen Daten zuverlässig in die Cloud übertragen werden.
+Der kritischste Flow: Ein Nutzer hat vielleicht Monate lang im Lokal-Modus gearbeitet. Beim Upgrade zu Particle müssen alle lokalen Daten zuverlässig in die Cloud übertragen werden.
 
 **Wichtig:** Dies ist der "erste Sync" – danach übernimmt der reguläre Sync-Service (POMO-305).
 
@@ -426,7 +426,7 @@ function SummaryPhase({
       </div>
 
       <h2 className="text-xl font-medium text-white text-center mb-2">
-        Willkommen bei Particle Plus!
+        Willkommen bei Particle!
       </h2>
       <p className="text-tertiary text-center mb-6">
         Du hast lokale Daten, die wir synchronisieren können:
@@ -686,7 +686,7 @@ useEffect(() => {
 │                                                             │
 │                          ·                                  │  ← Particle (pulsierend)
 │                                                             │
-│              Willkommen bei Particle Plus!                  │
+│              Willkommen bei Particle!                       │
 │                                                             │
 │          Du hast lokale Daten, die wir                      │
 │          synchronisieren können:                            │

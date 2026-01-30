@@ -24,7 +24,7 @@ Link zum Feature: [[features/cloud-sync-accounts]]
 
 **Vorgänger:** POMO-300 (Clerk Setup), POMO-301 (Supabase Schema)
 
-Die Auth-UI ist der erste Kontaktpunkt für Nutzer, die von Lokal auf Plus upgraden wollen. Sie muss einfach, schnell und Particle-typisch minimalistisch sein.
+Die Auth-UI ist der erste Kontaktpunkt für Nutzer, die von Lokal auf Particle upgraden wollen. Sie muss einfach, schnell und Particle-typisch minimalistisch sein.
 
 **Wichtig:** Die App funktioniert komplett ohne Account (Lokal-Modus). Auth ist ein Upgrade, keine Voraussetzung.
 
@@ -51,7 +51,7 @@ src/
 │       ├── index.ts                       # NEU: Exports
 │       ├── SyncButton.tsx                 # NEU: Header-Button für Lokal-User
 │       ├── AccountMenu.tsx                # NEU: Header-Menu für eingeloggte User
-│       └── TierBadge.tsx                  # NEU: Plus/Flow Badge
+│       └── TierBadge.tsx                  # NEU: Particle/Flow Badge
 ```
 
 ### Sign-In Page
@@ -287,7 +287,7 @@ export function AccountMenu() {
             </div>
 
             {/* Trial/Upgrade CTA */}
-            {tier === 'plus' && (
+            {tier === 'free' && (
               <div className="px-4 py-3 border-b border-tertiary/10">
                 <button
                   onClick={() => {
@@ -362,18 +362,18 @@ function MenuButton({
 import type { Tier } from '@/lib/tiers/config';
 
 interface TierBadgeProps {
-  tier: 'plus' | 'flow';
+  tier: 'free' | 'flow';
   showLabel?: boolean;
 }
 
 export function TierBadge({ tier, showLabel = true }: TierBadgeProps) {
   const config = {
-    plus: {
-      label: 'Plus',
+    free: {
+      label: 'Particle',
       className: 'bg-tertiary/20 text-secondary',
     },
     flow: {
-      label: 'Flow',
+      label: 'Particle Flow',
       className: 'bg-white/10 text-white',
     },
   };
@@ -384,7 +384,7 @@ export function TierBadge({ tier, showLabel = true }: TierBadgeProps) {
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${className}`}
     >
-      {showLabel ? `Particle ${label}` : label}
+      {showLabel ? label : tier === 'free' ? 'Free' : 'Flow'}
     </span>
   );
 }
@@ -473,7 +473,7 @@ export { TierBadge } from './TierBadge';
                                             ▼
                          ┌────────────────────────────────┐
                          │  waldemar@example.com          │
-                         │  Particle Plus                 │
+                         │  Particle                      │
                          ├────────────────────────────────┤
                          │  ✦  Particle Flow testen       │
                          │     14 Tage kostenlos          │
@@ -493,7 +493,7 @@ export { TierBadge } from './TierBadge';
 - [ ] Sign-In mit Email Magic Link funktioniert
 - [ ] Sign-In mit Apple funktioniert (wenn konfiguriert)
 - [ ] Redirect nach Login zur App
-- [ ] Account Menu zeigt korrekten Tier (Plus/Flow)
+- [ ] Account Menu zeigt korrekten Tier (Particle/Flow)
 - [ ] Account Menu: Logout funktioniert
 - [ ] Sync Button für Lokal-User sichtbar
 - [ ] Mobile-responsive
@@ -511,7 +511,7 @@ describe('Auth UI', () => {
   });
 
   it('shows AccountMenu when authenticated', () => {
-    mockUseParticleAuth({ status: 'authenticated', tier: 'plus' });
+    mockUseParticleAuth({ status: 'authenticated', tier: 'free' });
 
     render(<Header />);
 
@@ -519,8 +519,8 @@ describe('Auth UI', () => {
     // Avatar should be visible
   });
 
-  it('shows trial CTA for Plus users', async () => {
-    mockUseParticleAuth({ status: 'authenticated', tier: 'plus' });
+  it('shows trial CTA for free users', async () => {
+    mockUseParticleAuth({ status: 'authenticated', tier: 'free' });
 
     render(<AccountMenu />);
 
@@ -538,7 +538,7 @@ describe('Auth UI', () => {
 - [ ] Clerk Appearance customized (schwarzer BG, weißer Accent)
 - [ ] SyncButton für Lokal-User im Header
 - [ ] AccountMenu für eingeloggte User
-- [ ] TierBadge zeigt Plus/Flow korrekt
+- [ ] TierBadge zeigt Particle/Flow korrekt
 - [ ] Mobile-responsive
 - [ ] Keyboard-Navigation (Escape schließt Menu)
 - [ ] Tests geschrieben & grün
@@ -555,7 +555,7 @@ describe('Auth UI', () => {
 - Subtil, nicht aufdringlich
 
 **Trial CTA im Menu:**
-- Nur für Plus-User sichtbar
+- Nur für Particle-User (free) sichtbar
 - Flow-User sehen es nicht (bereits Premium)
 - Position: prominent aber nicht aufdringlich
 

@@ -14,7 +14,7 @@ tags: [feature, trial, monetization]
 
 ## User Story
 
-> Als **Plus-Nutzer**
+> Als **Particle-Nutzer**
 > möchte ich **Particle Flow 14 Tage kostenlos testen**,
 > damit **ich entscheiden kann, ob sich das Upgrade lohnt**.
 
@@ -27,16 +27,16 @@ Link zum Feature: [[features/cloud-sync-accounts]]
 Der Trial ist ein wichtiger Conversion-Hebel. Nutzer sollen Premium-Features erleben, ohne vorher zu zahlen. Keine Kreditkarte erforderlich.
 
 **Trial-Regeln:**
-- Nur für Plus-User (haben bereits Account)
+- Nur für Particle-User (haben bereits Account)
 - 14 Tage volle Flow-Features
 - Einmalig pro Account
-- Automatischer Downgrade zu Plus nach Ablauf
+- Automatischer Downgrade zu Particle nach Ablauf
 
 **Reihenfolge:** POMO-306 → **POMO-307** → POMO-308
 
 ## Akzeptanzkriterien
 
-- [ ] **Given** Plus-Account ohne Trial, **When** Trial gestartet, **Then** werden 14 Tage Flow aktiviert
+- [ ] **Given** Particle-Account ohne Trial, **When** Trial gestartet, **Then** werden 14 Tage Flow aktiviert
 - [ ] **Given** Trial aktiv, **When** App geladen, **Then** zeigt Header "Trial: X Tage übrig"
 - [ ] **Given** Trial endet in 3 Tagen, **When** App geladen, **Then** zeigt Reminder-Badge (orange)
 - [ ] **Given** Trial abgelaufen, **When** App geladen, **Then** zeigt Upgrade-Modal
@@ -483,7 +483,7 @@ export function TrialEndModal({ onUpgrade, onDismiss }: TrialEndModalProps) {
                   onClick={handleDismiss}
                   className="w-full py-2 text-tertiary hover:text-secondary text-sm"
                 >
-                  Mit Particle Plus weitermachen
+                  Mit Particle weitermachen
                 </button>
               </div>
 
@@ -538,7 +538,7 @@ export async function GET(request: Request) {
       await supabase
         .from('users')
         .update({
-          tier: 'plus',
+          tier: 'free',
           subscription_status: 'none',
         })
         .eq('id', user.id);
@@ -546,7 +546,7 @@ export async function GET(request: Request) {
       // Update Clerk Metadata
       await clerkClient.users.updateUser(user.clerk_id, {
         publicMetadata: {
-          tier: 'plus',
+          tier: 'free',
           trialEndsAt: null,
         },
       });
@@ -649,7 +649,7 @@ Expiring Soon (≤3 Tage):
 - [ ] Premium-Features sind während Trial verfügbar
 - [ ] Badge wird orange bei ≤3 Tagen
 - [ ] Nach Trial-Ende: Trial-End-Modal erscheint
-- [ ] Nach Trial-Ende: Tier wechselt zu Plus
+- [ ] Nach Trial-Ende: Tier wechselt zu Particle (free)
 - [ ] Nach Trial-Ende: Premium-Features gesperrt
 - [ ] Trial kann nur einmal pro Account gestartet werden
 
@@ -717,7 +717,7 @@ describe('Trial Service', () => {
 **Trial-Ende Handling:**
 - Modal erscheint nur einmal (localStorage Flag)
 - Kein "Nag Screen" bei jedem Besuch
-- Respektvoller Downgrade zu Plus
+- Respektvoller Downgrade zu Particle
 
 ---
 

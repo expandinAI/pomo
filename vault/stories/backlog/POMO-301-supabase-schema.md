@@ -57,9 +57,9 @@ CREATE TABLE users (
   clerk_id TEXT UNIQUE NOT NULL,
   email TEXT NOT NULL,
 
-  -- Tier: 'plus' (kostenlos) oder 'flow' (bezahlt)
-  -- Kein 'free' - ohne Account = kein DB-Eintrag
-  tier TEXT DEFAULT 'plus' CHECK (tier IN ('plus', 'flow')),
+  -- Tier: 'free' (kostenlos) oder 'flow' (bezahlt)
+  -- Ohne Account = kein DB-Eintrag
+  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'flow')),
 
   -- Trial Management
   trial_started_at TIMESTAMPTZ,

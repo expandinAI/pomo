@@ -28,8 +28,8 @@ Clerk ist unser Auth-Provider. Er bietet Apple Sign-In (wichtig für iOS), Googl
 
 **Tier-Architektur:**
 - **Lokal (kein Account):** Volle App, Daten nur auf diesem Gerät
-- **Plus (kostenloser Account):** Cloud Sync, Daten auf allen Geräten
-- **Flow (bezahlter Account):** Premium Features
+- **Particle (kostenloser Account):** Cloud Sync, Daten auf allen Geräten
+- **Particle Flow (bezahlter Account):** Premium Features
 
 **Reihenfolge:** POMO-300 → POMO-301 → POMO-302 → POMO-303 → ...
 
@@ -156,7 +156,7 @@ import { useMemo } from 'react';
 export type AuthState =
   | { status: 'loading' }
   | { status: 'anonymous' }  // Kein Account, lokaler Modus
-  | { status: 'authenticated'; user: User; tier: 'plus' | 'flow' };
+  | { status: 'authenticated'; user: User; tier: 'free' | 'flow' };
 
 export function useParticleAuth(): AuthState {
   const { isLoaded, isSignedIn } = useAuth();
@@ -172,7 +172,7 @@ export function useParticleAuth(): AuthState {
     }
 
     // Tier aus Clerk Metadata
-    const tier = (user.publicMetadata?.tier as 'plus' | 'flow') || 'plus';
+    const tier = (user.publicMetadata?.tier as 'free' | 'flow') || 'free';
 
     return {
       status: 'authenticated',
@@ -276,7 +276,7 @@ describe('useParticleAuth', () => {
     expect(result.current.tier).toBe('flow');
   });
 
-  it('defaults to plus tier', () => {
+  it('defaults to free tier', () => {
     mockUseAuth({ isLoaded: true, isSignedIn: true });
     mockUseUser({
       user: {
@@ -287,7 +287,7 @@ describe('useParticleAuth', () => {
 
     const { result } = renderHook(() => useParticleAuth());
 
-    expect(result.current.tier).toBe('plus');
+    expect(result.current.tier).toBe('free');
   });
 });
 ```

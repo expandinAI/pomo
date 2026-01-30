@@ -16,7 +16,7 @@ tags: [feature, tiers, monetization]
 
 > Als **Produkt**
 > möchte ich **Features basierend auf Account-Tier freischalten**,
-> damit **wir Plus und Flow Nutzer unterschiedlich behandeln können**.
+> damit **wir Particle und Flow Nutzer unterschiedlich behandeln können**.
 
 ## Kontext
 
@@ -29,12 +29,12 @@ Link zum Feature: [[features/cloud-sync-accounts]]
 | Modus | Account | Sync | Features | Kosten |
 |-------|---------|------|----------|--------|
 | **Lokal** | Kein | ✗ | Alle Basis-Features | Kostenlos |
-| **Plus** | Ja | ✓ | Basis + Sync | Kostenlos |
-| **Flow** | Ja | ✓ | Alles | 9€/Monat |
+| **Particle** | Ja | ✓ | Basis + Sync | Kostenlos |
+| **Particle Flow** | Ja | ✓ | Alles | 9€/Monat |
 
 **Wichtig:**
 - "Lokal" ist kein Tier – es ist die App ohne Account
-- Es gibt keinen "Free"-Tier in der Datenbank
+- Tier-Werte in der DB sind `'free'` und `'flow'`
 - Ohne Account existiert kein DB-Eintrag in `users`
 
 **Reihenfolge:** POMO-302 → **POMO-303** → POMO-304 → ...
@@ -42,9 +42,9 @@ Link zum Feature: [[features/cloud-sync-accounts]]
 ## Akzeptanzkriterien
 
 - [ ] **Given** kein Account (Lokal), **When** App geladen, **Then** sind alle Basis-Features verfügbar
-- [ ] **Given** Plus Account, **When** Premium-Feature genutzt, **Then** wird Upgrade-Prompt gezeigt
+- [ ] **Given** Particle Account, **When** Premium-Feature genutzt, **Then** wird Upgrade-Prompt gezeigt
 - [ ] **Given** Flow Account, **When** App geladen, **Then** sind alle Features verfügbar
-- [ ] **Given** Trial aktiv, **When** Trial abläuft, **Then** wechselt Tier automatisch zu Plus
+- [ ] **Given** Trial aktiv, **When** Trial abläuft, **Then** wechselt Tier automatisch zu Particle (free)
 
 ## Technische Details
 
@@ -67,12 +67,12 @@ src/lib/tiers/
  * Tier-Typen für authentifizierte User.
  * "Lokal" (ohne Account) ist kein Tier – es ist einfach `null`.
  */
-export type Tier = 'plus' | 'flow';
+export type Tier = 'free' | 'flow';
 
 /**
  * Auth-Status für die gesamte App.
  */
-export type AuthMode = 'local' | 'plus' | 'flow';
+export type AuthMode = 'local' | 'free' | 'flow';
 
 export interface TierFeatures {
   /** Cloud Sync aktiviert */
@@ -125,11 +125,11 @@ export const LOCAL_CONFIG: TierConfig = {
 };
 
 /**
- * Konfiguration für Plus (kostenloser Account).
+ * Konfiguration für Particle (kostenloser Account).
  * Hauptvorteil: Cloud Sync.
  */
-export const PLUS_CONFIG: TierConfig = {
-  name: 'Particle Plus',
+export const FREE_CONFIG: TierConfig = {
+  name: 'Particle',
   description: 'Cloud Sync auf allen Geräten',
   features: {
     sync: true,
@@ -171,7 +171,7 @@ export const FLOW_CONFIG: TierConfig = {
  */
 export const TIER_CONFIGS: Record<AuthMode, TierConfig> = {
   local: LOCAL_CONFIG,
-  plus: PLUS_CONFIG,
+  free: FREE_CONFIG,
   flow: FLOW_CONFIG,
 };
 
@@ -205,7 +205,7 @@ import {
 /**
  * Gibt den aktuellen Auth-Modus zurück.
  * - 'local': Kein Account
- * - 'plus': Kostenloser Account
+ * - 'free': Kostenloser Account (Particle)
  * - 'flow': Premium Account oder Trial
  */
 export function useAuthMode(): AuthMode {
@@ -244,7 +244,7 @@ export function useTierConfig() {
 }
 
 /**
- * Prüft ob User eingeloggt ist (Plus oder Flow).
+ * Prüft ob User eingeloggt ist (Particle oder Flow).
  */
 export function useIsAuthenticated(): boolean {
   const mode = useAuthMode();
@@ -374,7 +374,7 @@ export {
   type TierLimits,
   type TierConfig,
   LOCAL_CONFIG,
-  PLUS_CONFIG,
+  FREE_CONFIG,
   FLOW_CONFIG,
   TIER_CONFIGS,
   FEATURE_LABELS,
@@ -436,8 +436,8 @@ function SyncIndicator() {
 
 ## Feature-Matrix
 
-| Feature | Lokal | Plus | Flow |
-|---------|-------|------|------|
+| Feature | Lokal | Particle | Particle Flow |
+|---------|-------|----------|---------------|
 | Timer & Breaks | ✓ | ✓ | ✓ |
 | Projects | ✓ | ✓ | ✓ |
 | History (30 Tage) | ✓ | ✓ | ✓ |
@@ -454,8 +454,8 @@ function SyncIndicator() {
 
 - [ ] Ohne Login: Basis-Features verfügbar
 - [ ] Ohne Login: Sync-Button sichtbar (nicht "Anmelden")
-- [ ] Mit Plus: Cloud Sync aktiv, Premium-Features zeigen Upgrade-Prompt
-- [ ] Mit Flow: Alle Features verfügbar
+- [ ] Mit Particle: Cloud Sync aktiv, Premium-Features zeigen Upgrade-Prompt
+- [ ] Mit Particle Flow: Alle Features verfügbar
 - [ ] FeatureGate rendert korrekten Content
 
 ### Automatisierte Tests
@@ -470,12 +470,12 @@ describe('Tier System', () => {
     expect(result.current).toBe('local');
   });
 
-  it('returns plus for authenticated user without premium', () => {
-    mockUseParticleAuth({ status: 'authenticated', tier: 'plus' });
+  it('returns free for authenticated user without premium', () => {
+    mockUseParticleAuth({ status: 'authenticated', tier: 'free' });
 
     const { result } = renderHook(() => useAuthMode());
 
-    expect(result.current).toBe('plus');
+    expect(result.current).toBe('free');
   });
 
   it('returns flow for premium user', () => {
@@ -499,7 +499,7 @@ describe('Tier System', () => {
   });
 
   it('FeatureGate shows upgrade prompt when feature locked', () => {
-    mockUseParticleAuth({ status: 'authenticated', tier: 'plus' });
+    mockUseParticleAuth({ status: 'authenticated', tier: 'free' });
 
     render(
       <FeatureGate feature="yearView">
@@ -514,7 +514,7 @@ describe('Tier System', () => {
 
 ## Definition of Done
 
-- [ ] Tier Config mit Lokal/Plus/Flow definiert
+- [ ] Tier Config mit Lokal/Particle/Flow definiert
 - [ ] `useAuthMode()` Hook funktioniert
 - [ ] `useFeature()` Hook funktioniert
 - [ ] `useTierLimit()` Hook funktioniert
@@ -526,7 +526,7 @@ describe('Tier System', () => {
 
 **Warum "Lokal" kein Tier ist:**
 - Kein Account = kein DB-Eintrag
-- Vereinfacht die Datenbank (nur `plus` und `flow` in users.tier)
+- Vereinfacht die Datenbank (nur `free` und `flow` in users.tier)
 - Klare Trennung: Auth-Status vs. Subscription-Status
 
 **Feature Strategie:**
