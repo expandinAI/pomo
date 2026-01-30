@@ -19,9 +19,10 @@ export function formatTime(seconds: number): string {
 
 /**
  * Format seconds to human readable (e.g., "25 min")
+ * Uses Math.round for user-friendly display (90s → "2 min", not "1 min")
  */
 export function formatDuration(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
+  const mins = Math.round(seconds / 60);
   if (mins < 60) {
     return `${mins} min`;
   }

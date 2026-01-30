@@ -193,19 +193,20 @@ export function getTotalDuration(sessions: CompletedSession[]): number {
 }
 
 // Format duration as hours, minutes, and seconds (for small values)
+// Uses Math.round for user-friendly display (90s → "2m", not "1m")
 export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const totalMinutes = Math.round(seconds / 60);
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
+  if (totalMinutes >= 60) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
-  if (minutes > 0) {
-    return `${minutes}m`;
+  if (totalMinutes > 0) {
+    return `${totalMinutes}m`;
   }
-  // Show seconds for values under 1 minute (e.g., small overflow times)
-  return `${secs}s`;
+  // Show seconds for values under 30 seconds
+  return `${seconds}s`;
 }
 
 // Format date as relative or absolute
