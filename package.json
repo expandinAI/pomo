@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.0",
+    "dexie": "^4.2.1",
     "framer-motion": "^11.0.0",
     "fuse.js": "^7.1.0",
     "lucide-react": "^0.344.0",
@@ -30,6 +31,7 @@
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.0",
+    "fake-indexeddb": "^6.2.5",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.0",

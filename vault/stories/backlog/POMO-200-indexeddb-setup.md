@@ -414,7 +414,17 @@ describe('Feature Detection', () => {
 ## Arbeitsverlauf
 
 ### Gestartet:
-<!-- Claude: Notiere hier was du tust -->
+2026-01-30: Implementierung gestartet
 
 ### Erledigt:
-<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->
+- [x] Dexie.js installiert (`pnpm add dexie`)
+- [x] `src/lib/db/` Ordner mit allen Dateien erstellt
+- [x] ParticleDB Klasse mit Schema v1
+- [x] Feature Detection für IndexedDB
+- [x] TypeScript Types für alle Entities
+- [x] Sync-Metadata Helper Functions
+- [x] Singleton-Pattern für DB-Instanz
+- [x] Unit Tests geschrieben & grün (13/13)
+- [x] fake-indexeddb für Tests installiert
+- [x] TypeScript check passed
+- [x] Build passed
