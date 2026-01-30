@@ -50,3 +50,4 @@ src/app/test-supabase
 
 # Misc
 *.pem
+supabase/.temp/
