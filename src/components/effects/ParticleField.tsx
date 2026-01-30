@@ -102,11 +102,11 @@ export function ParticleField({
   convergenceTarget = null,
 }: ParticleFieldProps) {
   const reducedMotion = prefersReducedMotion();
-  const { nightModeEnabled } = useTimerSettingsContext();
+  const { isDarkMode } = useTimerSettingsContext();
 
-  // Particle color based on night mode
-  const particleColor = nightModeEnabled ? NIGHT_MODE_COLOR : NORMAL_COLOR;
-  const glowColorRgb = nightModeEnabled ? '160, 160, 160' : '255, 255, 255';
+  // Particle color based on dark mode
+  const particleColor = isDarkMode ? NIGHT_MODE_COLOR : NORMAL_COLOR;
+  const glowColorRgb = isDarkMode ? '160, 160, 160' : '255, 255, 255';
 
   // Refs for tracking particle positions
   const particleRefs = useRef<(HTMLDivElement | null)[]>([]);

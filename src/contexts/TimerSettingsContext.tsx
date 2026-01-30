@@ -37,8 +37,9 @@ const BREAK_BREATHING_KEY = 'particle_break_breathing_enabled';
 const DEFAULT_BREAK_BREATHING = false;
 const WELLBEING_HINTS_KEY = 'particle_wellbeing_hints_enabled';
 const DEFAULT_WELLBEING_HINTS = false;
-const NIGHT_MODE_KEY = 'particle_night_mode_enabled';
-const DEFAULT_NIGHT_MODE = false;
+const APPEARANCE_MODE_KEY = 'particle_appearance_mode';
+type AppearanceMode = 'light' | 'dark' | 'system';
+const DEFAULT_APPEARANCE_MODE: AppearanceMode = 'system';
 
 type AutoStartDelay = 3 | 5 | 10;
 type AutoStartMode = 'all' | 'breaks-only';
@@ -360,22 +361,47 @@ function saveWellbeingHintsEnabled(enabled: boolean): void {
   localStorage.setItem(WELLBEING_HINTS_KEY, JSON.stringify(enabled));
 }
 
-function loadNightModeEnabled(): boolean {
-  if (typeof window === 'undefined') return DEFAULT_NIGHT_MODE;
+function loadAppearanceMode(): AppearanceMode {
+  if (typeof window === 'undefined') return DEFAULT_APPEARANCE_MODE;
   try {
-    const stored = localStorage.getItem(NIGHT_MODE_KEY);
+    // Try new key first
+    const stored = localStorage.getItem(APPEARANCE_MODE_KEY);
     if (stored !== null) {
-      return JSON.parse(stored) === true;
+      const parsed = JSON.parse(stored);
+      if (parsed === 'light' || parsed === 'dark' || parsed === 'system') {
+        return parsed;
+      }
+    }
+    // Migration: check old boolean key
+    const oldStored = localStorage.getItem('particle_night_mode_enabled');
+    if (oldStored !== null) {
+      const wasDark = JSON.parse(oldStored) === true;
+      const migrated: AppearanceMode = wasDark ? 'dark' : 'light';
+      // Save migrated value
+      localStorage.setItem(APPEARANCE_MODE_KEY, JSON.stringify(migrated));
+      localStorage.removeItem('particle_night_mode_enabled');
+      return migrated;
     }
   } catch {
     // Ignore errors
   }
-  return DEFAULT_NIGHT_MODE;
+  return DEFAULT_APPEARANCE_MODE;
 }
 
-function saveNightModeEnabled(enabled: boolean): void {
+function saveAppearanceMode(mode: AppearanceMode): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(NIGHT_MODE_KEY, JSON.stringify(enabled));
+  localStorage.setItem(APPEARANCE_MODE_KEY, JSON.stringify(mode));
+}
+
+/** Determine if dark mode should be active based on appearance mode and system preference */
+function shouldUseDarkMode(mode: AppearanceMode): boolean {
+  if (mode === 'dark') return true;
+  if (mode === 'light') return false;
+  // System mode: check OS preference
+  if (typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return false;
 }
 
 interface TimerSettingsContextValue {
@@ -435,12 +461,14 @@ interface TimerSettingsContextValue {
   // Wellbeing hints during breaks
   wellbeingHintsEnabled: boolean;
   setWellbeingHintsEnabled: (enabled: boolean) => void;
-  // Night mode (dimmed white)
-  nightModeEnabled: boolean;
-  setNightModeEnabled: (enabled: boolean) => void;
+  // Appearance mode (light/dark/system)
+  appearanceMode: AppearanceMode;
+  setAppearanceMode: (mode: AppearanceMode) => void;
+  /** Computed: whether dark mode is currently active (based on mode + system pref) */
+  isDarkMode: boolean;
 }
 
-export type { AutoStartDelay, AutoStartMode };
+export type { AutoStartDelay, AutoStartMode, AppearanceMode };
 
 const TimerSettingsContext = createContext<TimerSettingsContextValue | null>(null);
 
@@ -464,8 +492,12 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
   const [celebrationIntensity, setCelebrationIntensityState] = useState<CelebrationIntensity>(DEFAULT_CELEBRATION_INTENSITY);
   const [breakBreathingEnabled, setBreakBreathingEnabledState] = useState<boolean>(DEFAULT_BREAK_BREATHING);
   const [wellbeingHintsEnabled, setWellbeingHintsEnabledState] = useState<boolean>(DEFAULT_WELLBEING_HINTS);
-  const [nightModeEnabled, setNightModeEnabledState] = useState<boolean>(DEFAULT_NIGHT_MODE);
+  const [appearanceMode, setAppearanceModeState] = useState<AppearanceMode>(DEFAULT_APPEARANCE_MODE);
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Computed: is dark mode active?
+  const isDarkMode = appearanceMode === 'dark' || (appearanceMode === 'system' && systemPrefersDark);
 
   // Reload all synced settings from localStorage
   const reloadSyncedSettings = useCallback(() => {
@@ -519,15 +551,42 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     const wellbeingHintsVal = loadWellbeingHintsEnabled();
     setWellbeingHintsEnabledState(wellbeingHintsVal);
 
-    const nightModeVal = loadNightModeEnabled();
-    setNightModeEnabledState(nightModeVal);
-    // Apply night-mode class on initial load
-    if (nightModeVal && typeof document !== 'undefined') {
-      document.documentElement.classList.add('night-mode');
+    // Load appearance mode and system preference
+    const modeVal = loadAppearanceMode();
+    setAppearanceModeState(modeVal);
+
+    // Get initial system preference
+    if (typeof window !== 'undefined') {
+      const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      setSystemPrefersDark(darkQuery.matches);
     }
 
     setIsLoaded(true);
   }, [reloadSyncedSettings]);
+
+  // Listen for system color scheme changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemPrefersDark(e.matches);
+    };
+
+    darkQuery.addEventListener('change', handleChange);
+    return () => darkQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Apply night-mode class whenever isDarkMode changes
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    if (isDarkMode) {
+      document.documentElement.classList.add('night-mode');
+    } else {
+      document.documentElement.classList.remove('night-mode');
+    }
+  }, [isDarkMode]);
 
   // Listen for settings sync event (POMO-308)
   useEffect(() => {
@@ -664,18 +723,11 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
     saveWellbeingHintsEnabled(enabled);
   }, []);
 
-  // Set night mode enabled
-  const setNightModeEnabled = useCallback((enabled: boolean) => {
-    setNightModeEnabledState(enabled);
-    saveNightModeEnabled(enabled);
-    // Apply/remove class on document root
-    if (typeof document !== 'undefined') {
-      if (enabled) {
-        document.documentElement.classList.add('night-mode');
-      } else {
-        document.documentElement.classList.remove('night-mode');
-      }
-    }
+  // Set appearance mode
+  const setAppearanceMode = useCallback((mode: AppearanceMode) => {
+    setAppearanceModeState(mode);
+    saveAppearanceMode(mode);
+    // Note: The isDarkMode effect will handle applying/removing the class
   }, []);
 
   // All available presets as array
@@ -719,8 +771,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setBreakBreathingEnabled,
       wellbeingHintsEnabled,
       setWellbeingHintsEnabled,
-      nightModeEnabled,
-      setNightModeEnabled,
+      appearanceMode,
+      setAppearanceMode,
+      isDarkMode,
     }),
     [
       durations,
@@ -759,8 +812,9 @@ export function TimerSettingsProvider({ children }: TimerSettingsProviderProps) 
       setBreakBreathingEnabled,
       wellbeingHintsEnabled,
       setWellbeingHintsEnabled,
-      nightModeEnabled,
-      setNightModeEnabled,
+      appearanceMode,
+      setAppearanceMode,
+      isDarkMode,
     ]
   );
 

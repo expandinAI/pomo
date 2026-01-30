@@ -20,7 +20,7 @@ interface LearnPanelProps {
 }
 
 const VIEW_TITLES: Record<LearnView, string> = {
-  menu: 'Learn',
+  menu: 'Library',
   rhythms: 'The Three Rhythms',
   breaks: 'Why Breaks Matter',
   science: 'The Science',

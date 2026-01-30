@@ -2,15 +2,18 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useClerk, useUser } from '@clerk/nextjs';
-import { Settings, HelpCircle, LogOut, Sparkles, Cloud } from 'lucide-react';
+import { useClerk } from '@clerk/nextjs';
+import { Settings, BookOpen, LogOut, Sparkles, Cloud, User, Moon, Sun, Monitor } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
 import { TierBadge } from './TierBadge';
+import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
 
 interface AccountMenuProps {
   className?: string;
+  appearanceMode?: AppearanceMode;
+  onAppearanceModeChange?: (mode: AppearanceMode) => void;
 }
 
 interface MenuItemProps {
@@ -38,28 +41,38 @@ function MenuItem({ icon, label, onClick, highlight }: MenuItemProps) {
   );
 }
 
+interface AppearanceOption {
+  id: AppearanceMode;
+  icon: React.ReactNode;
+  label: string;
+}
+
+const APPEARANCE_OPTIONS: AppearanceOption[] = [
+  { id: 'light', icon: <Sun className="w-3.5 h-3.5" />, label: 'Light' },
+  { id: 'dark', icon: <Moon className="w-3.5 h-3.5" />, label: 'Dark' },
+  { id: 'system', icon: <Monitor className="w-3.5 h-3.5" />, label: 'System' },
+];
+
 /**
  * AccountMenu - Dropdown menu for authenticated users
  *
  * Shows user avatar/initial as trigger, with dropdown containing:
  * - User email and tier badge
  * - "Try Particle Flow" CTA (for free users)
+ * - Appearance mode selector (Light/Dark/System)
  * - Settings link
- * - Help & Feedback link
+ * - Help & Learn link
  * - Sign out
  */
-export function AccountMenu({ className }: AccountMenuProps) {
+export function AccountMenu({ className, appearanceMode, onAppearanceModeChange }: AccountMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
-  const { user } = useUser();
   const auth = useParticleAuth();
 
   // Get user info
   const email = auth.status === 'authenticated' ? auth.email : null;
   const tier = auth.status === 'authenticated' ? auth.tier : 'free';
-  const avatarUrl = user?.imageUrl;
-  const initials = user?.firstName?.[0] || user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() || '?';
 
   // Check if initial sync is pending (has local data but not synced yet)
   const [hasPendingSync, setHasPendingSync] = useState(false);
@@ -106,10 +119,10 @@ export function AccountMenu({ className }: AccountMenuProps) {
     window.dispatchEvent(new CustomEvent('particle:open-settings'));
   }, []);
 
-  const handleOpenHelp = useCallback(() => {
+  const handleOpenLearn = useCallback(() => {
     setIsOpen(false);
-    // Open learn panel with keyboard shortcuts view
-    window.dispatchEvent(new CustomEvent('particle:open-learn', { detail: { section: 'shortcuts' } }));
+    // Open learn panel
+    window.dispatchEvent(new CustomEvent('particle:open-learn'));
   }, []);
 
   const handleUpgrade = useCallback(() => {
@@ -124,7 +137,7 @@ export function AccountMenu({ className }: AccountMenuProps) {
 
   return (
     <div ref={menuRef} className={cn('relative', className)}>
-      {/* Avatar trigger */}
+      {/* Account trigger - monochrome User icon matching ActionBar style */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -133,8 +146,7 @@ export function AccountMenu({ className }: AccountMenuProps) {
           'hover:text-secondary light:hover:text-secondary-dark',
           'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
           'transition-colors duration-fast',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-          'overflow-hidden'
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
         )}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -143,16 +155,7 @@ export function AccountMenu({ className }: AccountMenuProps) {
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-sm font-semibold">{initials}</span>
-        )}
+        <User className="w-5 h-5" />
       </motion.button>
 
       {/* Dropdown menu */}
@@ -206,6 +209,54 @@ export function AccountMenu({ className }: AccountMenuProps) {
                 />
               )}
 
+              {/* Appearance Mode Selector */}
+              {onAppearanceModeChange && (
+                <div className="px-3 py-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
+                      Appearance
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {APPEARANCE_OPTIONS.map((option) => {
+                      const isActive = appearanceMode === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => onAppearanceModeChange(option.id)}
+                          className={cn(
+                            'flex flex-col items-center gap-1 py-2 px-1.5 rounded-lg transition-colors',
+                            isActive
+                              ? 'bg-accent/15 light:bg-accent-dark/15 ring-1 ring-accent/50 light:ring-accent-dark/50'
+                              : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              isActive
+                                ? 'text-accent light:text-accent-dark'
+                                : 'text-tertiary light:text-tertiary-dark'
+                            )}
+                          >
+                            {option.icon}
+                          </span>
+                          <span
+                            className={cn(
+                              'text-[10px] font-medium',
+                              isActive
+                                ? 'text-accent light:text-accent-dark'
+                                : 'text-secondary light:text-secondary-dark'
+                            )}
+                          >
+                            {option.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <MenuItem
                 icon={<Settings className="w-4 h-4" />}
                 label="Settings"
@@ -213,9 +264,9 @@ export function AccountMenu({ className }: AccountMenuProps) {
               />
 
               <MenuItem
-                icon={<HelpCircle className="w-4 h-4" />}
-                label="Help & Feedback"
-                onClick={handleOpenHelp}
+                icon={<BookOpen className="w-4 h-4" />}
+                label="Library"
+                onClick={handleOpenLearn}
               />
 
               <div className="my-2 border-t border-tertiary/10 light:border-tertiary-dark/10" />

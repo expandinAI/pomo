@@ -55,6 +55,26 @@ export function CommandButton({ onOpenCommands }: CommandButtonProps) {
 }
 
 /**
+ * Library Button (bottom-right, standalone)
+ * Opens the Library panel with guides and philosophy
+ */
+interface LibraryButtonProps {
+  onOpenLibrary: () => void;
+}
+
+export function LibraryButton({ onOpenLibrary }: LibraryButtonProps) {
+  return (
+    <CornerButton
+      onClick={onOpenLibrary}
+      label="Open library"
+      tooltip="Library · L"
+    >
+      <BookOpen className="w-4 h-4" />
+    </CornerButton>
+  );
+}
+
+/**
  * Bottom-right corner controls
  * - Learn (L)
  * - Night Mode (D)

@@ -1,61 +1,66 @@
 'use client';
 
-import { Moon } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
-import { SPRING } from '@/styles/design-tokens';
+import { Sun, Moon, Monitor } from 'lucide-react';
+import { useTimerSettingsContext, type AppearanceMode } from '@/contexts/TimerSettingsContext';
+import { cn } from '@/lib/utils';
+
+interface ModeOption {
+  id: AppearanceMode;
+  icon: React.ReactNode;
+  label: string;
+}
+
+const MODE_OPTIONS: ModeOption[] = [
+  { id: 'light', icon: <Sun className="w-4 h-4" />, label: 'Light' },
+  { id: 'dark', icon: <Moon className="w-4 h-4" />, label: 'Dark' },
+  { id: 'system', icon: <Monitor className="w-4 h-4" />, label: 'System' },
+];
 
 export function NightModeSettings() {
-  const { nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
+  const { appearanceMode, setAppearanceMode } = useTimerSettingsContext();
 
   return (
-    <motion.button
-      onClick={() => setNightModeEnabled(!nightModeEnabled)}
-      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-        nightModeEnabled
-          ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
-          : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
-      }`}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', ...SPRING.default }}
-    >
-      <div className="flex items-center gap-3">
-        <Moon
-          className={`w-4 h-4 ${
-            nightModeEnabled
-              ? 'text-accent light:text-accent-dark'
-              : 'text-tertiary light:text-tertiary-dark'
-          }`}
-        />
-        <div className="text-left">
-          <p
-            className={`text-sm font-medium ${
-              nightModeEnabled
-                ? 'text-accent light:text-accent-dark'
-                : 'text-secondary light:text-secondary-dark'
-            }`}
-          >
-            Night Mode
-          </p>
-          <p className="text-xs text-tertiary light:text-tertiary-dark">
-            Reduced contrast, no effects
-          </p>
-        </div>
+    <div className="space-y-2">
+      <label className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
+        Appearance
+      </label>
+      <div className="grid grid-cols-3 gap-2">
+        {MODE_OPTIONS.map((option) => {
+          const isActive = appearanceMode === option.id;
+          return (
+            <button
+              key={option.id}
+              onClick={() => setAppearanceMode(option.id)}
+              className={cn(
+                'flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-lg transition-colors',
+                isActive
+                  ? 'bg-accent/10 light:bg-accent-dark/10 ring-1 ring-accent light:ring-accent-dark'
+                  : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+              )}
+            >
+              <span
+                className={cn(
+                  isActive
+                    ? 'text-accent light:text-accent-dark'
+                    : 'text-tertiary light:text-tertiary-dark'
+                )}
+              >
+                {option.icon}
+              </span>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isActive
+                    ? 'text-accent light:text-accent-dark'
+                    : 'text-secondary light:text-secondary-dark'
+                )}
+              >
+                {option.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      {/* Toggle Switch */}
-      <div
-        className={`relative w-10 h-6 rounded-full transition-colors ${
-          nightModeEnabled
-            ? 'bg-accent light:bg-accent-dark'
-            : 'bg-tertiary/30 light:bg-tertiary-dark/30'
-        }`}
-      >
-        <motion.div
-          className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
-          animate={{ left: nightModeEnabled ? 20 : 4 }}
-          transition={{ type: 'spring', ...SPRING.default }}
-        />
-      </div>
-    </motion.button>
+    </div>
   );
 }

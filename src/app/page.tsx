@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
 import { ActionBar } from '@/components/ui/ActionBar';
-import { CommandButton, BottomRightControls } from '@/components/ui/CornerControls';
+import { CommandButton, LibraryButton } from '@/components/ui/CornerControls';
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
@@ -107,7 +107,7 @@ function HomeContent() {
   }, []);
 
   // Night mode, presets, and command palette
-  const { nightModeEnabled, setNightModeEnabled, activePresetId, applyPreset } = useTimerSettingsContext();
+  const { appearanceMode, setAppearanceMode, isDarkMode, activePresetId, applyPreset } = useTimerSettingsContext();
   const { open: openCommandPalette } = useCommandPalette();
 
   // First-run intro - shows on very first app open
@@ -441,7 +441,12 @@ function HomeContent() {
         <TrialBadge />
         {/* Auth button: Sync for anonymous, AccountMenu for authenticated */}
         {auth.status === 'anonymous' && <SyncButton />}
-        {auth.status === 'authenticated' && <AccountMenu />}
+        {auth.status === 'authenticated' && (
+          <AccountMenu
+            appearanceMode={appearanceMode}
+            onAppearanceModeChange={setAppearanceMode}
+          />
+        )}
       </div>
 
       {/* TimerSettings modal - hidden trigger, responds to events */}
@@ -478,16 +483,13 @@ function HomeContent() {
         <ShortcutsHelp />
       </div>
 
-      {/* Bottom-right: Learn + Night Mode + Settings */}
+      {/* Bottom-right: Library Button */}
       <div className="absolute bottom-4 right-4">
-        <BottomRightControls
-          onOpenLearn={() => {
+        <LibraryButton
+          onOpenLibrary={() => {
             setLearnInitialView(undefined);
             setShowLearn(true);
           }}
-          onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
-          onOpenSettings={() => window.dispatchEvent(new CustomEvent('particle:open-settings'))}
-          nightModeEnabled={nightModeEnabled}
         />
       </div>
 

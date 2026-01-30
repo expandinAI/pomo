@@ -222,7 +222,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
-  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled, wellbeingHintsEnabled, nightModeEnabled, setNightModeEnabled } = useTimerSettingsContext();
+  const { durations, isLoaded, sessionsUntilLong, applyPreset, activePresetId, overflowEnabled, dailyGoal, setDailyGoal, autoStartEnabled, autoStartDelay, setAutoStartEnabled, autoStartMode, showEndTime, celebrationEnabled, celebrationTrigger, breakBreathingEnabled, wellbeingHintsEnabled, appearanceMode, setAppearanceMode, isDarkMode } = useTimerSettingsContext();
 
   // Ref to always have current sessionsUntilLong
   const sessionsUntilLongRef = useRef(sessionsUntilLong);
@@ -1503,10 +1503,14 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         case 'd':
         case 'D':
           {
-            const newEnabled = !nightModeEnabled;
-            setNightModeEnabled(newEnabled);
+            // Cycle through appearance modes: light → dark → system → light
+            const modes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+            const currentIndex = modes.indexOf(appearanceMode);
+            const nextMode = modes[(currentIndex + 1) % modes.length];
+            setAppearanceMode(nextMode);
+            const modeLabels = { light: 'Light mode', dark: 'Dark mode', system: 'System mode' };
             window.dispatchEvent(new CustomEvent('particle:toast', {
-              detail: { message: newEnabled ? 'Night mode' : 'Day mode' }
+              detail: { message: modeLabels[nextMode] }
             }));
           }
           break;
@@ -1651,7 +1655,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -1825,7 +1829,8 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         timerIsPaused={state.isPaused}
         isMuted={muted}
         autoStartEnabled={autoStartEnabled}
-        nightModeEnabled={nightModeEnabled}
+        appearanceMode={appearanceMode}
+        isDarkMode={isDarkMode}
         onStart={handleStart}
         onPause={handlePause}
         onSkip={handleSkip}
@@ -1833,7 +1838,11 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         onToggleMute={toggleMute}
         onPresetChange={applyPreset}
         onToggleAutoStart={handleToggleAutoStart}
-        onToggleNightMode={() => setNightModeEnabled(!nightModeEnabled)}
+        onCycleAppearanceMode={() => {
+          const modes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+          const currentIndex = modes.indexOf(appearanceMode);
+          setAppearanceMode(modes[(currentIndex + 1) % modes.length]);
+        }}
         pendingTaskCount={pendingTaskCount}
         onPickRandomTask={handlePickRandomTask}
       />

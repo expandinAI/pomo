@@ -7,6 +7,7 @@ import {
   SkipForward,
   Moon,
   Sun,
+  Monitor,
   Settings,
   VolumeX,
   Volume2,
@@ -26,13 +27,15 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
+import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
 
 interface CommandRegistrationProps {
   timerIsRunning: boolean;
   timerIsPaused: boolean;
   isMuted: boolean;
   autoStartEnabled?: boolean;
-  nightModeEnabled?: boolean;
+  appearanceMode?: AppearanceMode;
+  isDarkMode?: boolean;
   onStart: () => void;
   onPause: () => void;
   onSkip: () => void;
@@ -40,7 +43,7 @@ interface CommandRegistrationProps {
   onToggleMute: () => void;
   onPresetChange?: (presetId: string) => void;
   onToggleAutoStart?: () => void;
-  onToggleNightMode?: () => void;
+  onCycleAppearanceMode?: () => void;
   pendingTaskCount?: number;
   onPickRandomTask?: () => void;
 }
@@ -50,7 +53,8 @@ export function CommandRegistration({
   timerIsPaused,
   isMuted,
   autoStartEnabled,
-  nightModeEnabled,
+  appearanceMode,
+  isDarkMode,
   onStart,
   onPause,
   onSkip,
@@ -58,7 +62,7 @@ export function CommandRegistration({
   onToggleMute,
   onPresetChange,
   onToggleAutoStart,
-  onToggleNightMode,
+  onCycleAppearanceMode,
   pendingTaskCount = 0,
   onPickRandomTask,
 }: CommandRegistrationProps) {
@@ -106,14 +110,18 @@ export function CommandRegistration({
       }] as Command[] : []),
 
       // Settings commands
-      ...(onToggleNightMode ? [{
-        id: 'toggle-night-mode',
-        label: nightModeEnabled ? 'Day Mode' : 'Night Mode',
+      ...(onCycleAppearanceMode ? [{
+        id: 'cycle-appearance-mode',
+        label: appearanceMode === 'light' ? 'Switch to Dark Mode'
+             : appearanceMode === 'dark' ? 'Switch to System Mode'
+             : 'Switch to Light Mode',
         shortcut: 'D',
         category: 'settings',
-        action: onToggleNightMode,
-        icon: nightModeEnabled ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />,
-        keywords: ['night', 'day', 'mode', 'dim', 'bright'],
+        action: onCycleAppearanceMode,
+        icon: appearanceMode === 'light' ? <Sun className="w-4 h-4" />
+            : appearanceMode === 'dark' ? <Moon className="w-4 h-4" />
+            : <Monitor className="w-4 h-4" />,
+        keywords: ['night', 'day', 'mode', 'dim', 'bright', 'dark', 'light', 'system', 'appearance', 'theme'],
       }] as Command[] : []),
       {
         id: 'toggle-mute',
@@ -304,21 +312,21 @@ export function CommandRegistration({
         keywords: ['inspiration', 'daily', 'intention', 'quote', 'motivation', 'mindful'],
       },
 
-      // Learn commands
+      // Library commands
       {
-        id: 'learn-open',
-        label: 'Open Learn',
+        id: 'library-open',
+        label: 'Open Library',
         shortcut: 'L',
         category: 'learn',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-learn'));
         },
         icon: <BookOpen className="w-4 h-4" />,
-        keywords: ['learn', 'understand', 'help', 'guide', 'why', 'explain'],
+        keywords: ['library', 'learn', 'understand', 'help', 'guide', 'why', 'explain'],
       },
       {
-        id: 'learn-rhythms',
-        label: 'Learn: The Three Rhythms',
+        id: 'library-rhythms',
+        label: 'Library: The Three Rhythms',
         category: 'learn',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-learn', {
@@ -329,8 +337,8 @@ export function CommandRegistration({
         keywords: ['rhythms', 'modes', 'presets', '25', '52', '90', 'three'],
       },
       {
-        id: 'learn-classic',
-        label: 'Learn: Classic (25/5)',
+        id: 'library-classic',
+        label: 'Library: Classic (25/5)',
         category: 'learn',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-learn', {
@@ -341,8 +349,8 @@ export function CommandRegistration({
         keywords: ['classic', 'pomodoro', '25', 'traditional', 'cirillo'],
       },
       {
-        id: 'learn-deepwork',
-        label: 'Learn: Deep Work (52/17)',
+        id: 'library-deepwork',
+        label: 'Library: Deep Work (52/17)',
         category: 'learn',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-learn', {
@@ -353,8 +361,8 @@ export function CommandRegistration({
         keywords: ['deep', 'work', '52', '17', 'desktime', 'productive'],
       },
       {
-        id: 'learn-ultradian',
-        label: 'Learn: 90-Min Block',
+        id: 'library-ultradian',
+        label: 'Library: 90-Min Block',
         category: 'learn',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-learn', {
@@ -376,7 +384,8 @@ export function CommandRegistration({
     timerIsPaused,
     isMuted,
     autoStartEnabled,
-    nightModeEnabled,
+    appearanceMode,
+    isDarkMode,
     onStart,
     onPause,
     onSkip,
@@ -384,7 +393,7 @@ export function CommandRegistration({
     onToggleMute,
     onPresetChange,
     onToggleAutoStart,
-    onToggleNightMode,
+    onCycleAppearanceMode,
     pendingTaskCount,
     onPickRandomTask,
   ]);

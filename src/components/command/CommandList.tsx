@@ -18,7 +18,7 @@ const CATEGORY_LABELS: Record<CommandCategory, string> = {
   navigation: 'Navigation',
   settings: 'Settings',
   projects: 'Projects',
-  learn: 'Learn',
+  learn: 'Library',
 };
 
 const CATEGORY_ORDER: CommandCategory[] = ['timer', 'presets', 'projects', 'navigation', 'learn', 'settings'];
