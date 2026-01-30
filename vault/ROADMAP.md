@@ -9,7 +9,7 @@ High-level Überblick über Features und Milestones.
 > **Cloud Sync & Accounts** - Clerk Auth, Supabase, Multi-Device
 
 **Ziel:** Von reiner Web-App zu Multi-Platform-Produkt mit Monetarisierung
-**Status:** Local-First abgeschlossen, 300er-Serie bereit
+**Status:** 300er-Serie in Arbeit (POMO-300–302 done)
 
 ---
 
@@ -62,9 +62,9 @@ High-level Überblick über Features und Milestones.
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
-| POMO-300 | Clerk Setup | 3 | 🔜 Next |
-| POMO-301 | Supabase Schema | 5 | 🔜 Next |
-| POMO-302 | Auth UI | 5 | 🔜 Next |
+| POMO-300 | Clerk Setup | 3 | ✅ Done |
+| POMO-301 | Supabase Schema | 5 | ✅ Done |
+| POMO-302 | Auth UI | 5 | ✅ Done |
 | POMO-303 | Account Tiers | 3 | 🔜 Next |
 | POMO-304 | Upgrade Flow | 5 | 🔜 Next |
 | POMO-305 | Sync Service | 8 | 🔜 Next |
@@ -281,10 +281,13 @@ Payment    GDPR
 - [x] Migration UI
 
 ### v2.0 - Multi-Platform Foundation 🚧
-- [ ] Clerk Auth Integration
-- [ ] Supabase Cloud Sync
+- [x] Clerk Auth Setup (POMO-300)
+- [x] Supabase Schema (POMO-301)
+- [x] Auth UI (POMO-302)
 - [ ] Account Tiers (Free/Plus/Flow)
 - [ ] Trial System (14 Tage)
+- [ ] Sync Service
+- [ ] Conflict Resolution
 
 ### v2.1 - Monetization
 - [ ] Stripe Payment Integration
