@@ -7,6 +7,39 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Sync Service mit Offline Queue (POMO-305, 8 SP)**:
+  - Continuous Sync zwischen lokalem IndexedDB und Supabase
+  - Push: Lokale Änderungen werden sofort zu Supabase gepusht
+  - Pull: Server-Änderungen werden alle 30s + bei Window-Focus geholt
+  - Offline Queue: Änderungen werden bei Offline/Fehler in IndexedDB gequeued
+  - Exponential Backoff Retry (1min → 2min → 4min → 8min → 16min)
+  - Event-basierte Architektur mit CustomEvents für Context-Kommunikation
+  - SyncProvider React Context mit `useSyncService()`, `useSyncState()` Hooks
+  - SupabaseClientFactory Pattern für automatischen JWT Token Refresh
+  - Dexie Schema v3 mit `serverId` Index für Sync-Lookups
+  - Multi-Device Sync getestet (Chrome ↔ Safari)
+- **Conflict Resolution (POMO-306, 5 SP)**:
+  - Last-Write-Wins (LWW) Strategie für Konfliktauflösung
+  - Bei Timestamp-Gleichstand gewinnt Server (Determinismus)
+  - Extrahierte Helper-Funktionen in `conflict-resolution.ts` für Testbarkeit
+  - `resolveConflict()`, `isRemoteNewerOrEqual()`, `isDeleted()` Utilities
+- **Initial Upgrade Flow (POMO-304, 5 SP)**:
+  - Upload-Service in `src/lib/sync/` für Initial-Sync nach Account-Erstellung
+  - `getLocalDataSummary()`: Zählt lokale Sessions, Projects, Settings
+  - `performInitialUpload()`: Batch-Upload mit Progress-Callback
+  - UpgradeModal mit 4 Phasen: loading → summary → uploading → success/error
+  - `useUpgradeFlow` Hook: Detektiert neue User mit lokalen Daten
+  - Event-Handler für `particle:open-auth` (navigiert zu /sign-up)
+  - Lokale Daten werden nach Upload als `synced` markiert
+  - Retry bei Fehlern, Skip-Option für später
+- **Account Tiers & Feature Gates (POMO-303, 3 SP)**:
+  - Tier-System: `local` (kein Account), `free` (Particle), `flow` (Premium)
+  - Hooks: `useAuthMode()`, `useFeature()`, `useTierLimit()`, `useTierConfig()`, `useIsPremium()`, `useHasAccount()`
+  - `FeatureGate` Komponente für deklaratives Feature-Gating
+  - `UpgradePrompt` mit adaptiven CTAs (Account erstellen vs. Flow testen)
+  - Year View (G Y) für Flow-User freigeschalten, UpgradePrompt für andere
+  - Focus Heatmap für Flow-User freigeschalten, kompakter Prompt für andere
+  - Tier-Config mit Features (sync, yearView, advancedStats, etc.) und Limits
 - **Transition Chimes (POMO-121, 3 SP)**:
   - Phase-Übergangssounds: "Arrival" (Focus→Break) und "Awakening" (Break→Focus)
   - Philosophie: "Particle klingt wie Licht klingen würde" – reine Sinuswellen in harmonischen Verhältnissen
@@ -269,6 +302,10 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-306-conflict-resolution]]
+- [[stories/done/POMO-305-sync-service]]
+- [[stories/done/POMO-304-upgrade-flow]]
+- [[stories/done/POMO-303-account-tiers]]
 - [[stories/done/POMO-124-ui-sounds]]
 - [[stories/done/POMO-135-auto-start-next]]
 - [[stories/done/POMO-143-estimation-trend-analytics]]

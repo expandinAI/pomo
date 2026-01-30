@@ -9,7 +9,7 @@ High-level Überblick über Features und Milestones.
 > **Cloud Sync & Accounts** - Clerk Auth, Supabase, Multi-Device
 
 **Ziel:** Von reiner Web-App zu Multi-Platform-Produkt mit Monetarisierung
-**Status:** 300er-Serie in Arbeit (POMO-300–302 done)
+**Status:** 300er-Serie in Arbeit (POMO-300–305 done)
 
 ---
 
@@ -65,10 +65,10 @@ High-level Überblick über Features und Milestones.
 | POMO-300 | Clerk Setup | 3 | ✅ Done |
 | POMO-301 | Supabase Schema | 5 | ✅ Done |
 | POMO-302 | Auth UI | 5 | ✅ Done |
-| POMO-303 | Account Tiers | 3 | 🔜 Next |
-| POMO-304 | Upgrade Flow | 5 | 🔜 Next |
-| POMO-305 | Sync Service | 8 | 🔜 Next |
-| POMO-306 | Conflict Resolution | 5 | 🔜 Next |
+| POMO-303 | Account Tiers | 3 | ✅ Done |
+| POMO-304 | Upgrade Flow | 5 | ✅ Done |
+| POMO-305 | Sync Service | 8 | ✅ Done |
+| POMO-306 | Conflict Resolution | 5 | ✅ Done |
 | POMO-307 | Trial Management | 3 | 🔜 Next |
 | POMO-308 | Settings Sync | 3 | 🔜 Next |
 
@@ -284,10 +284,10 @@ Payment    GDPR
 - [x] Clerk Auth Setup (POMO-300)
 - [x] Supabase Schema (POMO-301)
 - [x] Auth UI (POMO-302)
-- [ ] Account Tiers (Free/Plus/Flow)
+- [x] Account Tiers (Free/Plus/Flow) (POMO-303)
+- [x] Sync Service (POMO-305)
 - [ ] Trial System (14 Tage)
-- [ ] Sync Service
-- [ ] Conflict Resolution
+- [x] Conflict Resolution (LWW, Server wins on tie)
 
 ### v2.1 - Monetization
 - [ ] Stripe Payment Integration
@@ -324,4 +324,4 @@ Parked ideas:
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-30*
+*Zuletzt aktualisiert: 2026-01-30 (POMO-306 done)*
