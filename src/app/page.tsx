@@ -15,6 +15,8 @@ import { useEasterEggs } from '@/hooks/useEasterEgg';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
 import { isIndexedDBAvailable, hasPendingMigrations, runMigrations } from '@/lib/db';
+import { useParticleAuth } from '@/lib/auth/hooks';
+import { SyncButton, AccountMenu } from '@/components/auth';
 import type { LearnView } from '@/components/learn/LearnMenu';
 
 // Lazy load non-critical modal components
@@ -57,6 +59,9 @@ import { IntroExperience } from '@/components/intro';
  * Inner component that uses milestone context
  */
 function HomeContent() {
+  // Auth state
+  const auth = useParticleAuth();
+
   // Timeline overlay state
   const [showTimeline, setShowTimeline] = useState(false);
 
@@ -362,8 +367,8 @@ function HomeContent() {
       animate="visible"
       variants={entranceVariants}
     >
-      {/* Action Bar - Functional navigation (top-right) */}
-      <div className="absolute top-4 right-4">
+      {/* Action Bar + Auth (top-right) */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
         <ActionBar
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
@@ -371,6 +376,9 @@ function HomeContent() {
           onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
         />
+        {/* Auth button: Sync for anonymous, AccountMenu for authenticated */}
+        {auth.status === 'anonymous' && <SyncButton />}
+        {auth.status === 'authenticated' && <AccountMenu />}
       </div>
 
       {/* TimerSettings modal - hidden trigger, responds to events */}
