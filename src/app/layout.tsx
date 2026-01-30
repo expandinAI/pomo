@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { ClerkProviderWrapper } from '@/components/auth';
 import { NoiseOverlay, Vignette, AmbientEffects } from '@/components/effects';
 import { AmbientEffectsProvider } from '@/contexts/AmbientEffectsContext';
 import { TimerSettingsProvider } from '@/contexts/TimerSettingsContext';
@@ -7,6 +8,7 @@ import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 import { SessionProvider } from '@/contexts/SessionContext';
 import { ProjectProvider } from '@/contexts/ProjectContext';
+import { SyncProvider } from '@/lib/sync';
 import { CommandPaletteWrapper } from '@/components/command';
 import { MigrationOverlay } from '@/components/migration';
 import './globals.css';
@@ -74,6 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProviderWrapper>
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -123,24 +126,28 @@ export default function RootLayout({
         <MigrationOverlay />
         <SessionProvider>
           <ProjectProvider>
-            <TimerSettingsProvider>
-            <AmbientSoundProvider>
-              <AmbientEffectsProvider>
-                <CommandPaletteProvider>
-                  {/* Visual effects for immersive dark experience */}
-                  <NoiseOverlay />
-                  <Vignette />
-                  <AmbientEffects />
-                  {/* Command Palette (Cmd+K) */}
-                  <CommandPaletteWrapper />
-                  {children}
-                </CommandPaletteProvider>
-              </AmbientEffectsProvider>
-            </AmbientSoundProvider>
-          </TimerSettingsProvider>
+            {/* SyncProvider listens for data changes and syncs to Supabase */}
+            <SyncProvider>
+              <TimerSettingsProvider>
+              <AmbientSoundProvider>
+                <AmbientEffectsProvider>
+                  <CommandPaletteProvider>
+                    {/* Visual effects for immersive dark experience */}
+                    <NoiseOverlay />
+                    <Vignette />
+                    <AmbientEffects />
+                    {/* Command Palette (Cmd+K) */}
+                    <CommandPaletteWrapper />
+                    {children}
+                  </CommandPaletteProvider>
+                </AmbientEffectsProvider>
+              </AmbientSoundProvider>
+            </TimerSettingsProvider>
+          </SyncProvider>
         </ProjectProvider>
       </SessionProvider>
       </body>
     </html>
+    </ClerkProviderWrapper>
   );
 }

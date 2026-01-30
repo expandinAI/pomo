@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Grid3X3, X, Star } from 'lucide-react';
+import { Grid3X3, X, Star, Sparkles } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { buildHeatmap, type HeatmapData } from '@/lib/session-analytics';
 import { HeatmapGrid } from './HeatmapGrid';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useFeature, UpgradePrompt } from '@/lib/tiers';
 
 interface FocusHeatmapProps {
   refreshTrigger?: number;
@@ -22,6 +23,7 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
   const [data, setData] = useState<HeatmapData | null>(null);
 
   const reducedMotion = prefersReducedMotion();
+  const hasAdvancedStats = useFeature('advancedStats');
 
   // Focus management
   const modalRef = useRef<HTMLDivElement>(null);
@@ -118,7 +120,10 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
 
                   {/* Content */}
                   <div className="p-4 pt-5">
-                    {data?.isEmpty ? (
+                    {!hasAdvancedStats ? (
+                      /* Upgrade Prompt */
+                      <UpgradePrompt feature="advancedStats" />
+                    ) : data?.isEmpty ? (
                       /* Empty State */
                       <motion.div
                         initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
@@ -186,12 +191,14 @@ export function FocusHeatmap({ refreshTrigger }: FocusHeatmapProps) {
                     ) : null}
                   </div>
 
-                  {/* Footer with context */}
-                  <div className="px-4 pb-4 pt-2">
-                    <p className="text-[10px] text-tertiary/70 light:text-tertiary-dark/70 text-center">
-                      Based on your last 30 days of focus sessions
-                    </p>
-                  </div>
+                  {/* Footer with context - only show when feature available */}
+                  {hasAdvancedStats && (
+                    <div className="px-4 pb-4 pt-2">
+                      <p className="text-[10px] text-tertiary/70 light:text-tertiary-dark/70 text-center">
+                        Based on your last 30 days of focus sessions
+                      </p>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>

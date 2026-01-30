@@ -1,13 +1,14 @@
 // src/lib/db/database.ts
 
 import Dexie, { type Table } from 'dexie';
-import type { DBSession, DBProject, DBRecentTask, DBSettings } from './types';
+import type { DBSession, DBProject, DBRecentTask, DBSettings, DBQueuedChange } from './types';
 
 export class ParticleDB extends Dexie {
   sessions!: Table<DBSession, string>;
   projects!: Table<DBProject, string>;
   recentTasks!: Table<DBRecentTask, string>;
   settings!: Table<DBSettings, string>;
+  syncQueue!: Table<DBQueuedChange, string>;
 
   constructor() {
     super('ParticleDB');
@@ -25,6 +26,28 @@ export class ParticleDB extends Dexie {
 
       // Settings: key-value store
       settings: 'key',
+    });
+
+    // Schema v2 - Add sync queue for offline changes
+    this.version(2).stores({
+      // Existing tables remain unchanged
+      sessions: 'id, completedAt, projectId, syncStatus, type',
+      projects: 'id, archived, syncStatus',
+      recentTasks: 'text, lastUsed',
+      settings: 'key',
+
+      // New: Sync queue for offline/failed changes
+      syncQueue: 'id, entityType, createdAt, nextRetryAt',
+    });
+
+    // Schema v3 - Add serverId index for sync lookups
+    this.version(3).stores({
+      // Add serverId index for looking up entities by server ID during pull
+      sessions: 'id, completedAt, projectId, syncStatus, type, serverId',
+      projects: 'id, archived, syncStatus, serverId',
+      recentTasks: 'text, lastUsed',
+      settings: 'key',
+      syncQueue: 'id, entityType, createdAt, nextRetryAt',
     });
   }
 }

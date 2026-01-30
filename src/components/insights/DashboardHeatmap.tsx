@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Grid3X3 } from 'lucide-react';
+import { Star, Grid3X3, Sparkles } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { buildHeatmap, type HeatmapData, type TimeRange } from '@/lib/session-analytics';
 import { HeatmapGrid } from './HeatmapGrid';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useFeature, useHasAccount } from '@/lib/tiers';
 
 interface DashboardHeatmapProps {
   timeRange: TimeRange;
@@ -36,6 +37,8 @@ const TIME_RANGE_LABELS: Record<TimeRange, string> = {
 export function DashboardHeatmap({ timeRange, refreshTrigger }: DashboardHeatmapProps) {
   const [data, setData] = useState<HeatmapData | null>(null);
   const reducedMotion = prefersReducedMotion();
+  const hasAdvancedStats = useFeature('advancedStats');
+  const hasAccount = useHasAccount();
 
   // Build heatmap data based on time range
   useEffect(() => {
@@ -44,6 +47,40 @@ export function DashboardHeatmap({ timeRange, refreshTrigger }: DashboardHeatmap
   }, [timeRange, refreshTrigger]);
 
   const timeRangeLabel = useMemo(() => TIME_RANGE_LABELS[timeRange], [timeRange]);
+
+  // Show compact upgrade prompt when feature is locked
+  if (!hasAdvancedStats) {
+    return (
+      <motion.section
+        initial={reducedMotion ? {} : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={reducedMotion ? { duration: 0 } : { delay: 0.15 }}
+        className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-4"
+      >
+        <h3 className="text-sm font-medium text-secondary light:text-secondary-dark mb-3 text-center">
+          Focus Patterns
+        </h3>
+        <div className="flex flex-col items-center py-4">
+          <div className="w-10 h-10 rounded-full bg-accent/10 light:bg-accent-dark/10 flex items-center justify-center mb-3">
+            <Sparkles className="w-5 h-5 text-accent light:text-accent-dark" />
+          </div>
+          <p className="text-sm text-tertiary light:text-tertiary-dark text-center mb-3">
+            Discover your focus patterns
+          </p>
+          <button
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent(hasAccount ? 'particle:open-upgrade' : 'particle:open-auth')
+              );
+            }}
+            className="text-xs text-accent light:text-accent-dark hover:underline"
+          >
+            {hasAccount ? 'Try Flow' : 'Create free account'}
+          </button>
+        </div>
+      </motion.section>
+    );
+  }
 
   if (!data) return null;
 

@@ -67,6 +67,40 @@ export interface DBSettings {
   localUpdatedAt: string;
 }
 
+/**
+ * Entity types that can be synced
+ */
+export type SyncEntityType = 'sessions' | 'projects';
+
+/**
+ * Operation type for queued changes
+ */
+export type SyncOperation = 'upsert' | 'delete';
+
+/**
+ * Queued change waiting to be synced (IndexedDB table)
+ */
+export interface DBQueuedChange {
+  /** Unique queue entry ID */
+  id: string;
+  /** Type of entity being synced */
+  entityType: SyncEntityType;
+  /** Local ID of the entity */
+  entityId: string;
+  /** Operation to perform */
+  operation: SyncOperation;
+  /** Serialized entity data for upsert, empty for delete */
+  payload: Record<string, unknown>;
+  /** When this change was queued */
+  createdAt: string;
+  /** Number of retry attempts */
+  retryCount: number;
+  /** Last error message if any */
+  lastError?: string;
+  /** When to retry next (ISO timestamp) */
+  nextRetryAt?: string;
+}
+
 // ============================================
 // Sync Metadata Helper Functions
 // ============================================

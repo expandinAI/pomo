@@ -35,6 +35,12 @@ import {
   type CompletedSession,
   type TaskData,
 } from '@/lib/session-storage';
+import {
+  dispatchSessionAdded,
+  dispatchSessionUpdated,
+  dispatchSessionDeleted,
+  SYNC_EVENTS,
+} from '@/lib/sync/sync-events';
 import type { SessionType } from '@/styles/design-tokens';
 
 /**
@@ -118,6 +124,7 @@ interface SessionProviderProps {
  *
  * Provides unified access to sessions regardless of storage backend.
  * Automatically detects and uses IndexedDB when available, falls back to localStorage.
+ * Dispatches sync events for cloud synchronization when using IndexedDB.
  */
 export function SessionProvider({ children }: SessionProviderProps) {
   const [sessions, setSessions] = useState<UnifiedSession[]>([]);
@@ -178,6 +185,16 @@ export function SessionProvider({ children }: SessionProviderProps) {
     }
   }, [storageMode]);
 
+  // Listen for sync pull completed to refresh data
+  useEffect(() => {
+    function handlePullCompleted() {
+      refresh();
+    }
+
+    window.addEventListener(SYNC_EVENTS.PULL_COMPLETED, handlePullCompleted);
+    return () => window.removeEventListener(SYNC_EVENTS.PULL_COMPLETED, handlePullCompleted);
+  }, [refresh]);
+
   // Add session
   const addSession = useCallback(
     async (
@@ -189,6 +206,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
         const input = toCreateInput(type, duration, taskData);
         const newSession = await saveSessionDB(input);
         setSessions((prev) => [newSession, ...prev]);
+        // Dispatch sync event
+        dispatchSessionAdded(newSession);
         return newSession;
       } else {
         const newSession = addSessionLS(type, duration, taskData);
@@ -211,6 +230,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
           setSessions((prev) =>
             prev.map((s) => (s.id === id ? updated : s))
           );
+          // Dispatch sync event
+          dispatchSessionUpdated(updated);
         }
         return updated;
       } else {
@@ -239,6 +260,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
         if (success) {
           // Soft delete in IndexedDB - remove from visible list
           setSessions((prev) => prev.filter((s) => s.id !== id));
+          // Dispatch sync event
+          dispatchSessionDeleted(id);
         }
         return success;
       } else {

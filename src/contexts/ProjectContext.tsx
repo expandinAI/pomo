@@ -36,6 +36,12 @@ import {
   type CreateProjectData,
   type UpdateProjectData,
 } from '@/lib/projects';
+import {
+  dispatchProjectAdded,
+  dispatchProjectUpdated,
+  dispatchProjectDeleted,
+  SYNC_EVENTS,
+} from '@/lib/sync/sync-events';
 
 /**
  * Unified project type that works with both storage backends
@@ -92,6 +98,7 @@ interface ProjectProviderProps {
  *
  * Provides unified access to projects regardless of storage backend.
  * Automatically detects and uses IndexedDB when available, falls back to localStorage.
+ * Dispatches sync events for cloud synchronization when using IndexedDB.
  */
 export function ProjectProvider({ children }: ProjectProviderProps) {
   const [projects, setProjects] = useState<UnifiedProject[]>([]);
@@ -170,12 +177,24 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
     }
   }, [storageMode]);
 
+  // Listen for sync pull completed to refresh data
+  useEffect(() => {
+    function handlePullCompleted() {
+      refresh();
+    }
+
+    window.addEventListener(SYNC_EVENTS.PULL_COMPLETED, handlePullCompleted);
+    return () => window.removeEventListener(SYNC_EVENTS.PULL_COMPLETED, handlePullCompleted);
+  }, [refresh]);
+
   // Add project
   const addProject = useCallback(
     async (data: CreateProjectInput): Promise<UnifiedProject> => {
       if (storageMode === 'indexeddb') {
         const newProject = await saveProjectDB(data);
         setProjects((prev) => [...prev, newProject].sort((a, b) => a.name.localeCompare(b.name)));
+        // Dispatch sync event
+        dispatchProjectAdded(newProject);
         return newProject;
       } else {
         const lsData: CreateProjectData = {
@@ -203,6 +222,8 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
           setProjects((prev) =>
             prev.map((p) => (p.id === id ? updated : p)).sort((a, b) => a.name.localeCompare(b.name))
           );
+          // Dispatch sync event
+          dispatchProjectUpdated(updated);
         }
         return updated;
       } else {
@@ -233,6 +254,8 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
           setProjects((prev) =>
             prev.map((p) => (p.id === id ? archived : p))
           );
+          // Dispatch sync event (archive is an update)
+          dispatchProjectUpdated(archived);
         }
         return archived;
       } else {
@@ -258,6 +281,8 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
           setProjects((prev) =>
             prev.map((p) => (p.id === id ? restored : p))
           );
+          // Dispatch sync event (restore is an update)
+          dispatchProjectUpdated(restored);
         }
         return restored;
       } else {
@@ -282,6 +307,8 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
         if (success) {
           // Soft delete in IndexedDB - remove from visible list
           setProjects((prev) => prev.filter((p) => p.id !== id));
+          // Dispatch sync event
+          dispatchProjectDeleted(id);
         }
         return success;
       } else {

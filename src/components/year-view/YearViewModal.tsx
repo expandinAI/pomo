@@ -16,6 +16,7 @@ import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdo
 import { useProjects } from '@/hooks/useProjects';
 import { useSessionStore } from '@/contexts/SessionContext';
 import type { CompletedSession } from '@/lib/session-storage';
+import { useFeature, UpgradePrompt } from '@/lib/tiers';
 
 // Available years for navigation
 const CURRENT_YEAR = new Date().getFullYear();
@@ -43,6 +44,7 @@ export function YearViewModal() {
   const { activeProjects } = useProjects();
   const { sessions } = useSessionStore();
   const reducedMotion = prefersReducedMotion();
+  const hasYearView = useFeature('yearView');
 
   // Focus management
   const modalRef = useRef<HTMLDivElement>(null);
@@ -196,22 +198,24 @@ export function YearViewModal() {
                     Year View
                   </h2>
                   <div className="flex items-center gap-3">
-                    {/* Project Filter - only show if projects exist */}
-                    {activeProjects.length > 0 && (
+                    {/* Project Filter - only show if feature available and projects exist */}
+                    {hasYearView && activeProjects.length > 0 && (
                       <ProjectFilterDropdown
                         value={selectedProjectId}
                         onChange={setSelectedProjectId}
                         projects={activeProjects}
                       />
                     )}
-                    {/* Data Toggle */}
-                    <button
-                      onClick={() => setUseMockData(!useMockData)}
-                      className="text-xs text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark px-2 py-1 rounded transition-colors"
-                      aria-label={useMockData ? 'Switch to real data' : 'Switch to demo data'}
-                    >
-                      {useMockData ? 'Demo' : 'Real'}
-                    </button>
+                    {/* Data Toggle - only show if feature available */}
+                    {hasYearView && (
+                      <button
+                        onClick={() => setUseMockData(!useMockData)}
+                        className="text-xs text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark px-2 py-1 rounded transition-colors"
+                        aria-label={useMockData ? 'Switch to real data' : 'Switch to demo data'}
+                      >
+                        {useMockData ? 'Demo' : 'Real'}
+                      </button>
+                    )}
                     <button
                       onClick={handleClose}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -224,51 +228,57 @@ export function YearViewModal() {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6">
-                  {/* Year Selector */}
-                  <div className="text-center mb-6">
-                    <YearSelector
-                      currentYear={currentYear}
-                      minYear={MIN_YEAR}
-                      maxYear={CURRENT_YEAR}
-                      onYearChange={handleYearChange}
-                    />
-                    <p className="text-tertiary light:text-tertiary-dark text-xs mt-2">
-                      Use ← → or H / L to navigate years
-                    </p>
-                  </div>
-
-                  {/* Animated Year Content */}
-                  <AnimatePresence mode="wait" custom={direction}>
-                    <motion.div
-                      key={currentYear}
-                      custom={direction}
-                      variants={slideVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{ duration: 0.25, ease: 'easeInOut' }}
-                    >
-                      {/* Year Grid */}
-                      <div className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-6 mb-4">
-                        <YearGrid
-                          data={data}
-                          weekStartsOnMonday={weekStartsOnMonday}
-                          onCellHover={handleCellHover}
-                          onCellClick={(cell) => console.log('Clicked:', cell)}
-                          onAnimationComplete={handleGridAnimationComplete}
+                  {hasYearView ? (
+                    <>
+                      {/* Year Selector */}
+                      <div className="text-center mb-6">
+                        <YearSelector
+                          currentYear={currentYear}
+                          minYear={MIN_YEAR}
+                          maxYear={CURRENT_YEAR}
+                          onYearChange={handleYearChange}
                         />
+                        <p className="text-tertiary light:text-tertiary-dark text-xs mt-2">
+                          Use ← → or H / L to navigate years
+                        </p>
                       </div>
 
-                      {/* Year Summary Stats - fades in after grid animation */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={gridAnimationComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
-                      >
-                        <YearSummary summary={data.summary} />
-                      </motion.div>
-                    </motion.div>
-                  </AnimatePresence>
+                      {/* Animated Year Content */}
+                      <AnimatePresence mode="wait" custom={direction}>
+                        <motion.div
+                          key={currentYear}
+                          custom={direction}
+                          variants={slideVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        >
+                          {/* Year Grid */}
+                          <div className="bg-surface/50 light:bg-surface-dark/50 rounded-xl p-6 mb-4">
+                            <YearGrid
+                              data={data}
+                              weekStartsOnMonday={weekStartsOnMonday}
+                              onCellHover={handleCellHover}
+                              onCellClick={(cell) => console.log('Clicked:', cell)}
+                              onAnimationComplete={handleGridAnimationComplete}
+                            />
+                          </div>
+
+                          {/* Year Summary Stats - fades in after grid animation */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={gridAnimationComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                          >
+                            <YearSummary summary={data.summary} />
+                          </motion.div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <UpgradePrompt feature="yearView" />
+                  )}
                 </div>
               </div>
             </motion.div>
