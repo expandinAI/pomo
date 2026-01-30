@@ -45,5 +45,8 @@ playwright-report
 *.swo
 .DS_Store
 
+# Dev/Debug pages
+src/app/test-supabase
+
 # Misc
 *.pem
