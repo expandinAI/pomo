@@ -189,8 +189,8 @@ export function buildDailyStats(
  * Calculate complete weekly statistics
  * @param weekOffset 0 = current week, -1 = last week
  */
-export function calculateWeeklyStats(weekOffset: number = 0): WeeklyStats {
-  const sessions = loadSessions();
+export function calculateWeeklyStats(weekOffset: number = 0, sessionsInput?: CompletedSession[]): WeeklyStats {
+  const sessions = sessionsInput ?? loadSessions();
 
   // Current week stats
   const currentWeekSessions = getSessionsForWeek(sessions, weekOffset);
@@ -536,8 +536,14 @@ export function calculateLongestStreak(sessions: CompletedSession[]): number {
  * - Completion Volume (50%): Total work time vs 4h target
  * - Session Count (30%): Number of work sessions vs 4 target
  * - Streak Bonus (20%): Current streak vs 7 day target
+ *
+ * @param sessions - Sessions to calculate score from (filtered to time range)
+ * @param allSessionsInput - Optional all sessions for streak calculation (loads from storage if not provided)
  */
-export function calculateFocusScore(sessions: CompletedSession[]): number {
+export function calculateFocusScore(
+  sessions: CompletedSession[],
+  allSessionsInput?: CompletedSession[]
+): number {
   if (sessions.length === 0) return 0;
 
   const workSessions = sessions.filter(s => s.type === 'work');
@@ -554,7 +560,7 @@ export function calculateFocusScore(sessions: CompletedSession[]): number {
 
   // Streak Bonus (20%) - Consistency over days
   // Need all sessions for streak calculation, not just filtered ones
-  const allSessions = loadSessions();
+  const allSessions = allSessionsInput ?? loadSessions();
   const streakBonus = Math.min(calculateCurrentStreak(allSessions) / 7, 1);
 
   return Math.round(volumeScore * 50 + countScore * 30 + streakBonus * 20);
@@ -577,9 +583,11 @@ export interface LifetimeStats {
 /**
  * Calculate lifetime statistics across all sessions
  * Only counts work sessions (not breaks)
+ *
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
-export function getLifetimeStats(): LifetimeStats {
-  const sessions = loadSessions();
+export function getLifetimeStats(sessionsInput?: CompletedSession[]): LifetimeStats {
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = sessions.filter(s => s.type === 'work');
 
   if (workSessions.length === 0) {
@@ -702,9 +710,13 @@ export interface WeeklyReport {
 /**
  * Generate a comprehensive weekly report
  * @param weekOffset 0 = current week, -1 = last week
+ * @param sessionsInput Optional sessions array (loads from storage if not provided)
  */
-export function generateWeeklyReport(weekOffset: number = 0): WeeklyReport {
-  const sessions = loadSessions();
+export function generateWeeklyReport(
+  weekOffset: number = 0,
+  sessionsInput?: CompletedSession[]
+): WeeklyReport {
+  const sessions = sessionsInput ?? loadSessions();
 
   // Get week boundaries
   const { start: weekStart, end: weekEnd } = getWeekBoundaries(weekOffset);
@@ -731,8 +743,8 @@ export function generateWeeklyReport(weekOffset: number = 0): WeeklyReport {
   const trend: 'up' | 'down' | 'same' =
     totalChange > 0 ? 'up' : totalChange < 0 ? 'down' : 'same';
 
-  // Calculate focus score for this week
-  const focusScore = calculateFocusScore(thisWeekSessions);
+  // Calculate focus score for this week (pass all sessions for streak calculation)
+  const focusScore = calculateFocusScore(thisWeekSessions, sessions);
 
   // Get top tasks
   const topTasks = calculateTopTasks(thisWeekSessions, 3);

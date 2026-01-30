@@ -11,9 +11,10 @@ import {
   formatTrendMessage,
   type WeeklyStats,
 } from '@/lib/session-analytics';
-import { formatDuration } from '@/lib/session-storage';
+import { formatDuration, type CompletedSession } from '@/lib/session-storage';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useSessionStore } from '@/contexts/SessionContext';
 
 interface WeeklyReportProps {
   refreshTrigger?: number;
@@ -27,6 +28,7 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [stats, setStats] = useState<WeeklyStats | null>(null);
 
+  const { sessions } = useSessionStore();
   const reducedMotion = prefersReducedMotion();
 
   // Focus management
@@ -38,12 +40,12 @@ export function WeeklyReport({ refreshTrigger }: WeeklyReportProps) {
     setIsOpen(prev => !prev);
   }, []);
 
-  // Load stats when modal opens or refresh triggers
+  // Load stats when modal opens, refresh triggers, or sessions change
   useEffect(() => {
     if (isOpen) {
-      setStats(calculateWeeklyStats(0));
+      setStats(calculateWeeklyStats(0, sessions as CompletedSession[]));
     }
-  }, [isOpen, refreshTrigger]);
+  }, [isOpen, refreshTrigger, sessions]);
 
   // Close on Escape - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {

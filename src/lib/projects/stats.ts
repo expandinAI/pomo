@@ -116,12 +116,14 @@ export function getProjectStats(
  * Get all projects with their statistics
  *
  * @param includeArchived - Whether to include archived projects
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  * @returns Array of projects with statistics
  */
 export function getAllProjectsWithStats(
-  includeArchived = false
+  includeArchived = false,
+  sessionsInput?: CompletedSession[]
 ): ProjectWithStats[] {
-  const sessions = loadSessions();
+  const sessions = sessionsInput ?? loadSessions();
   const projects = includeArchived ? loadProjects() : getActiveProjects();
 
   return projects.map(p => getProjectStats(p, sessions));
@@ -166,12 +168,14 @@ export function getUnassignedStats(sessions?: CompletedSession[]): {
  * Calculate project breakdown for statistics display
  *
  * @param timeRange - Filter by time range ('day' | 'week' | 'month' | 'all')
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  * @returns Array of project breakdowns with percentages
  */
 export function getProjectBreakdown(
-  timeRange: 'day' | 'week' | 'month' | 'all' = 'week'
+  timeRange: 'day' | 'week' | 'month' | 'all' = 'week',
+  sessionsInput?: CompletedSession[]
 ): ProjectBreakdown[] {
-  const sessions = loadSessions();
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = getWorkSessions(sessions);
   const projects = getActiveProjects();
 
@@ -239,17 +243,21 @@ export function getProjectBreakdown(
 
 /**
  * Get total particle count across all projects
+ *
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
-export function getTotalParticleCount(): number {
-  const sessions = loadSessions();
+export function getTotalParticleCount(sessionsInput?: CompletedSession[]): number {
+  const sessions = sessionsInput ?? loadSessions();
   return getWorkSessions(sessions).length;
 }
 
 /**
  * Get the most used project (for defaults/suggestions)
+ *
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
-export function getMostUsedProject(): Project | null {
-  const sessions = loadSessions();
+export function getMostUsedProject(sessionsInput?: CompletedSession[]): Project | null {
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = getWorkSessions(sessions);
   const projects = getActiveProjects();
 
@@ -282,9 +290,10 @@ export function getMostUsedProject(): Project | null {
  * Get recent project IDs from sessions (for P 1-9 ordering)
  *
  * @param limit - Maximum number of recent project IDs to return
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
-export function getRecentProjectIds(limit = 9): string[] {
-  const sessions = loadSessions();
+export function getRecentProjectIds(limit = 9, sessionsInput?: CompletedSession[]): string[] {
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = getWorkSessions(sessions);
 
   const seen = new Set<string>();

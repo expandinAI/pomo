@@ -4,7 +4,7 @@
  * Main entry point for fetching year view data.
  */
 
-import { loadSessions } from '@/lib/session-storage';
+import { loadSessions, type CompletedSession } from '@/lib/session-storage';
 import type { YearViewData } from './types';
 import {
   filterWorkSessionsForYear,
@@ -19,6 +19,7 @@ import {
  *
  * @param year - The year to fetch data for
  * @param projectId - Optional project filter (prepared for future use, currently ignored)
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  * @returns Promise<YearViewData> - Complete year view data structure
  *
  * @example
@@ -30,10 +31,11 @@ import {
  */
 export async function getYearViewData(
   year: number,
-  projectId?: string | null
+  projectId?: string | null,
+  sessionsInput?: CompletedSession[]
 ): Promise<YearViewData> {
   // 1. Load all sessions
-  const sessions = loadSessions();
+  const sessions = sessionsInput ?? loadSessions();
 
   // 2. Filter to work sessions in the specified year (and optionally by project)
   const workSessions = filterWorkSessionsForYear(sessions, year, projectId);
@@ -67,6 +69,7 @@ export async function getYearViewData(
  * Check if there is any data for a specific year
  *
  * @param year - The year to check
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  * @returns Promise<boolean> - True if there are work sessions in this year
  *
  * @example
@@ -76,8 +79,11 @@ export async function getYearViewData(
  * }
  * ```
  */
-export async function hasDataForYear(year: number): Promise<boolean> {
-  const sessions = loadSessions();
+export async function hasDataForYear(
+  year: number,
+  sessionsInput?: CompletedSession[]
+): Promise<boolean> {
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = filterWorkSessionsForYear(sessions, year);
   return workSessions.length > 0;
 }

@@ -6,7 +6,8 @@ import { X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { prefersReducedMotion } from '@/lib/utils';
-import { loadSessions, type CompletedSession } from '@/lib/session-storage';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
+import { type CompletedSession } from '@/lib/session-storage';
 import {
   filterSessionsByTimeRange,
   calculateWeeklyStats,
@@ -32,7 +33,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
-  const [sessions, setSessions] = useState<CompletedSession[]>([]);
+
+  // Use SessionContext for sessions
+  const { sessions: contextSessions, refresh: refreshSessions } = useSessionStore();
+
+  // Cast to CompletedSession[] for compatibility with existing analytics functions
+  const sessions = contextSessions as CompletedSession[];
 
   const reducedMotion = prefersReducedMotion();
 
@@ -41,12 +47,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
   // Focus the modal container itself to avoid visible ring on close button
   useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
-  // Load sessions when modal opens or refresh triggers
+  // Refresh sessions when modal opens or refresh triggers
   useEffect(() => {
     if (isOpen) {
-      setSessions(loadSessions());
+      refreshSessions();
     }
-  }, [isOpen, refreshTrigger]);
+  }, [isOpen, refreshTrigger, refreshSessions]);
 
   // Filter sessions by time range
   const filteredSessions = useMemo(() => {
@@ -58,29 +64,28 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     return filteredSessions.filter(s => s.type === 'work').length;
   }, [filteredSessions]);
 
-  // Calculate focus score (uses filtered sessions)
+  // Calculate focus score (uses filtered sessions, passes all sessions for streak calculation)
   const focusScore = useMemo(() => {
-    return calculateFocusScore(filteredSessions);
-  }, [filteredSessions]);
+    return calculateFocusScore(filteredSessions, sessions);
+  }, [filteredSessions, sessions]);
 
   // Get lifetime total hours (all-time, not filtered)
   const totalHours = useMemo(() => {
-    const stats = getLifetimeStats();
+    const stats = getLifetimeStats(sessions);
     return formatHoursMinutes(stats.totalSeconds);
-  }, [sessions]); // Recalculate when sessions change
+  }, [sessions]);
 
   // Calculate weekly stats for the chart (always show current week)
   const weeklyStats = useMemo(() => {
     if (!isOpen) return null;
-    return calculateWeeklyStats(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, refreshTrigger]);
+    return calculateWeeklyStats(0, sessions);
+  }, [isOpen, sessions]);
 
   // Calculate project breakdown based on time range
   const projectBreakdown = useMemo(() => {
     if (!isOpen) return [];
-    return getProjectBreakdown(timeRange);
-  }, [isOpen, timeRange, refreshTrigger]);
+    return getProjectBreakdown(timeRange, sessions);
+  }, [isOpen, timeRange, sessions]);
 
   // Close on Escape - stopImmediatePropagation prevents Timer from receiving the event
   useEffect(() => {
@@ -207,7 +212,7 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                 ) : (
                   <HistoryTab
                     sessions={sessions}
-                    onSessionUpdate={() => setSessions(loadSessions())}
+                    onSessionUpdate={() => refreshSessions()}
                   />
                 )}
                 </div>

@@ -24,15 +24,19 @@ export interface MilestoneStats {
 
 /**
  * Build current milestone stats from session storage
+ *
+ * @param options - Configuration options
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
 export function buildMilestoneStats(
   options: {
     hasProjects?: boolean;
     isFirstProject?: boolean;
     lastSessionDurationSeconds?: number;
-  } = {}
+  } = {},
+  sessionsInput?: CompletedSession[]
 ): MilestoneStats {
-  const sessions = loadSessions();
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = sessions.filter((s) => s.type === 'work');
 
   // Total particles (work sessions)
@@ -184,13 +188,19 @@ export function getAllEarnedMilestones(
 /**
  * Calculate the historically accurate date when a milestone was actually earned
  * by analyzing session history.
+ *
+ * @param milestoneId - The milestone ID
+ * @param threshold - The milestone threshold value
+ * @param category - The milestone category
+ * @param sessionsInput - Optional sessions array (loads from storage if not provided)
  */
 export function calculateMilestoneEarnedDate(
   milestoneId: string,
   threshold: number | undefined,
-  category: 'count' | 'time' | 'streak' | 'special'
+  category: 'count' | 'time' | 'streak' | 'special',
+  sessionsInput?: CompletedSession[]
 ): string {
-  const sessions = loadSessions();
+  const sessions = sessionsInput ?? loadSessions();
   const workSessions = sessions
     .filter((s) => s.type === 'work')
     .sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime());

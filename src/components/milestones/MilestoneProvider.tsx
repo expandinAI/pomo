@@ -21,6 +21,8 @@ import {
   calculateMilestoneEarnedDate,
   buildMilestoneStats,
 } from '@/lib/milestones';
+import { useSessionStore } from '@/contexts/SessionContext';
+import type { CompletedSession } from '@/lib/session-storage';
 import { MilestoneMoment } from './MilestoneMoment';
 import { MilestoneJourney } from './MilestoneJourney';
 
@@ -59,6 +61,9 @@ interface MilestoneProviderProps {
  * Renders the MilestoneMoment and MilestoneJourney modals.
  */
 export function MilestoneProvider({ children }: MilestoneProviderProps) {
+  // Get sessions from SessionContext
+  const { sessions } = useSessionStore();
+
   // Earned milestones from storage
   const [earnedMilestones, setEarnedMilestones] = useState<EarnedMilestone[]>(() =>
     loadMilestones()
@@ -84,8 +89,8 @@ export function MilestoneProvider({ children }: MilestoneProviderProps) {
   useEffect(() => {
     if (startupCheckDone) return;
 
-    // Build current stats
-    const stats = buildMilestoneStats();
+    // Build current stats using sessions from context
+    const stats = buildMilestoneStats({}, sessions as CompletedSession[]);
     const earnedIds = getEarnedMilestoneIds();
 
     // Get all milestones that should be earned but aren't
@@ -97,7 +102,8 @@ export function MilestoneProvider({ children }: MilestoneProviderProps) {
         const earnedAt = calculateMilestoneEarnedDate(
           milestone.id,
           milestone.threshold,
-          milestone.category
+          milestone.category,
+          sessions as CompletedSession[]
         );
         saveMilestone(milestone.id, stats.totalParticles, stats.totalHours, earnedAt);
       }
@@ -112,7 +118,7 @@ export function MilestoneProvider({ children }: MilestoneProviderProps) {
     }
 
     setStartupCheckDone(true);
-  }, [startupCheckDone]);
+  }, [startupCheckDone, sessions]);
 
   // Refresh milestones from storage
   const refreshMilestones = useCallback(() => {
@@ -127,10 +133,13 @@ export function MilestoneProvider({ children }: MilestoneProviderProps) {
       isFirstProject?: boolean;
     }): MilestoneDefinition | undefined => {
       const earnedIds = getEarnedMilestoneIds();
-      const stats: MilestoneStats = buildMilestoneStats({
-        lastSessionDurationSeconds: options?.lastSessionDurationSeconds,
-        isFirstProject: options?.isFirstProject,
-      });
+      const stats: MilestoneStats = buildMilestoneStats(
+        {
+          lastSessionDurationSeconds: options?.lastSessionDurationSeconds,
+          isFirstProject: options?.isFirstProject,
+        },
+        sessions as CompletedSession[]
+      );
 
       const newMilestone = checkForNewMilestone(stats, earnedIds);
 
@@ -149,7 +158,7 @@ export function MilestoneProvider({ children }: MilestoneProviderProps) {
 
       return undefined;
     },
-    [refreshMilestones]
+    [refreshMilestones, sessions]
   );
 
   // Acknowledge pending milestone

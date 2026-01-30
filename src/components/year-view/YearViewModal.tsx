@@ -14,6 +14,8 @@ import type { GridCell } from '@/lib/year-view/grid';
 import { YearGrid, YearTooltip, YearSummary, YearSelector } from './index';
 import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdown';
 import { useProjects } from '@/hooks/useProjects';
+import { useSessionStore } from '@/contexts/SessionContext';
+import type { CompletedSession } from '@/lib/session-storage';
 
 // Available years for navigation
 const CURRENT_YEAR = new Date().getFullYear();
@@ -39,6 +41,7 @@ export function YearViewModal() {
 
   const { weekStartsOnMonday } = useWeekStart();
   const { activeProjects } = useProjects();
+  const { sessions } = useSessionStore();
   const reducedMotion = prefersReducedMotion();
 
   // Focus management
@@ -46,12 +49,12 @@ export function YearViewModal() {
   // Focus the modal container itself to avoid visible ring on close button
   useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
 
-  // Load real data when modal opens, year changes, or project filter changes
+  // Load real data when modal opens, year changes, project filter changes, or sessions change
   useEffect(() => {
     if (isOpen && !useMockData) {
-      getYearViewData(currentYear, selectedProjectId).then(setRealData);
+      getYearViewData(currentYear, selectedProjectId, sessions as CompletedSession[]).then(setRealData);
     }
-  }, [isOpen, currentYear, useMockData, selectedProjectId]);
+  }, [isOpen, currentYear, useMockData, selectedProjectId, sessions]);
 
   // Get data based on toggle
   const data: YearViewData = useMemo(() => {
