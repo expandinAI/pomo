@@ -5,6 +5,7 @@ import { AmbientEffectsProvider } from '@/contexts/AmbientEffectsContext';
 import { TimerSettingsProvider } from '@/contexts/TimerSettingsContext';
 import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
+import { SessionProvider } from '@/contexts/SessionContext';
 import { CommandPaletteWrapper } from '@/components/command';
 import './globals.css';
 
@@ -116,21 +117,23 @@ export default function RootLayout({
             `,
           }}
         />
-        <TimerSettingsProvider>
-          <AmbientSoundProvider>
-            <AmbientEffectsProvider>
-              <CommandPaletteProvider>
-                {/* Visual effects for immersive dark experience */}
-                <NoiseOverlay />
-                <Vignette />
-                <AmbientEffects />
-                {/* Command Palette (Cmd+K) */}
-                <CommandPaletteWrapper />
-                {children}
-              </CommandPaletteProvider>
-            </AmbientEffectsProvider>
-          </AmbientSoundProvider>
-        </TimerSettingsProvider>
+        <SessionProvider>
+          <TimerSettingsProvider>
+            <AmbientSoundProvider>
+              <AmbientEffectsProvider>
+                <CommandPaletteProvider>
+                  {/* Visual effects for immersive dark experience */}
+                  <NoiseOverlay />
+                  <Vignette />
+                  <AmbientEffects />
+                  {/* Command Palette (Cmd+K) */}
+                  <CommandPaletteWrapper />
+                  {children}
+                </CommandPaletteProvider>
+              </AmbientEffectsProvider>
+            </AmbientSoundProvider>
+          </TimerSettingsProvider>
+        </SessionProvider>
       </body>
     </html>
   );

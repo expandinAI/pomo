@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, X, Trash2, Zap } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
 import {
-  getSessionById,
-  updateSession,
-  deleteSession,
   formatTime24h,
   formatDuration,
   formatDate,
-  type CompletedSession,
 } from '@/lib/session-storage';
 import { ProjectDropdown } from '@/components/task/ProjectDropdown';
 import type { Project } from '@/lib/projects';
@@ -71,8 +68,15 @@ export function ParticleDetailOverlay({
   const taskInputRef = useRef<HTMLInputElement>(null);
   const durationInputRef = useRef<HTMLInputElement>(null);
 
+  // Session store
+  const {
+    getSessionById,
+    updateSession,
+    deleteSession,
+  } = useSessionStore();
+
   // Session data
-  const [session, setSession] = useState<CompletedSession | null>(null);
+  const [session, setSession] = useState<UnifiedSession | null>(null);
 
   // Editable fields
   const [task, setTask] = useState('');
@@ -106,12 +110,12 @@ export function ParticleDetailOverlay({
         setIsEditingDuration(false);
       }
     }
-  }, [isOpen, sessionId]);
+  }, [isOpen, sessionId, getSessionById]);
 
   // Save changes before closing
-  const handleSaveAndClose = useCallback(() => {
+  const handleSaveAndClose = useCallback(async () => {
     if (isDirty && sessionId) {
-      updateSession(sessionId, {
+      await updateSession(sessionId, {
         task: task || undefined,
         projectId: projectId || undefined,
         duration,
@@ -119,16 +123,16 @@ export function ParticleDetailOverlay({
       onSessionUpdated();
     }
     onClose();
-  }, [isDirty, sessionId, task, projectId, duration, onSessionUpdated, onClose]);
+  }, [isDirty, sessionId, task, projectId, duration, onSessionUpdated, onClose, updateSession]);
 
   // Handle delete
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (sessionId) {
-      deleteSession(sessionId);
+      await deleteSession(sessionId);
       onSessionDeleted();
       onClose();
     }
-  }, [sessionId, onSessionDeleted, onClose]);
+  }, [sessionId, onSessionDeleted, onClose, deleteSession]);
 
   // Commit duration edit (defined before useEffect that uses it)
   const commitDurationEdit = useCallback(() => {

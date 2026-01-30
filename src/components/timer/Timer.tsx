@@ -26,7 +26,8 @@ import {
 } from '@/styles/design-tokens';
 import { TAB_TITLES } from '@/lib/constants';
 import { formatTime, formatEndTime } from '@/lib/utils';
-import { addSession, getTodaySessions, getTotalSessionCount, type CompletedSession } from '@/lib/session-storage';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
+import { formatDuration, formatTime24h, formatSessionInfo } from '@/lib/session-storage';
 import { calculateSessionFeedback, type SessionFeedback } from '@/lib/session-feedback';
 import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage, parseMultiLineInput } from '@/lib/smart-input-parser';
@@ -345,7 +346,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   const [todayCount, setTodayCount] = useState(0);
 
   // Today's sessions list (for particle hover info)
-  const [todaySessions, setTodaySessions] = useState<CompletedSession[]>([]);
+  const [todaySessions, setTodaySessions] = useState<UnifiedSession[]>([]);
 
   // Particle hover info state
   const [particleHoverInfo, setParticleHoverInfo] = useState<string | null>(null);
@@ -387,6 +388,14 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     isLoading: projectsLoading,
     getById,
   } = useProjects();
+
+  // Session store (IndexedDB/localStorage abstraction)
+  const {
+    addSession,
+    getTodaySessions,
+    getTotalSessionCount,
+    isLoading: sessionsLoading,
+  } = useSessionStore();
 
   // Milestones
   const { checkForMilestones } = useMilestones();
@@ -432,7 +441,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
   // Load and update today's session count and list
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && !sessionsLoading) {
       const sessions = getTodaySessions();
       setTodaySessions(sessions);
       const newCount = sessions.length;
@@ -449,7 +458,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
       prevTodayCountRef.current = newCount;
     }
-  }, [isLoaded, state.completedPomodoros, dailyGoal]); // Re-calculate when pomodoros increment
+  }, [isLoaded, sessionsLoading, state.completedPomodoros, dailyGoal, getTodaySessions]); // Re-calculate when pomodoros increment
 
   // Hide daily goal reached message after 3 seconds
   useEffect(() => {
@@ -571,7 +580,8 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       estimatedDuration: sessionDuration, // Planned duration (for rhythm tracking)
     };
 
-    addSession(sessionMode, sessionDuration, taskData);
+    // Fire and forget - state is updated by SessionProvider
+    void addSession(sessionMode, sessionDuration, taskData);
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -689,7 +699,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         }
       }, 3500);
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, checkForHint, markHintShown]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, checkForHint, markHintShown, addSession, getTotalSessionCount]);
 
   // Initialize Web Worker timer
   const {
@@ -996,15 +1006,10 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         estimatedDuration: fullDuration,
       };
 
-      // Save with actual elapsed time
-      addSession(sessionMode, elapsedTime, taskData);
+      // Save with actual elapsed time - state is updated by SessionProvider
+      void addSession(sessionMode, elapsedTime, taskData);
 
-      // Update today's sessions to reflect the new particle
-      const sessions = getTodaySessions();
-      setTodaySessions(sessions);
-      setTodayCount(sessions.length);
-
-      // Show feedback with saved time
+      // Show feedback with saved time (sessions will update via context)
       const minutes = Math.round(elapsedTime / 60);
       setToastMessage(`Session ended · ${minutes} min saved`);
     } else {
@@ -1031,7 +1036,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     // Light haptic feedback
     vibrate('light');
-  }, [state.mode, state.timeRemaining, state.currentTask, isOverflow, workerPause, workerReset, vibrate]);
+  }, [state.mode, state.timeRemaining, state.currentTask, isOverflow, workerPause, workerReset, vibrate, addSession]);
 
   // Skip session (complete early with actual elapsed time)
   const handleSkip = useCallback(() => {
@@ -1058,13 +1063,8 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
       };
 
-      // Save ACTUAL elapsed time (including overflow)
-      addSession(sessionMode, elapsedTime, taskData);
-
-      // Refresh today's sessions to show the new particle
-      const sessions = getTodaySessions();
-      setTodaySessions(sessions);
-      setTodayCount(sessions.length);
+      // Save ACTUAL elapsed time (including overflow) - state is updated by SessionProvider
+      void addSession(sessionMode, elapsedTime, taskData);
     }
 
     // Calculate next mode (same logic as reducer)
@@ -1107,7 +1107,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     // Reset one-off duration (next session uses preset)
     setOneOffDuration(null);
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, playSound, vibrate, workerReset, trackEarlyStop]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, isOverflow, playSound, vibrate, workerReset, trackEarlyStop, addSession]);
 
   // Complete session from overflow mode (Enter key in overflow)
   // This is a proper completion that increments the counter
@@ -1133,7 +1133,8 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
     };
 
-    addSession(sessionMode, totalDuration, taskData);
+    // Fire and forget - state is updated by SessionProvider
+    void addSession(sessionMode, totalDuration, taskData);
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -1255,7 +1256,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         }
       }, 3500);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown, addSession, getTotalSessionCount]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1276,7 +1277,8 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
     };
 
-    addSession(sessionMode, elapsedTime, taskData);
+    // Fire and forget - state is updated by SessionProvider
+    void addSession(sessionMode, elapsedTime, taskData);
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -1388,7 +1390,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, addSession, getTotalSessionCount]);
 
   // Start/Pause handlers with sound
   const handleStart = useCallback(() => {
@@ -1649,7 +1651,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, nightModeEnabled, setNightModeEnabled, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -1774,16 +1776,16 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     const sessions = getTodaySessions();
     setTodaySessions(sessions);
     setTodayCount(sessions.length);
-  }, []);
+  }, [getTodaySessions]);
 
   const handleSessionDeleted = useCallback(() => {
     const sessions = getTodaySessions();
     setTodaySessions(sessions);
     setTodayCount(sessions.length);
-  }, []);
+  }, [getTodaySessions]);
 
-  // Show skeleton while settings are loading to prevent layout shift
-  if (!isLoaded) {
+  // Show skeleton while settings or sessions are loading to prevent layout shift
+  if (!isLoaded || sessionsLoading) {
     return <TimerSkeleton />;
   }
 

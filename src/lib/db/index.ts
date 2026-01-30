@@ -21,3 +21,31 @@ export {
   markAsSynced,
   markAsDeleted,
 } from './types';
+
+// Migrations
+export {
+  runMigrations,
+  hasPendingMigrations,
+  countPendingEntries,
+  type MigrationResult,
+  type MigrationSummary,
+} from './migrations';
+
+// Session API (new IndexedDB-based)
+export {
+  loadSessions as loadSessionsDB,
+  getSessionById as getSessionByIdDB,
+  saveSession as saveSessionDB,
+  updateSession as updateSessionDB,
+  deleteSession as deleteSessionDB,
+  getSessionsByDateRange,
+  getSessionsForDate,
+  getSessionsByProject,
+  getSessionsFromDays as getSessionsFromDaysDB,
+  getTodaySessions as getTodaySessionsDB,
+  getTotalSessionCount as getTotalSessionCountDB,
+  getPendingSyncSessions,
+  clearAllSessions,
+  type CreateSessionInput,
+  type UpdateSessionInput,
+} from './sessions';

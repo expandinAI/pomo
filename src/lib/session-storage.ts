@@ -1,3 +1,15 @@
+/**
+ * @deprecated This module is being replaced by IndexedDB-based storage.
+ * Use `useSessionStore()` from `@/contexts/SessionContext` instead.
+ *
+ * Migration path:
+ * - For reading/writing sessions: use `useSessionStore()` hook
+ * - For utility functions (formatDuration, etc.): still import from here
+ *
+ * @see src/contexts/SessionContext.tsx
+ * @see src/lib/db/sessions.ts
+ */
+
 import type { SessionType } from '@/styles/design-tokens';
 
 export interface CompletedSession {
@@ -21,6 +33,9 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
+/**
+ * @deprecated Use `useSessionStore().sessions` from `@/contexts/SessionContext` instead.
+ */
 export function loadSessions(): CompletedSession[] {
   if (typeof window === 'undefined') return [];
 
@@ -45,6 +60,9 @@ export function loadSessions(): CompletedSession[] {
   return [];
 }
 
+/**
+ * @deprecated Internal use only. Use `useSessionStore()` for persistence.
+ */
 export function saveSessions(sessions: CompletedSession[]): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
@@ -59,11 +77,17 @@ export interface TaskData {
   estimatedDuration?: number;
 }
 
+/**
+ * @deprecated Use `useSessionStore().getSessionById()` from `@/contexts/SessionContext` instead.
+ */
 export function getSessionById(id: string): CompletedSession | null {
   const sessions = loadSessions();
   return sessions.find(s => s.id === id) || null;
 }
 
+/**
+ * @deprecated Use `useSessionStore().updateSession()` from `@/contexts/SessionContext` instead.
+ */
 export function updateSession(
   id: string,
   updates: Partial<Pick<CompletedSession, 'task' | 'projectId' | 'duration'>>
@@ -82,6 +106,9 @@ export function updateSession(
   return updated;
 }
 
+/**
+ * @deprecated Use `useSessionStore().deleteSession()` from `@/contexts/SessionContext` instead.
+ */
 export function deleteSession(id: string): boolean {
   const sessions = loadSessions();
   const index = sessions.findIndex(s => s.id === id);
@@ -92,6 +119,9 @@ export function deleteSession(id: string): boolean {
   return true;
 }
 
+/**
+ * @deprecated Use `useSessionStore().addSession()` from `@/contexts/SessionContext` instead.
+ */
 export function addSession(
   type: SessionType,
   duration: number,
@@ -120,12 +150,17 @@ export function addSession(
   return session;
 }
 
+/**
+ * @deprecated Use IndexedDB clear functions instead.
+ */
 export function clearSessions(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// Get sessions from the last N days
+/**
+ * @deprecated Use `useSessionStore().getSessionsFromDays()` from `@/contexts/SessionContext` instead.
+ */
 export function getSessionsFromDays(days: number): CompletedSession[] {
   const sessions = loadSessions();
   const cutoffDate = new Date();
@@ -207,7 +242,9 @@ export function formatTime(dateString: string): string {
   });
 }
 
-// Get today's completed work sessions
+/**
+ * @deprecated Use `useSessionStore().getTodaySessions()` from `@/contexts/SessionContext` instead.
+ */
 export function getTodaySessions(): CompletedSession[] {
   const sessions = loadSessions();
   const today = new Date();
@@ -246,7 +283,9 @@ export function formatSessionInfo(
   return parts.join(' · ');
 }
 
-// Get total count of all completed work sessions
+/**
+ * @deprecated Use `useSessionStore().getTotalSessionCount()` from `@/contexts/SessionContext` instead.
+ */
 export function getTotalSessionCount(): number {
   const sessions = loadSessions();
   return sessions.filter(s => s.type === 'work').length;
