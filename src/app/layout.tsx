@@ -6,6 +6,7 @@ import { TimerSettingsProvider } from '@/contexts/TimerSettingsContext';
 import { AmbientSoundProvider } from '@/contexts/AmbientSoundContext';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 import { SessionProvider } from '@/contexts/SessionContext';
+import { ProjectProvider } from '@/contexts/ProjectContext';
 import { CommandPaletteWrapper } from '@/components/command';
 import { MigrationOverlay } from '@/components/migration';
 import './globals.css';
@@ -121,7 +122,8 @@ export default function RootLayout({
         {/* Migration overlay - runs before providers to migrate localStorage → IndexedDB */}
         <MigrationOverlay />
         <SessionProvider>
-          <TimerSettingsProvider>
+          <ProjectProvider>
+            <TimerSettingsProvider>
             <AmbientSoundProvider>
               <AmbientEffectsProvider>
                 <CommandPaletteProvider>
@@ -136,7 +138,8 @@ export default function RootLayout({
               </AmbientEffectsProvider>
             </AmbientSoundProvider>
           </TimerSettingsProvider>
-        </SessionProvider>
+        </ProjectProvider>
+      </SessionProvider>
       </body>
     </html>
   );

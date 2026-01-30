@@ -294,13 +294,13 @@ export function ProjectListModal() {
   // Get project being edited, archived, or viewed
   const projectBeingEdited = editingProject ? getById(editingProject) : null;
   const projectBeingArchived = archivingProject
-    ? projectsWithStats.find((p) => p.id === archivingProject) ?? getById(archivingProject)
+    ? projectsWithStats.find((p) => p.id === archivingProject) ?? getById(archivingProject) ?? null
     : null;
   const projectBeingViewed =
     viewingProject === 'no-project'
       ? null
       : viewingProject
-        ? projectsWithStats.find((p) => p.id === viewingProject) ?? getById(viewingProject)
+        ? projectsWithStats.find((p) => p.id === viewingProject) ?? getById(viewingProject) ?? null
         : undefined;
 
   // Handler for updates from detail view

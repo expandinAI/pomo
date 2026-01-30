@@ -1,33 +1,23 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  loadProjects,
-  getActiveProjects,
-  getArchivedProjects,
-  createProject,
-  updateProject,
-  archiveProject,
-  restoreProject,
-  getProject,
-  isDuplicateName,
-  getAllProjectsWithStats,
-  getRecentProjectIds,
-  type Project,
-  type CreateProjectData,
-  type UpdateProjectData,
-  type ProjectWithStats,
+import { useProjectStore, type UnifiedProject } from '@/contexts/ProjectContext';
+import { useSessionStore } from '@/contexts/SessionContext';
+import type {
+  Project,
+  ProjectWithStats,
 } from '@/lib/projects';
+import type { CreateProjectInput, UpdateProjectInput } from '@/lib/db';
 
 interface UseProjectsReturn {
   /** All projects (including archived) */
-  projects: Project[];
+  projects: UnifiedProject[];
 
   /** Active (non-archived) projects only */
-  activeProjects: Project[];
+  activeProjects: UnifiedProject[];
 
   /** Archived projects only */
-  archivedProjects: Project[];
+  archivedProjects: UnifiedProject[];
 
   /** Active projects with computed statistics */
   projectsWithStats: ProjectWithStats[];
@@ -39,39 +29,68 @@ interface UseProjectsReturn {
   selectProject: (projectId: string | null) => void;
 
   /** Create a new project */
-  create: (data: CreateProjectData) => Project;
+  create: (data: CreateProjectInput) => Promise<UnifiedProject>;
 
   /** Update an existing project */
-  update: (id: string, data: UpdateProjectData) => Project | null;
+  update: (id: string, data: UpdateProjectInput) => Promise<UnifiedProject | null>;
 
   /** Archive a project (soft delete) */
-  archive: (id: string) => Project | null;
+  archive: (id: string) => Promise<UnifiedProject | null>;
 
   /** Restore an archived project */
-  restore: (id: string) => Project | null;
+  restore: (id: string) => Promise<UnifiedProject | null>;
 
   /** Get a single project by ID */
-  getById: (id: string) => Project | null;
+  getById: (id: string) => UnifiedProject | undefined;
 
-  /** Check if a name already exists */
+  /** Check if a name already exists (sync, from cache) */
   checkDuplicateName: (name: string, excludeId?: string) => boolean;
 
   /** Recent project IDs (for P 1-9 shortcuts) */
   recentProjectIds: string[];
 
   /** Refresh projects from storage */
-  refresh: () => void;
+  refresh: () => Promise<void>;
 
   /** Loading state */
   isLoading: boolean;
+
+  /** Storage mode in use */
+  storageMode: 'indexeddb' | 'localstorage';
 }
 
 const SELECTED_PROJECT_KEY = 'particle_selected_project';
 
 /**
+ * Check if a date is within this week (Monday-Sunday)
+ */
+function isThisWeek(date: Date): boolean {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  const day = startOfWeek.getDay();
+  const diff = day === 0 ? 6 : day - 1; // Adjust for Monday start
+  startOfWeek.setDate(startOfWeek.getDate() - diff);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  return date >= startOfWeek;
+}
+
+/**
+ * Check if a date is within this month
+ */
+function isThisMonth(date: Date): boolean {
+  const now = new Date();
+  return (
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+}
+
+/**
  * Hook for managing projects
  *
  * Provides CRUD operations and state management for projects.
+ * Uses ProjectContext for storage abstraction (IndexedDB or localStorage).
  * The selected project persists across sessions.
  *
  * @example
@@ -79,71 +98,96 @@ const SELECTED_PROJECT_KEY = 'particle_selected_project';
  * const { activeProjects, selectedProjectId, selectProject, create } = useProjects();
  *
  * // Create a new project
- * const project = create({ name: 'My Project', brightness: 0.7 });
+ * const project = await create({ name: 'My Project', brightness: 0.7 });
  *
  * // Select it for the current session
  * selectProject(project.id);
  * ```
  */
 export function useProjects(): UseProjectsReturn {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const projectStore = useProjectStore();
+  const sessionStore = useSessionStore();
+
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Load projects and selected project from storage
+  // Load selected project from localStorage on mount
   useEffect(() => {
-    setProjects(loadProjects());
-
-    // Load selected project from localStorage
     const stored = localStorage.getItem(SELECTED_PROJECT_KEY);
     if (stored) {
-      // Verify the project still exists
-      const project = getProject(stored);
+      // Verify the project still exists and is not archived
+      const project = projectStore.getProjectById(stored);
       if (project && !project.archived) {
         setSelectedProjectId(stored);
       } else {
         localStorage.removeItem(SELECTED_PROJECT_KEY);
       }
     }
+    // We intentionally only depend on projects array, not getProjectById
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectStore.projects]);
 
-    setIsLoading(false);
-  }, []);
+  // Derived state: active projects
+  const activeProjects = useMemo(
+    () => projectStore.getActiveProjects(),
+    [projectStore]
+  );
 
-  // Listen for project changes from other hook instances
-  useEffect(() => {
-    function handleProjectsChanged() {
-      setProjects(loadProjects());
+  // Derived state: archived projects
+  const archivedProjects = useMemo(
+    () => projectStore.getArchivedProjects(),
+    [projectStore]
+  );
+
+  // Compute project statistics from sessions
+  const projectsWithStats = useMemo((): ProjectWithStats[] => {
+    const workSessions = sessionStore.sessions.filter(s => s.type === 'work');
+
+    return activeProjects.map((project) => {
+      const projectSessions = workSessions.filter(s => s.projectId === project.id);
+
+      let weekCount = 0;
+      let monthCount = 0;
+      let totalDuration = 0;
+
+      for (const session of projectSessions) {
+        const date = new Date(session.completedAt);
+        totalDuration += session.duration;
+
+        if (isThisWeek(date)) {
+          weekCount++;
+        }
+        if (isThisMonth(date)) {
+          monthCount++;
+        }
+      }
+
+      return {
+        ...(project as Project),
+        particleCount: projectSessions.length,
+        totalDuration,
+        weekParticleCount: weekCount,
+        monthParticleCount: monthCount,
+      };
+    });
+  }, [activeProjects, sessionStore.sessions]);
+
+  // Compute recent project IDs from sessions (for P 1-9 shortcuts)
+  const recentProjectIds = useMemo((): string[] => {
+    const workSessions = sessionStore.sessions.filter(s => s.type === 'work');
+
+    const seen = new Set<string>();
+    const recent: string[] = [];
+
+    for (const session of workSessions) {
+      if (session.projectId && !seen.has(session.projectId)) {
+        seen.add(session.projectId);
+        recent.push(session.projectId);
+        if (recent.length >= 9) break;
+      }
     }
 
-    window.addEventListener('particle:projects-changed', handleProjectsChanged);
-    return () => window.removeEventListener('particle:projects-changed', handleProjectsChanged);
-  }, []);
-
-  // Refresh projects from storage
-  const refresh = useCallback(() => {
-    setProjects(loadProjects());
-  }, []);
-
-  // Derived state
-  const activeProjects = useMemo(
-    () => projects.filter(p => !p.archived),
-    [projects]
-  );
-
-  const archivedProjects = useMemo(
-    () => projects.filter(p => p.archived),
-    [projects]
-  );
-
-  const projectsWithStats = useMemo(
-    () => getAllProjectsWithStats(false),
-    [projects] // Re-compute when projects change
-  );
-
-  const recentProjectIds = useMemo(
-    () => getRecentProjectIds(9),
-    [projects]
-  );
+    return recent;
+  }, [sessionStore.sessions]);
 
   // Select a project for the current session
   const selectProject = useCallback((projectId: string | null) => {
@@ -156,73 +200,40 @@ export function useProjects(): UseProjectsReturn {
     }
   }, []);
 
-  // Notify other hook instances of changes
-  const notifyChange = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('particle:projects-changed'));
-  }, []);
-
-  // CRUD operations
-  const create = useCallback((data: CreateProjectData): Project => {
-    const project = createProject(data);
-    refresh();
-    notifyChange();
-    return project;
-  }, [refresh, notifyChange]);
-
-  const update = useCallback((id: string, data: UpdateProjectData): Project | null => {
-    const project = updateProject(id, data);
-    if (project) {
-      refresh();
-      notifyChange();
+  // Wrap archive to also deselect if the archived project was selected
+  const archive = useCallback(async (id: string): Promise<UnifiedProject | null> => {
+    const result = await projectStore.archiveProject(id);
+    if (result && selectedProjectId === id) {
+      selectProject(null);
     }
-    return project;
-  }, [refresh, notifyChange]);
+    return result;
+  }, [projectStore, selectedProjectId, selectProject]);
 
-  const archive = useCallback((id: string): Project | null => {
-    const project = archiveProject(id);
-    if (project) {
-      // Deselect if the archived project was selected
-      if (selectedProjectId === id) {
-        selectProject(null);
-      }
-      refresh();
-      notifyChange();
-    }
-    return project;
-  }, [refresh, notifyChange, selectedProjectId, selectProject]);
-
-  const restore = useCallback((id: string): Project | null => {
-    const project = restoreProject(id);
-    if (project) {
-      refresh();
-      notifyChange();
-    }
-    return project;
-  }, [refresh, notifyChange]);
-
-  const getById = useCallback((id: string): Project | null => {
-    return getProject(id);
-  }, []);
-
+  // Synchronous duplicate name check using cached projects
+  // This maintains backward compatibility with existing components
   const checkDuplicateName = useCallback((name: string, excludeId?: string): boolean => {
-    return isDuplicateName(name, excludeId);
-  }, []);
+    const normalizedName = name.trim().toLowerCase();
+    return projectStore.projects.some(
+      p => p.name.toLowerCase() === normalizedName && p.id !== excludeId
+    );
+  }, [projectStore.projects]);
 
   return {
-    projects,
+    projects: projectStore.projects,
     activeProjects,
     archivedProjects,
     projectsWithStats,
     selectedProjectId,
     selectProject,
-    create,
-    update,
+    create: projectStore.addProject,
+    update: projectStore.updateProject,
     archive,
-    restore,
-    getById,
+    restore: projectStore.restoreProject,
+    getById: projectStore.getProjectById,
     checkDuplicateName,
     recentProjectIds,
-    refresh,
-    isLoading,
+    refresh: projectStore.refresh,
+    isLoading: projectStore.isLoading,
+    storageMode: projectStore.storageMode,
   };
 }
