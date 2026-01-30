@@ -14,6 +14,7 @@ import { useIntro, usePrefersReducedMotion } from '@/hooks/useIntro';
 import { useEasterEggs } from '@/hooks/useEasterEgg';
 import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
+import { isIndexedDBAvailable, hasPendingMigrations, runMigrations } from '@/lib/db';
 import type { LearnView } from '@/components/learn/LearnMenu';
 
 // Lazy load non-critical modal components
@@ -111,10 +112,30 @@ function HomeContent() {
   // Easter eggs:
   // - "intro" → Replay the original intro
   // - "focus" → Show a random inspiration
+  // Easter eggs - words that trigger special actions when typed
+  // Note: Avoid letters used in G-prefix shortcuts (t,s,h,y,p,o,r,m,l)
+  // to prevent conflicts with keyboard navigation
   useEasterEggs([
-    { word: 'intro', onTrigger: replayIntro },
-    { word: 'focus', onTrigger: showInspiration },
+    { word: 'zen', onTrigger: showInspiration },
   ]);
+
+  // Run IndexedDB migrations on app start
+  useEffect(() => {
+    if (isIndexedDBAvailable() && hasPendingMigrations()) {
+      runMigrations().then(summary => {
+        if (summary.totalMigrated > 0) {
+          console.log(
+            `[Storage] Migration completed: ${summary.totalMigrated} items migrated in ${summary.duration.toFixed(0)}ms`
+          );
+        }
+        if (summary.totalErrors > 0) {
+          console.warn('[Storage] Migration errors:', summary.results.flatMap(r => r.errors));
+        }
+      }).catch(error => {
+        console.error('[Storage] Migration failed:', error);
+      });
+    }
+  }, []);
 
   // Onboarding - shows on first start attempt (after intro)
   const { hasCompletedOnboarding, isOnboardingVisible, showOnboarding, completeOnboarding } = useOnboarding();

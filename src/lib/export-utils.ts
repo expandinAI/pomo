@@ -1,4 +1,5 @@
 import { loadSessions, formatDuration, type CompletedSession } from './session-storage';
+import type { UnifiedSession } from '@/contexts/SessionContext';
 
 /**
  * Escape a value for CSV (handle commas, quotes, newlines)
@@ -77,15 +78,20 @@ export function downloadFile(content: string, filename: string, mimeType: string
 /**
  * Export all sessions as CSV and trigger download
  * Returns true if export was successful, false if no data
+ *
+ * @param sessionsInput - Optional sessions array from SessionContext.
+ *                        If not provided, falls back to localStorage (legacy).
  */
-export function exportSessionsAsCSV(): boolean {
-  const sessions = loadSessions();
+export function exportSessionsAsCSV(sessionsInput?: UnifiedSession[]): boolean {
+  // Use provided sessions or fall back to localStorage
+  const sessions = sessionsInput ?? loadSessions();
 
   if (sessions.length === 0) {
     return false;
   }
 
-  const csv = generateCSV(sessions);
+  // Cast to CompletedSession[] - UnifiedSession is compatible
+  const csv = generateCSV(sessions as CompletedSession[]);
   const filename = generateExportFilename();
   downloadFile(csv, filename);
 

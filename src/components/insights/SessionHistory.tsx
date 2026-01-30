@@ -6,9 +6,8 @@ import { BarChart3, X, Coffee, Zap, Search } from 'lucide-react';
 import { SPRING, SESSION_LABELS, type SessionType } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
 import {
-  loadSessions,
-  getSessionsFromDays,
   groupSessionsByDate,
   getTotalDuration,
   formatDuration,
@@ -31,9 +30,16 @@ interface SessionHistoryProps {
 
 export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [sessions, setSessions] = useState<CompletedSession[]>([]);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Use SessionContext for sessions
+  const { getSessionsFromDays, refresh: refreshSessions } = useSessionStore();
+
+  // Get sessions from last 30 days, cast to CompletedSession[] for compatibility
+  const sessions = useMemo(() => {
+    return getSessionsFromDays(30) as CompletedSession[];
+  }, [getSessionsFromDays]);
 
   const reducedMotion = prefersReducedMotion();
 
@@ -46,10 +52,12 @@ export function SessionHistory({ refreshTrigger }: SessionHistoryProps) {
     setIsOpen((prev) => !prev);
   }, []);
 
-  // Load sessions on mount and when refreshTrigger changes
+  // Refresh sessions when modal opens or refresh triggers
   useEffect(() => {
-    setSessions(getSessionsFromDays(30));
-  }, [refreshTrigger, isOpen]);
+    if (isOpen) {
+      refreshSessions();
+    }
+  }, [refreshTrigger, isOpen, refreshSessions]);
 
   // Reset filters when modal closes
   useEffect(() => {

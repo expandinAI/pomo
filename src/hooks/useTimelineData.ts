@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { loadSessions, type CompletedSession } from '@/lib/session-storage';
+import { useSessionStore } from '@/contexts/SessionContext';
+import { type CompletedSession } from '@/lib/session-storage';
 import { useProjects } from './useProjects';
 import type { SessionType } from '@/styles/design-tokens';
 
@@ -101,8 +102,8 @@ export function useTimelineData(): UseTimelineDataReturn {
     return today;
   });
 
-  // Refresh trigger to force reload of sessions
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // Use SessionContext for sessions
+  const { sessions: contextSessions, refresh: refreshContextSessions } = useSessionStore();
 
   const { getById } = useProjects();
 
@@ -115,7 +116,8 @@ export function useTimelineData(): UseTimelineDataReturn {
 
   // Load and transform sessions for the selected date
   const sessions = useMemo((): TimelineSession[] => {
-    const allSessions = loadSessions();
+    // Cast to CompletedSession[] for compatibility
+    const allSessions = contextSessions as CompletedSession[];
     const dateKey = getDateKey(date);
 
     // Filter sessions for this date
@@ -156,7 +158,7 @@ export function useTimelineData(): UseTimelineDataReturn {
 
     // Sort chronologically (earliest first)
     return transformed.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-  }, [date, getById, refreshTrigger]);
+  }, [date, getById, contextSessions]);
 
   // Compute statistics
   const stats = useMemo(() => {
@@ -201,8 +203,8 @@ export function useTimelineData(): UseTimelineDataReturn {
 
   // Force refresh of timeline data
   const refresh = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1);
-  }, []);
+    refreshContextSessions();
+  }, [refreshContextSessions]);
 
   const isToday = isSameDay(date, today);
   const canGoForward = !isToday;

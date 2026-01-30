@@ -54,8 +54,16 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
         return;
       }
 
+      // Ignore key repeat (holding key down)
+      if (e.repeat) {
+        return;
+      }
+
+      // Normalize key to lowercase for case-insensitive matching
+      const key = e.key.toLowerCase();
+
       // First key: G
-      if (e.key === 'g' && !isGPressed) {
+      if (key === 'g' && !isGPressed) {
         setIsGPressed(true);
         clearGTimeout();
 
@@ -68,10 +76,15 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
 
       // Second key after G
       if (isGPressed) {
+        // Ignore repeated G presses (key repeat or accidental double-tap)
+        if (key === 'g') {
+          return;
+        }
+
         clearGTimeout();
         setIsGPressed(false);
 
-        switch (e.key) {
+        switch (key) {
           case 't':
             e.preventDefault();
             e.stopImmediatePropagation();

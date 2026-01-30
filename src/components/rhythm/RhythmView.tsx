@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useProjects } from '@/hooks/useProjects';
-import { loadSessions } from '@/lib/session-storage';
+import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
+import { type CompletedSession } from '@/lib/session-storage';
 import {
   calculateRhythm,
   calculateProjectRhythms,
@@ -29,14 +30,18 @@ export function RhythmView({ isOpen, onClose }: RhythmViewProps) {
   const { activeProjects, isLoading: projectsLoading } = useProjects();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  // Load sessions
-  const [sessions, setSessions] = useState<ReturnType<typeof loadSessions>>([]);
+  // Use SessionContext for sessions
+  const { sessions: contextSessions, refresh: refreshSessions } = useSessionStore();
 
+  // Cast to CompletedSession[] for compatibility with rhythm calculations
+  const sessions = contextSessions as CompletedSession[];
+
+  // Refresh sessions when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSessions(loadSessions());
+      refreshSessions();
     }
-  }, [isOpen]);
+  }, [isOpen, refreshSessions]);
 
   // Filter sessions by selected project
   const filteredSessions = useMemo(() => {

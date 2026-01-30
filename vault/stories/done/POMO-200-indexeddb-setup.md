@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 2
 feature: "[[features/local-first-persistence]]"
 created: 2026-01-28
-updated: 2026-01-29
-done_date: null
+updated: 2026-01-30
+done_date: 2026-01-30
 tags: [infrastructure, indexeddb, dexie, foundation]
 ---
 

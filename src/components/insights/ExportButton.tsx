@@ -6,6 +6,7 @@ import { Download, Check, AlertCircle } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { exportSessionsAsCSV } from '@/lib/export-utils';
 import { prefersReducedMotion } from '@/lib/utils';
+import { useSessionStore } from '@/contexts/SessionContext';
 
 type ExportState = 'idle' | 'success' | 'empty';
 
@@ -23,9 +24,10 @@ interface ExportButtonProps {
 export function ExportButton({ variant = 'default', className = '' }: ExportButtonProps) {
   const [state, setState] = useState<ExportState>('idle');
   const reducedMotion = prefersReducedMotion();
+  const { sessions } = useSessionStore();
 
   const handleExport = useCallback(() => {
-    const success = exportSessionsAsCSV();
+    const success = exportSessionsAsCSV(sessions);
 
     if (success) {
       setState('success');
@@ -36,7 +38,7 @@ export function ExportButton({ variant = 'default', className = '' }: ExportButt
       // Reset after 3 seconds
       setTimeout(() => setState('idle'), 3000);
     }
-  }, []);
+  }, [sessions]);
 
   const isCompact = variant === 'compact';
 
