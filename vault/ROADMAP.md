@@ -6,10 +6,10 @@ High-level Überblick über Features und Milestones.
 
 ## Aktueller Fokus
 
-> **Multi-Platform Foundation** - Accounts, Sync, Native Apps
+> **Cloud Sync & Accounts** - Clerk Auth, Supabase, Multi-Device
 
 **Ziel:** Von reiner Web-App zu Multi-Platform-Produkt mit Monetarisierung
-**Status:** Architektur entschieden, Features spezifiziert
+**Status:** Local-First abgeschlossen, 300er-Serie bereit
 
 ---
 
@@ -39,18 +39,40 @@ High-level Überblick über Features und Milestones.
 | [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | ✅ Done |
 | [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | ✅ Done |
 
+### v1.0 - Feature Complete
+
+| Feature | Stories | Points | Status |
+|---------|---------|--------|--------|
+| Sound Engine & Settings | POMO-120 bis 124 | ~15 | ✅ Done |
+| Night Mode | POMO-130 bis 139 | ~20 | ✅ Done |
+| Learn Panel & Onboarding | POMO-160 bis 166 | ~18 | ✅ Done |
+| Intro Animation | POMO-170 bis 175 | ~13 | ✅ Done |
+
+### v1.1 - Local-First Persistence
+
+| Feature | Stories | Points | Status |
+|---------|---------|--------|--------|
+| [[features/local-first-persistence]] | POMO-200 bis 206 | 17 | ✅ Done |
+
 ---
 
-## Now: Multi-Platform Foundation
+## Now: Cloud Sync & Accounts
 
-### Phase 1: Local-First & Cloud Sync
+### Phase 1: Cloud Sync (300er-Serie)
 
-| Feature | Stories | Points | Status | Prio |
-|---------|---------|--------|--------|------|
-| [[features/local-first-persistence]] | POMO-200 bis 206 | 17 | Draft | P0 |
-| [[features/cloud-sync-accounts]] | POMO-300 bis 308 | 37 | Draft | P0 |
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-300 | Clerk Setup | 3 | 🔜 Next |
+| POMO-301 | Supabase Schema | 5 | 🔜 Next |
+| POMO-302 | Auth UI | 5 | 🔜 Next |
+| POMO-303 | Account Tiers | 3 | 🔜 Next |
+| POMO-304 | Upgrade Flow | 5 | 🔜 Next |
+| POMO-305 | Sync Service | 8 | 🔜 Next |
+| POMO-306 | Conflict Resolution | 5 | 🔜 Next |
+| POMO-307 | Trial Management | 3 | 🔜 Next |
+| POMO-308 | Settings Sync | 3 | 🔜 Next |
 
-**Total Phase 1: 54 Story Points**
+**Total: 37 Story Points**
 
 ### Phase 2: Monetization & Compliance
 
@@ -93,8 +115,8 @@ Dokumentiert in [[decisions/]]:
 │                                                                  │
 │  PHASE 1: Foundation                          ~54 SP             │
 │  ─────────────────────────────────────                          │
-│  ☐ Local-First Persistence (IndexedDB)       17 SP  ← NEXT      │
-│  ☐ Cloud Sync & Accounts (Clerk + Supabase)  37 SP              │
+│  ✅ Local-First Persistence (IndexedDB)       17 SP  DONE        │
+│  ☐ Cloud Sync & Accounts (Clerk + Supabase)  37 SP  ← NEXT      │
 │                                                                  │
 │  PHASE 2: Monetization & Compliance           ~27 SP             │
 │  ─────────────────────────────────────                          │
@@ -107,18 +129,18 @@ Dokumentiert in [[decisions/]]:
 │  ☐ Native iOS App (SwiftUI, reduced scope)   ~30 SP             │
 │                                                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  TOTAL: ~161 Story Points                                        │
-│  Bei ~5 SP/Woche: ~32 Wochen (~8 Monate)                        │
+│  REMAINING: ~144 Story Points                                    │
+│  Bei ~5 SP/Woche: ~29 Wochen (~7 Monate)                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Abhängigkeiten
 
 ```
-Local-First Persistence
+Local-First Persistence ✅
          │
          ▼
-Cloud Sync & Accounts
+Cloud Sync & Accounts ← NEXT
          │
     ┌────┴────┐
     ▼         ▼
@@ -134,22 +156,22 @@ Payment    GDPR
 
 ---
 
-## Tech Stack (Neu)
+## Tech Stack
 
 | Komponente | Technologie | Status |
 |------------|-------------|--------|
-| **Web Frontend** | Next.js 14 | ✅ Bestehend |
-| **Local Storage (Web)** | IndexedDB (Dexie.js) | 🔜 Geplant |
-| **Auth** | Clerk | 🔜 Geplant |
-| **Database** | Supabase (PostgreSQL) | 🔜 Geplant |
-| **Payments** | Stripe | 🔜 Geplant |
+| **Web Frontend** | Next.js 14 | ✅ Done |
+| **Local Storage (Web)** | IndexedDB (Dexie.js) | ✅ Done |
+| **Auth** | Clerk | 🔜 Next |
+| **Database** | Supabase (PostgreSQL) | 🔜 Next |
+| **Payments** | Stripe | 📋 Später |
 | **Mac App** | Swift/SwiftUI | 📋 Später |
 | **iOS App** | SwiftUI | 📋 Später |
 | **Local Storage (Native)** | SwiftData/SQLite | 📋 Später |
 
 ---
 
-## Pricing Model (Überarbeitet)
+## Pricing Model
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -247,9 +269,18 @@ Payment    GDPR
 - [x] Statistics Dashboard
 - [x] Year View
 - [x] Project Tracking
+- [x] Night Mode
+- [x] Learn Panel & Onboarding
+- [x] Intro Animation
+
+### v1.1 - Local-First ✅
+- [x] IndexedDB Migration
+- [x] SessionContext (unified storage)
+- [x] ProjectContext (unified storage)
+- [x] Settings Migration
+- [x] Migration UI
 
 ### v2.0 - Multi-Platform Foundation 🚧
-- [ ] IndexedDB Migration (Local-First)
 - [ ] Clerk Auth Integration
 - [ ] Supabase Cloud Sync
 - [ ] Account Tiers (Free/Plus/Flow)
@@ -279,11 +310,15 @@ Payment    GDPR
 
 Parked ideas:
 
+- Sound Creation Tools (POMO-125) – Grund: Nice-to-have, nicht kritisch
+- Phase Ambient Sounds (POMO-137) – Grund: Nach Cloud Sync evaluieren
+- Offline Queue (POMO-205) – Grund: Nach Sync-Implementierung
 - Social/Team features – Grund: "Focus is personal" philosophy
 - Gamification (streaks, badges) – Grund: "Calm over anxiety" principle
 - Apple Watch App – Grund: Nach iOS evaluieren
 - Android App – Grund: iOS/Mac Fokus zuerst
+- Weekly Email Report (POMO-156) – Grund: Nach Account-System
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-28*
+*Zuletzt aktualisiert: 2026-01-30*
