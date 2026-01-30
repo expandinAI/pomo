@@ -454,8 +454,8 @@ function ProjectList() {
         <AddProjectButton />
       ) : (
         <UpgradeHint>
-          Du hast {maxProjects} aktive Projekte.
-          Archiviere eines oder upgrade auf Flow.
+          You have {maxProjects} active projects.
+          Archive one or upgrade to Flow.
         </UpgradeHint>
       )}
     </div>

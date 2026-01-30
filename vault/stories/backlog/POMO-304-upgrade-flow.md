@@ -426,10 +426,10 @@ function SummaryPhase({
       </div>
 
       <h2 className="text-xl font-medium text-white text-center mb-2">
-        Willkommen bei Particle!
+        Welcome to Particle!
       </h2>
       <p className="text-tertiary text-center mb-6">
-        Du hast lokale Daten, die wir synchronisieren können:
+        You have local data we can sync:
       </p>
 
       <DataSummary summary={summary} />
@@ -441,14 +441,14 @@ function SummaryPhase({
                      hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
         >
           <Cloud className="w-4 h-4" />
-          Jetzt synchronisieren
+          Sync Now
         </button>
 
         <button
           onClick={onSkip}
           className="w-full py-2 text-tertiary hover:text-secondary transition-colors text-sm"
         >
-          Später
+          Later
         </button>
       </div>
     </div>
@@ -470,7 +470,7 @@ function UploadingPhase({ progress }: { progress: UploadProgressType }) {
       </div>
 
       <h2 className="text-lg font-medium text-white text-center mb-6">
-        Daten werden synchronisiert
+        Syncing your data
       </h2>
 
       <UploadProgress progress={progress} />
@@ -684,24 +684,24 @@ useEffect(() => {
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│                          ·                                  │  ← Particle (pulsierend)
+│                          ·                                  │  ← Particle (pulsating)
 │                                                             │
-│              Willkommen bei Particle!                       │
+│              Welcome to Particle!                           │
 │                                                             │
-│          Du hast lokale Daten, die wir                      │
-│          synchronisieren können:                            │
+│          You have local data we can                         │
+│          synchronize:                                       │
 │                                                             │
 │          ┌───────────────────────────────────┐              │
-│          │  Partikel             127         │              │
-│          │  Projekte              12         │              │
-│          │  Einstellungen          ✓         │              │
+│          │  Particles            127         │              │
+│          │  Projects              12         │              │
+│          │  Settings               ✓         │              │
 │          └───────────────────────────────────┘              │
 │                                                             │
 │          ┌───────────────────────────────────┐              │
-│          │     ☁  Jetzt synchronisieren      │              │  ← Primary CTA
+│          │     ☁  Sync Now                   │              │  ← Primary CTA
 │          └───────────────────────────────────┘              │
 │                                                             │
-│                      [Später]                               │
+│                      [Later]                                │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -711,32 +711,32 @@ useEffect(() => {
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│                          ·                                  │  ← Particle (schnell pulsierend)
+│                          ·                                  │  ← Particle (fast pulsating)
 │                                                             │
-│              Daten werden synchronisiert                    │
+│              Syncing your data                              │
 │                                                             │
 │          ████████████████░░░░░░░░░░░░░░░░░       65%       │
 │                                                             │
-│              82 / 127 Partikel                              │
+│              82 / 127 Particles                             │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Erfolg
+### Success
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
 │                         ✓                                   │  ← Checkmark Icon
 │                                                             │
-│              Synchronisation abgeschlossen                  │
+│              Sync complete                                  │
 │                                                             │
-│              127 Partikel synchronisiert                    │
-│              12 Projekte synchronisiert                     │
-│              Einstellungen synchronisiert                   │
+│              127 Particles synced                           │
+│              12 Projects synced                             │
+│              Settings synced                                │
 │                                                             │
-│              Deine Daten sind jetzt                         │
-│              sicher in der Cloud.                           │
+│              Your data is now safely                        │
+│              stored in the cloud.                           │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -751,7 +751,7 @@ useEffect(() => {
 - [ ] Nach Upload: Daten in Supabase Dashboard sichtbar
 - [ ] Auf anderem Gerät einloggen → Daten sind da
 - [ ] Bei Netzwerk-Fehler: Retry funktioniert
-- [ ] "Später" Button schließt Modal
+- [ ] "Later" Button schließt Modal
 
 ### Automatisierte Tests
 
@@ -799,7 +799,7 @@ describe('Initial Upload', () => {
 - [ ] UpgradeModal mit allen Phasen (Summary, Uploading, Success, Error)
 - [ ] Progress-Anzeige accurate
 - [ ] Retry-Mechanismus funktioniert
-- [ ] "Später" Option funktioniert
+- [ ] "Later" Option funktioniert
 - [ ] Skip wenn keine lokalen Daten
 - [ ] Daten auf anderem Gerät verifiziert
 - [ ] Tests geschrieben & grün
@@ -816,7 +816,7 @@ describe('Initial Upload', () => {
 - Erfolgreich hochgeladene Daten bleiben erhalten
 - User kann Retry für fehlgeschlagene Einträge
 
-**"Später" Verhalten:**
+**"Later" Verhalten:**
 - Lokale Daten bleiben in IndexedDB
 - Sync-Service wird nicht gestartet (kein Account = kein Sync)
 - Bei nächstem Login wird Modal erneut gezeigt

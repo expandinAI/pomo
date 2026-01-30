@@ -247,7 +247,7 @@ export function TrialBadge() {
           : 'bg-white/10 text-white'}
       `}
     >
-      Trial: {daysRemaining} {daysRemaining === 1 ? 'Tag' : 'Tage'}
+      Trial: {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}
     </div>
   );
 }
@@ -378,14 +378,14 @@ export function TrialStartModal({ isOpen, onClose, onStarted }: TrialStartModalP
                   className="w-full py-3 bg-white text-black rounded-xl font-medium
                              hover:bg-zinc-200 transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? 'Wird aktiviert...' : '14-Tage Trial starten'}
+                  {isLoading ? 'Activating...' : 'Start 14-Day Trial'}
                 </button>
 
                 <button
                   onClick={onClose}
                   className="w-full py-2 text-tertiary hover:text-secondary text-sm"
                 >
-                  Vielleicht später
+                  Maybe Later
                 </button>
               </div>
             </div>
@@ -449,7 +449,7 @@ export function TrialEndModal({ onUpgrade, onDismiss }: TrialEndModalProps) {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-tertiary/10">
-              <h2 className="text-lg font-medium text-white">Dein Trial ist beendet</h2>
+              <h2 className="text-lg font-medium text-white">Your trial has ended</h2>
               <button
                 onClick={handleDismiss}
                 className="w-8 h-8 rounded-full flex items-center justify-center
@@ -462,8 +462,8 @@ export function TrialEndModal({ onUpgrade, onDismiss }: TrialEndModalProps) {
             {/* Content */}
             <div className="p-5">
               <p className="text-secondary mb-6">
-                Danke, dass du Particle Flow ausprobiert hast.
-                Um weiterhin alle Premium-Features zu nutzen, kannst du upgraden.
+                Thanks for trying Particle Flow.
+                To continue using all premium features, you can upgrade.
               </p>
 
               {/* TODO: Trial-Statistiken hier anzeigen */}
@@ -476,19 +476,19 @@ export function TrialEndModal({ onUpgrade, onDismiss }: TrialEndModalProps) {
                   className="w-full py-3 bg-white text-black rounded-xl font-medium
                              hover:bg-zinc-200 transition-colors"
                 >
-                  Particle Flow behalten
+                  Keep Particle Flow
                 </button>
 
                 <button
                   onClick={handleDismiss}
                   className="w-full py-2 text-tertiary hover:text-secondary text-sm"
                 >
-                  Mit Particle weitermachen
+                  Continue with Particle
                 </button>
               </div>
 
               <p className="text-tertiary text-xs text-center mt-4">
-                Deine Daten bleiben erhalten. Cloud Sync funktioniert weiterhin.
+                Your data will be preserved. Cloud Sync continues to work.
               </p>
             </div>
           </motion.div>
@@ -606,22 +606,22 @@ export { TrialEndModal } from './TrialEndModal';
 │  ✦ Particle Flow                                       [×]  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  14 Tage kostenlos alle Premium-Features testen.            │
-│  Keine Kreditkarte erforderlich.                            │
+│  Try all premium features free for 14 days.                 │
+│  No credit card required.                                   │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │  ○ Jahresansicht                                     │   │
-│  │  ○ Erweiterte Statistiken                            │   │
-│  │  ○ Alle Themes                                       │   │
-│  │  ○ Unbegrenzte Presets                               │   │
+│  │  ○ Year View                                         │   │
+│  │  ○ Advanced Statistics                               │   │
+│  │  ○ All Themes                                        │   │
+│  │  ○ Unlimited Presets                                 │   │
 │  │  ○ Ambient Sounds                                    │   │
 │  └──────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │            14-Tage Trial starten                     │   │
+│  │            Start 14-Day Trial                        │   │
 │  └──────────────────────────────────────────────────────┘   │
 │                                                             │
-│                    [Vielleicht später]                      │
+│                    [Maybe Later]                            │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -629,14 +629,14 @@ export { TrialEndModal } from './TrialEndModal';
 ### Trial Badge im Header
 
 ```
-Normal (>3 Tage):
+Normal (>3 days):
 ┌─────────────────────────┐
-│  Trial: 12 Tage         │  ← Weiß/Grau
+│  Trial: 12 days         │  ← White/Gray
 └─────────────────────────┘
 
-Expiring Soon (≤3 Tage):
+Expiring Soon (≤3 days):
 ┌─────────────────────────┐
-│  Trial: 2 Tage          │  ← Orange
+│  Trial: 2 days          │  ← Orange
 └─────────────────────────┘
 ```
 
