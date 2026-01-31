@@ -12,9 +12,14 @@ import {
   Calendar,
   GraduationCap,
   Trophy,
+  Shield,
+  User,
 } from 'lucide-react';
+import Link from 'next/link';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
+
+type AuthStatus = 'anonymous' | 'authenticated' | 'loading';
 
 interface ParticleMenuProps {
   onOpenTimeline: () => void;
@@ -26,8 +31,11 @@ interface ParticleMenuProps {
   onOpenYear?: () => void;
   onOpenMilestones?: () => void;
   onOpenLearn?: () => void;
+  onOpenAccount?: () => void;
   /** When true, menu opens automatically (triggered by G key) */
   isGPressed?: boolean;
+  /** Auth status to show appropriate account action */
+  authStatus?: AuthStatus;
 }
 
 interface MenuItem {
@@ -44,6 +52,9 @@ interface MenuItem {
  *
  * Philosophy: One white dot. Click or press G to reveal all views.
  * The menu shows available destinations with their keyboard shortcuts.
+ *
+ * For anonymous users: Shows "Partikel sichern" to encourage sign-up
+ * For authenticated users: Shows "Account" to access settings
  */
 export function ParticleMenu({
   onOpenTimeline,
@@ -55,7 +66,9 @@ export function ParticleMenu({
   onOpenYear,
   onOpenMilestones,
   onOpenLearn,
+  onOpenAccount,
   isGPressed = false,
+  authStatus = 'anonymous',
 }: ParticleMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false);
@@ -71,7 +84,7 @@ export function ParticleMenu({
     { id: 'rhythm', icon: <Activity className="w-4 h-4" />, label: 'Rhythm', key: 'R', onClick: onOpenRhythm },
     ...(onOpenYear ? [{ id: 'year', icon: <Calendar className="w-4 h-4" />, label: 'Year View', key: 'Y', onClick: onOpenYear }] : []),
     ...(onOpenMilestones ? [{ id: 'milestones', icon: <Trophy className="w-4 h-4" />, label: 'Milestones', key: 'M', onClick: onOpenMilestones }] : []),
-    ...(onOpenLearn ? [{ id: 'learn', icon: <GraduationCap className="w-4 h-4" />, label: 'Learn', key: 'L', onClick: onOpenLearn }] : []),
+    ...(onOpenLearn ? [{ id: 'library', icon: <GraduationCap className="w-4 h-4" />, label: 'Library', key: 'L', onClick: onOpenLearn }] : []),
   ];
 
   // Open menu when G is pressed
@@ -133,6 +146,14 @@ export function ParticleMenu({
     setOpenedViaKeyboard(false);
   };
 
+  const handleAccountClick = () => {
+    setIsOpen(false);
+    setOpenedViaKeyboard(false);
+    onOpenAccount?.();
+  };
+
+  const totalItems = menuItems.length;
+
   return (
     <div ref={menuRef} className="relative">
       {/* The Particle - trigger button */}
@@ -174,7 +195,7 @@ export function ParticleMenu({
             role="menu"
             className={cn(
               'absolute top-full right-0 mt-2',
-              'min-w-[200px]',
+              'min-w-[220px]',
               'bg-surface light:bg-surface-dark',
               'border border-tertiary/20 light:border-tertiary-dark/20',
               'rounded-xl shadow-xl',
@@ -199,6 +220,7 @@ export function ParticleMenu({
               </motion.div>
             )}
 
+            {/* Navigation Items */}
             <div className="py-1">
               {menuItems.map((item, index) => (
                 <motion.button
@@ -240,6 +262,69 @@ export function ParticleMenu({
                   </span>
                 </motion.button>
               ))}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-tertiary/10 light:bg-tertiary-dark/10 mx-3" />
+
+            {/* Account Section */}
+            <div className="py-1">
+              {authStatus === 'anonymous' ? (
+                // Anonymous: Show "Protect your work" with link to sign-in
+                <Link href="/sign-in" onClick={() => setIsOpen(false)}>
+                  <motion.div
+                    role="menuitem"
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-2.5',
+                      'text-secondary light:text-secondary-dark',
+                      'hover:text-primary light:hover:text-primary-dark',
+                      'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+                      'transition-colors duration-fast',
+                      'cursor-pointer'
+                    )}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      delay: totalItems * 0.02,
+                      duration: 0.12,
+                    }}
+                  >
+                    <span className="text-tertiary light:text-tertiary-dark">
+                      <Shield className="w-4 h-4" />
+                    </span>
+                    <span className="flex-1 text-left text-sm font-medium">
+                      Protect your work
+                    </span>
+                  </motion.div>
+                </Link>
+              ) : authStatus === 'authenticated' ? (
+                // Authenticated: Show "Account" button
+                <motion.button
+                  role="menuitem"
+                  onClick={handleAccountClick}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-4 py-2.5',
+                    'text-secondary light:text-secondary-dark',
+                    'hover:text-primary light:hover:text-primary-dark',
+                    'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+                    'transition-colors duration-fast',
+                    'focus:outline-none focus-visible:bg-tertiary/10'
+                  )}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    delay: totalItems * 0.02,
+                    duration: 0.12,
+                  }}
+                >
+                  <span className="text-tertiary light:text-tertiary-dark">
+                    <User className="w-4 h-4" />
+                  </span>
+                  <span className="flex-1 text-left text-sm font-medium">
+                    Account
+                  </span>
+                </motion.button>
+              ) : null}
             </div>
           </motion.div>
         )}

@@ -17,7 +17,7 @@ import { TimelineOverlay } from '@/components/timeline';
 import { MilestoneProvider, useMilestones } from '@/components/milestones';
 import { isIndexedDBAvailable, hasPendingMigrations, runMigrations } from '@/lib/db';
 import { useParticleAuth } from '@/lib/auth/hooks';
-import { SyncButton, AccountMenu } from '@/components/auth';
+import { AccountMenu } from '@/components/auth';
 import type { LearnView } from '@/components/learn/LearnMenu';
 import { useRouter } from 'next/navigation';
 
@@ -64,7 +64,7 @@ const TrialStartModal = dynamic(
 );
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
-import { TrialBadge, TrialExpiredBanner } from '@/components/trial';
+import { TrialExpiredBanner } from '@/components/trial';
 import { useTrialExpirationCheck } from '@/lib/trial';
 
 /**
@@ -99,6 +99,9 @@ function HomeContent() {
   // Learn panel state
   const [showLearn, setShowLearn] = useState(false);
   const [learnInitialView, setLearnInitialView] = useState<LearnView | undefined>();
+
+  // Account panel state (opened via ParticleMenu)
+  const [showAccountPanel, setShowAccountPanel] = useState(false);
 
   // Reset initialView when panel closes
   const handleLearnClose = useCallback(() => {
@@ -428,10 +431,11 @@ function HomeContent() {
       animate="visible"
       variants={entranceVariants}
     >
-      {/* Particle Menu + Trial Badge + Auth (top-right) */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
+      {/* Particle Menu (top-right) - single entry point for all navigation */}
+      <div className="absolute top-4 right-4">
         <ParticleMenu
           isGPressed={isGPressed}
+          authStatus={auth.status}
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
@@ -441,18 +445,19 @@ function HomeContent() {
           onOpenYear={() => window.dispatchEvent(new CustomEvent('particle:open-year'))}
           onOpenMilestones={() => setShowJourney(true)}
           onOpenLearn={() => { setLearnInitialView(undefined); setShowLearn(true); }}
+          onOpenAccount={() => setShowAccountPanel(true)}
         />
-        {/* Trial Badge - shows when user has active trial */}
-        <TrialBadge />
-        {/* Auth button: Sync for anonymous, AccountMenu for authenticated */}
-        {auth.status === 'anonymous' && <SyncButton />}
-        {auth.status === 'authenticated' && (
-          <AccountMenu
-            appearanceMode={appearanceMode}
-            onAppearanceModeChange={setAppearanceMode}
-          />
-        )}
       </div>
+
+      {/* Account Panel (opened via ParticleMenu for authenticated users) */}
+      {auth.status === 'authenticated' && (
+        <AccountMenu
+          isOpen={showAccountPanel}
+          onClose={() => setShowAccountPanel(false)}
+          appearanceMode={appearanceMode}
+          onAppearanceModeChange={setAppearanceMode}
+        />
+      )}
 
       {/* TimerSettings modal - hidden trigger, responds to events */}
       <div className="absolute -left-[9999px]" aria-hidden="true">

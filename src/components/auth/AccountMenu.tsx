@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClerk } from '@clerk/nextjs';
-import { Settings, BookOpen, LogOut, Sparkles, Cloud, User, Moon, Sun, Monitor } from 'lucide-react';
+import { Settings, BookOpen, LogOut, Sparkles, Cloud, Moon, Sun, Monitor, X } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
@@ -14,6 +14,10 @@ interface AccountMenuProps {
   className?: string;
   appearanceMode?: AppearanceMode;
   onAppearanceModeChange?: (mode: AppearanceMode) => void;
+  /** Controlled mode: when provided, the panel open state is controlled externally */
+  isOpen?: boolean;
+  /** Controlled mode: callback when the panel should close */
+  onClose?: () => void;
 }
 
 interface MenuItemProps {
@@ -54,21 +58,38 @@ const APPEARANCE_OPTIONS: AppearanceOption[] = [
 ];
 
 /**
- * AccountMenu - Dropdown menu for authenticated users
+ * AccountMenu - Panel for authenticated users
  *
- * Shows user avatar/initial as trigger, with dropdown containing:
+ * Can be used in two modes:
+ * 1. Controlled: Pass `isOpen` and `onClose` props (used by ParticleMenu)
+ * 2. Uncontrolled: Renders its own trigger button (legacy)
+ *
+ * Shows:
  * - User email and tier badge
  * - "Try Particle Flow" CTA (for free users)
  * - Appearance mode selector (Light/Dark/System)
  * - Settings link
- * - Help & Learn link
+ * - Library link
  * - Sign out
  */
-export function AccountMenu({ className, appearanceMode, onAppearanceModeChange }: AccountMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AccountMenu({
+  className,
+  appearanceMode,
+  onAppearanceModeChange,
+  isOpen: controlledIsOpen,
+  onClose,
+}: AccountMenuProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
   const auth = useParticleAuth();
+
+  // Determine if we're in controlled mode
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = isControlled
+    ? (value: boolean) => { if (!value && onClose) onClose(); }
+    : setInternalIsOpen;
 
   // Get user info
   const email = auth.status === 'authenticated' ? auth.email : null;
@@ -95,70 +116,58 @@ export function AccountMenu({ className, appearanceMode, onAppearanceModeChange 
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   // Close menu on Escape
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape' && isOpen) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
         setIsOpen(false);
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown, true);
+      return () => window.removeEventListener('keydown', handleKeyDown, true);
+    }
+  }, [isOpen, setIsOpen]);
 
   const handleSignOut = useCallback(() => {
     setIsOpen(false);
     signOut();
-  }, [signOut]);
+  }, [signOut, setIsOpen]);
 
   const handleOpenSettings = useCallback(() => {
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent('particle:open-settings'));
-  }, []);
+  }, [setIsOpen]);
 
   const handleOpenLearn = useCallback(() => {
     setIsOpen(false);
     // Open learn panel
     window.dispatchEvent(new CustomEvent('particle:open-learn'));
-  }, []);
+  }, [setIsOpen]);
 
   const handleUpgrade = useCallback(() => {
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent('particle:open-upgrade'));
-  }, []);
+  }, [setIsOpen]);
 
   const handleSyncData = useCallback(() => {
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent('particle:trigger-sync'));
-  }, []);
+  }, [setIsOpen]);
+
+  // In controlled mode, don't render anything if not open (parent handles trigger)
+  if (isControlled && !isOpen) {
+    return null;
+  }
 
   return (
     <div ref={menuRef} className={cn('relative', className)}>
-      {/* Account trigger - monochrome User icon matching ParticleMenu style */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'w-10 h-10 rounded-full flex items-center justify-center',
-          'text-tertiary light:text-tertiary-dark',
-          'hover:text-secondary light:hover:text-secondary-dark',
-          'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
-          'transition-colors duration-fast',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
-        )}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', ...SPRING.default }}
-        aria-label="Account menu"
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-      >
-        <User className="w-5 h-5" />
-      </motion.button>
-
-      {/* Dropdown menu */}
+      {/* Dropdown menu - positioned absolute to top-right corner in controlled mode */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -167,21 +176,42 @@ export function AccountMenu({ className, appearanceMode, onAppearanceModeChange 
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ type: 'spring', ...SPRING.snappy }}
             className={cn(
-              'absolute top-full right-0 mt-2 w-64',
+              isControlled
+                ? 'fixed top-16 right-4 w-72'  // Fixed position when controlled
+                : 'absolute top-full right-0 mt-2 w-64',  // Dropdown when uncontrolled
               'bg-surface light:bg-surface-dark',
               'rounded-xl border border-tertiary/20 light:border-tertiary-dark/20',
               'shadow-lg shadow-black/20',
               'overflow-hidden z-50'
             )}
-            role="menu"
+            role="dialog"
+            aria-label="Account menu"
           >
-            {/* User info header */}
+            {/* Header with close button */}
             <div className="px-4 py-3 border-b border-tertiary/10 light:border-tertiary-dark/10">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-primary light:text-primary-dark font-medium truncate max-w-[160px]">
-                  {email || 'User'}
-                </p>
-                <TierBadge tier={tier} />
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <p className="text-sm text-primary light:text-primary-dark font-medium truncate">
+                    {email || 'User'}
+                  </p>
+                  <TierBadge tier={tier} />
+                </div>
+                {isControlled && (
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ml-2',
+                      'text-tertiary light:text-tertiary-dark',
+                      'hover:text-secondary light:hover:text-secondary-dark',
+                      'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+                      'transition-colors',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+                    )}
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
 
