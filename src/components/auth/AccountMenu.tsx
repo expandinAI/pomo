@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClerk } from '@clerk/nextjs';
-import { Settings, BookOpen, LogOut, Sparkles, Cloud, Moon, Sun, Monitor, X } from 'lucide-react';
+import { Settings, BookOpen, LogOut, Sparkles, Cloud, Moon, Sun, Monitor, X, CreditCard } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
@@ -160,6 +160,30 @@ export function AccountMenu({
     window.dispatchEvent(new CustomEvent('particle:trigger-sync'));
   }, [setIsOpen]);
 
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+
+  const handleManageSubscription = useCallback(async () => {
+    if (isLoadingPortal) return;
+    setIsLoadingPortal(true);
+
+    try {
+      const response = await fetch('/api/stripe/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create portal session');
+      }
+
+      const { portalUrl } = await response.json();
+      window.location.href = portalUrl;
+    } catch (error) {
+      console.error('Failed to open billing portal:', error);
+      setIsLoadingPortal(false);
+    }
+  }, [isLoadingPortal]);
+
   // In controlled mode, don't render anything if not open (parent handles trigger)
   if (isControlled && !isOpen) {
     return null;
@@ -228,6 +252,15 @@ export function AccountMenu({
                   />
                   <div className="my-2 border-t border-tertiary/10 light:border-tertiary-dark/10" />
                 </>
+              )}
+
+              {/* Manage subscription for Flow users */}
+              {tier === 'flow' && (
+                <MenuItem
+                  icon={<CreditCard className="w-4 h-4" />}
+                  label={isLoadingPortal ? 'Opening...' : 'Manage subscription'}
+                  onClick={handleManageSubscription}
+                />
               )}
 
               {/* Sync Data option - shows if there's pending local data */}
