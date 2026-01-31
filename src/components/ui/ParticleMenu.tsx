@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CalendarDays,
@@ -17,6 +17,16 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { SPRING } from '@/styles/design-tokens';
+
+// Pool of messages for anonymous users - rotates on each menu open
+const SIGNUP_MESSAGES = [
+  'Protect your work',
+  'Access anywhere',
+  'Never lose progress',
+  'Your work, everywhere',
+  'Keep it safe',
+  'Continue on any device',
+];
 import { cn } from '@/lib/utils';
 
 type AuthStatus = 'anonymous' | 'authenticated' | 'loading';
@@ -73,6 +83,13 @@ export function ParticleMenu({
   const [isOpen, setIsOpen] = useState(false);
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Random signup message - changes each time menu opens
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const signupMessage = useMemo(
+    () => SIGNUP_MESSAGES[Math.floor(Math.random() * SIGNUP_MESSAGES.length)],
+    [isOpen]
+  );
 
   // Build menu items based on available callbacks
   const menuItems: MenuItem[] = [
@@ -293,7 +310,7 @@ export function ParticleMenu({
                       <Shield className="w-4 h-4" />
                     </span>
                     <span className="flex-1 text-left text-sm font-medium">
-                      Protect your work
+                      {signupMessage}
                     </span>
                   </motion.div>
                 </Link>
