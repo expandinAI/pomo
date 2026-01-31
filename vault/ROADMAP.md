@@ -88,17 +88,18 @@ High-level overview of features and milestones.
 | POMO-312 | Payment Webhook Handler | 3 | ✅ Done |
 | POMO-313 | Tier Upgrade Logic | 3 | ✅ Done |
 | POMO-314 | Billing Portal | 2 | ✅ Done |
-| POMO-315 | AI Query Counter | 3 | 📋 Ready |
 | POMO-316 | Upgrade Modal UI | 3 | ✅ Done |
 | POMO-317 | Lifetime Purchase | 3 | ✅ Done |
-| POMO-318 | Trial Email Automation | 4 | 📋 Ready |
 
-**Total: 24 Story Points (17 Done, 7 Remaining)**
+**Total: 17 Story Points (✅ Complete)**
+
+*Note: POMO-315 moved to AI Coach, POMO-318 moved to Icebox*
 
 ### AI Coach
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
+| POMO-315 | AI Query Counter & Limits | 3 | 📋 Ready |
 | POMO-319 | Coach Particle UI | 3 | 📋 Ready |
 | POMO-320 | Toast Notification System | 3 | 📋 Ready |
 | POMO-321 | Coach View | 5 | 📋 Ready |
@@ -108,7 +109,7 @@ High-level overview of features and milestones.
 | POMO-325 | Export Function | 3 | 📋 Ready |
 | POMO-326 | Coach Settings | 2 | 📋 Ready |
 
-**Total: 32 Story Points**
+**Total: 35 Story Points**
 
 ### GDPR & Data Privacy
 
