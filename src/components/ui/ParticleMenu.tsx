@@ -50,6 +50,8 @@ interface ParticleMenuProps {
   authStatus?: AuthStatus;
   /** User's subscription plan type */
   planType?: PlanType;
+  /** Trial days remaining (only shown if trial is active) */
+  trialDaysRemaining?: number | null;
 }
 
 interface MenuItem {
@@ -84,6 +86,7 @@ export function ParticleMenu({
   isGPressed = false,
   authStatus = 'anonymous',
   planType,
+  trialDaysRemaining,
 }: ParticleMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false);
@@ -375,14 +378,17 @@ export function ParticleMenu({
                     Account
                   </span>
                   {planType && (
-                    <span className={cn(
-                      'text-xs px-1.5 py-0.5 rounded',
-                      planType === 'flow'
-                        ? 'bg-accent/20 text-accent'
-                        : 'text-tertiary light:text-tertiary-dark'
-                    )}>
-                      {planType === 'flow' ? 'Flow' : 'Free'}
-                    </span>
+                    planType === 'flow' || (trialDaysRemaining != null && trialDaysRemaining > 0) ? (
+                      <span className="text-[11px] font-semibold tracking-wide text-primary light:text-primary-dark drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] light:drop-shadow-[0_0_8px_rgba(0,0,0,0.2)]">
+                        {trialDaysRemaining != null && trialDaysRemaining > 0
+                          ? `Flow · ${trialDaysRemaining}d`
+                          : 'Flow'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-tertiary/50 light:text-tertiary-dark/50">
+                        Free
+                      </span>
+                    )
                   )}
                 </motion.button>
               ) : null}

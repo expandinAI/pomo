@@ -65,7 +65,7 @@ const TrialStartModal = dynamic(
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
-import { useTrialExpirationCheck } from '@/lib/trial';
+import { useTrialExpirationCheck, useTrial } from '@/lib/trial';
 
 /**
  * Inner component that uses milestone context
@@ -79,6 +79,7 @@ function HomeContent() {
 
   // Trial management
   const [showTrialModal, setShowTrialModal] = useState(false);
+  const trial = useTrial();
   useTrialExpirationCheck(); // Check and expire trials on load
 
   // Upgrade flow (Local → Cloud sync after sign-up)
@@ -437,6 +438,7 @@ function HomeContent() {
           isGPressed={isGPressed}
           authStatus={auth.status}
           planType={auth.status === 'authenticated' ? auth.tier : undefined}
+          trialDaysRemaining={trial.isActive ? trial.daysRemaining : null}
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
