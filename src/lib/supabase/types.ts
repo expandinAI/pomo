@@ -33,6 +33,12 @@ export interface Database {
           subscription_ends_at: string | null;
           trial_started_at: string | null;
           trial_ends_at: string | null;
+          // Stripe fields (POMO-311)
+          stripe_customer_id: string | null;
+          subscription_id: string | null;
+          is_lifetime: boolean;
+          ai_queries_this_month: number;
+          ai_queries_reset_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -45,6 +51,12 @@ export interface Database {
           subscription_ends_at?: string | null;
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
+          // Stripe fields (POMO-311)
+          stripe_customer_id?: string | null;
+          subscription_id?: string | null;
+          is_lifetime?: boolean;
+          ai_queries_this_month?: number;
+          ai_queries_reset_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -57,6 +69,12 @@ export interface Database {
           subscription_ends_at?: string | null;
           trial_started_at?: string | null;
           trial_ends_at?: string | null;
+          // Stripe fields (POMO-311)
+          stripe_customer_id?: string | null;
+          subscription_id?: string | null;
+          is_lifetime?: boolean;
+          ai_queries_this_month?: number;
+          ai_queries_reset_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
