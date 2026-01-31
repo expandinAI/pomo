@@ -490,14 +490,14 @@ function HomeContent() {
         onBeforeStart={handleBeforeStart}
       />
 
-      {/* Bottom-left: Command Palette + Keyboard Shortcuts */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-1">
+      {/* Bottom-left: Command Palette + Keyboard Shortcuts (hidden on mobile) */}
+      <div className="hidden sm:flex absolute bottom-4 left-4 items-center gap-1">
         <CommandButton onOpenCommands={openCommandPalette} />
         <ShortcutsHelp />
       </div>
 
-      {/* Bottom-right: Library Button */}
-      <div className="absolute bottom-4 right-4">
+      {/* Bottom-right: Library Button (hidden on mobile) */}
+      <div className="hidden sm:block absolute bottom-4 right-4">
         <LibraryButton
           onOpenLibrary={() => {
             setLearnInitialView(undefined);
