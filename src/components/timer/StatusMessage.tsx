@@ -163,7 +163,7 @@ export function StatusMessage({
 
   return (
     <div
-      className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-40"
+      className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-40 px-6"
       aria-live="polite"
       aria-atomic="true"
     >
@@ -179,7 +179,7 @@ export function StatusMessage({
               ...SPRING.gentle,
               opacity: { duration: 0.2 }
             }}
-            className="text-sm text-secondary light:text-secondary-dark"
+            className="text-sm text-secondary light:text-secondary-dark text-center max-w-sm"
           >
             {displayMessage}
           </motion.p>
