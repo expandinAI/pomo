@@ -1,7 +1,7 @@
 # Idea: KI-Analyse als Premium Feature
 
 **Datum:** 2025-01-24 (Nacht-Vision)
-**Status:** Konzept
+**Status:** ✅ Promoted → [[features/ai-coach]]
 **Priorität:** Hoch (Monetarisierung)
 
 ---

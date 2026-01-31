@@ -74,14 +74,15 @@ High-level Überblick über Features und Milestones.
 
 **Total: 37 Story Points**
 
-### Phase 2: Monetization & Compliance
+### Phase 2: Monetization & AI Coach
 
 | Feature | Stories | Points | Status | Prio |
 |---------|---------|--------|--------|------|
-| [[features/payment-integration]] | TBD | ~15 | Draft | P1 |
+| [[features/payment-integration]] | POMO-311 bis 318 | 24 | Ready | P1 |
+| [[features/ai-coach]] | POMO-319 bis 326 | 32 | Ready | P1 |
 | [[features/gdpr-data-privacy]] | TBD | ~12 | Draft | P1 |
 
-**Total Phase 2: ~27 Story Points**
+**Total Phase 2: ~68 Story Points**
 
 ### Phase 3: Native Apps
 
@@ -185,7 +186,7 @@ Payment    GDPR
 │ ✓ Basis-Statistiken (7 Tage)                                    │
 │ ✓ PWA Installation                                               │
 │ ✗ Cloud Sync                                                     │
-│ ✗ Multi-Device                                                   │
+│ ✗ AI Coach                                                       │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
@@ -198,28 +199,31 @@ Payment    GDPR
 │ ✓ Cloud Backup                                                   │
 │ ✓ 10 Custom Presets                                              │
 │ ✗ Year View                                                      │
-│ ✗ Advanced Stats                                                 │
+│ ✗ AI Coach                                                       │
 │ ✗ Alle Themes                                                    │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PARTICLE FLOW                                 │
-│              9€/Monat oder 79€/Jahr                              │
+│        4,99€/Monat · 39€/Jahr · 99€ Lifetime*                   │
 │                 (14 Tage kostenlos testen)                       │
 ├─────────────────────────────────────────────────────────────────┤
 │ Alles aus Plus, plus:                                            │
+│ ✓ AI Coach (300 Insights/Monat)                                 │
 │ ✓ Year View (G Y)                                                │
 │ ✓ Advanced Statistics                                            │
 │ ✓ Alle Themes                                                    │
 │ ✓ Unbegrenzte Presets                                           │
-│ ✓ Priority Support                                               │
+│ ✓ Export für Abrechnungen                                       │
+│                                                                   │
+│ * Lifetime nur bei Special Promotions                            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 **Philosophie:**
 - Free = Voll nutzbar ohne Account (Local-First)
 - Plus = Kostenloser Account für Sync
-- Flow = Premium für Power-Features
+- Flow = Premium mit AI Coach als Killer-Feature
 
 ---
 
@@ -289,9 +293,10 @@ Payment    GDPR
 - [ ] Trial System (14 Tage)
 - [x] Conflict Resolution (LWW, Server wins on tie)
 
-### v2.1 - Monetization
+### v2.1 - Monetization & AI Coach
 - [ ] Stripe Payment Integration
 - [ ] Subscription Management
+- [ ] AI Coach (Coach-Partikel, Insights, Chat)
 - [ ] GDPR Compliance (Export, Deletion)
 
 ### v3.0 - Native Mac App
@@ -324,4 +329,4 @@ Parked ideas:
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-30 (POMO-306 done)*
+*Zuletzt aktualisiert: 2026-01-31 (Payment Integration + AI Coach refined)*
