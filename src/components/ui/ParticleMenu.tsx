@@ -227,8 +227,12 @@ export function ParticleMenu({
           )}
           animate={
             shouldGlow && !prefersReducedMotion && !isOpen
-              ? { scale: [1, 1.4, 1] }
-              : { scale: isOpen ? 0.8 : 1 }
+              ? { scale: [1, 1.4, 1], opacity: 1 }
+              : isOpen
+                ? { scale: 0.8, opacity: 1 }
+                : prefersReducedMotion
+                  ? { scale: 1, opacity: 0.5 }
+                  : { scale: [1, 1.15, 1], opacity: [0.3, 1, 0.3] }
           }
           transition={
             shouldGlow && !prefersReducedMotion && !isOpen
@@ -237,7 +241,13 @@ export function ParticleMenu({
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }
-              : { type: 'spring', ...SPRING.snappy }
+              : isOpen || prefersReducedMotion
+                ? { type: 'spring', ...SPRING.snappy }
+                : {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }
           }
         />
       </motion.button>
