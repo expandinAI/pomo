@@ -35,7 +35,19 @@ export function useTrial(): TrialStatus {
       tier?: string;
       trialStartedAt?: string;
       trialEndsAt?: string;
+      subscriptionStatus?: string;
     };
+
+    // If user has active subscription, they're not trialing
+    if (metadata.subscriptionStatus === 'active') {
+      return {
+        isActive: false,
+        hasUsed: true,
+        daysRemaining: 0,
+        endsAt: null,
+        isExpiringSoon: false,
+      };
+    }
 
     // If no trial data in metadata, user hasn't trialed
     if (!metadata.trialEndsAt) {
@@ -49,8 +61,7 @@ export function useTrial(): TrialStatus {
     }
 
     // Calculate status based on metadata
-    // Note: We use tier === 'flow' as proxy for subscription_status === 'trialing'
-    // since we don't store subscription_status in Clerk metadata
+    // User is trialing if tier is 'flow' and they have a trial end date
     const isTrialing = metadata.tier === 'flow' && !!metadata.trialEndsAt;
 
     return calculateTrialStatus(

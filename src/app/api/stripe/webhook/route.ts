@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { clerkClient } from '@clerk/nextjs/server';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
@@ -119,6 +120,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (error) {
     console.error('[Stripe Webhook] Failed to update user:', error);
     throw error;
+  }
+
+  // Update Clerk metadata to reflect paid status (clears trial display)
+  try {
+    const clerk = await clerkClient();
+    await clerk.users.updateUserMetadata(clerkId, {
+      publicMetadata: {
+        tier: 'flow',
+        subscriptionStatus: 'active',
+        isLifetime: isLifetime,
+        // Clear trial fields - user is now a paying customer
+        trialEndsAt: null,
+      },
+    });
+    console.log(`[Stripe Webhook] Updated Clerk metadata for ${clerkId}`);
+  } catch (clerkError) {
+    console.error('[Stripe Webhook] Failed to update Clerk metadata:', clerkError);
+    // Don't throw - Supabase update succeeded, Clerk is secondary
   }
 
   console.log(`[Stripe Webhook] User ${clerkId} upgraded to Flow`);
