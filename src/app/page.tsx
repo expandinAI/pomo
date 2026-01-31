@@ -11,6 +11,7 @@ import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useUpgradeFlow } from '@/hooks/useUpgradeFlow';
+import { useFlowCelebration } from '@/hooks/useFlowCelebration';
 import { useIntro, usePrefersReducedMotion } from '@/hooks/useIntro';
 import { useEasterEggs } from '@/hooks/useEasterEgg';
 import { TimelineOverlay } from '@/components/timeline';
@@ -62,6 +63,10 @@ const TrialStartModal = dynamic(
   () => import('@/components/trial').then(mod => ({ default: mod.TrialStartModal })),
   { ssr: false }
 );
+const FlowCelebration = dynamic(
+  () => import('@/components/celebration').then(mod => ({ default: mod.FlowCelebration })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
@@ -90,6 +95,9 @@ function HomeContent() {
     skipUpgrade,
     triggerUpgrade,
   } = useUpgradeFlow();
+
+  // Flow celebration (after successful Stripe checkout)
+  const { showCelebration, dismiss: dismissCelebration } = useFlowCelebration();
 
   // Timeline overlay state
   const [showTimeline, setShowTimeline] = useState(false);
@@ -567,6 +575,9 @@ function HomeContent() {
 
       {/* Trial Expired Banner - shown when trial just expired */}
       <TrialExpiredBanner />
+
+      {/* Flow Celebration - shown after successful Stripe checkout */}
+      <FlowCelebration isOpen={showCelebration} onDismiss={dismissCelebration} />
 
     </motion.main>
   );
