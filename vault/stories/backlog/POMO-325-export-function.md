@@ -14,112 +14,112 @@ tags: [ai, coach, export, invoices]
 
 ## User Story
 
-> Als **Freelancer**
-> möchte ich **meine Arbeitszeit für ein Projekt exportieren können**,
-> damit **ich Rechnungen erstellen kann**.
+> As a **freelancer**,
+> I want to **export my work time for a project**,
+> so that **I can create invoices**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Coach kann auf Anfrage Arbeitsdaten exportieren. Natural Language Interface.
+Coach can export work data on request. Natural language interface—just ask.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] User kann im Chat nach Export fragen
-- [ ] Coach versteht: "Exportiere Projekt X für Januar"
-- [ ] Export als CSV oder PDF
-- [ ] Gruppierung nach Projekt, Task, Tag
-- [ ] Summen und Zwischensummen
-- [ ] Download-Link wird im Chat angezeigt
-- [ ] Zeitraum-Filter (letzte Woche, Monat, Custom)
+- [ ] User can ask for export in chat
+- [ ] Coach understands: "Export Project X for January"
+- [ ] Export as CSV or PDF
+- [ ] Grouping by project, task, day
+- [ ] Totals and subtotals
+- [ ] Download link shown in chat
+- [ ] Date range filter (last week, month, custom)
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── lib/
 │   └── coach/
-│       └── export.ts             # NEU: Export-Logik
+│       └── export.ts             # NEW: Export logic
 ├── app/api/coach/
-│   └── export/route.ts           # NEU: Export-Endpoint
+│   └── export/route.ts           # NEW: Export endpoint
 ```
 
-### Intent-Detection
+### Intent Detection
 
-Coach erkennt Export-Absichten:
+Coach recognizes export intents:
 ```typescript
 const EXPORT_INTENTS = [
-  'exportiere',
   'export',
-  'rechnung',
-  'abrechnung',
-  'zeitaufstellung',
-  'zusammenfassung für',
+  'download',
+  'invoice',
+  'timesheet',
+  'summary for',
+  'report',
 ];
 ```
 
-### Export-Formate
+### Export Formats
 
 **CSV:**
 ```csv
-Datum,Projekt,Task,Start,Ende,Dauer (min)
+Date,Project,Task,Start,End,Duration (min)
 2026-01-15,Website Redesign,Hero Section,09:14,09:39,25
 2026-01-15,Website Redesign,Navigation,10:02,10:27,25
 ...
 
-Gesamt,,,,,180
+Total,,,,,180
 ```
 
 **PDF:**
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     ZEITAUFSTELLUNG                              │
+│                       TIME REPORT                                │
 │                                                                   │
-│  Projekt: Website Redesign                                       │
-│  Zeitraum: 01.01.2026 - 31.01.2026                              │
+│  Project: Website Redesign                                       │
+│  Period: Jan 1, 2026 - Jan 31, 2026                             │
 │                                                                   │
 │  ───────────────────────────────────────────────────────────    │
 │                                                                   │
-│  15.01.2026                                                      │
+│  Jan 15, 2026                                                    │
 │    Hero Section                   09:14 - 09:39      25 min     │
 │    Navigation                     10:02 - 10:27      25 min     │
-│                                             Summe:   50 min     │
+│                                             Subtotal: 50 min    │
 │                                                                   │
-│  16.01.2026                                                      │
+│  Jan 16, 2026                                                    │
 │    ...                                                           │
 │                                                                   │
 │  ───────────────────────────────────────────────────────────    │
 │                                                                   │
-│  GESAMT                                              32h 45min   │
+│  TOTAL                                               32h 45min   │
 │                                                                   │
-│  Generiert am 31.01.2026 mit Particle                           │
+│  Generated on Jan 31, 2026 with Particle                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Chat-Flow
+### Chat Flow
 
 ```
-User: "Exportiere Website Redesign für Januar"
+User: "Export Website Redesign for January"
 
-Coach: "Klar! Hier ist deine Zusammenfassung für 'Website Redesign' im Januar:
+Coach: "Here's your summary for 'Website Redesign' in January:
 
-        Gesamt: 32h 45min
-        Sessions: 47
+        Total: 32h 45min
+        Sessions: 47 particles
 
-        [Als CSV herunterladen] [Als PDF herunterladen]
+        [Download as CSV] [Download as PDF]
 
-        Soll ich nach Tasks aufschlüsseln?"
+        Want me to break it down by task?"
 ```
 
-## API-Endpoint
+## API Endpoint
 
 ```typescript
 // POST /api/coach/export
 interface ExportRequest {
   projectId?: string;
-  projectName?: string; // Falls kein ID bekannt
+  projectName?: string; // If no ID known
   startDate: string;    // ISO
   endDate: string;      // ISO
   format: 'csv' | 'pdf';
@@ -137,9 +137,9 @@ interface ExportResponse {
 
 ## Definition of Done
 
-- [ ] Export-Logik implementiert
-- [ ] CSV-Export funktioniert
-- [ ] PDF-Export funktioniert
-- [ ] Coach versteht Export-Anfragen
-- [ ] Download-Links im Chat
-- [ ] Projekt-/Zeitraum-Filter
+- [ ] Export logic implemented
+- [ ] CSV export works
+- [ ] PDF export works
+- [ ] Coach understands export requests
+- [ ] Download links in chat
+- [ ] Project/date filtering

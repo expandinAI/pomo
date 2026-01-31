@@ -1,12 +1,12 @@
 ---
 type: story
-status: done
+status: backlog
 priority: p0
 effort: 3
 feature: "[[features/first-run-intro]]"
 created: 2026-01-27
 updated: 2026-01-29
-done_date: 2026-01-29
+done_date: null
 tags: [intro, animation, particle, genesis]
 ---
 

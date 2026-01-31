@@ -14,55 +14,55 @@ tags: [ai, coach, backend, insights]
 
 ## User Story
 
-> Als **System**
-> möchte ich **automatisch Insights aus Nutzerdaten generieren**,
-> damit **der Coach proaktiv wertvolle Beobachtungen teilen kann**.
+> As the **system**,
+> I want to **automatically generate insights from user data**,
+> so that **the Coach can proactively share valuable observations**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Das Herzstück des Coaches. Analysiert Session-Daten, erkennt Muster, generiert Insights.
+The heart of the Coach. Analyzes session data, detects patterns, generates insights. This is what makes the Coach feel alive and intelligent.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Insight-Generierung nach jeder 3.-5. Session
-- [ ] Wöchentliche Zusammenfassung (Sonntag/Montag)
-- [ ] Anomalie-Erkennung (signifikante Abweichungen)
-- [ ] Pattern-Erkennung (Arbeitsmuster)
-- [ ] Insights werden in DB gespeichert
-- [ ] Max 3 proaktive Insights pro Tag
-- [ ] Cooldown von 2h zwischen Insights
-- [ ] Insights zählen zum Quota-Limit
+- [ ] Insight generation after every 3rd-5th session
+- [ ] Weekly summary (Sunday/Monday)
+- [ ] Anomaly detection (significant deviations)
+- [ ] Pattern recognition (work habits)
+- [ ] Insights stored in database
+- [ ] Max 3 proactive insights per day
+- [ ] Cooldown of 2h between insights
+- [ ] Insights count toward quota limit
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── lib/
 │   └── coach/
-│       ├── insight-engine.ts     # NEU: Hauptlogik
-│       ├── patterns.ts           # NEU: Pattern-Detection
-│       ├── anomalies.ts          # NEU: Anomalie-Detection
-│       └── prompts.ts            # NEU: Insight-Prompts
+│       ├── insight-engine.ts     # NEW: Main logic
+│       ├── patterns.ts           # NEW: Pattern detection
+│       ├── anomalies.ts          # NEW: Anomaly detection
+│       └── prompts.ts            # NEW: Insight prompts
 ├── app/api/
 │   └── coach/
-│       └── generate/route.ts     # NEU: Trigger-Endpoint
+│       └── generate/route.ts     # NEW: Trigger endpoint
 └── app/api/cron/
-    └── weekly-insights/route.ts  # NEU: Wöchentlicher Job
+    └── weekly-insights/route.ts  # NEW: Weekly job
 ```
 
-### Datenbank
+### Database
 ```sql
 CREATE TABLE coach_insights (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id),
   type TEXT NOT NULL, -- 'session' | 'pattern' | 'anomaly' | 'weekly'
-  trigger TEXT,       -- Was hat den Insight ausgelöst
-  short_text TEXT,    -- Toast-Text (max 100 chars)
-  full_text TEXT,     -- Ausführliche Erklärung
-  data JSONB,         -- Relevante Zahlen/Kontext
+  trigger TEXT,       -- What triggered the insight
+  short_text TEXT,    -- Toast text (max 100 chars)
+  full_text TEXT,     -- Detailed explanation
+  data JSONB,         -- Relevant numbers/context
   read_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -72,34 +72,34 @@ CREATE INDEX idx_insights_unread ON coach_insights(user_id)
   WHERE read_at IS NULL;
 ```
 
-### Insight-Typen
+### Insight Types
 
-| Typ | Trigger | Beispiel |
-|-----|---------|----------|
-| `session` | Nach Session | "Das war deine 5. Session heute!" |
-| `pattern` | Pattern erkannt | "Du arbeitest meist 9-12 Uhr" |
-| `anomaly` | Signifikante Abweichung | "Heute 50% weniger als üblich" |
-| `weekly` | Wöchentlicher Cron | "Deine Woche: 23h fokussiert" |
+| Type | Trigger | Example |
+|------|---------|---------|
+| `session` | After session | "That was your 5th particle today!" |
+| `pattern` | Pattern detected | "You're most productive 9-12am" |
+| `anomaly` | Significant deviation | "50% less focus than usual today" |
+| `weekly` | Weekly cron | "Your week: 23 hours of focus" |
 
-### Pattern-Detection (Algorithmen)
+### Pattern Detection (Algorithms)
 
-1. **Produktivste Tageszeit**
-   - Gruppiere Sessions nach Stunde
-   - Finde Peak-Zeiten
+1. **Most Productive Time of Day**
+   - Group sessions by hour
+   - Find peak times
 
-2. **Produktivste Wochentage**
-   - Aggregiere nach Wochentag
-   - Vergleiche mit Durchschnitt
+2. **Most Productive Days of Week**
+   - Aggregate by weekday
+   - Compare with average
 
-3. **Pausen-Muster**
-   - Berechne Zeit zwischen Sessions
-   - Vergleiche mit empfohlenen 5-15min
+3. **Break Patterns**
+   - Calculate time between sessions
+   - Compare with recommended 5-15min
 
-4. **Session-Länge**
-   - Durchschnitt vs. Preset-Dauer
-   - Overflow-Häufigkeit
+4. **Session Length**
+   - Average vs preset duration
+   - Overflow frequency
 
-### Anomalie-Detection
+### Anomaly Detection
 
 ```typescript
 function detectAnomaly(todayStats: Stats, historicalStats: Stats): Anomaly | null {
@@ -108,35 +108,35 @@ function detectAnomaly(todayStats: Stats, historicalStats: Stats): Anomaly | nul
   if (Math.abs(deviation) > 1.5) {
     return {
       type: deviation > 0 ? 'high' : 'low',
-      percentage: Math.round(deviation * 100),
+      percentage: Math.round(Math.abs(deviation - 1) * 100),
       message: deviation > 0
-        ? `${percentage}% mehr als üblich`
-        : `${Math.abs(percentage)}% weniger als üblich`
+        ? `${percentage}% more than usual`
+        : `${percentage}% less than usual`
     };
   }
   return null;
 }
 ```
 
-### Prompt für Insight-Generierung
+### Prompt for Insight Generation
 
 ```
-Generiere einen kurzen, ermutigenden Insight basierend auf:
+Generate a short, encouraging insight based on:
 
-DATEN:
+DATA:
 {pattern_data}
 
 TRIGGER:
 {trigger_reason}
 
-REGELN:
-- Max 2 Sätze für short_text (Toast)
-- Sei warm und ermutigend
-- Keine Schuld, keine Vergleiche mit anderen
-- Nenne konkrete Zahlen wenn hilfreich
-- Deutsch, Du-Form
+RULES:
+- Max 2 sentences for short_text (toast)
+- Be warm and encouraging
+- No guilt, no comparisons to others
+- Mention specific numbers when helpful
+- English, casual tone
 
-Antworte im JSON-Format:
+Respond in JSON format:
 {
   "short_text": "...",
   "full_text": "..."
@@ -145,19 +145,18 @@ Antworte im JSON-Format:
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Nach 5 Sessions: Insight wird generiert
-- [ ] Wöchentlicher Insight erscheint
-- [ ] Anomalie wird erkannt
-- [ ] Max 3 Insights pro Tag
-- [ ] Insights werden gespeichert
+- [ ] After 5 sessions: insight generated
+- [ ] Weekly insight appears
+- [ ] Anomaly detected correctly
+- [ ] Max 3 insights per day enforced
+- [ ] Insights stored in database
 
 ## Definition of Done
 
-- [ ] Pattern-Detection implementiert
-- [ ] Anomalie-Detection implementiert
-- [ ] Insight-Generierung mit LLM
-- [ ] Datenbank-Schema erstellt
-- [ ] Trigger nach Session
-- [ ] Wöchentlicher Cron-Job
-- [ ] Frequenz-Limiting
+- [ ] Pattern detection implemented
+- [ ] Anomaly detection implemented
+- [ ] Insight generation with LLM
+- [ ] Database schema created
+- [ ] Post-session trigger
+- [ ] Weekly cron job
+- [ ] Frequency limiting

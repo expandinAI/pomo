@@ -14,52 +14,52 @@ tags: [ai, coach, ui, particle]
 
 ## User Story
 
-> Als **Flow-User**
-> möchte ich **den Coach-Partikel sehen können**,
-> damit **ich weiß, dass mein Coach für mich da ist**.
+> As a **Flow user**,
+> I want to **see the Coach particle floating on screen**,
+> so that **I know my Coach is there for me**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Der Coach manifestiert sich als eigener ✨ Sparkle-Partikel, der unten im Screen schwebt.
+The Coach manifests as its own ✨ sparkle particle that floats at the bottom of the screen. Like the MacBook sleep indicator, it breathes gently—alive, present, waiting.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Coach-Partikel erscheint für Flow-User
-- [ ] Position: Unten zentriert, 24px vom Bottom
-- [ ] Symbol: ✨ (Sparkle Emoji oder Custom Icon)
-- [ ] Idle-State: Statisch, subtle
-- [ ] Active-State: Pulsiert wenn neuer Insight wartet
-- [ ] Klick öffnet Coach View
-- [ ] Keyboard: G C öffnet Coach View
-- [ ] Nicht sichtbar für Free/Plus User
+- [ ] Coach particle appears for Flow users only
+- [ ] Position: Bottom center, 24px from bottom
+- [ ] Symbol: ✨ (Sparkle emoji or custom icon)
+- [ ] Idle state: Static, subtle (opacity ~0.6)
+- [ ] Active state: Pulses when new insight is waiting
+- [ ] Click opens Coach View
+- [ ] Keyboard: G C opens Coach View
+- [ ] Not visible for Free/Plus users
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── coach/
-│       ├── CoachParticle.tsx     # NEU
+│       ├── CoachParticle.tsx     # NEW
 │       └── index.ts
 └── app/
-    └── page.tsx                  # Einbinden
+    └── page.tsx                  # Integrate component
 ```
 
-### Implementierungshinweise
-- Framer Motion für Pulsier-Animation
-- `useFeatureAccess('aiCoach')` für Visibility
-- `useCoachInsights()` Hook für Insight-Status
-- Breathing-Animation ähnlich wie ParticleMenu-Dot
+### Implementation Notes
+- Framer Motion for pulse animation
+- `useFeatureAccess('aiCoach')` for visibility
+- `useCoachInsights()` hook for insight status
+- Breathing animation similar to ParticleMenu dot
 
 ### Animation
 ```typescript
 // Idle State
 { opacity: 0.6, scale: 1 }
 
-// Active State (neuer Insight)
+// Active State (new insight waiting)
 animate={{
   opacity: [0.5, 1, 0.5],
   scale: [1, 1.2, 1],
@@ -82,19 +82,20 @@ transition={{
 │                                                                   │
 │                                                                   │
 │                                                                   │
-│                             ✨  ← Coach-Partikel                 │
+│                             ✨  ← Coach Particle                 │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Hover:** Leichtes Scale-Up, Cursor: Pointer
-**Touch:** Touch-Target 44x44px
+**Hover:** Subtle scale-up (1.1), cursor: pointer
+**Touch:** 44x44px touch target
+**Feel:** Alive, not decorative. Like it has something to share.
 
 ## Definition of Done
 
-- [ ] Komponente implementiert
-- [ ] Idle-State korrekt
-- [ ] Pulsier-Animation funktioniert
-- [ ] Klick öffnet Coach View
-- [ ] G C Shortcut funktioniert
-- [ ] Nur für Flow-User sichtbar
+- [ ] Component implemented
+- [ ] Idle state correct
+- [ ] Pulse animation works
+- [ ] Click opens Coach View
+- [ ] G C shortcut works
+- [ ] Only visible for Flow users

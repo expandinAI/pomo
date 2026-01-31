@@ -1,12 +1,12 @@
 ---
 type: story
-status: done
+status: backlog
 priority: p0
 effort: 3
 feature: sound-design-2
 created: 2026-01-20
 updated: 2026-01-20
-done_date: 2026-01-29
+done_date: null
 tags: [sound, web-audio-api, engine, foundation, p0]
 ---
 

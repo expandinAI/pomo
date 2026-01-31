@@ -14,46 +14,46 @@ tags: [payment, tier, flow]
 
 ## User Story
 
-> Als **frisch bezahlter Flow-User**
-> möchte ich **sofort Zugang zu allen Flow-Features haben**,
-> damit **ich die Premium-Features nutzen kann**.
+> As a **newly subscribed Flow user**,
+> I want to **immediately access all Flow features**,
+> so that **I can start using premium capabilities right away**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-Nach Webhook muss die App den neuen Tier-Status reflektieren. Features müssen entsperrt werden.
+After the webhook updates the user tier, the app must reflect the new status. Features must be unlocked, and the user should feel celebrated.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] App erkennt neuen Tier-Status (Polling oder Realtime)
-- [ ] Year View wird entsperrt
-- [ ] Alle Themes werden entsperrt
-- [ ] Advanced Stats werden entsperrt
-- [ ] Coach-Feature wird entsperrt (300/Monat Limit)
-- [ ] UI zeigt "Flow" Badge
-- [ ] Celebration-Animation bei erstem Flow-Zugang
+- [ ] App detects new tier status (polling or realtime)
+- [ ] Year View is unlocked
+- [ ] All themes are unlocked
+- [ ] Advanced Stats are unlocked
+- [ ] Coach feature is unlocked (300/month limit)
+- [ ] UI shows "Flow" badge
+- [ ] Celebration animation plays on first Flow access
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── contexts/
-│   └── UserContext.tsx           # Tier-State erweitern
+│   └── UserContext.tsx           # Extend with tier state
 ├── hooks/
-│   └── useFeatureAccess.ts       # NEU: Feature-Gates
+│   └── useFeatureAccess.ts       # NEW: Feature gates
 ├── components/
-│   └── FlowCelebration.tsx       # NEU: Upgrade-Animation
+│   └── FlowCelebration.tsx       # NEW: Upgrade animation
 ```
 
-### Implementierungshinweise
+### Implementation Notes
 - `useFeatureAccess('yearView')` → boolean
-- Supabase Realtime für Tier-Updates ODER
-- Polling alle 30s nach Checkout-Redirect
-- LocalStorage-Flag für "hat gerade upgraded" → Celebration
+- Use Supabase Realtime for tier updates OR
+- Poll every 30s after checkout redirect
+- LocalStorage flag for "just upgraded" → show celebration
 
-### Feature-Gates
+### Feature Gates
 ```typescript
 const FLOW_FEATURES = [
   'yearView',
@@ -73,22 +73,23 @@ function useFeatureAccess(feature: FlowFeature): boolean {
 ## UI/UX
 
 **Celebration Animation:**
-- Confetti oder Particle-Explosion
-- "Welcome to Flow ✨" Message
-- Kurz (2-3 Sekunden)
-- Nur einmal zeigen
+- Particle explosion or confetti
+- "Welcome to Flow ✨" message
+- Brief (2-3 seconds)
+- Shows only once
+
+The celebration should feel magical, not salesy. It's a moment of arrival.
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Nach Upgrade: Year View zugänglich
-- [ ] Nach Upgrade: Alle Themes sichtbar
-- [ ] Celebration-Animation spielt
-- [ ] Downgrade: Features wieder gesperrt
+- [ ] After upgrade: Year View accessible
+- [ ] After upgrade: All themes visible
+- [ ] Celebration animation plays
+- [ ] Downgrade: Features locked again
 
 ## Definition of Done
 
-- [ ] Feature-Gates implementiert
-- [ ] Alle Flow-Features entsperrt bei tier='flow'
-- [ ] Celebration-Animation
-- [ ] Downgrade-Pfad getestet
+- [ ] Feature gates implemented
+- [ ] All Flow features unlock when tier='flow'
+- [ ] Celebration animation works
+- [ ] Downgrade path tested

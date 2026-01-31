@@ -14,44 +14,44 @@ tags: [ai, coach, settings]
 
 ## User Story
 
-> Als **Flow-User**
-> möchte ich **die Coach-Benachrichtigungen anpassen können**,
-> damit **ich die richtige Balance zwischen hilfreich und störend finde**.
+> As a **Flow user**,
+> I want to **adjust Coach notification preferences**,
+> so that **I find the right balance between helpful and distracting**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Manche User wollen mehr Insights, manche weniger. Einstellbar machen.
+Some users want more insights, some want fewer. Make it configurable. Respect user preferences.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Setting: Proaktive Hinweise (Mehr / Normal / Weniger / Aus)
-- [ ] Setting: Wöchentliche Zusammenfassung (An / Aus)
-- [ ] Setting: Toast-Dauer (3s / 5s / 8s)
-- [ ] Settings im Account/Settings-Bereich
-- [ ] Settings werden in DB gespeichert
-- [ ] Änderungen wirken sofort
+- [ ] Setting: Proactive hints (More / Normal / Less / Off)
+- [ ] Setting: Weekly summary (On / Off)
+- [ ] Setting: Toast duration (3s / 5s / 8s)
+- [ ] Settings in Account/Settings section
+- [ ] Settings saved to database
+- [ ] Changes take effect immediately
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── settings/
-│       └── CoachSettings.tsx     # NEU
+│       └── CoachSettings.tsx     # NEW
 └── lib/
     └── coach/
-        └── settings.ts           # NEU: Defaults & Types
+        └── settings.ts           # NEW: Defaults & types
 ```
 
-### Settings-Schema
+### Settings Schema
 ```typescript
 interface CoachSettings {
   proactiveHints: 'more' | 'normal' | 'less' | 'off';
   weeklySummary: boolean;
-  toastDuration: 3 | 5 | 8; // Sekunden
+  toastDuration: 3 | 5 | 8; // seconds
 }
 
 const DEFAULT_COACH_SETTINGS: CoachSettings = {
@@ -61,52 +61,51 @@ const DEFAULT_COACH_SETTINGS: CoachSettings = {
 };
 ```
 
-### Frequenz-Mapping
+### Frequency Mapping
 
-| Setting | Max Insights/Tag | Cooldown |
+| Setting | Max insights/day | Cooldown |
 |---------|------------------|----------|
 | `more` | 5 | 1h |
 | `normal` | 3 | 2h |
 | `less` | 1 | 4h |
-| `off` | 0 | - |
+| `off` | 0 | – |
 
-### Datenbank
+### Database
 ```sql
--- In users Tabelle oder separate settings Tabelle
 ALTER TABLE users ADD COLUMN IF NOT EXISTS
   coach_settings JSONB DEFAULT '{"proactiveHints": "normal", "weeklySummary": true, "toastDuration": 5}'::jsonb;
 ```
 
 ## UI/UX
 
-Im Settings-Bereich:
+In Settings section:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ Coach                                                            │
 │ ─────────────────────────────────────────────────────────────   │
 │                                                                   │
-│ Proaktive Hinweise                                               │
+│ Proactive Insights                                               │
 │ ┌─────────┬─────────┬─────────┬─────────┐                       │
-│ │  Mehr   │ Normal  │ Weniger │   Aus   │                       │
+│ │  More   │ Normal  │  Less   │   Off   │                       │
 │ └─────────┴────●────┴─────────┴─────────┘                       │
-│ Der Coach teilt gelegentlich Beobachtungen mit dir              │
+│ The Coach shares observations from time to time                  │
 │                                                                   │
-│ Wöchentliche Zusammenfassung                          [●]       │
-│ Jeden Montag eine Übersicht deiner Woche                        │
+│ Weekly Summary                                         [●]       │
+│ Get a summary of your week every Monday                         │
 │                                                                   │
-│ Toast-Dauer                                                       │
+│ Toast Duration                                                    │
 │ ┌─────────┬─────────┬─────────┐                                 │
 │ │   3s    │   5s    │   8s    │                                 │
 │ └─────────┴────●────┴─────────┘                                 │
-│ Wie lange Hinweise sichtbar bleiben                              │
+│ How long insights stay visible                                   │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Definition of Done
 
-- [ ] Settings-UI implementiert
-- [ ] Settings werden gespeichert
-- [ ] Frequenz-Logic respektiert Settings
-- [ ] Toast-Dauer konfigurierbar
-- [ ] Wöchentliche Summary togglebar
+- [ ] Settings UI implemented
+- [ ] Settings are saved
+- [ ] Frequency logic respects settings
+- [ ] Toast duration configurable
+- [ ] Weekly summary toggleable

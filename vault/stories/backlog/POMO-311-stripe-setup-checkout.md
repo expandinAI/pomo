@@ -14,45 +14,45 @@ tags: [payment, stripe, checkout]
 
 ## User Story
 
-> Als **Flow-Interessent**
-> möchte ich **einfach auf "Upgrade" klicken und bezahlen können**,
-> damit **ich sofort Zugang zu Flow-Features bekomme**.
+> As a **user interested in Flow**,
+> I want to **click "Upgrade" and pay seamlessly**,
+> so that **I immediately get access to Flow features**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-Stripe Checkout (hosted) als einfachste Lösung. Kein Custom Payment Form nötig.
+Stripe Checkout (hosted) is the simplest solution. No custom payment form needed. The checkout page is hosted by Stripe, reducing PCI compliance burden.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Stripe Account konfiguriert (Test + Live Keys)
-- [ ] Produkte in Stripe angelegt (Flow Monthly 4,99€, Flow Yearly 39€)
-- [ ] Checkout-Session kann erstellt werden
-- [ ] User wird zu Stripe Checkout weitergeleitet
-- [ ] Nach erfolgreicher Zahlung: Redirect zurück zur App
-- [ ] Stripe Customer ID wird am User gespeichert
+- [ ] Stripe account configured (Test + Live keys in environment)
+- [ ] Products created in Stripe (Flow Monthly €4.99, Flow Yearly €39)
+- [ ] Checkout session can be created via API
+- [ ] User is redirected to Stripe Checkout
+- [ ] After successful payment: redirect back to app
+- [ ] Stripe Customer ID is stored on user record
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── app/api/stripe/
-│   └── create-checkout/route.ts  # NEU
+│   └── create-checkout/route.ts  # NEW
 ├── lib/
-│   └── stripe.ts                 # NEU: Stripe Client
-└── .env.local                    # Stripe Keys
+│   └── stripe.ts                 # NEW: Stripe client singleton
+└── .env.local                    # Stripe keys
 ```
 
-### Implementierungshinweise
-- `stripe` npm Package installieren
-- Stripe Client als Singleton
-- Checkout-Session mit `mode: 'subscription'`
-- `success_url` und `cancel_url` konfigurieren
-- Customer-ID aus Clerk-Metadata oder neu erstellen
+### Implementation Notes
+- Install `stripe` npm package
+- Create Stripe client as singleton
+- Use `mode: 'subscription'` for recurring billing
+- Configure `success_url` and `cancel_url`
+- Create or retrieve Stripe Customer ID from Clerk metadata
 
-### API-Änderungen
+### API Contract
 ```typescript
 // POST /api/stripe/create-checkout
 interface CreateCheckoutRequest {
@@ -66,21 +66,20 @@ interface CreateCheckoutResponse {
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Klick auf "Upgrade" → Stripe Checkout öffnet sich
-- [ ] Test-Kreditkarte funktioniert (4242...)
-- [ ] Nach Zahlung: Redirect zurück zur App
-- [ ] Cancel: Redirect zurück ohne Änderung
+- [ ] Click "Upgrade" → Stripe Checkout opens
+- [ ] Test card works (4242 4242 4242 4242)
+- [ ] After payment: redirect back to app
+- [ ] Cancel: redirect back without changes
 
 ## Definition of Done
 
-- [ ] Stripe Account eingerichtet
-- [ ] API-Endpoint implementiert
-- [ ] Lokal mit Test-Keys getestet
-- [ ] Dokumentation für Stripe-Setup
+- [ ] Stripe account set up
+- [ ] API endpoint implemented
+- [ ] Tested locally with test keys
+- [ ] Documentation for Stripe setup added
 
 ---
 
-## Notizen
+## Notes
 
-Stripe Test-Karten: https://stripe.com/docs/testing
+Stripe test cards: https://stripe.com/docs/testing

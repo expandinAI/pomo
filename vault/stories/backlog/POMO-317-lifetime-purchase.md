@@ -14,48 +14,48 @@ tags: [payment, stripe, lifetime]
 
 ## User Story
 
-> Als **Free-User mit Promo-Link**
-> möchte ich **Lifetime für 99€ kaufen können**,
-> damit **ich einmal zahle und für immer Flow habe**.
+> As a **free user with a promo link**,
+> I want to **purchase Lifetime for €99**,
+> so that **I pay once and have Flow forever**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-Lifetime ist nur über spezielle Promo-Links verfügbar, nicht öffentlich auf der Website.
+Lifetime is only available through special promo links, not publicly on the website. This creates urgency and rewards early supporters.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Promo-Link führt zu Lifetime-Checkout
-- [ ] Stripe Checkout mit One-Time Payment (kein Abo)
-- [ ] Nach Kauf: `is_lifetime: true` am User
-- [ ] Lifetime-User haben dauerhaft Flow-Features
-- [ ] Kein Ablaufdatum, kein Renewal
-- [ ] Webhook verarbeitet One-Time Payment korrekt
+- [ ] Promo link leads to Lifetime checkout
+- [ ] Stripe Checkout with one-time payment (not subscription)
+- [ ] After purchase: `is_lifetime: true` on user
+- [ ] Lifetime users have Flow features forever
+- [ ] No expiration date, no renewal
+- [ ] Webhook correctly processes one-time payment
 
-## Technische Details
+## Technical Details
 
-### URL-Struktur
+### URL Structure
 ```
 /upgrade/lifetime?promo=EARLY2026
 ```
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── app/upgrade/lifetime/
-│   └── page.tsx                  # NEU: Lifetime Landing
+│   └── page.tsx                  # NEW: Lifetime landing
 └── app/api/stripe/
-    └── create-checkout/route.ts  # Erweitern für one-time
+    └── create-checkout/route.ts  # Extend for one-time
 ```
 
-### Implementierungshinweise
-- Stripe Checkout mit `mode: 'payment'` statt `subscription`
-- Promo-Code validieren (optional, für Tracking)
-- `is_lifetime: true` statt `subscription_id`
-- Kein Grace Period nötig
+### Implementation Notes
+- Stripe Checkout with `mode: 'payment'` instead of `subscription`
+- Validate promo code (optional, for tracking)
+- Set `is_lifetime: true` instead of `subscription_id`
+- No grace period needed
 
-### Datenbank
+### Database
 ```sql
 ALTER TABLE users ADD COLUMN IF NOT EXISTS
   is_lifetime BOOLEAN DEFAULT FALSE;
@@ -63,32 +63,34 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS
 
 ## UI/UX
 
-Lifetime Landing Page:
+Lifetime landing page:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                   │
 │                    Lifetime Access                               │
 │                                                                   │
-│                       99€                                        │
-│                    einmalig                                      │
+│                       €99                                        │
+│                    one-time                                      │
 │                                                                   │
-│  Du zahlst einmal und hast für immer Zugang zu:                 │
+│  Pay once and get forever access to:                            │
 │                                                                   │
-│  ✓ AI Coach (300 Insights/Monat)                                │
+│  ✓ AI Coach (300 insights/month)                                │
 │  ✓ Year View                                                     │
-│  ✓ Alle zukünftigen Features                                    │
+│  ✓ All future features                                          │
 │                                                                   │
-│              [Jetzt kaufen]                                      │
+│              [Get Lifetime Access]                               │
 │                                                                   │
-│         Dieses Angebot ist zeitlich begrenzt                    │
+│         This offer is available for a limited time              │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+The page feels exclusive, not salesy. Simple. Clear. Calm.
+
 ## Definition of Done
 
-- [ ] Lifetime-Produkt in Stripe angelegt
-- [ ] Landing Page implementiert
-- [ ] One-Time Checkout funktioniert
-- [ ] Webhook verarbeitet Lifetime korrekt
-- [ ] is_lifetime Flag gesetzt nach Kauf
+- [ ] Lifetime product created in Stripe
+- [ ] Landing page implemented
+- [ ] One-time checkout works
+- [ ] Webhook processes Lifetime correctly
+- [ ] is_lifetime flag set after purchase

@@ -5,350 +5,184 @@ priority: p1
 effort: 3
 feature: "[[features/learn-section]]"
 created: 2026-01-27
-updated: 2026-01-28
+updated: 2026-01-27
 done_date: null
 tags: [content, learn, rhythms]
 ---
 
-# POMO-162: Rhythm Content
+# POMO-162: Rhythmus-Erklärungen
 
 ## User Story
 
-> As a **Particle user**
-> I want **to understand what the three rhythms mean and where they come from**,
-> so that **I can choose the right rhythm for my way of working**.
+> Als **Particle-Nutzer**
+> möchte ich **verstehen, was die drei Rhythmen bedeuten und woher sie kommen**,
+> damit **ich den passenden Rhythmus für meine Arbeitsweise wählen kann**.
 
-## Context
+## Kontext
 
-Link to feature: [[features/learn-section]]
+Link zum Feature: [[features/learn-section]]
 
-The three rhythms are the heart of Particle. The explanations must be written in the Particle voice—poetic, concise, with storytelling. Not documentation, but a conversation with a wise mentor.
+Die drei Rhythmen sind das Herzstück von Particle. Die Erklärungen müssen im Particle-Voice geschrieben sein – poetisch, kurz, mit Storytelling. Keine Dokumentation, sondern ein Gespräch mit einem weisen Mentor.
 
-## Acceptance Criteria
+## Akzeptanzkriterien
 
-- [ ] **Given** I'm in the Learn Panel, **When** I select "The Three Rhythms", **Then** I see explanations for all three rhythms
-- [ ] **Given** I'm reading about a rhythm, **When** I click "Try this rhythm", **Then** that rhythm is activated and the panel closes
-- [ ] **Given** a rhythm is already active, **When** I see it in the Learn Panel, **Then** it's marked as "Active"
-- [ ] **Given** I'm in the rhythm view, **When** I press `←` or Backspace, **Then** I return to the menu
-
----
+- [ ] **Given** ich bin im Learn Panel, **When** ich "Die drei Rhythmen" wähle, **Then** sehe ich Erklärungen zu allen drei Rhythmen
+- [ ] **Given** ich lese über einen Rhythmus, **When** ich "Ausprobieren" klicke, **Then** wird dieser Rhythmus aktiviert und das Panel schließt
+- [ ] **Given** ein Rhythmus ist bereits aktiv, **When** ich ihn im Learn Panel sehe, **Then** ist er als "Aktiv" markiert
+- [ ] **Given** ich bin in der Rhythmus-Ansicht, **When** ich `←` oder Backspace drücke, **Then** komme ich zurück zum Menü
 
 ## Content (Final Copy)
 
-### Intro
+### Classic · 25 Minuten
 
-```
-Every particle has its own rhythm.
-Here are three that have helped people
-do their best work.
-```
+```markdown
+Der Ursprung. Francesco Cirillo nannte es "Pomodoro" –
+nach seiner Küchenuhr.
 
----
-
-### Classic · 25 minutes
-
-```
-The origin. Francesco Cirillo called it "Pomodoro"—
-after his kitchen timer.
-
-Short sprints. Frequent breaks.
-Perfect when you're just starting—or when
-the inner resistance feels strongest.
+Kurze Sprints. Häufige Pausen.
+Perfekt, wenn du anfängst – oder wenn
+der innere Widerstand groß ist.
 ```
 
-**Button:** `Try this rhythm` / `Active`
+**Button:** `Ausprobieren` / `Bereits aktiv`
 
----
+### Deep Work · 52 Minuten
 
-### Deep Work · 52 minutes
+```markdown
+Die DeskTime-Studie fand heraus: Die produktivsten
+10% arbeiten 52 Minuten, dann 17 Minuten Pause.
 
-```
-A DeskTime study found that the most productive
-10% work for 52 minutes, then rest for 17.
-
-Longer focus. Deeper work.
-For projects that demand your full attention.
+Längere Fokuszeit. Tiefere Arbeit.
+Für Projektarbeit und konzentriertes Denken.
 ```
 
-**Button:** `Try this rhythm` / `Active`
+**Button:** `Ausprobieren` / `Bereits aktiv`
 
----
+### Ultradian · 90 Minuten
 
-### 90-Min · 90 minutes
+```markdown
+Dein Körper folgt einem 90-Minuten-Rhythmus.
+Nathaniel Kleitman entdeckte ihn in den 1950ern.
 
-```
-Your body follows a 90-minute rhythm.
-Nathaniel Kleitman discovered it in the 1950s.
-
-For flow states. For work that makes you
-forget that time exists.
+Für Flow-States. Für Arbeit, die dich
+vergessen lässt, dass Zeit vergeht.
 ```
 
-**Button:** `Try this rhythm` / `Active`
+**Button:** `Ausprobieren` / `Bereits aktiv`
 
----
+### Abschluss-Text
 
-### Closing
-
-```
-There is no "right" or "wrong."
-Only what works for you.
+```markdown
+Es gibt kein "richtig" oder "falsch".
+Nur das, was für dich funktioniert.
 ```
 
----
+## Technische Details
 
-## Technical Details
-
-### Affected Files
+### Betroffene Dateien
 ```
 src/
 ├── components/
 │   └── learn/
-│       ├── LearnPanel.tsx        # Add view switching logic
-│       ├── LearnMenu.tsx         # Handle navigation to content
-│       ├── RhythmContent.tsx     # NEW: Rhythm explanations view
-│       └── RhythmCard.tsx        # NEW: Individual rhythm card
+│       ├── LearnContent.tsx      # Artikel-Container
+│       └── RhythmCard.tsx        # Einzelne Rhythmus-Karte
 ├── lib/
 │   └── content/
-│       └── learn-content.ts      # NEW: Content as constants
+│       └── learn-content.ts      # Content als Constants
 ```
 
-### Implementation Notes
-- Content as TypeScript constants (no CMS needed for MVP)
-- `RhythmCard` receives current preset as prop
-- "Try this rhythm" calls `setPreset()` and closes panel
-- Use existing `PRESETS` from design-tokens for consistency
+### Implementierungshinweise
+- Content als TypeScript-Konstanten (kein CMS nötig für MVP)
+- `RhythmCard` bekommt den aktuellen Preset als Prop
+- "Ausprobieren" ruft `setPreset()` auf und schließt Panel
 
-### Data Structure
+### Datenstruktur
 ```typescript
 interface RhythmContent {
-  id: 'classic' | 'deepWork' | 'ultradian';
-  presetId: string;           // Maps to PRESETS key
-  title: string;              // "Classic", "Deep Work", "90-Min"
-  duration: string;           // "25 minutes", "52 minutes", "90 minutes"
-  paragraphs: string[];       // The poetic content
+  id: 'classic' | 'deep-work' | 'ultradian';
+  title: string;
+  duration: string;
+  paragraphs: string[];
+  presetValue: PresetType;
 }
-
-const RHYTHM_CONTENT: RhythmContent[] = [
-  {
-    id: 'classic',
-    presetId: 'classic',
-    title: 'Classic',
-    duration: '25 minutes',
-    paragraphs: [
-      'The origin. Francesco Cirillo called it "Pomodoro"—after his kitchen timer.',
-      'Short sprints. Frequent breaks. Perfect when you\'re just starting—or when the inner resistance feels strongest.'
-    ]
-  },
-  // ... etc
-];
 ```
-
----
 
 ## UI/UX
 
 ### Layout
-
 ```
 ┌─────────────────────────────────────────┐
-│  ← Back                             ✕   │
+│  ← Zurück                           ✕   │
+│                                         │
+│  Die drei Rhythmen                      │
+│                                         │
 ├─────────────────────────────────────────┤
 │                                         │
-│  The Three Rhythms                      │
-│                                         │
-│  Every particle has its own rhythm.     │
-│  Here are three that have helped        │
-│  people do their best work.             │
+│  Jeder Partikel hat seinen eigenen      │
+│  Rhythmus. Hier sind drei, die          │
+│  Menschen geholfen haben.               │
 │                                         │
 │  ───────────────────────────────────    │
 │                                         │
-│  ○ Classic · 25 minutes                 │
+│  ○ Classic · 25 Minuten                 │
 │                                         │
-│    The origin. Francesco Cirillo        │
-│    called it "Pomodoro"—after his       │
-│    kitchen timer.                       │
+│    Der Ursprung. Francesco Cirillo...   │
 │                                         │
-│    Short sprints. Frequent breaks...    │
-│                                         │
-│                   [ Try this rhythm ]   │
+│                      [ Ausprobieren ]   │
 │                                         │
 │  ───────────────────────────────────    │
 │                                         │
-│  ● Deep Work · 52 minutes      Active   │
+│  ● Deep Work · 52 Minuten      Aktiv    │
 │                                         │
-│    A DeskTime study found that the      │
-│    most productive 10% work for 52...   │
+│    Die DeskTime-Studie fand heraus...   │
 │                                         │
-│                          [ Active ]     │  ← Disabled, muted
-│                                         │
-│  ───────────────────────────────────    │
-│                                         │
-│  ○ 90-Min · 90 minutes                  │
-│                                         │
-│    Your body follows a 90-minute        │
-│    rhythm. Nathaniel Kleitman...        │
-│                                         │
-│                   [ Try this rhythm ]   │
+│                      [ Bereits aktiv ]  │
 │                                         │
 │  ───────────────────────────────────    │
 │                                         │
-│  There is no "right" or "wrong."        │
-│  Only what works for you.               │
+│  ...                                    │
 │                                         │
 └─────────────────────────────────────────┘
 ```
 
-### Behavior
-- Click "Try this rhythm" → Switch preset, close panel
-- "Active" button is disabled (muted styling)
-- Radio indicator (○/●) shows current preset
-- Back button returns to Learn Menu
-
-### Back Navigation
-```typescript
-// In LearnPanel, track current view
-const [view, setView] = useState<'menu' | 'rhythms' | 'breaks' | 'science'>('menu');
-
-// Back button
-<button onClick={() => setView('menu')}>
-  <ArrowLeft className="w-4 h-4" />
-  Back
-</button>
-
-// Keyboard handler (in RhythmContent)
-useEffect(() => {
-  function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Backspace' || e.key === 'ArrowLeft') {
-      e.preventDefault();
-      onBack();
-    }
-  }
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
-}, [onBack]);
-```
-
----
-
-## Styling
-
-### Rhythm Card
-
-```typescript
-<div className={cn(
-  "p-4 rounded-xl",
-  "border border-tertiary/10 light:border-tertiary-dark/10",
-  isActive && "bg-tertiary/5 light:bg-tertiary-dark/5"
-)}>
-  {/* Header with radio indicator */}
-  <div className="flex items-center gap-3 mb-3">
-    <div className={cn(
-      "w-3 h-3 rounded-full border-2",
-      isActive
-        ? "border-primary light:border-primary-dark bg-primary light:bg-primary-dark"
-        : "border-tertiary light:border-tertiary-dark"
-    )} />
-    <span className="font-medium text-primary light:text-primary-dark">
-      {title}
-    </span>
-    <span className="text-tertiary light:text-tertiary-dark">
-      · {duration}
-    </span>
-    {isActive && (
-      <span className="ml-auto text-xs text-tertiary light:text-tertiary-dark">
-        Active
-      </span>
-    )}
-  </div>
-
-  {/* Content */}
-  <div className="text-sm text-secondary light:text-secondary-dark space-y-2 ml-6">
-    {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-  </div>
-
-  {/* Button */}
-  <div className="mt-4 ml-6">
-    <button
-      onClick={onTry}
-      disabled={isActive}
-      className={cn(
-        "px-4 py-2 rounded-lg text-sm font-medium",
-        isActive
-          ? "bg-tertiary/10 text-tertiary cursor-not-allowed"
-          : "bg-primary text-background hover:bg-primary/90"
-      )}
-    >
-      {isActive ? 'Active' : 'Try this rhythm'}
-    </button>
-  </div>
-</div>
-```
-
----
+**Verhalten:**
+- Click auf "Ausprobieren" → Preset wechseln, Panel schließen
+- "Bereits aktiv" Button ist disabled (grau)
+- Radio-Indikator (○/●) zeigt aktuellen Preset
 
 ## Testing
 
-### Manual Tests
-- [ ] All three rhythms are displayed
-- [ ] Active rhythm is visually marked
-- [ ] "Try this rhythm" switches preset
-- [ ] Panel closes after preset switch
-- [ ] Back navigation works (button + keyboard)
-- [ ] Content is readable and well-formatted
-- [ ] Scrolling works on mobile
+### Manuell zu testen
+- [ ] Alle drei Rhythmen werden angezeigt
+- [ ] Aktiver Rhythmus ist markiert
+- [ ] "Ausprobieren" wechselt Preset
+- [ ] Panel schließt nach Preset-Wechsel
+- [ ] Zurück-Navigation funktioniert
 
-### Automated Tests
-- [ ] Unit Test: RhythmCard shows correct active state
-- [ ] Unit Test: Preset switch callback is called with correct preset
-- [ ] Unit Test: Back navigation callback is called
-
----
+### Automatisierte Tests
+- [ ] Unit Test: RhythmCard zeigt korrekten State
+- [ ] Unit Test: Preset-Wechsel-Callback wird aufgerufen
 
 ## Definition of Done
 
-- [ ] RhythmContent.tsx implemented
-- [ ] RhythmCard.tsx implemented
-- [ ] LearnPanel.tsx updated with view switching
-- [ ] LearnMenu.tsx updated with navigation
-- [ ] learn-content.ts with all rhythm content
-- [ ] Content is final (Particle voice, English)
-- [ ] Back navigation works (button + Backspace/←)
-- [ ] Preset switch closes panel
-- [ ] Tests written & passing
-- [ ] Manually tested
-- [ ] Mobile responsive
+- [ ] Code implementiert
+- [ ] Content ist final (Particle-Voice)
+- [ ] Tests geschrieben & grün
+- [ ] Lokal getestet
+- [ ] Deployed auf Preview
+
+## Notizen
+
+- Die Texte sind bewusst kurz – keine Wall of Text
+- Jeder Rhythmus hat eine "Geschichte" (Cirillo, DeskTime, Kleitman)
+- Keine Bewertung ("besser"/"schlechter") – nur Unterschiede
 
 ---
 
-## Notes
+## Arbeitsverlauf
 
-### Content Philosophy
-- **Short**: No walls of text—each rhythm is ~2-3 sentences
-- **Story-driven**: Each rhythm has an origin story (Cirillo, DeskTime, Kleitman)
-- **Non-judgmental**: No "better" or "worse"—just different approaches
-- **Actionable**: Clear CTA to try the rhythm immediately
+### Gestartet:
+<!-- Claude: Notiere hier was du tust -->
 
-### Voice Guidelines (from BRAND.md)
-- Speak like a wise, calm mentor
-- Use short, clear sentences
-- No buzzwords ("Boost", "Hack", "Supercharge")
-- No gamification language
-- Poetic but not kitsch
-
-### Preset Mapping
-| Content ID | Preset Key | Display Name |
-|------------|------------|--------------|
-| classic | classic | Classic |
-| deepWork | deepWork | Deep Work |
-| ultradian | ultradian | 90-Min |
-
----
-
-## Work Log
-
-### Started:
-<!-- Claude: Note what you're doing here -->
-
-### Completed:
-<!-- Filled automatically when story moves to done/ -->
+### Erledigt:
+<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->

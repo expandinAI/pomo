@@ -1,12 +1,12 @@
 ---
 type: story
-status: done
+status: backlog
 priority: p1
 effort: 2
 feature: "[[features/local-first-persistence]]"
 created: 2026-01-28
-updated: 2026-01-30
-done_date: 2026-01-30
+updated: 2026-01-29
+done_date: null
 tags: [ui, migration, onboarding]
 ---
 
@@ -30,11 +30,11 @@ Bei Nutzern mit >50 Einträgen kann die Migration einige Sekunden dauern. Ein Pr
 
 ## Akzeptanzkriterien
 
-- [x] **Given** <50 Einträge, **When** Migration läuft, **Then** kein UI (zu schnell)
-- [x] **Given** ≥50 Einträge, **When** Migration läuft, **Then** zeige Progress Overlay
-- [x] **Given** Migration abgeschlossen, **When** UI gezeigt wurde, **Then** zeige Erfolgs-Summary für 2s
-- [x] **Given** Migration UI, **When** angezeigt, **Then** kann der User nicht interagieren (blockiert)
-- [x] **Given** Migration Errors, **When** sie auftreten, **Then** werden sie geloggt aber nicht dem User gezeigt
+- [ ] **Given** <50 Einträge, **When** Migration läuft, **Then** kein UI (zu schnell)
+- [ ] **Given** ≥50 Einträge, **When** Migration läuft, **Then** zeige Progress Overlay
+- [ ] **Given** Migration abgeschlossen, **When** UI gezeigt wurde, **Then** zeige Erfolgs-Summary für 2s
+- [ ] **Given** Migration UI, **When** angezeigt, **Then** kann der User nicht interagieren (blockiert)
+- [ ] **Given** Migration Errors, **When** sie auftreten, **Then** werden sie geloggt aber nicht dem User gezeigt
 
 ## Technische Details
 
@@ -441,15 +441,14 @@ describe('MigrationOverlay', () => {
 
 ## Definition of Done
 
-- [x] `useMigration` Hook implementiert
-- [x] `MigrationOverlay` Komponente mit Progress und Complete States
-- [x] In `layout.tsx` integriert
-- [x] Threshold von 50 Einträgen funktioniert
-- [x] Auto-Close nach 2s
-- [x] Smooth Animations (Framer Motion)
-- [ ] Tests geschrieben & grün (deferred - manual testing done)
-- [x] Particle-Design konsistent (schwarzer BG, weißer Particle)
-- [x] Demo mode via `?demo-migration` URL parameter
+- [ ] `useMigration` Hook implementiert
+- [ ] `MigrationOverlay` Komponente mit Progress und Complete States
+- [ ] In `layout.tsx` integriert
+- [ ] Threshold von 50 Einträgen funktioniert
+- [ ] Auto-Close nach 2s
+- [ ] Smooth Animations (Framer Motion)
+- [ ] Tests geschrieben & grün
+- [ ] Particle-Design konsistent (schwarzer BG, weißer Particle)
 
 ## Notizen
 
@@ -474,21 +473,8 @@ describe('MigrationOverlay', () => {
 
 ## Arbeitsverlauf
 
-### Gestartet: 2026-01-30
+### Gestartet:
+<!-- Claude: Notiere hier was du tust -->
 
-### Erledigt: 2026-01-30
-
-**Implementiert:**
-- `src/hooks/useMigration.ts` - State machine hook mit auto-start
-- `src/components/migration/MigrationOverlay.tsx` - Full-screen overlay
-- `src/components/migration/MigrationProgress.tsx` - Progress bar + phase labels
-- `src/components/migration/index.ts` - Exports
-- Extended `src/lib/db/migrations/index.ts` with `onProgress` callback
-- Integrated in `src/app/layout.tsx`
-
-**Bonus:**
-- Demo mode via `?demo-migration` URL parameter for testing/screenshots
-
-**Commits:**
-- `f320465` feat(db): Add Migration Progress UI (POMO-206)
-- `0318915` feat(db): Add demo mode for migration UI
+### Erledigt:
+<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->

@@ -1,12 +1,12 @@
 ---
 type: story
-status: done
+status: backlog
 priority: p0
 effort: 3
 feature: "[[features/local-first-persistence]]"
 created: 2026-01-28
-updated: 2026-01-30
-done_date: 2026-01-30
+updated: 2026-01-29
+done_date: null
 tags: [infrastructure, migration, sessions]
 ---
 
@@ -664,12 +664,7 @@ describe('New Session API', () => {
 ## Arbeitsverlauf
 
 ### Gestartet:
-2026-01-30: Implementierung gestartet
+<!-- Claude: Notiere hier was du tust -->
 
 ### Erledigt:
-- [x] Migration-Runner in `src/lib/db/migrations/index.ts`
-- [x] Session-Migration in `src/lib/db/migrations/sessions.ts`
-- [x] Neue Session API in `src/lib/db/sessions.ts`
-- [x] Unit Tests geschrieben & grün
-- [x] Integration in `page.tsx` (runMigrations beim App-Start)
-- [x] SessionContext für unified storage access (POMO-204)
+<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->

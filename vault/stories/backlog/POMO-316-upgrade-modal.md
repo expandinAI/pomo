@@ -14,37 +14,37 @@ tags: [payment, ui, upgrade]
 
 ## User Story
 
-> Als **Plus-User**
-> möchte ich **ein überzeugendes Upgrade-Angebot sehen**,
-> damit **ich verstehe was Flow bietet und einfach upgraden kann**.
+> As a **Plus user**,
+> I want to **see a compelling upgrade offer**,
+> so that **I understand what Flow offers and can upgrade easily**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-Das Upgrade-Modal ist der wichtigste Conversion-Point. Muss überzeugend aber nicht pushy sein.
+The upgrade modal is the most important conversion point. Must be convincing but not pushy. Calm, not aggressive.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Modal zeigt Monthly und Yearly Optionen
-- [ ] Yearly zeigt Ersparnis ("Spare 35%")
-- [ ] Feature-Liste ist klar und überzeugend
-- [ ] AI Coach wird prominent hervorgehoben
-- [ ] "14 Tage kostenlos testen" CTA
-- [ ] Modal öffnet sich bei Klick auf gesperrte Features
-- [ ] Keyboard: Escape schließt
+- [ ] Modal shows Monthly and Yearly options
+- [ ] Yearly shows savings ("Save 35%")
+- [ ] Feature list is clear and compelling
+- [ ] AI Coach is prominently highlighted
+- [ ] "Start 14-day free trial" CTA
+- [ ] Modal opens when clicking locked features
+- [ ] Keyboard: Escape closes
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── upgrade/
-│       ├── UpgradeModal.tsx      # NEU
-│       └── PricingCard.tsx       # NEU
+│       ├── UpgradeModal.tsx      # NEW
+│       └── PricingCard.tsx       # NEW
 └── hooks/
-    └── useUpgradeModal.ts        # NEU: Modal-State
+    └── useUpgradeModal.ts        # NEW: Modal state
 ```
 
 ## UI/UX
@@ -58,41 +58,48 @@ src/
 │  ┌─────────────────────┐    ┌─────────────────────┐             │
 │  │      Monthly        │    │       Yearly        │             │
 │  │                     │    │                     │             │
-│  │       4,99€         │    │        39€          │             │
-│  │      /Monat         │    │       /Jahr         │             │
+│  │       €4.99         │    │        €39          │             │
+│  │      /month         │    │       /year         │             │
 │  │                     │    │    ┌──────────┐    │             │
-│  │                     │    │    │ Spare 35%│    │             │
+│  │                     │    │    │ Save 35% │    │             │
 │  │                     │    │    └──────────┘    │             │
-│  │   [Auswählen]       │    │   [Auswählen]      │             │
+│  │     [Select]        │    │     [Select]       │             │
 │  └─────────────────────┘    └─────────────────────┘             │
 │                                                                   │
-│  ✓ AI Coach - Dein persönlicher Produktivitäts-Coach            │
-│  ✓ Year View - Dein Jahr auf einen Blick                        │
-│  ✓ Advanced Statistics - Tiefe Einblicke                        │
-│  ✓ Alle Themes                                                   │
-│  ✓ Unbegrenzte Presets                                          │
-│  ✓ Export für Abrechnungen                                       │
+│  ✓ AI Coach – Your personal productivity companion              │
+│  ✓ Year View – See your year at a glance                        │
+│  ✓ Advanced Statistics – Deep insights                          │
+│  ✓ All Themes                                                    │
+│  ✓ Unlimited Presets                                             │
+│  ✓ Export for invoicing                                          │
 │                                                                   │
-│              14 Tage kostenlos testen                            │
-│         Jederzeit kündbar · Keine versteckten Kosten            │
+│              Start 14-day free trial                             │
+│           Cancel anytime · No hidden fees                        │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Trigger-Punkte
+### Trigger Points
 
-| Trigger | Verhalten |
-|---------|-----------|
-| Klick auf Year View (Plus) | Modal öffnet sich |
-| Klick auf gesperrtes Theme | Modal öffnet sich |
-| "Upgrade" im Account-Menü | Modal öffnet sich |
-| Trial abgelaufen | Modal öffnet sich automatisch |
+| Trigger | Behavior |
+|---------|----------|
+| Click locked Year View | Modal opens |
+| Click locked theme | Modal opens |
+| "Upgrade" in account menu | Modal opens |
+| Trial expired | Modal opens automatically |
+
+### Design Principles
+
+- **Calm, not aggressive** – No countdown timers, no "LAST CHANCE"
+- **Honest** – Clear pricing, no tricks
+- **Respectful** – Easy to close, no dark patterns
+- **Premium** – Generous spacing, subtle animations
 
 ## Definition of Done
 
-- [ ] Modal-Komponente implementiert
-- [ ] Beide Pricing-Optionen dargestellt
-- [ ] Checkout-Integration (ruft POMO-311 auf)
-- [ ] Alle Trigger-Punkte implementiert
+- [ ] Modal component implemented
+- [ ] Both pricing options displayed
+- [ ] Checkout integration (calls POMO-311)
+- [ ] All trigger points implemented
 - [ ] Responsive (Mobile + Desktop)
-- [ ] Keyboard-Accessible
+- [ ] Keyboard accessible

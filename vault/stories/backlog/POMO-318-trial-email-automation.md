@@ -14,88 +14,94 @@ tags: [payment, email, trial]
 
 ## User Story
 
-> Als **Trial-User**
-> möchte ich **hilfreiche E-Mails während meines Trials bekommen**,
-> damit **ich die Features kennenlerne und eine informierte Entscheidung treffe**.
+> As a **trial user**,
+> I want to **receive helpful emails during my trial**,
+> so that **I learn about features and can make an informed decision**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-E-Mail-Sequenz während der 14 Tage Trial. Nicht pushy, sondern hilfreich.
+Email sequence during the 14-day trial. Not pushy—helpful. Each email should provide value, not just ask for money.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Tag 1: Willkommens-E-Mail mit Coach-Intro
-- [ ] Tag 7: "Deine erste Woche" - Insights-Zusammenfassung
-- [ ] Tag 12: Reminder - Trial endet in 2 Tagen
-- [ ] Tag 14: Trial beendet - Upgrade-CTA
-- [ ] E-Mails können in Settings deaktiviert werden
-- [ ] Unsubscribe-Link in jeder E-Mail
+- [ ] Day 1: Welcome email with Coach introduction
+- [ ] Day 7: "Your first week" – insights summary
+- [ ] Day 12: Reminder – trial ends in 2 days
+- [ ] Day 14: Trial ended – upgrade CTA
+- [ ] Emails can be disabled in settings
+- [ ] Unsubscribe link in every email
 
-## Technische Details
+## Technical Details
 
-### E-Mail-Provider
-- Option A: Resend (einfach, günstig)
+### Email Provider Options
+- Option A: Resend (simple, affordable)
 - Option B: Supabase Edge Functions + SMTP
-- Option C: Stripe Billing Emails (für Payment-relevante)
+- Option C: Stripe Billing Emails (for payment-related)
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── lib/
 │   └── email/
-│       ├── send.ts               # NEU: E-Mail Client
+│       ├── send.ts               # NEW: Email client
 │       └── templates/
-│           ├── trial-welcome.tsx # NEU
-│           ├── trial-week1.tsx   # NEU
-│           └── trial-ending.tsx  # NEU
+│           ├── trial-welcome.tsx # NEW
+│           ├── trial-week1.tsx   # NEW
+│           └── trial-ending.tsx  # NEW
 └── app/api/cron/
-    └── trial-emails/route.ts     # NEU: Scheduled Job
+    └── trial-emails/route.ts     # NEW: Scheduled job
 ```
 
-### E-Mail-Trigger
+### Email Triggers
 
-| Tag | Trigger | Template |
+| Day | Trigger | Template |
 |-----|---------|----------|
-| 1 | Trial Start | trial-welcome |
+| 1 | Trial start | trial-welcome |
 | 7 | Cron (trial_started_at + 7d) | trial-week1 |
 | 12 | Cron (trial_started_at + 12d) | trial-ending |
 | 14 | Cron (trial_started_at + 14d) | trial-ended |
 
-### Datenbank
+### Database
 ```sql
 ALTER TABLE users ADD COLUMN IF NOT EXISTS
   trial_started_at TIMESTAMPTZ,
   trial_emails_enabled BOOLEAN DEFAULT TRUE;
 ```
 
-## E-Mail-Inhalte (Konzept)
+## Email Content (Concept)
 
-**Tag 1: Willkommen**
-- "Dein Coach ist bereit"
-- Quick-Start: 3 Dinge die du ausprobieren solltest
-- Link zur App
+**Day 1: Welcome**
+- "Your Coach is ready"
+- Quick-start: 3 things to try
+- Link to app
 
-**Tag 7: Erste Woche**
-- Personalisierte Insights (wenn Daten vorhanden)
-- "Das hast du diese Woche geschafft"
-- Highlight: Was der Coach über dich gelernt hat
+**Day 7: First Week**
+- Personalized insights (if data available)
+- "Here's what you accomplished"
+- Highlight: What the Coach learned about you
 
-**Tag 12: Reminder**
-- "Dein Trial endet in 2 Tagen"
-- Zusammenfassung was du verlieren würdest
-- Upgrade-CTA (nicht pushy)
+**Day 12: Reminder**
+- "Your trial ends in 2 days"
+- Summary of what you'd lose
+- Upgrade CTA (not pushy)
 
-**Tag 14: Beendet**
-- "Dein Trial ist beendet"
-- Letzte Chance: Upgrade-Link
-- "Du kannst weiterhin kostenlos nutzen, aber..."
+**Day 14: Ended**
+- "Your trial has ended"
+- Last chance: Upgrade link
+- "You can still use Particle for free, but..."
+
+### Tone
+- Warm, not corporate
+- Helpful, not desperate
+- Respectful of their time
+- No guilt ("You're missing out!")
 
 ## Definition of Done
 
-- [ ] E-Mail-Provider eingerichtet
-- [ ] 4 E-Mail-Templates erstellt
-- [ ] Cron-Job für Scheduling
-- [ ] Unsubscribe-Funktion
-- [ ] E-Mails getestet (Preview)
+- [ ] Email provider set up
+- [ ] 4 email templates created
+- [ ] Cron job for scheduling
+- [ ] Unsubscribe function
+- [ ] Emails tested (preview)

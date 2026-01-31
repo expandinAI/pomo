@@ -14,52 +14,52 @@ tags: [ai, coach, chat, llm]
 
 ## User Story
 
-> Als **Flow-User**
-> möchte ich **mit meinem Coach chatten können**,
-> damit **ich Fragen stellen und tiefere Insights bekommen kann**.
+> As a **Flow user**,
+> I want to **chat with my Coach**,
+> so that **I can ask questions and get deeper insights about my work patterns**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Freies Chat-Interface für Fragen über Arbeitsmuster, Produktivität, Export-Anfragen.
+Free-form chat interface for questions about work patterns, productivity, and data export requests. The Coach knows your data and speaks with warmth.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Texteingabe für Nachrichten
-- [ ] Enter sendet Nachricht
-- [ ] Shift+Enter für Zeilenumbruch
-- [ ] Nachrichten erscheinen in Chat-History
-- [ ] Coach-Antwort wird gestreamt (Typewriter-Effekt)
-- [ ] Loading-State während Anfrage
-- [ ] Fehlerbehandlung bei API-Fehlern
-- [ ] Quota wird bei jeder Nachricht geprüft
-- [ ] Chat-History wird persistiert
+- [ ] Text input for messages
+- [ ] Enter sends message
+- [ ] Shift+Enter for line break
+- [ ] Messages appear in chat history
+- [ ] Coach response is streamed (typewriter effect)
+- [ ] Loading state during request
+- [ ] Error handling for API failures
+- [ ] Quota is checked on each message
+- [ ] Chat history is persisted
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── coach/
-│       ├── ChatInput.tsx         # NEU: Eingabefeld
-│       ├── ChatMessage.tsx       # NEU: Einzelne Nachricht
-│       └── ChatHistory.tsx       # Liste der Nachrichten
+│       ├── ChatInput.tsx         # NEW: Input field
+│       ├── ChatMessage.tsx       # NEW: Single message
+│       └── ChatHistory.tsx       # Message list
 ├── app/api/coach/
-│   └── chat/route.ts             # NEU: Chat-Endpoint
+│   └── chat/route.ts             # NEW: Chat endpoint
 └── lib/
     └── coach/
-        ├── prompt.ts             # Master-Prompt
-        └── context.ts            # Session-Daten als Kontext
+        ├── prompt.ts             # Master prompt
+        └── context.ts            # Session data as context
 ```
 
-### API-Endpoint
+### API Endpoint
 ```typescript
 // POST /api/coach/chat
 interface ChatRequest {
   message: string;
-  insightId?: string; // Falls Follow-up zu einem Insight
+  insightId?: string; // If follow-up to an insight
 }
 
 interface ChatResponse {
@@ -68,63 +68,60 @@ interface ChatResponse {
 }
 ```
 
-### Implementierungshinweise
-- Anthropic SDK für Claude-Anfragen
-- Streaming für bessere UX (`stream: true`)
-- Session-Daten als Kontext mitgeben
-- Conversation-History (letzte 10 Nachrichten) für Kontext
-- Rate-Limiting am Client (debounce)
+### Implementation Notes
+- Anthropic SDK for Claude requests
+- Streaming for better UX (`stream: true`)
+- Include session data as context
+- Conversation history (last 10 messages) for context
+- Client-side rate limiting (debounce)
 
-### Master-Prompt (Auszug)
+### Master Prompt (Summary)
 ```
-Du bist der Particle Coach - ein warmer, ermutigender Begleiter.
+You are the Particle Coach – a warm, encouraging companion.
 
-DEIN CHARAKTER:
-- Du feierst Erfolge authentisch
-- Du gibst sanfte Hinweise, nie Schuld
-- Du sprichst natürlich, nicht corporate
-- Du bist wie ein guter Freund, der sich für deine Arbeit interessiert
+YOUR CHARACTER:
+- Celebrate wins authentically
+- Give gentle observations, never guilt
+- Speak naturally, not corporate
+- Be like a good friend who cares about their work
 
-NUTZER-DATEN:
+USER DATA:
 {session_summary}
 {patterns}
 {current_insight}
 
-KONVERSATION:
+CONVERSATION:
 {chat_history}
 
-USER: {message}
-
-Antworte hilfreich und ermutigend. Halte dich kurz (2-4 Sätze),
-außer der User fragt nach Details.
+Respond helpfully and encouragingly. Keep it brief (2-4 sentences)
+unless the user asks for details.
 ```
 
 ## UI/UX
 
-**Chat-Input:**
+**Chat Input:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Frag mich etwas...                                       ↵ │
+│ Ask me anything...                                       ↵ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Chat-Nachrichten:**
+**Chat Messages:**
 ```
 ┌───────────────────────────────────────────────────────────┐
 │                                                            │
-│  Du                                              14:23    │
-│  Wie war meine Woche im Vergleich zur letzten?           │
+│  You                                              2:23 PM │
+│  How was my week compared to last week?                   │
 │                                                            │
-│  ✨ Coach                                        14:23    │
-│  Diese Woche war richtig stark! Du hast 23.5 Stunden     │
-│  fokussiert gearbeitet - das sind 18% mehr als letzte    │
-│  Woche. Besonders beeindruckend: Mittwoch war dein       │
-│  produktivster Tag mit 5.2 Stunden.                      │
+│  ✨ Coach                                         2:23 PM │
+│  This week was strong! You focused for 23.5 hours –      │
+│  that's 18% more than last week. Especially impressive:  │
+│  Wednesday was your most productive day with 5.2 hours.  │
 │                                                            │
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Loading-State:**
+**Loading State:**
 ```
 │  ✨ Coach                                                 │
 │  ●●● (typing animation)                                   │
@@ -132,19 +129,18 @@ außer der User fragt nach Details.
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Nachricht senden → Antwort kommt
-- [ ] Streaming funktioniert
-- [ ] Quota wird decremented
-- [ ] Bei Limit: Freundliche Meldung
-- [ ] Chat-History bleibt nach View schließen
-- [ ] Kontext-Awareness (Coach kennt meine Daten)
+- [ ] Send message → response arrives
+- [ ] Streaming works
+- [ ] Quota is decremented
+- [ ] At limit: friendly message
+- [ ] Chat history persists after closing view
+- [ ] Context-aware (Coach knows my data)
 
 ## Definition of Done
 
-- [ ] Chat-Input implementiert
-- [ ] API-Endpoint funktioniert
-- [ ] Streaming-Response
-- [ ] Chat-History persistiert
-- [ ] Quota-Integration
-- [ ] Error-Handling
+- [ ] Chat input implemented
+- [ ] API endpoint works
+- [ ] Streaming response
+- [ ] Chat history persisted
+- [ ] Quota integration
+- [ ] Error handling

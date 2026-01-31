@@ -14,49 +14,49 @@ tags: [ai, coach, view, overlay]
 
 ## User Story
 
-> Als **Flow-User**
-> möchte ich **den Coach-Bereich öffnen können**,
-> damit **ich Insights lesen und mit dem Coach chatten kann**.
+> As a **Flow user**,
+> I want to **open the Coach view**,
+> so that **I can read insights and chat with my Coach**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Zentraler View für alle Coach-Interaktionen. Zeigt aktuellen Insight und Chat-History.
+Central view for all Coach interactions. Shows current insight prominently and chat history below. The Coach feels like a wise companion, not a chatbot.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Öffnet sich bei Klick auf Coach-Partikel
-- [ ] Öffnet sich bei G C Shortcut
-- [ ] Zeigt aktuellen/letzten Insight prominent
-- [ ] Zeigt Chat-History darunter
-- [ ] Chat-Input am unteren Rand
-- [ ] Quota-Anzeige (247/300)
-- [ ] Schließen mit × oder Escape
-- [ ] Smooth Slide-In Animation
+- [ ] Opens on click of Coach particle
+- [ ] Opens on G C shortcut
+- [ ] Shows current/latest insight prominently
+- [ ] Shows chat history below
+- [ ] Chat input at bottom
+- [ ] Quota display (247/300)
+- [ ] Close with × or Escape
+- [ ] Smooth slide-in animation
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── coach/
-│       ├── CoachView.tsx         # NEU: Hauptkomponente
-│       ├── InsightCard.tsx       # NEU: Insight-Darstellung
-│       ├── ChatHistory.tsx       # NEU: Nachrichtenliste
-│       └── QuotaIndicator.tsx    # NEU: Limit-Anzeige
+│       ├── CoachView.tsx         # NEW: Main component
+│       ├── InsightCard.tsx       # NEW: Insight display
+│       ├── ChatHistory.tsx       # NEW: Message list
+│       └── QuotaIndicator.tsx    # NEW: Limit display
 ├── hooks/
-│   └── useCoach.ts               # NEU: Coach-State
+│   └── useCoach.ts               # NEW: Coach state
 └── app/
-    └── page.tsx                  # Modal einbinden
+    └── page.tsx                  # Include modal
 ```
 
-### Implementierungshinweise
-- Overlay-Pattern wie andere Views (Timeline, Stats)
-- Focus-Trap im Modal
-- Keyboard-Navigation
-- Scroll für Chat-History
+### Implementation Notes
+- Overlay pattern like other views (Timeline, Stats)
+- Focus trap in modal
+- Keyboard navigation
+- Scroll for chat history
 
 ## UI/UX
 
@@ -66,50 +66,49 @@ src/
 │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━░░░░░░                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
-│  ✨ Aktueller Insight                                            │
+│  ✨ Today's Insight                                              │
 │  ───────────────────────────────────────────────────────────    │
 │                                                                   │
-│  Du hast heute 127% mehr fokussiert als an einem                 │
-│  typischen Freitag.                                              │
+│  You focused 127% more than usual for a Friday.                  │
 │                                                                   │
-│  Das ist bemerkenswert! Normalerweise arbeitest du               │
-│  freitags ~3 Stunden, heute waren es bereits 6.8 Stunden.        │
+│  That's remarkable. You typically work about 3 hours on          │
+│  Fridays, but today you've already logged 6.8 hours.            │
 │                                                                   │
-│  Was ich beobachte:                                              │
-│  • Früher Start (8:14 statt 9:30)                               │
-│  • Weniger Projektwechsel                                        │
-│  • Längere Sessions                                              │
+│  What I noticed:                                                 │
+│  • You started earlier (8:14 vs 9:30)                           │
+│  • Fewer project switches                                        │
+│  • Longer sessions (45min average)                              │
 │                                                                   │
 │  ───────────────────────────────────────────────────────────    │
 │                                                                   │
 │  💬 Chat                                                         │
 │                                                                   │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │ Du: Warum war ich heute so produktiv?                     │  │
+│  │ You: Why was I so productive today?                       │  │
 │  │                                                            │  │
-│  │ Coach: Ich sehe ein paar Faktoren...                      │  │
+│  │ Coach: I see a few factors that were different...         │  │
 │  └───────────────────────────────────────────────────────────┘  │
 │                                                                   │
 │  ┌─────────────────────────────────────────────────────────┐    │
-│  │ Frag mich etwas...                                    ↵ │    │
+│  │ Ask me anything...                                    ↵ │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Layout-Struktur
-- Header: Titel + Quota + Close
-- Main: Scrollable Content
-  - Insight Card (wenn vorhanden)
+### Layout Structure
+- Header: Title + Quota + Close
+- Main: Scrollable content
+  - Insight Card (if available)
   - Chat History
-- Footer: Chat Input (fixed)
+- Footer: Chat input (fixed)
 
 ## Definition of Done
 
-- [ ] View-Komponente implementiert
-- [ ] G C Shortcut registriert
-- [ ] Insight-Card zeigt aktuellen Insight
-- [ ] Chat-History scrollbar
-- [ ] Quota-Anzeige korrekt
-- [ ] Keyboard-Accessible
+- [ ] View component implemented
+- [ ] G C shortcut registered
+- [ ] Insight card shows current insight
+- [ ] Chat history scrollable
+- [ ] Quota display correct
+- [ ] Keyboard accessible
 - [ ] Responsive (Mobile + Desktop)

@@ -14,47 +14,46 @@ tags: [payment, stripe, webhook]
 
 ## User Story
 
-> Als **System**
-> möchte ich **Stripe-Events zuverlässig verarbeiten**,
-> damit **User-Tiers automatisch aktualisiert werden**.
+> As the **system**,
+> I want to **reliably process Stripe events**,
+> so that **user tiers are updated automatically**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/payment-integration]]
+Link: [[features/payment-integration]]
 
-Webhooks sind der zuverlässigste Weg, Payment-Events zu verarbeiten. Nicht auf Client-Redirects verlassen!
+Webhooks are the most reliable way to process payment events. Never rely solely on client redirects—the webhook is the source of truth.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Webhook-Endpoint erstellt und in Stripe registriert
-- [ ] Signature-Verification implementiert
-- [ ] `checkout.session.completed` → Tier upgrade zu Flow
-- [ ] `customer.subscription.deleted` → Tier downgrade zu Plus
-- [ ] `invoice.payment_failed` → Grace Period starten
-- [ ] `invoice.paid` → Grace Period beenden
-- [ ] Idempotenz: Gleicher Event darf mehrfach kommen
+- [ ] Webhook endpoint created and registered in Stripe Dashboard
+- [ ] Signature verification implemented
+- [ ] `checkout.session.completed` → upgrade tier to Flow
+- [ ] `customer.subscription.deleted` → downgrade tier to Plus
+- [ ] `invoice.payment_failed` → start grace period
+- [ ] `invoice.paid` → end grace period
+- [ ] Idempotent: same event can arrive multiple times safely
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── app/api/stripe/
-│   └── webhook/route.ts          # NEU
+│   └── webhook/route.ts          # NEW
 └── lib/
-    └── stripe-events.ts          # NEU: Event-Handler
+    └── stripe-events.ts          # NEW: Event handlers
 ```
 
-### Implementierungshinweise
-- Raw body für Signature-Check (kein JSON-Parse vorher)
-- Stripe Webhook Secret in ENV
-- Supabase-Update bei erfolgreichem Event
-- Clerk Metadata sync (optional)
-- Logging für Debugging
+### Implementation Notes
+- Use raw body for signature verification (no JSON parsing before)
+- Store Stripe Webhook Secret in ENV
+- Update Supabase on successful events
+- Optional: Sync tier to Clerk metadata
+- Add logging for debugging
 
-### Datenbank-Änderungen
+### Database Changes
 ```sql
--- User-Tabelle erweitern (falls nicht schon)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS
   subscription_status TEXT DEFAULT 'none',
   subscription_id TEXT,
@@ -64,25 +63,24 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS
 
 ### Webhook Events
 
-| Event | Aktion |
+| Event | Action |
 |-------|--------|
 | `checkout.session.completed` | tier → 'flow', subscription_status → 'active' |
 | `customer.subscription.deleted` | tier → 'plus', subscription_status → 'canceled' |
 | `invoice.payment_failed` | grace_period_until → NOW() + 7 days |
 | `invoice.paid` | grace_period_until → NULL |
-| `customer.subscription.updated` | Plan-Wechsel verarbeiten |
+| `customer.subscription.updated` | Process plan change |
 
 ## Testing
 
-### Manuell zu testen
 - [ ] Stripe CLI: `stripe trigger checkout.session.completed`
-- [ ] User-Tier wird aktualisiert
-- [ ] Gleicher Event zweimal → keine Duplikate
-- [ ] Ungültiger Signature → 400 Error
+- [ ] User tier is updated correctly
+- [ ] Same event twice → no duplicates
+- [ ] Invalid signature → 400 error
 
 ## Definition of Done
 
-- [ ] Webhook-Endpoint implementiert
-- [ ] Alle Events verarbeitet
-- [ ] Stripe CLI Tests erfolgreich
-- [ ] Webhook in Stripe Dashboard registriert
+- [ ] Webhook endpoint implemented
+- [ ] All events processed correctly
+- [ ] Stripe CLI tests pass
+- [ ] Webhook registered in Stripe Dashboard

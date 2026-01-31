@@ -14,45 +14,44 @@ tags: [ai, coach, toast, notification]
 
 ## User Story
 
-> Als **Flow-User**
-> möchte ich **Coach-Insights als kurze Nachrichten sehen**,
-> damit **ich informiert werde ohne meine Arbeit zu unterbrechen**.
+> As a **Flow user**,
+> I want to **see Coach insights as brief messages**,
+> so that **I'm informed without my work being interrupted**.
 
-## Kontext
+## Context
 
-Link zum Feature: [[features/ai-coach]]
+Link: [[features/ai-coach]]
 
-Toast erscheint oberhalb des Coach-Partikels, zeigt kurzen Insight, verschwindet nach 5 Sekunden.
+Toast appears above the Coach particle, shows a brief insight, disappears after 5 seconds. The particle then pulses, waiting for the user to explore further.
 
-## Akzeptanzkriterien
+## Acceptance Criteria
 
-- [ ] Toast erscheint oberhalb des Coach-Partikels
-- [ ] Zeigt ✨ Icon + kurzen Text (max 2 Zeilen)
-- [ ] Slide-Up Animation beim Erscheinen
-- [ ] Auto-Hide nach 5 Sekunden
-- [ ] Fade-Out Animation
-- [ ] Klick auf Toast → öffnet Coach View mit diesem Insight
-- [ ] Nach Hide → Coach-Partikel beginnt zu pulsieren
-- [ ] Nicht während laufender Session zeigen
+- [ ] Toast appears above the Coach particle
+- [ ] Shows ✨ icon + short text (max 2 lines)
+- [ ] Slide-up animation on appear
+- [ ] Auto-hide after 5 seconds
+- [ ] Fade-out animation
+- [ ] Click on toast → opens Coach View with that insight
+- [ ] After hide → Coach particle starts pulsing
+- [ ] Don't show during active focus session
 
-## Technische Details
+## Technical Details
 
-### Betroffene Dateien
+### Files
 ```
 src/
 ├── components/
 │   └── coach/
-│       ├── CoachToast.tsx        # NEU
+│       ├── CoachToast.tsx        # NEW
 │       └── CoachParticle.tsx     # Integration
 ├── hooks/
-│   └── useCoachNotifications.ts  # NEU: Notification-Logic
+│   └── useCoachNotifications.ts  # NEW: Notification logic
 ```
 
-### Implementierungshinweise
-- `AnimatePresence` für Ein/Ausblenden
-- Toast-Queue für mehrere Insights
-- Nur einen Toast gleichzeitig zeigen
-- Local Storage: Letzte Toast-Zeit (Cooldown)
+### Implementation Notes
+- `AnimatePresence` for enter/exit animations
+- Toast queue for multiple insights (show one at a time)
+- LocalStorage: last toast time (cooldown)
 
 ### Animation
 ```typescript
@@ -70,35 +69,36 @@ transition={{ duration: 0.3 }}
 
 ```
 ┌─────────────────────────────────────────┐
-│  ✨ Du hast heute 127% mehr fokussiert  │
-│     als an einem typischen Freitag      │
+│  ✨ You focused 127% more than usual    │
+│     on a typical Friday                 │
 └─────────────────────────────────────────┘
                     ↓
                    ✨
-            (Coach-Partikel)
+            (Coach Particle)
 ```
 
 **Styling:**
 - Background: `bg-surface`
 - Border: `border-tertiary/20`
-- Border-Radius: `rounded-xl`
+- Border-radius: `rounded-xl`
 - Padding: `px-4 py-3`
 - Shadow: `shadow-lg`
-- Max-Width: `max-w-sm`
+- Max-width: `max-w-sm`
+
+**Feel:** Magical, not marketing. Like a friend sharing an observation.
 
 ## Testing
 
-### Manuell zu testen
-- [ ] Toast erscheint bei neuem Insight
-- [ ] Auto-Hide nach 5 Sekunden
-- [ ] Klick öffnet Coach View
-- [ ] Partikel pulsiert nach Toast-Hide
-- [ ] Kein Toast während Timer läuft
+- [ ] Toast appears on new insight
+- [ ] Auto-hides after 5 seconds
+- [ ] Click opens Coach View
+- [ ] Particle pulses after toast hides
+- [ ] No toast during running timer
 
 ## Definition of Done
 
-- [ ] Toast-Komponente implementiert
+- [ ] Toast component implemented
 - [ ] Animation smooth
-- [ ] Klick-Handler funktioniert
-- [ ] Session-Awareness (nicht stören)
-- [ ] Cooldown zwischen Toasts
+- [ ] Click handler works
+- [ ] Session-awareness (don't disturb)
+- [ ] Cooldown between toasts

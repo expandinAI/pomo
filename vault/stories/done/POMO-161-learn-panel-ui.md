@@ -1,12 +1,12 @@
 ---
 type: story
-status: done
+status: backlog
 priority: p1
 effort: 5
 feature: "[[features/learn-section]]"
 created: 2026-01-27
 updated: 2026-01-28
-done_date: 2026-01-28
+done_date: null
 tags: [ui, learn, panel]
 ---
 
@@ -14,66 +14,65 @@ tags: [ui, learn, panel]
 
 ## User Story
 
-> As a **Particle user**
-> I want **a calm space where I can learn more about focused work**,
-> so that **I understand how to use Particle optimally for my needs**.
+> Als **Particle-Nutzer**
+> möchte ich **einen ruhigen Bereich haben, wo ich mehr über fokussiertes Arbeiten erfahren kann**,
+> damit **ich verstehe, wie ich Particle optimal für mich nutzen kann**.
 
-## Context
+## Kontext
 
-Link to feature: [[features/learn-section]]
+Link zum Feature: [[features/learn-section]]
 
-The Learn Section is the central place for knowledge about focused work and the three rhythms. The panel must seamlessly integrate with the Particle aesthetic—minimalist, keyboard-first, unobtrusive.
+Die Learn Section ist der zentrale Ort für Wissen über Fokusarbeit und die drei Rhythmen. Das Panel muss sich nahtlos in die Particle-Ästhetik einfügen – minimalistisch, keyboard-first, nicht aufdringlich.
 
-## Acceptance Criteria
+## Akzeptanzkriterien
 
-- [x] **Given** I'm on the timer page, **When** I press `L`, **Then** the Learn Panel opens from the right
-- [x] **Given** the Learn Panel is open, **When** I press `Esc` or `L`, **Then** the panel closes
-- [x] **Given** the Learn Panel is open, **When** I click outside the panel, **Then** the panel closes
-- [x] **Given** I'm on mobile (<640px), **When** the Learn Panel opens, **Then** it's fullscreen
-- [x] **Given** the panel is open, **When** I navigate with the keyboard, **Then** I can tab through menu items
-- [x] **Given** I click the Learn button in the bottom-right corner, **Then** the panel opens
+- [ ] **Given** ich bin auf der Timer-Seite, **When** ich `L` drücke, **Then** öffnet sich das Learn Panel von rechts
+- [ ] **Given** das Learn Panel ist offen, **When** ich `Esc` oder `L` drücke, **Then** schließt sich das Panel
+- [ ] **Given** das Learn Panel ist offen, **When** ich außerhalb des Panels klicke, **Then** schließt sich das Panel
+- [ ] **Given** ich bin auf Mobile (<640px), **When** das Learn Panel öffnet, **Then** ist es fullscreen
+- [ ] **Given** das Panel ist offen, **When** ich mit der Tastatur navigiere, **Then** kann ich durch die Menüpunkte navigieren
+- [ ] **Given** ich klicke auf den Learn-Button unten rechts, **Then** öffnet sich das Panel
 
-## Technical Details
+## Technische Details
 
-### Affected Files
+### Betroffene Dateien
 ```
 src/
 ├── components/
 │   └── learn/
-│       ├── LearnPanel.tsx        # Main container (Slide-In Panel)
-│       ├── LearnMenu.tsx         # Menu with topics
-│       └── index.ts              # Barrel export
+│       ├── LearnPanel.tsx        # Hauptcontainer (Slide-In Panel)
+│       └── LearnMenu.tsx         # Menü mit Themen
 ├── hooks/
-│   └── useGPrefixNavigation.ts   # Added G+L shortcut
+│   └── useLearnPanel.ts          # State-Management Hook
 ├── components/ui/
-│   └── CornerControls.tsx        # Learn button integrated here
+│   └── CornerControls.tsx        # Learn-Button hier integrieren
 └── app/
-    └── page.tsx                  # State + Event listeners
+    └── page.tsx                  # State + Event-Listener
 ```
 
 ### Integration in BottomRightControls
 
-The Learn button is part of the existing `BottomRightControls` component:
+Der Learn-Button wird Teil der bestehenden `BottomRightControls` Komponente:
 
 ```
 Bottom-right Layout: [L] [D] [⚙]
                       │   │   └── Settings
                       │   └────── Night Mode (Day/Night Toggle)
-                      └────────── Learn
+                      └────────── Learn ("Verstehen")
 ```
 
-**Why here?**
-- Learn is a meta-function (like Settings), not daily navigation
-- Semantically: "Learn" belongs with "Settings" (System controls)
-- Apple convention: Help/Info in bottom-right
+**Warum hier?**
+- Learn ist eine Meta-Funktion (wie Settings), keine tägliche Navigation
+- Semantisch: "Verstehen" gehört zu "Einstellungen" (System-Controls)
+- Apple-Konvention: Hilfe/Info unten rechts
 
-### State Management
+### State-Management
 
 ```typescript
 // In page.tsx
 const [showLearn, setShowLearn] = useState(false);
 
-// Event listener for Command Palette integration
+// Event-Listener für Command Palette Integration
 useEffect(() => {
   function handleOpenLearn() {
     setShowLearn(true);
@@ -83,10 +82,10 @@ useEffect(() => {
 }, []);
 ```
 
-### Keyboard Handlers
+### Keyboard-Handler
 
 ```typescript
-// Global L key (in page.tsx)
+// Global L-Taste (in page.tsx oder dediziertem Hook)
 useEffect(() => {
   function handleKeyDown(e: KeyboardEvent) {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -105,7 +104,7 @@ useEffect(() => {
 ### Animation (Framer Motion)
 
 ```typescript
-// Slide-in from right
+// Slide-In von rechts
 const panelVariants = {
   hidden: { x: '100%', opacity: 0 },
   visible: {
@@ -113,8 +112,8 @@ const panelVariants = {
     opacity: 1,
     transition: {
       type: 'spring',
-      damping: 35,
-      stiffness: 600
+      damping: 30,
+      stiffness: 300
     }
   },
   exit: {
@@ -125,62 +124,62 @@ const panelVariants = {
 };
 ```
 
-### Z-Index Hierarchy
+### Z-Index Hierarchie
 
-| Layer | Z-Index | Component |
-|-------|---------|-----------|
-| Timer | 0 | Base |
-| Learn Panel | 50 | Above Timer |
-| Command Palette | 60 | Above everything except Toasts |
-| Toasts | 70 | Top layer |
+| Layer | Z-Index | Komponente |
+|-------|---------|------------|
+| Timer | 0 | Basis |
+| Learn Panel | 50 | Über Timer |
+| Command Palette | 60 | Über allem außer Toasts |
+| Toasts | 70 | Ganz oben |
 
 ## UI/UX
 
-### Panel Layout
+### Panel-Layout
 
 ```
 ┌─────────────────────────────────────────┐
-│  Learn                              ✕   │  ← Header with Close button
+│  Verstehen                          ✕   │  ← Header mit Close-Button
 ├─────────────────────────────────────────┤
 │                                         │
 │  ┌───────────────────────────────────┐  │
-│  │  📚  The Three Rhythms            │  │  ← Menu item (clickable)
-│  │      Everyone works differently   │  │
+│  │  📚  Die drei Rhythmen            │  │  ← Menü-Item (klickbar)
+│  │      Jeder Mensch arbeitet anders │  │
 │  └───────────────────────────────────┘  │
 │                                         │
 │  ┌───────────────────────────────────┐  │
-│  │  🧠  Why Breaks Matter            │  │
-│  │      Your brain needs space       │  │
+│  │  🧠  Warum Pausen wichtig sind    │  │
+│  │      Dein Gehirn braucht Raum     │  │
 │  └───────────────────────────────────┘  │
 │                                         │
 │  ┌───────────────────────────────────┐  │
-│  │  🔬  The Science                  │  │
-│  │      Focus isn't magic            │  │
+│  │  🔬  Die Wissenschaft             │  │
+│  │      Fokus ist keine Magie        │  │
 │  └───────────────────────────────────┘  │
 │                                         │
 │                                         │
 │  ─────────────────────────────────────  │
-│  Keyboard: L                            │  ← Footer hint
+│  Keyboard: L                            │  ← Footer-Hint
 └─────────────────────────────────────────┘
 ```
 
-### Learn Button in CornerControls
+### Learn-Button in CornerControls
 
 ```typescript
-// Extended BottomRightControls
+// In BottomRightControls erweitern
 export function BottomRightControls({
-  onOpenLearn,
+  onOpenLearn,        // NEU
   onToggleNightMode,
   onOpenSettings,
   nightModeEnabled,
 }: BottomRightControlsProps) {
   return (
     <div className="flex items-center gap-1">
-      {/* Learn Button */}
+      {/* Learn Button - NEU */}
       <CornerButton
         onClick={onOpenLearn}
         label="Open learn section"
-        tooltip="Learn · L"
+        tooltip="Verstehen · L"
       >
         <BookOpen className="w-4 h-4" />
       </CornerButton>
@@ -195,12 +194,12 @@ export function BottomRightControls({
 }
 ```
 
-**Icon:** `BookOpen` from Lucide (not `HelpCircle` – "Learn" ≠ "Help")
+**Icon:** `BookOpen` von Lucide (nicht `HelpCircle` – "Verstehen" ≠ "Hilfe")
 
 ### Backdrop
 
 ```typescript
-// Click outside closes panel
+// Klick außerhalb schließt Panel
 <AnimatePresence>
   {showLearn && (
     <>
@@ -262,63 +261,47 @@ useFocusTrap(panelRef, isOpen, { initialFocusRef: panelRef });
 
 ## Testing
 
-### Manual Tests
-- [x] `L` opens/closes panel
-- [x] `Esc` closes panel
-- [x] Click on backdrop closes panel
-- [x] Click on Learn button opens panel
-- [x] Mobile (<640px): Panel is fullscreen
-- [x] Animation is smooth (spring-based)
-- [x] Focus trap works (Tab stays in panel)
-- [x] Keyboard events are isolated (Space/Esc don't trigger Timer)
+### Manuell zu testen
+- [ ] `L` öffnet/schließt Panel
+- [ ] `Esc` schließt Panel
+- [ ] Click auf Backdrop schließt Panel
+- [ ] Click auf Learn-Button öffnet Panel
+- [ ] Mobile (<640px): Panel ist fullscreen
+- [ ] Animation ist smooth (Spring-basiert)
+- [ ] Focus Trap funktioniert (Tab bleibt im Panel)
+- [ ] Keyboard-Events werden isoliert (Space/Esc triggern nicht Timer)
 
-### Automated Tests
-- [ ] Unit Test: Keyboard handler (`L` toggle, `Esc` close)
-- [ ] Unit Test: Focus management
-- [ ] E2E Test: Panel open/close via button and keyboard
+### Automatisierte Tests
+- [ ] Unit Test: Keyboard-Handler (`L` toggle, `Esc` close)
+- [ ] Unit Test: Focus Management
+- [ ] E2E Test: Panel öffnen/schließen via Button und Keyboard
 
 ## Definition of Done
 
-- [x] LearnPanel.tsx implemented
-- [x] LearnMenu.tsx with 3 topic items
-- [x] CornerControls.tsx extended (Learn button)
-- [x] page.tsx: State + Event listeners
-- [x] Keyboard isolation (events don't leak to Timer)
-- [x] Focus trap works
-- [x] Mobile responsive (fullscreen <640px)
-- [ ] Tests written & passing
-- [x] Manually tested
-- [x] Keyboard accessibility verified
+- [ ] LearnPanel.tsx implementiert
+- [ ] LearnMenu.tsx mit 3 Themen-Items
+- [ ] CornerControls.tsx erweitert (Learn-Button)
+- [ ] page.tsx: State + Event-Listener
+- [ ] Keyboard-Isolation (Events sickern nicht zum Timer)
+- [ ] Focus Trap funktioniert
+- [ ] Mobile-Responsive (fullscreen <640px)
+- [ ] Tests geschrieben & grün
+- [ ] Manuell getestet
+- [ ] Keyboard-Accessibility geprüft
 
-## Notes
+## Notizen
 
-- **Title:** "Learn" – fits the Particle voice
-- **Icon:** `BookOpen` – conveys knowledge, not helplessness
-- **Animation:** Spring-based for organic feel
-- **Scope of this story:** Only Panel UI and trigger, NO content (see POMO-162)
+- **Titel:** "Verstehen" (nicht "Learn" oder "Hilfe") – passt zum Particle-Voice
+- **Icon:** `BookOpen` – vermittelt Wissen, nicht Hilflosigkeit
+- **Animation:** Spring-basiert für organisches Gefühl
+- **Scope dieser Story:** Nur Panel-UI und Trigger, KEIN Content (siehe POMO-162)
 
 ---
 
-## Work Log
+## Arbeitsverlauf
 
-### Started: 2026-01-28
+### Gestartet:
+<!-- Claude: Notiere hier was du tust -->
 
-Implemented Learn Panel UI:
-- Created `src/components/learn/LearnMenu.tsx` with 3 menu items
-- Created `src/components/learn/LearnPanel.tsx` with slide-in animation
-- Created `src/components/learn/index.ts` barrel export
-- Extended `src/components/ui/CornerControls.tsx` with Learn button
-- Updated `src/app/page.tsx` with state, L key handler, event listener
-- Updated `src/hooks/useGPrefixNavigation.ts` with G+L shortcut
-
-### Completed: 2026-01-28
-
-All acceptance criteria met. Panel opens/closes correctly via:
-- L key (toggle)
-- G+L shortcut (open)
-- Escape key (close)
-- Backdrop click (close)
-- X button (close)
-- Learn button in corner controls (open)
-
-Translated all UI text to English for v1 release.
+### Erledigt:
+<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->
