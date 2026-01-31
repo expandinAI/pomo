@@ -7,6 +7,44 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Stripe Setup & Checkout (POMO-311, 3 SP)**:
+  - Stripe Integration mit Test + Live Keys
+  - Flow Monthly (€4.99) und Yearly (€39) Products
+  - `/api/stripe/create-checkout` Endpoint
+  - Redirect zu Stripe Checkout und zurück
+  - Stripe Customer ID auf User-Record gespeichert
+- **Payment Webhook Handler (POMO-312, 3 SP)**:
+  - `/api/stripe/webhook` Endpoint mit Signature Verification
+  - `checkout.session.completed` → Tier auf Flow upgraden
+  - `customer.subscription.deleted` → Tier auf Free downgraden
+  - `invoice.payment_failed` → Grace Period starten
+  - `invoice.paid` → Grace Period beenden
+  - Idempotente Event-Verarbeitung
+- **Tier Upgrade Logic (POMO-313, 3 SP)**:
+  - Clerk Metadata Update nach Payment
+  - Features sofort freigeschaltet (Year View, Themes, Stats)
+  - `FlowCelebration` Animation nach erfolgreichem Checkout
+  - `TierBadge` zeigt aktuellen Plan
+- **Billing Portal (POMO-314, 2 SP)**:
+  - `/api/stripe/create-portal-session` Endpoint
+  - "Manage subscription" Button im AccountMenu
+  - Self-Service: Plan wechseln, kündigen, Rechnungen, Zahlungsmethode
+- **Upgrade Modal UI (POMO-316, 3 SP)**:
+  - `PricingModal` mit Monthly (€4.99) / Yearly (€39) Auswahl
+  - `PricingCard` Komponente mit Selection-State und "Save 35%" Badge
+  - Keyboard-Navigation: `←`/`→` Plan wechseln, `Enter` Checkout, `ESC` schließen
+- **Lifetime Purchase (POMO-317, 3 SP)**:
+  - `/upgrade/lifetime` Landing Page für Promo-Links
+  - One-time €99 Payment statt Subscription
+  - `is_lifetime: true` Flag für permanenten Flow-Zugang
+  - Minimales, exklusives Design mit The Particle
+  - Sign-In Flow für nicht eingeloggte User
+  - Trial-abhängige CTAs: "Try Flow" vs. "Upgrade to Flow" überall konsistent
+  - Entscheidungslogik: `TrialStartModal` wenn Trial nicht genutzt, `PricingModal` wenn verbraucht
+  - Stripe Checkout Integration mit korrektem Price ID basierend auf Auswahl
+  - Light/Dark Mode Support
+  - Unit Tests für Business-Logik (13 Tests)
+  - Pattern dokumentiert in CLAUDE.md unter "Upgrade CTA Pattern"
 - **Sync Service mit Offline Queue (POMO-305, 8 SP)**:
   - Continuous Sync zwischen lokalem IndexedDB und Supabase
   - Push: Lokale Änderungen werden sofort zu Supabase gepusht

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, User } from 'lucide-react';
 import { useFeature, useHasAccount } from './hooks';
 import { type TierFeature, FEATURE_INFO } from './config';
+import { useTrial } from '@/lib/trial';
 import { SPRING } from '@/styles/design-tokens';
 
 interface FeatureGateProps {
@@ -117,11 +118,13 @@ export function UpgradePrompt({ feature, title, description }: UpgradePromptProp
 }
 
 /**
- * Button prompting user to try Flow
+ * Button prompting user to try/upgrade to Flow
+ * Shows "Try Flow" if trial not used, "Upgrade to Flow" if trial already used
  */
 function FlowUpgradeButton() {
+  const trial = useTrial();
+
   const handleClick = () => {
-    // Dispatch event to open upgrade modal (POMO-304 will implement)
     window.dispatchEvent(new CustomEvent('particle:open-upgrade'));
   };
 
@@ -131,7 +134,7 @@ function FlowUpgradeButton() {
       className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-dark text-sm font-medium transition-all hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
     >
       <Sparkles className="w-4 h-4" />
-      Try Flow for 14 days
+      {trial.hasUsed ? 'Upgrade to Flow' : 'Try Flow for 14 days'}
     </button>
   );
 }

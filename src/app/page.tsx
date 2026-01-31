@@ -63,6 +63,10 @@ const TrialStartModal = dynamic(
   () => import('@/components/trial').then(mod => ({ default: mod.TrialStartModal })),
   { ssr: false }
 );
+const PricingModal = dynamic(
+  () => import('@/components/pricing').then(mod => ({ default: mod.PricingModal })),
+  { ssr: false }
+);
 const FlowCelebration = dynamic(
   () => import('@/components/celebration').then(mod => ({ default: mod.FlowCelebration })),
   { ssr: false }
@@ -84,6 +88,7 @@ function HomeContent() {
 
   // Trial management
   const [showTrialModal, setShowTrialModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const trial = useTrial();
   useTrialExpirationCheck(); // Check and expire trials on load
 
@@ -372,17 +377,23 @@ function HomeContent() {
   }, [router]);
 
   // Listen for upgrade event (from FeatureGate / UpgradePrompt)
-  // Opens the trial modal for authenticated users
+  // Opens trial modal if user can start trial, otherwise pricing modal
   useEffect(() => {
     function handleOpenUpgrade() {
       if (auth.status === 'authenticated') {
-        setShowTrialModal(true);
+        // If user hasn't used trial yet, show trial modal
+        // Otherwise show pricing modal for direct purchase
+        if (!trial.hasUsed) {
+          setShowTrialModal(true);
+        } else {
+          setShowPricingModal(true);
+        }
       }
     }
 
     window.addEventListener('particle:open-upgrade', handleOpenUpgrade);
     return () => window.removeEventListener('particle:open-upgrade', handleOpenUpgrade);
-  }, [auth.status]);
+  }, [auth.status, trial.hasUsed]);
 
   // Listen for trigger sync event (from AccountMenu)
   useEffect(() => {
@@ -571,6 +582,12 @@ function HomeContent() {
       <TrialStartModal
         isOpen={showTrialModal}
         onClose={() => setShowTrialModal(false)}
+      />
+
+      {/* Pricing Modal - shown when trial already used */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
       />
 
       {/* Trial Expired Banner - shown when trial just expired */}

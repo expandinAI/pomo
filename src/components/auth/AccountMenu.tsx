@@ -7,6 +7,7 @@ import { Settings, BookOpen, LogOut, Sparkles, Cloud, Moon, Sun, Monitor, X, Cre
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
+import { useTrial } from '@/lib/trial';
 import { TierBadge } from './TierBadge';
 import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
 
@@ -94,6 +95,7 @@ export function AccountMenu({
   // Get user info
   const email = auth.status === 'authenticated' ? auth.email : null;
   const tier = auth.status === 'authenticated' ? auth.tier : 'free';
+  const trial = useTrial();
 
   // Check if initial sync is pending (has local data but not synced yet)
   const [hasPendingSync, setHasPendingSync] = useState(false);
@@ -246,7 +248,7 @@ export function AccountMenu({
                 <>
                   <MenuItem
                     icon={<Sparkles className="w-4 h-4" />}
-                    label="Try Particle Flow"
+                    label={trial.hasUsed ? 'Upgrade to Flow' : 'Try Particle Flow'}
                     onClick={handleUpgrade}
                     highlight
                   />

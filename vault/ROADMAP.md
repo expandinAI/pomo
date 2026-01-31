@@ -84,16 +84,16 @@ High-level overview of features and milestones.
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
-| POMO-311 | Stripe Setup & Checkout | 3 | 📋 Ready |
-| POMO-312 | Payment Webhook Handler | 3 | 📋 Ready |
-| POMO-313 | Tier Upgrade Logic | 3 | 📋 Ready |
-| POMO-314 | Billing Portal | 2 | 📋 Ready |
+| POMO-311 | Stripe Setup & Checkout | 3 | ✅ Done |
+| POMO-312 | Payment Webhook Handler | 3 | ✅ Done |
+| POMO-313 | Tier Upgrade Logic | 3 | ✅ Done |
+| POMO-314 | Billing Portal | 2 | ✅ Done |
 | POMO-315 | AI Query Counter | 3 | 📋 Ready |
-| POMO-316 | Upgrade Modal UI | 3 | 📋 Ready |
-| POMO-317 | Lifetime Purchase | 3 | 📋 Ready |
+| POMO-316 | Upgrade Modal UI | 3 | ✅ Done |
+| POMO-317 | Lifetime Purchase | 3 | ✅ Done |
 | POMO-318 | Trial Email Automation | 4 | 📋 Ready |
 
-**Total: 24 Story Points**
+**Total: 24 Story Points (17 Done, 7 Remaining)**
 
 ### AI Coach
 

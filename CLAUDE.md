@@ -437,6 +437,65 @@ Der Timer unterscheidet zwischen **natürlicher Completion** und **manuellem Ski
 - `SKIP` Action: Zeile ~102-126
 - `handleSkip` Callback: Zeile ~455-488
 
+## Upgrade CTA Pattern
+
+### Trial-abhängige Texte
+
+Überall wo wir Premium-Features bewerben, unterscheiden wir zwischen:
+
+| Trial-Status | CTA-Text | Modal |
+|--------------|----------|-------|
+| Trial noch nicht genutzt (`!trial.hasUsed`) | "Try Flow" / "Try Particle Flow" | `TrialStartModal` |
+| Trial bereits verbraucht (`trial.hasUsed`) | "Upgrade to Flow" | `PricingModal` |
+
+**Wichtig:** "Try" impliziert, dass man etwas noch nicht ausprobiert hat. Wer bereits eine Trial hatte (auch wenn abgelaufen), soll "Upgrade" sehen – nicht nochmal "Try".
+
+### Implementierung
+
+```typescript
+import { useTrial } from '@/lib/trial';
+
+function UpgradeButton() {
+  const trial = useTrial();
+
+  return (
+    <button onClick={handleUpgrade}>
+      {trial.hasUsed ? 'Upgrade to Flow' : 'Try Flow for 14 days'}
+    </button>
+  );
+}
+```
+
+### Wo angewendet
+
+| Komponente | Datei |
+|------------|-------|
+| `FlowUpgradeButton` | `src/lib/tiers/FeatureGate.tsx` |
+| `AccountMenu` | `src/components/auth/AccountMenu.tsx` |
+| `DashboardHeatmap` | `src/components/insights/DashboardHeatmap.tsx` |
+| `TrialStartModal` | Zeigt nur wenn `!trial.hasUsed` |
+| `PricingModal` | Zeigt nur wenn `trial.hasUsed` |
+
+### Event-Flow
+
+```
+particle:open-upgrade Event
+        │
+        ▼
+┌─────────────────────────────┐
+│  if (!trial.hasUsed)        │
+│    → TrialStartModal        │
+│  else                       │
+│    → PricingModal           │
+└─────────────────────────────┘
+```
+
+**Checkliste für neue Upgrade-CTAs:**
+- [ ] `useTrial()` Hook importieren
+- [ ] Text dynamisch basierend auf `trial.hasUsed`
+- [ ] Event `particle:open-upgrade` dispatchen (nicht direkt Modal öffnen)
+- [ ] Die Logik in `page.tsx` entscheidet welches Modal erscheint
+
 ## Keyboard Hints Strategie
 
 ### Philosophie: "Learn by Doing"

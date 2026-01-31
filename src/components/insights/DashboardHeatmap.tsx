@@ -8,6 +8,7 @@ import { buildHeatmap, type HeatmapData, type TimeRange } from '@/lib/session-an
 import { HeatmapGrid } from './HeatmapGrid';
 import { prefersReducedMotion } from '@/lib/utils';
 import { useFeature, useHasAccount } from '@/lib/tiers';
+import { useTrial } from '@/lib/trial';
 
 interface DashboardHeatmapProps {
   timeRange: TimeRange;
@@ -39,6 +40,7 @@ export function DashboardHeatmap({ timeRange, refreshTrigger }: DashboardHeatmap
   const reducedMotion = prefersReducedMotion();
   const hasAdvancedStats = useFeature('advancedStats');
   const hasAccount = useHasAccount();
+  const trial = useTrial();
 
   // Build heatmap data based on time range
   useEffect(() => {
@@ -75,7 +77,7 @@ export function DashboardHeatmap({ timeRange, refreshTrigger }: DashboardHeatmap
             }}
             className="text-xs text-accent light:text-accent-dark hover:underline"
           >
-            {hasAccount ? 'Try Flow' : 'Create free account'}
+            {hasAccount ? (trial.hasUsed ? 'Upgrade to Flow' : 'Try Flow') : 'Create free account'}
           </button>
         </div>
       </motion.section>
