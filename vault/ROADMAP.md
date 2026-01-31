@@ -1,15 +1,15 @@
 # Roadmap
 
-High-level Überblick über Features und Milestones.
+High-level overview of features and milestones.
 
 ---
 
-## Aktueller Fokus
+## Current Focus
 
-> **Cloud Sync & Accounts** - Clerk Auth, Supabase, Multi-Device
+> **Phase 2: Monetization & AI Coach** - Payment, AI Coach, GDPR
 
-**Ziel:** Von reiner Web-App zu Multi-Platform-Produkt mit Monetarisierung
-**Status:** 300er-Serie in Arbeit (POMO-300–305 done)
+**Goal:** Revenue-ready product with AI-powered coaching
+**Status:** Phase 1 complete, Phase 2 ready to start
 
 ---
 
@@ -31,34 +31,30 @@ High-level Überblick über Features und Milestones.
 
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
-| [[features/design-system-update]] | POMO-050 bis 055 | 13 | ✅ Done |
-| [[features/immersive-visual-experience]] | POMO-090 bis 092 | 21 | ✅ Done |
-| [[features/command-palette]] | POMO-056 bis 060 | 18 | ✅ Done |
-| [[features/quick-task-system]] | POMO-061 bis 065 | 12 | ✅ Done |
-| [[features/extended-presets]] | POMO-066 bis 071 | 12 | ✅ Done |
-| [[features/keyboard-ux]] | POMO-072 bis 077 | 14 | ✅ Done |
-| [[features/statistics-dashboard]] | POMO-083 bis 089 | 31 | ✅ Done |
+| [[features/design-system-update]] | POMO-050 to 055 | 13 | ✅ Done |
+| [[features/immersive-visual-experience]] | POMO-090 to 092 | 21 | ✅ Done |
+| [[features/command-palette]] | POMO-056 to 060 | 18 | ✅ Done |
+| [[features/quick-task-system]] | POMO-061 to 065 | 12 | ✅ Done |
+| [[features/extended-presets]] | POMO-066 to 071 | 12 | ✅ Done |
+| [[features/keyboard-ux]] | POMO-072 to 077 | 14 | ✅ Done |
+| [[features/statistics-dashboard]] | POMO-083 to 089 | 31 | ✅ Done |
 
 ### v1.0 - Feature Complete
 
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
-| Sound Engine & Settings | POMO-120 bis 124 | ~15 | ✅ Done |
-| Night Mode | POMO-130 bis 139 | ~20 | ✅ Done |
-| Learn Panel & Onboarding | POMO-160 bis 166 | ~18 | ✅ Done |
-| Intro Animation | POMO-170 bis 175 | ~13 | ✅ Done |
+| Sound Engine & Settings | POMO-120 to 124 | ~15 | ✅ Done |
+| Night Mode | POMO-130 to 139 | ~20 | ✅ Done |
+| Learn Panel & Onboarding | POMO-160 to 166 | ~18 | ✅ Done |
+| Intro Animation | POMO-170 to 175 | ~13 | ✅ Done |
 
 ### v1.1 - Local-First Persistence
 
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
-| [[features/local-first-persistence]] | POMO-200 bis 206 | 17 | ✅ Done |
+| [[features/local-first-persistence]] | POMO-200 to 206 | 17 | ✅ Done |
 
----
-
-## Now: Cloud Sync & Accounts
-
-### Phase 1: Cloud Sync (300er-Serie)
+### v2.0 - Cloud Sync & Accounts (Phase 1) ✅
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
@@ -69,27 +65,73 @@ High-level Überblick über Features und Milestones.
 | POMO-304 | Upgrade Flow | 5 | ✅ Done |
 | POMO-305 | Sync Service | 8 | ✅ Done |
 | POMO-306 | Conflict Resolution | 5 | ✅ Done |
-| POMO-307 | Trial Management | 3 | 🔜 Next |
-| POMO-308 | Settings Sync | 3 | 🔜 Next |
+| POMO-307 | Trial Management | 3 | ✅ Done |
+| POMO-308 | Settings Sync | 3 | ✅ Done |
 
-**Total: 37 Story Points**
+**Total Phase 1: 40 Story Points** ✅
 
-### Phase 2: Monetization & AI Coach
+---
 
-| Feature | Stories | Points | Status | Prio |
-|---------|---------|--------|--------|------|
-| [[features/payment-integration]] | POMO-311 bis 318 | 24 | Ready | P1 |
-| [[features/ai-coach]] | POMO-319 bis 326 | 32 | Ready | P1 |
-| [[features/gdpr-data-privacy]] | TBD | ~12 | Draft | P1 |
+## Now: Phase 2 - Monetization & AI Coach
 
-**Total Phase 2: ~68 Story Points**
+### Priority Order (decided)
 
-### Phase 3: Native Apps
+1. **Payment Integration** (revenue first)
+2. **AI Coach** (killer feature)
+3. **GDPR Compliance** (before launch)
 
-| Feature | Stories | Points | Status | Prio |
-|---------|---------|--------|--------|------|
-| [[features/native-mac-app]] | TBD | ~50 | Draft | P2 |
-| [[features/native-ios-app]] | TBD | ~30 | Draft | P2 |
+### Payment Integration
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-311 | Stripe Setup & Checkout | 3 | 📋 Ready |
+| POMO-312 | Payment Webhook Handler | 3 | 📋 Ready |
+| POMO-313 | Tier Upgrade Logic | 3 | 📋 Ready |
+| POMO-314 | Billing Portal | 2 | 📋 Ready |
+| POMO-315 | AI Query Counter | 3 | 📋 Ready |
+| POMO-316 | Upgrade Modal UI | 3 | 📋 Ready |
+| POMO-317 | Lifetime Purchase | 3 | 📋 Ready |
+| POMO-318 | Trial Email Automation | 4 | 📋 Ready |
+
+**Total: 24 Story Points**
+
+### AI Coach
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-319 | Coach Particle UI | 3 | 📋 Ready |
+| POMO-320 | Toast Notification System | 3 | 📋 Ready |
+| POMO-321 | Coach View | 5 | 📋 Ready |
+| POMO-322 | Chat Interface | 5 | 📋 Ready |
+| POMO-323 | Insight Engine Backend | 8 | 📋 Ready |
+| POMO-324 | Master Prompt & Tuning | 3 | 📋 Ready |
+| POMO-325 | Export Function | 3 | 📋 Ready |
+| POMO-326 | Coach Settings | 2 | 📋 Ready |
+
+**Total: 32 Story Points**
+
+### GDPR & Data Privacy
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-327 | Data Export API + UI | 3 | 📋 Ready |
+| POMO-328 | Account Deletion Flow | 5 | 📋 Ready |
+| POMO-329 | Deletion Cron Job | 2 | 📋 Ready |
+| POMO-330 | Privacy Settings UI | 2 | 📋 Ready |
+| POMO-331 | Privacy Policy Page | 2 | 📋 Ready |
+
+**Total: 14 Story Points**
+
+**Phase 2 Total: ~70 Story Points**
+
+---
+
+## Next: Phase 3 - Native Apps
+
+| Feature | Stories | Points | Status |
+|---------|---------|--------|--------|
+| [[features/native-mac-app]] | TBD | ~50 | Draft |
+| [[features/native-ios-app]] | TBD | ~30 | Draft |
 
 **Total Phase 3: ~80 Story Points**
 
@@ -97,11 +139,11 @@ High-level Überblick über Features und Milestones.
 
 ## Architecture Decisions
 
-Dokumentiert in [[decisions/]]:
+Documented in [[decisions/]]:
 
-| ADR | Entscheidung |
-|-----|--------------|
-| [[decisions/ADR-001-multi-platform-architecture]] | Native Swift für Mac/iOS, Supabase + Clerk |
+| ADR | Decision |
+|-----|----------|
+| [[decisions/ADR-001-multi-platform-architecture]] | Native Swift for Mac/iOS, Supabase + Clerk |
 | [[decisions/ADR-002-schema-evolution]] | Additive-Only Schema, Partial Updates |
 | [[decisions/ADR-003-sync-strategy]] | Near-Time Sync (Event Push + 30s Polling) |
 
@@ -114,15 +156,16 @@ Dokumentiert in [[decisions/]]:
 │                    PARTICLE ROADMAP                              │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  PHASE 1: Foundation                          ~54 SP             │
+│  PHASE 1: Foundation                          ~57 SP             │
 │  ─────────────────────────────────────                          │
 │  ✅ Local-First Persistence (IndexedDB)       17 SP  DONE        │
-│  ☐ Cloud Sync & Accounts (Clerk + Supabase)  37 SP  ← NEXT      │
+│  ✅ Cloud Sync & Accounts (Clerk + Supabase)  40 SP  DONE        │
 │                                                                  │
-│  PHASE 2: Monetization & Compliance           ~27 SP             │
+│  PHASE 2: Monetization & AI                   ~70 SP             │
 │  ─────────────────────────────────────                          │
-│  ☐ Payment Integration (Stripe)              ~15 SP             │
-│  ☐ GDPR & Data Privacy                       ~12 SP             │
+│  ☐ Payment Integration (Stripe)              24 SP  ← NEXT      │
+│  ☐ AI Coach                                  32 SP              │
+│  ☐ GDPR & Data Privacy                       14 SP              │
 │                                                                  │
 │  PHASE 3: Native Apps                         ~80 SP             │
 │  ─────────────────────────────────────                          │
@@ -130,24 +173,27 @@ Dokumentiert in [[decisions/]]:
 │  ☐ Native iOS App (SwiftUI, reduced scope)   ~30 SP             │
 │                                                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  REMAINING: ~144 Story Points                                    │
-│  Bei ~5 SP/Woche: ~29 Wochen (~7 Monate)                        │
+│  REMAINING: ~150 Story Points                                    │
+│  At ~5 SP/week: ~30 weeks (~7 months)                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Abhängigkeiten
+### Dependencies
 
 ```
 Local-First Persistence ✅
          │
          ▼
-Cloud Sync & Accounts ← NEXT
+Cloud Sync & Accounts ✅
          │
     ┌────┴────┐
     ▼         ▼
-Payment    GDPR
+Payment    AI Coach
     │         │
     └────┬────┘
+         ▼
+      GDPR
+         │
          ▼
    Native Mac App
          │
@@ -159,16 +205,17 @@ Payment    GDPR
 
 ## Tech Stack
 
-| Komponente | Technologie | Status |
-|------------|-------------|--------|
+| Component | Technology | Status |
+|-----------|------------|--------|
 | **Web Frontend** | Next.js 14 | ✅ Done |
 | **Local Storage (Web)** | IndexedDB (Dexie.js) | ✅ Done |
-| **Auth** | Clerk | 🔜 Next |
-| **Database** | Supabase (PostgreSQL) | 🔜 Next |
-| **Payments** | Stripe | 📋 Später |
-| **Mac App** | Swift/SwiftUI | 📋 Später |
-| **iOS App** | SwiftUI | 📋 Später |
-| **Local Storage (Native)** | SwiftData/SQLite | 📋 Später |
+| **Auth** | Clerk | ✅ Done |
+| **Database** | Supabase (PostgreSQL) | ✅ Done |
+| **Payments** | Stripe | 📋 Next |
+| **AI** | Anthropic Claude Haiku | 📋 Next |
+| **Mac App** | Swift/SwiftUI | 📋 Later |
+| **iOS App** | SwiftUI | 📋 Later |
+| **Local Storage (Native)** | SwiftData/SQLite | 📋 Later |
 
 ---
 
@@ -177,13 +224,13 @@ Payment    GDPR
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                      PARTICLE FREE                               │
-│                    (Kein Account nötig)                          │
+│                    (No account required)                         │
 ├─────────────────────────────────────────────────────────────────┤
-│ ✓ Voller Timer (alle Presets)                                   │
+│ ✓ Full Timer (all presets)                                      │
 │ ✓ Projects                                                       │
 │ ✓ Dark Mode + Default Theme                                      │
 │ ✓ Keyboard-First UX                                              │
-│ ✓ Basis-Statistiken (7 Tage)                                    │
+│ ✓ Basic Statistics (7 days)                                     │
 │ ✓ PWA Installation                                               │
 │ ✗ Cloud Sync                                                     │
 │ ✗ AI Coach                                                       │
@@ -191,48 +238,48 @@ Payment    GDPR
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PARTICLE PLUS                                 │
-│                 (Kostenloser Account)                            │
+│                 (Free account)                                   │
 ├─────────────────────────────────────────────────────────────────┤
-│ Alles aus Free, plus:                                            │
+│ Everything in Free, plus:                                        │
 │ ✓ Cloud Sync                                                     │
 │ ✓ Multi-Device (Web, Mac, iOS)                                  │
 │ ✓ Cloud Backup                                                   │
 │ ✓ 10 Custom Presets                                              │
 │ ✗ Year View                                                      │
 │ ✗ AI Coach                                                       │
-│ ✗ Alle Themes                                                    │
+│ ✗ All Themes                                                     │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PARTICLE FLOW                                 │
-│        4,99€/Monat · 39€/Jahr · 99€ Lifetime*                   │
-│                 (14 Tage kostenlos testen)                       │
+│        €4.99/month · €39/year · €99 Lifetime*                   │
+│                 (14-day free trial)                              │
 ├─────────────────────────────────────────────────────────────────┤
-│ Alles aus Plus, plus:                                            │
-│ ✓ AI Coach (300 Insights/Monat)                                 │
+│ Everything in Plus, plus:                                        │
+│ ✓ AI Coach (300 queries/month)                                  │
 │ ✓ Year View (G Y)                                                │
 │ ✓ Advanced Statistics                                            │
-│ ✓ Alle Themes                                                    │
-│ ✓ Unbegrenzte Presets                                           │
-│ ✓ Export für Abrechnungen                                       │
+│ ✓ All Themes                                                     │
+│ ✓ Unlimited Presets                                              │
+│ ✓ Export for invoicing                                           │
 │                                                                   │
-│ * Lifetime nur bei Special Promotions                            │
+│ * Lifetime only during special promotions                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Philosophie:**
-- Free = Voll nutzbar ohne Account (Local-First)
-- Plus = Kostenloser Account für Sync
-- Flow = Premium mit AI Coach als Killer-Feature
+**Philosophy:**
+- Free = Fully usable without account (Local-First)
+- Plus = Free account for sync
+- Flow = Premium with AI Coach as killer feature
 
 ---
 
 ## Native App Scope
 
-### Mac App (Voller Scope)
+### Mac App (Full Scope)
 
-| Feature | Enthalten |
-|---------|-----------|
+| Feature | Included |
+|---------|----------|
 | Timer | ✓ |
 | Projects | ✓ |
 | Statistics | ✓ |
@@ -243,21 +290,21 @@ Payment    GDPR
 | AppleScript | ✓ |
 | Notifications | ✓ |
 
-### iOS App (Reduzierter Scope)
+### iOS App (Reduced Scope)
 
-| Feature | Enthalten |
-|---------|-----------|
+| Feature | Included |
+|---------|----------|
 | Timer | ✓ |
-| Projects (auswählen) | ✓ |
-| Heute-Ansicht | ✓ |
-| Basis-Stats | ✓ (vereinfacht) |
+| Projects (select) | ✓ |
+| Today View | ✓ |
+| Basic Stats | ✓ (simplified) |
 | Widgets | ✓ |
 | Live Activities | ✓ |
 | Year View | ✗ → Web/Mac |
 | Advanced Stats | ✗ → Web/Mac |
 | Full Settings | ✗ → Web/Mac |
 
-**Philosophie:** iOS = "Linear-Style" – unterwegs kurz was erledigen, nicht am Handy arbeiten.
+**Philosophy:** iOS = "Linear-Style" – quick tasks on the go, not working on phone.
 
 ---
 
@@ -284,19 +331,20 @@ Payment    GDPR
 - [x] Settings Migration
 - [x] Migration UI
 
-### v2.0 - Multi-Platform Foundation 🚧
+### v2.0 - Multi-Platform Foundation ✅
 - [x] Clerk Auth Setup (POMO-300)
 - [x] Supabase Schema (POMO-301)
 - [x] Auth UI (POMO-302)
 - [x] Account Tiers (Free/Plus/Flow) (POMO-303)
 - [x] Sync Service (POMO-305)
-- [ ] Trial System (14 Tage)
-- [x] Conflict Resolution (LWW, Server wins on tie)
+- [x] Trial System (14 days) (POMO-307)
+- [x] Conflict Resolution (LWW, Server wins on tie) (POMO-306)
+- [x] Settings Sync (POMO-308)
 
-### v2.1 - Monetization & AI Coach
+### v2.1 - Monetization & AI Coach 🔜
 - [ ] Stripe Payment Integration
 - [ ] Subscription Management
-- [ ] AI Coach (Coach-Partikel, Insights, Chat)
+- [ ] AI Coach (Coach Particle, Insights, Chat)
 - [ ] GDPR Compliance (Export, Deletion)
 
 ### v3.0 - Native Mac App
@@ -318,15 +366,15 @@ Payment    GDPR
 
 Parked ideas:
 
-- Sound Creation Tools (POMO-125) – Grund: Nice-to-have, nicht kritisch
-- Phase Ambient Sounds (POMO-137) – Grund: Nach Cloud Sync evaluieren
-- Offline Queue (POMO-205) – Grund: Nach Sync-Implementierung
-- Social/Team features – Grund: "Focus is personal" philosophy
-- Gamification (streaks, badges) – Grund: "Calm over anxiety" principle
-- Apple Watch App – Grund: Nach iOS evaluieren
-- Android App – Grund: iOS/Mac Fokus zuerst
-- Weekly Email Report (POMO-156) – Grund: Nach Account-System
+- Sound Creation Tools (POMO-125) – Reason: Nice-to-have, not critical
+- Phase Ambient Sounds (POMO-137) – Reason: Evaluate after Cloud Sync
+- Offline Queue (POMO-205) – Reason: After Sync implementation
+- Social/Team features – Reason: "Focus is personal" philosophy
+- Gamification (streaks, badges) – Reason: "Calm over anxiety" principle
+- Apple Watch App – Reason: Evaluate after iOS
+- Android App – Reason: iOS/Mac focus first
+- Weekly Email Report (POMO-156) – Reason: After Account system
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-31 (Payment Integration + AI Coach refined)*
+*Last updated: 2026-01-31 (Phase 1 complete, Phase 2 ready)*

@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: "[[features/cloud-sync-accounts]]"
 created: 2026-01-28
-updated: 2026-01-29
-done_date: null
+updated: 2026-01-31
+done_date: 2026-01-31
 tags: [feature, trial, monetization]
 ---
 
