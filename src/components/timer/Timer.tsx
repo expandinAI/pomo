@@ -103,6 +103,11 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         nextMode = 'work';
       }
 
+      // Emit break-started event when transitioning from work to break
+      if (isWorkSession) {
+        window.dispatchEvent(new CustomEvent('particle:break-started'));
+      }
+
       return {
         ...state,
         mode: nextMode,
@@ -126,6 +131,11 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
           : 'shortBreak';
       } else {
         nextMode = 'work';
+      }
+
+      // Emit break-started event when transitioning from work to break
+      if (isWorkSession) {
+        window.dispatchEvent(new CustomEvent('particle:break-started'));
       }
 
       return {

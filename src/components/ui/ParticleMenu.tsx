@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   CalendarDays,
   FolderKanban,
@@ -84,12 +84,30 @@ export function ParticleMenu({
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Glow effect for break start (anonymous users only)
+  const [shouldGlow, setShouldGlow] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
   // Random signup message - changes each time menu opens
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const signupMessage = useMemo(
     () => SIGNUP_MESSAGES[Math.floor(Math.random() * SIGNUP_MESSAGES.length)],
     [isOpen]
   );
+
+  // Listen for break-started event (glow effect for anonymous users)
+  useEffect(() => {
+    if (authStatus !== 'anonymous') return;
+
+    const handleBreakStart = () => {
+      setShouldGlow(true);
+      // Auto-stop after animation completes (2 pulses × 4s = 8s)
+      setTimeout(() => setShouldGlow(false), 8000);
+    };
+
+    window.addEventListener('particle:break-started', handleBreakStart);
+    return () => window.removeEventListener('particle:break-started', handleBreakStart);
+  }, [authStatus]);
 
   // Build menu items based on available callbacks
   const menuItems: MenuItem[] = [
@@ -159,6 +177,7 @@ export function ParticleMenu({
   };
 
   const handleButtonClick = () => {
+    setShouldGlow(false); // Stop glow when menu opens
     setIsOpen(!isOpen);
     setOpenedViaKeyboard(false);
   };
@@ -198,10 +217,20 @@ export function ParticleMenu({
               ? 'bg-background light:bg-background-dark'
               : 'bg-secondary light:bg-secondary-dark'
           )}
-          animate={{
-            scale: isOpen ? 0.8 : 1,
-          }}
-          transition={{ type: 'spring', ...SPRING.snappy }}
+          animate={
+            shouldGlow && !prefersReducedMotion && !isOpen
+              ? { scale: [1, 1.4, 1] }
+              : { scale: isOpen ? 0.8 : 1 }
+          }
+          transition={
+            shouldGlow && !prefersReducedMotion && !isOpen
+              ? {
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }
+              : { type: 'spring', ...SPRING.snappy }
+          }
         />
       </motion.button>
 
