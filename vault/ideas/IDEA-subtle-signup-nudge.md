@@ -1,8 +1,12 @@
 # Subtle Sign-up Nudge
 
-**Status:** Idea
+**Status:** Promoted → Stories created
 **Created:** 2025-01-31
 **Tags:** conversion, onboarding, animation, growth
+
+**Stories:**
+- [[stories/backlog/POMO-309-rotating-signup-messages]] (Effort: 2)
+- [[stories/backlog/POMO-310-break-start-glow]] (Effort: 3)
 
 ---
 
@@ -36,7 +40,7 @@ The menu dot occasionally pulses with a soft, warm glow – like it's "breathing
 | **Session-based** | Once per focus session | After completion | Contextual |
 | **Hybrid** | Milestone + time cap | Smart | Balanced |
 
-**Recommendation:** Start with **Milestone-based** (after 5, 10, 25 particles) – it ties the nudge to accomplishment, which feels celebratory rather than salesy.
+**Recommendation:** Trigger on **Break Start** – the moment when focus ends and user is free to look around. Respects focus time, feels like celebration, not interruption.
 
 ### Animation Spec
 
