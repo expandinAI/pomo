@@ -76,8 +76,10 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
 
       // Second key after G
       if (isGPressed) {
-        // Ignore repeated G presses (key repeat or accidental double-tap)
+        // G again = close menu (toggle)
         if (key === 'g') {
+          clearGTimeout();
+          setIsGPressed(false);
           return;
         }
 

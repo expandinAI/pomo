@@ -527,25 +527,6 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-      {/* G-prefix indicator - positioned above bottom-right controls */}
-      <AnimatePresence>
-        {isGPressed && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed bottom-16 right-4 px-3 py-1.5 bg-surface/90 light:bg-surface-dark/90 backdrop-blur-sm rounded-lg border border-tertiary/20 light:border-tertiary-dark/20 shadow-lg z-50"
-          >
-            <span className="text-sm font-medium text-secondary light:text-secondary-dark">
-              G...
-            </span>
-            <span className="ml-2 text-xs text-tertiary light:text-tertiary-dark">
-              t/r/s/h/y/p/o/m/l/,
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* First-run rhythm onboarding - appears on first start attempt */}
       <AnimatePresence>
