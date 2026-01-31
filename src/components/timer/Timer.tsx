@@ -1402,6 +1402,30 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     }
   }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, addSession, getTotalSessionCount]);
 
+  // Early complete from clicking break in collapsed view
+  // Only works during work sessions with >60s elapsed
+  const handleEarlyCompleteFromBreakClick = useCallback(() => {
+    // Only allow during work sessions
+    if (state.mode !== 'work') return;
+
+    // Calculate elapsed time
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[state.mode];
+    const elapsedTime = isOverflow
+      ? fullDuration + overflowSecondsRef.current
+      : fullDuration - state.timeRemaining;
+
+    // Minimum 60 seconds required
+    if (elapsedTime < 60) {
+      window.dispatchEvent(new CustomEvent('particle:toast', {
+        detail: { message: 'Work at least 1 minute first' }
+      }));
+      return;
+    }
+
+    // Use handleEndEarly which does everything we need
+    handleEndEarly();
+  }, [state.mode, state.timeRemaining, isOverflow, handleEndEarly]);
+
   // Start/Pause handlers with sound
   const handleStart = useCallback(() => {
     // Check if we should intercept (e.g., for onboarding)
@@ -1870,6 +1894,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         onPresetHover={setHoveredPresetId}
         onCollapsedHover={setIsCollapsedHovered}
         onModeIndicatorHover={setHoveredModeIndicator}
+        onEarlyComplete={handleEarlyCompleteFromBreakClick}
       />
 
       {/* Timer display - clickable to open timeline */}

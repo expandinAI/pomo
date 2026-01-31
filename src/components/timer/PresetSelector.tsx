@@ -26,6 +26,8 @@ interface PresetSelectorProps {
   onCollapsedHover?: (isHovered: boolean) => void;
   /** Callback when hovering over mode indicators (overflow/autostart icons) */
   onModeIndicatorHover?: (mode: 'overflow' | 'autoStart' | null) => void;
+  /** Callback when user clicks break to complete early (only during work sessions) */
+  onEarlyComplete?: () => void;
 }
 
 // Get preset info text (work + break duration)
@@ -52,6 +54,7 @@ function CollapsedPresetView({
   autoStartEnabled,
   overflowEnabled,
   onModeIndicatorHover,
+  onEarlyComplete,
 }: {
   currentMode: SessionType;
   durations: TimerDurations;
@@ -60,6 +63,7 @@ function CollapsedPresetView({
   autoStartEnabled?: boolean;
   overflowEnabled?: boolean;
   onModeIndicatorHover?: (mode: 'overflow' | 'autoStart' | null) => void;
+  onEarlyComplete?: () => void;
 }) {
   const isWork = currentMode === 'work';
   // Use override duration if set (from smart input), otherwise use preset
@@ -98,7 +102,13 @@ function CollapsedPresetView({
         <>
           <span className="text-primary light:text-primary-dark">{workMinutes}m Work</span>
           <span className="text-tertiary light:text-tertiary-dark mx-2">→</span>
-          <span className="text-tertiary light:text-tertiary-dark">{breakMinutes}m {breakLabel}</span>
+          <button
+            onClick={onEarlyComplete}
+            className="text-tertiary light:text-tertiary-dark hover:text-primary light:hover:text-primary-dark transition-colors cursor-pointer focus:outline-none focus-visible:underline"
+            title="Complete early and start break"
+          >
+            {breakMinutes}m {breakLabel}
+          </button>
         </>
       ) : (
         <>
@@ -138,7 +148,7 @@ function CollapsedPresetView({
   );
 }
 
-export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, overflowEnabled, onPresetHover, onCollapsedHover, onModeIndicatorHover }: PresetSelectorProps) {
+export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, overflowEnabled, onPresetHover, onCollapsedHover, onModeIndicatorHover, onEarlyComplete }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset, customDurations, customSessionsUntilLong } = useTimerSettingsContext();
 
   // Build a virtual custom preset with actual custom values (not dependent on active preset)
@@ -247,6 +257,7 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
               autoStartEnabled={autoStartEnabled}
               overflowEnabled={overflowEnabled}
               onModeIndicatorHover={onModeIndicatorHover}
+              onEarlyComplete={onEarlyComplete}
             />
           </motion.div>
         ) : (

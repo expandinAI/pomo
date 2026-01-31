@@ -436,6 +436,7 @@ function HomeContent() {
         <ParticleMenu
           isGPressed={isGPressed}
           authStatus={auth.status}
+          planType={auth.status === 'authenticated' ? auth.tier : undefined}
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}

@@ -31,6 +31,8 @@ import { cn } from '@/lib/utils';
 
 type AuthStatus = 'anonymous' | 'authenticated' | 'loading';
 
+type PlanType = 'free' | 'flow';
+
 interface ParticleMenuProps {
   onOpenTimeline: () => void;
   onOpenRhythm: () => void;
@@ -46,6 +48,8 @@ interface ParticleMenuProps {
   isGPressed?: boolean;
   /** Auth status to show appropriate account action */
   authStatus?: AuthStatus;
+  /** User's subscription plan type */
+  planType?: PlanType;
 }
 
 interface MenuItem {
@@ -79,6 +83,7 @@ export function ParticleMenu({
   onOpenAccount,
   isGPressed = false,
   authStatus = 'anonymous',
+  planType,
 }: ParticleMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false);
@@ -344,7 +349,7 @@ export function ParticleMenu({
                   </motion.div>
                 </Link>
               ) : authStatus === 'authenticated' ? (
-                // Authenticated: Show "Account" button
+                // Authenticated: Show "Account" button with plan type
                 <motion.button
                   role="menuitem"
                   onClick={handleAccountClick}
@@ -369,6 +374,16 @@ export function ParticleMenu({
                   <span className="flex-1 text-left text-sm font-medium">
                     Account
                   </span>
+                  {planType && (
+                    <span className={cn(
+                      'text-xs px-1.5 py-0.5 rounded',
+                      planType === 'flow'
+                        ? 'bg-accent/20 text-accent'
+                        : 'text-tertiary light:text-tertiary-dark'
+                    )}>
+                      {planType === 'flow' ? 'Flow' : 'Free'}
+                    </span>
+                  )}
                 </motion.button>
               ) : null}
             </div>
