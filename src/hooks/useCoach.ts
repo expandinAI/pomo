@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { CoachInsight, CoachMessage } from '@/components/coach/types';
 import { buildCoachContext, type CoachContext } from '@/lib/coach';
 import type { GeneratedInsight } from '@/lib/coach';
+import { useCoachSettings } from '@/hooks/useCoachSettings';
 
 interface UseCoachResult {
   /** Current insight from the coach */
@@ -43,8 +44,11 @@ export function useCoach(): UseCoachResult {
   const [isLoadingInsight, setIsLoadingInsight] = useState(false);
   const [insightError, setInsightError] = useState<string | null>(null);
 
-  // Session caching - only generate insight once per browser session
-  const hasGeneratedInsightRef = useRef(false);
+  // Coach settings for frequency control
+  const { canGenerateInsight, recordInsightGenerated, isLoaded: settingsLoaded } = useCoachSettings();
+
+  // Session-level flag to prevent retries on errors (doesn't count against daily limit)
+  const hasAttemptedThisSession = useRef(false);
 
   /**
    * Load coach context from IndexedDB
@@ -74,15 +78,23 @@ export function useCoach(): UseCoachResult {
    * Generate a daily insight from the AI
    */
   const generateDailyInsight = useCallback(async () => {
-    // Skip if already generated this session or no context
-    if (hasGeneratedInsightRef.current) {
-      console.log('[useCoach] Insight already generated this session');
+    // Skip if already attempted this session (prevents infinite retry loops on errors)
+    if (hasAttemptedThisSession.current) {
+      console.log('[useCoach] Already attempted this session');
+      return;
+    }
+    // Skip if settings-based limits don't allow generation
+    if (!canGenerateInsight()) {
+      console.log('[useCoach] Insight generation blocked by frequency settings');
       return;
     }
     if (!context) {
       console.log('[useCoach] No context available yet');
       return;
     }
+
+    // Mark as attempted for this session
+    hasAttemptedThisSession.current = true;
 
     console.log('[useCoach] Generating daily insight...', {
       todayParticles: context.sessionSummary.todayParticles,
@@ -119,7 +131,7 @@ export function useCoach(): UseCoachResult {
           highlights: generated.highlights,
           createdAt: new Date(),
         });
-        hasGeneratedInsightRef.current = true;
+        recordInsightGenerated();
 
         // Dispatch event for CoachParticle glow + StatusMessage preview
         window.dispatchEvent(new CustomEvent('particle:insight-ready', {
@@ -131,43 +143,43 @@ export function useCoach(): UseCoachResult {
       } else if (response.status === 429) {
         // Quota limit reached - graceful degradation
         console.log('[useCoach] Quota limit reached (429), skipping insight');
-        hasGeneratedInsightRef.current = true; // Don't retry
+        // Don't record - already at limit, will be handled by canGenerateInsight
       } else if (response.status === 403) {
         // Not a Flow user - graceful degradation
         console.log('[useCoach] Flow subscription required (403)');
-        hasGeneratedInsightRef.current = true; // Don't retry
+        // Don't record - user doesn't have access
       } else if (response.status === 401) {
         console.log('[useCoach] Not authenticated (401)');
-        hasGeneratedInsightRef.current = true; // Don't retry
+        // Don't record - user not authenticated
       } else if (response.status === 404) {
         console.log('[useCoach] User not found (404)');
-        hasGeneratedInsightRef.current = true; // Don't retry
+        // Don't record - user not found
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('[useCoach] API error:', response.status, errorData);
         setInsightError(errorData.error || 'Could not generate insight');
-        hasGeneratedInsightRef.current = true; // Don't retry on errors
+        // Don't record - generic error
       }
     } catch (err) {
       console.error('[useCoach] Failed to generate insight:', err);
       setInsightError('Could not generate insight');
-      hasGeneratedInsightRef.current = true; // Don't retry on errors
+      // Don't record - network/fetch error
     } finally {
       setIsLoadingInsight(false);
     }
-  }, [context]);
+  }, [context, canGenerateInsight, recordInsightGenerated]);
 
   // Load context on mount
   useEffect(() => {
     refreshContext();
   }, [refreshContext]);
 
-  // Generate insight when context is ready
+  // Generate insight when context and settings are ready
   useEffect(() => {
-    if (context && !hasGeneratedInsightRef.current && !insight) {
+    if (context && settingsLoaded && !hasAttemptedThisSession.current && !insight) {
       generateDailyInsight();
     }
-  }, [context, insight, generateDailyInsight]);
+  }, [context, settingsLoaded, insight, generateDailyInsight]);
 
   return {
     insight,

@@ -36,6 +36,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/components/milestones';
 import { useWellbeingHint } from '@/hooks/useWellbeingHint';
 import { useContextualHints } from '@/hooks/useContextualHints';
+import { useCoachSettings } from '@/hooks/useCoachSettings';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -420,6 +421,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Contextual hints (shown after session completion based on user patterns)
   const { trackOverflow, trackEarlyStop, trackSessionStart, checkForHint, markHintShown } = useContextualHints();
 
+  // Coach settings (for insight display duration)
+  const { insightDisplayDuration } = useCoachSettings();
+
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
     selectedProjectIdRef.current = selectedProjectId;
@@ -552,17 +556,17 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     return () => window.removeEventListener('particle:insight-ready', handleInsightReady);
   }, []);
 
-  // Auto-clear coach insight preview after 8 seconds, then trigger "arrival" effect
+  // Auto-clear coach insight preview after configured duration, then trigger "arrival" effect
   useEffect(() => {
     if (coachInsightPreview) {
       const timeout = setTimeout(() => {
         setCoachInsightPreview(null);
         // Dispatch event for CoachParticle "arrival" effect
         window.dispatchEvent(new CustomEvent('particle:insight-arrived'));
-      }, 8000);
+      }, insightDisplayDuration);
       return () => clearTimeout(timeout);
     }
-  }, [coachInsightPreview]);
+  }, [coachInsightPreview, insightDisplayDuration]);
 
   // Auto-clear contextual hint after 8 seconds
   useEffect(() => {

@@ -19,6 +19,7 @@ import { VisualTimerSettings } from './VisualTimerSettings';
 import { CelebrationSettings } from './CelebrationSettings';
 import { BreakBreathingSettings } from './BreakBreathingSettings';
 import { WellbeingHintsSettings } from './WellbeingHintsSettings';
+import { CoachSettings } from './CoachSettings';
 import { DailyIntentionSettings } from './DailyIntentionSettings';
 
 interface TimerSettingsProps {
@@ -296,6 +297,9 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* Wellbeing Hints Settings */}
                   <WellbeingHintsSettings />
+
+                  {/* AI Coach Settings (Flow-only) */}
+                  <CoachSettings />
 
                   {/* Sound Settings */}
                   <SoundSettings />
