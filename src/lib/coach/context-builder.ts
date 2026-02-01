@@ -19,12 +19,25 @@ import type {
   ProjectBreakdown,
   DetectedPattern,
   RecentActivity,
+  WeeklySummary,
+  DailySummary,
+  TaskFrequency,
 } from './types';
 
 /**
  * Number of days to consider for pattern detection and context
  */
 const CONTEXT_DAYS = 30;
+
+/**
+ * Number of weeks to include in weekly trend
+ */
+const WEEKLY_TREND_WEEKS = 6;
+
+/**
+ * Number of days to include in daily trend
+ */
+const DAILY_TREND_DAYS = 14;
 
 /**
  * Build the complete coach context from local data
@@ -52,12 +65,18 @@ export async function buildCoachContext(): Promise<CoachContext> {
   const projectBreakdown = buildProjectBreakdown(recentSessions, projects);
   const patterns = detectAllPatterns(recentSessions, projects);
   const recentActivity = buildRecentActivity(recentSessions, projects);
+  const weeklyTrend = buildWeeklyTrend(recentSessions, projects);
+  const dailyTrend = buildDailyTrend(recentSessions);
+  const taskFrequency = buildTaskFrequency(recentSessions, projects);
 
   return {
     sessionSummary,
     projectBreakdown,
     patterns,
     recentActivity,
+    weeklyTrend,
+    dailyTrend,
+    taskFrequency,
   };
 }
 
@@ -248,78 +267,269 @@ function buildRecentActivity(
  * that gets inserted into the system prompt.
  */
 export function formatContextForPrompt(context: CoachContext): string {
-  const { sessionSummary, projectBreakdown, patterns, recentActivity } =
-    context;
+  const {
+    sessionSummary,
+    projectBreakdown,
+    patterns,
+    recentActivity,
+    weeklyTrend,
+    dailyTrend,
+    taskFrequency,
+  } = context;
 
   const lines: string[] = [];
 
   // Overall stats
-  lines.push('## Your Data (Last 30 Days)');
-  lines.push('');
+  lines.push('## Summary');
   lines.push(
-    `**Overall:** ${sessionSummary.totalParticles} particles, ${formatHours(sessionSummary.totalMinutes)} of focus`
-  );
-  lines.push(
-    `**This Week:** ${sessionSummary.weekParticles} particles, ${formatHours(sessionSummary.weekMinutes)}`
-  );
-  lines.push(
-    `**Today:** ${sessionSummary.todayParticles} particles, ${formatHours(sessionSummary.todayMinutes)}`
+    `Total: ${sessionSummary.totalParticles} particles, ${formatHours(sessionSummary.totalMinutes)} | ` +
+    `Week: ${sessionSummary.weekParticles} particles | ` +
+    `Today: ${sessionSummary.todayParticles} particles`
   );
 
-  // Project breakdown (top 5)
-  if (projectBreakdown.length > 0) {
+  // Weekly trend (compact format for token efficiency)
+  if (weeklyTrend.length > 0) {
     lines.push('');
-    lines.push('**Projects:**');
-    const topProjects = projectBreakdown.slice(0, 5);
-    for (const project of topProjects) {
+    lines.push('## Weekly Trend');
+    for (const week of weeklyTrend) {
+      const projectInfo = week.topProject ? ` [${week.topProject} ${week.topProjectPercent}%]` : '';
       lines.push(
-        `- ${project.projectName}: ${project.particles} particles (${project.percentage}%)`
+        `${week.label}: ${week.particles}p, ${formatHours(week.minutes)}${projectInfo}`
       );
     }
   }
 
-  // Patterns
+  // Daily trend (last 7 days only for tokens, but we have 14 available)
+  if (dailyTrend.length > 0) {
+    lines.push('');
+    lines.push('## Last 7 Days');
+    const recentDays = dailyTrend.slice(0, 7);
+    for (const day of recentDays) {
+      lines.push(`${day.label}: ${day.particles}p, ${formatHours(day.minutes)}`);
+    }
+  }
+
+  // Project breakdown (top 5, compact)
+  if (projectBreakdown.length > 0) {
+    lines.push('');
+    lines.push('## Projects (30d)');
+    const topProjects = projectBreakdown.slice(0, 5);
+    lines.push(
+      topProjects
+        .map((p) => `${p.projectName}: ${p.percentage}%`)
+        .join(' | ')
+    );
+  }
+
+  // Task frequency (recurring work)
+  if (taskFrequency.length > 0) {
+    lines.push('');
+    lines.push('## Recurring Tasks');
+    for (const tf of taskFrequency.slice(0, 5)) {
+      const projectInfo = tf.project ? ` (${tf.project})` : '';
+      lines.push(`- "${tf.task}": ${tf.count}x, ${formatHours(tf.minutes)}${projectInfo}`);
+    }
+  }
+
+  // Patterns (compact)
   if (patterns.length > 0) {
     lines.push('');
-    lines.push('**Patterns I noticed:**');
+    lines.push('## Patterns');
     for (const pattern of patterns) {
       lines.push(`- ${pattern.description}`);
     }
   }
 
-  // Session length info
-  if (sessionSummary.averageSessionMinutes > 0) {
-    lines.push('');
-    lines.push(
-      `**Average session:** ${sessionSummary.averageSessionMinutes} minutes`
-    );
-  }
-
-  // Recent activity
+  // Recent session
   if (recentActivity.lastSession) {
     lines.push('');
     const { lastSession } = recentActivity;
-    const projectInfo = lastSession.projectName
-      ? ` on "${lastSession.projectName}"`
-      : '';
-    const taskInfo = lastSession.task
-      ? ` working on: "${lastSession.task}"`
-      : '';
-    lines.push(
-      `**Recent:** You just completed a ${lastSession.durationMinutes}-minute focus session${projectInfo}${taskInfo}`
-    );
-  }
-
-  // Recent tasks (what they've been working on)
-  if (recentActivity.recentTasks.length > 0) {
-    lines.push('');
-    lines.push('**Recent tasks (last 7 days):**');
-    for (const task of recentActivity.recentTasks) {
-      lines.push(`- ${task}`);
-    }
+    const projectInfo = lastSession.projectName ? ` on "${lastSession.projectName}"` : '';
+    const taskInfo = lastSession.task ? `: "${lastSession.task}"` : '';
+    lines.push(`## Last Session: ${lastSession.durationMinutes}min${projectInfo}${taskInfo}`);
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Build weekly trend for the last N weeks
+ */
+function buildWeeklyTrend(
+  sessions: DBSession[],
+  projects: DBProject[]
+): WeeklySummary[] {
+  const workSessions = sessions.filter((s) => s.type === 'work');
+  const weeks: WeeklySummary[] = [];
+
+  // Generate week boundaries (Monday-Sunday)
+  const now = new Date();
+
+  for (let i = 0; i < WEEKLY_TREND_WEEKS; i++) {
+    // Calculate week start (Monday) and end (Sunday)
+    const weekEnd = new Date(now);
+    weekEnd.setDate(now.getDate() - (i * 7) - now.getDay() + (now.getDay() === 0 ? -6 : 1) - 1);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekStart = new Date(weekEnd);
+    weekStart.setDate(weekEnd.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    // For current week, use today as end
+    const effectiveEnd = i === 0 ? now : weekEnd;
+
+    // Filter sessions for this week
+    const weekSessions = workSessions.filter((s) => {
+      const date = new Date(s.completedAt);
+      return date >= weekStart && date <= effectiveEnd;
+    });
+
+    // Calculate stats
+    const particles = weekSessions.length;
+    const minutes = weekSessions.reduce((sum, s) => sum + s.duration, 0) / 60;
+
+    // Find top project
+    const projectMinutes: Record<string, number> = {};
+    for (const session of weekSessions) {
+      const pid = session.projectId || 'unassigned';
+      projectMinutes[pid] = (projectMinutes[pid] || 0) + session.duration / 60;
+    }
+
+    let topProject: string | null = null;
+    let topProjectPercent = 0;
+    let maxMinutes = 0;
+
+    for (const [pid, mins] of Object.entries(projectMinutes)) {
+      if (mins > maxMinutes) {
+        maxMinutes = mins;
+        topProject = pid === 'unassigned'
+          ? null
+          : projects.find((p) => p.id === pid)?.name || null;
+        topProjectPercent = minutes > 0 ? Math.round((mins / minutes) * 100) : 0;
+      }
+    }
+
+    // Format label (e.g., "Jan 20-26")
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const label = `${monthNames[weekStart.getMonth()]} ${weekStart.getDate()}-${weekEnd.getDate()}`;
+
+    weeks.push({
+      label,
+      startDate: weekStart.toISOString().split('T')[0],
+      particles,
+      minutes: Math.round(minutes * 10) / 10,
+      topProject,
+      topProjectPercent,
+    });
+  }
+
+  return weeks;
+}
+
+/**
+ * Build daily trend for the last N days
+ */
+function buildDailyTrend(sessions: DBSession[]): DailySummary[] {
+  const workSessions = sessions.filter((s) => s.type === 'work');
+  const days: DailySummary[] = [];
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  for (let i = 0; i < DAILY_TREND_DAYS; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    date.setHours(0, 0, 0, 0);
+
+    const dateEnd = new Date(date);
+    dateEnd.setHours(23, 59, 59, 999);
+
+    // Filter sessions for this day
+    const daySessions = workSessions.filter((s) => {
+      const sDate = new Date(s.completedAt);
+      return sDate >= date && sDate <= dateEnd;
+    });
+
+    const particles = daySessions.length;
+    const minutes = daySessions.reduce((sum, s) => sum + s.duration, 0) / 60;
+
+    // Format label (e.g., "Mon Jan 27")
+    const label = `${dayNames[date.getDay()]} ${monthNames[date.getMonth()]} ${date.getDate()}`;
+
+    days.push({
+      label,
+      date: date.toISOString().split('T')[0],
+      particles,
+      minutes: Math.round(minutes * 10) / 10,
+    });
+  }
+
+  return days;
+}
+
+/**
+ * Build task frequency analysis
+ */
+function buildTaskFrequency(
+  sessions: DBSession[],
+  projects: DBProject[]
+): TaskFrequency[] {
+  const workSessions = sessions.filter((s) => s.type === 'work' && s.task);
+
+  // Group by task
+  const taskStats: Record<string, {
+    count: number;
+    minutes: number;
+    projectIds: Record<string, number>;
+  }> = {};
+
+  for (const session of workSessions) {
+    const task = session.task!.trim();
+    if (!task) continue;
+
+    if (!taskStats[task]) {
+      taskStats[task] = { count: 0, minutes: 0, projectIds: {} };
+    }
+
+    taskStats[task].count++;
+    taskStats[task].minutes += session.duration / 60;
+
+    if (session.projectId) {
+      taskStats[task].projectIds[session.projectId] =
+        (taskStats[task].projectIds[session.projectId] || 0) + 1;
+    }
+  }
+
+  // Convert to array and find dominant project
+  const frequencies: TaskFrequency[] = [];
+
+  for (const [task, stats] of Object.entries(taskStats)) {
+    // Only include tasks with 2+ occurrences (recurring work)
+    if (stats.count < 2) continue;
+
+    // Find most common project for this task
+    let dominantProject: string | null = null;
+    let maxProjectCount = 0;
+
+    for (const [pid, count] of Object.entries(stats.projectIds)) {
+      if (count > maxProjectCount) {
+        maxProjectCount = count;
+        dominantProject = projects.find((p) => p.id === pid)?.name || null;
+      }
+    }
+
+    frequencies.push({
+      task,
+      count: stats.count,
+      minutes: Math.round(stats.minutes * 10) / 10,
+      project: dominantProject,
+    });
+  }
+
+  // Sort by count descending, take top 10
+  return frequencies
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
 }
 
 // ============================================

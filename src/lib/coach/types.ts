@@ -79,6 +79,52 @@ export interface RecentActivity {
 }
 
 /**
+ * Weekly summary for trend comparison
+ */
+export interface WeeklySummary {
+  /** Week label (e.g., "Jan 20-26") */
+  label: string;
+  /** Start date of the week */
+  startDate: string;
+  /** Number of particles this week */
+  particles: number;
+  /** Total minutes this week */
+  minutes: number;
+  /** Top project name (if any) */
+  topProject: string | null;
+  /** Top project percentage */
+  topProjectPercent: number;
+}
+
+/**
+ * Daily summary for recent trend analysis
+ */
+export interface DailySummary {
+  /** Date label (e.g., "Mon Jan 27") */
+  label: string;
+  /** ISO date string */
+  date: string;
+  /** Number of particles this day */
+  particles: number;
+  /** Total minutes this day */
+  minutes: number;
+}
+
+/**
+ * Task frequency information
+ */
+export interface TaskFrequency {
+  /** Task name */
+  task: string;
+  /** Number of sessions with this task */
+  count: number;
+  /** Total minutes spent on this task */
+  minutes: number;
+  /** Associated project (if consistent) */
+  project: string | null;
+}
+
+/**
  * Complete context for the coach
  */
 export interface CoachContext {
@@ -90,6 +136,12 @@ export interface CoachContext {
   patterns: DetectedPattern[];
   /** Recent activity information */
   recentActivity: RecentActivity;
+  /** Weekly summaries for trend comparison (last 4-6 weeks) */
+  weeklyTrend: WeeklySummary[];
+  /** Daily summaries for recent activity (last 7-14 days) */
+  dailyTrend: DailySummary[];
+  /** Task frequency analysis */
+  taskFrequency: TaskFrequency[];
 }
 
 /**
