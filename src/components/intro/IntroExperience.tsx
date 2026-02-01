@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { IntroPhase } from '@/hooks/useIntro';
 import { usePrefersReducedMotion } from '@/hooks/useIntro';
@@ -8,6 +8,12 @@ import type { DailyIntention } from '@/lib/content/daily-intentions';
 import { GenesisParticle } from './GenesisParticle';
 import { IntroTypography } from './IntroTypography';
 import { ParticleSystem } from './ParticleSystem';
+
+/**
+ * Delay before click events are registered (ms)
+ * Prevents the click that triggered "Replay Intro" from immediately skipping
+ */
+const CLICK_GUARD_DELAY = 300;
 
 // ============================================================================
 // Types
@@ -32,6 +38,10 @@ export function IntroExperience({ phase, intention, onSkip, onComplete }: IntroE
   // Reduced motion support
   const prefersReducedMotion = usePrefersReducedMotion();
 
+  // Track mount time to ignore clicks that happen immediately after mounting
+  // (prevents the click that triggered "Replay Intro" from skipping)
+  const mountTimeRef = useRef(Date.now());
+
   // Handle skip events (click, tap, keyboard)
   const handleSkip = useCallback(
     (e: KeyboardEvent | MouseEvent | TouchEvent) => {
@@ -41,6 +51,15 @@ export function IntroExperience({ phase, intention, onSkip, onComplete }: IntroE
           return;
         }
         e.preventDefault();
+      }
+
+      // For click/touch events, ignore if they happen too soon after mount
+      // (the click that opened the intro via Command Palette would otherwise skip it)
+      if (e instanceof MouseEvent || e instanceof TouchEvent) {
+        const timeSinceMount = Date.now() - mountTimeRef.current;
+        if (timeSinceMount < CLICK_GUARD_DELAY) {
+          return;
+        }
       }
 
       // Prevent double-firing from touch + click
@@ -55,6 +74,9 @@ export function IntroExperience({ phase, intention, onSkip, onComplete }: IntroE
 
   // Set up event listeners for skip
   useEffect(() => {
+    // Update mount time on each render to handle re-mounts
+    mountTimeRef.current = Date.now();
+
     // Use capture phase to ensure we get the event first
     window.addEventListener('keydown', handleSkip as EventListener, true);
     window.addEventListener('click', handleSkip as EventListener);
