@@ -15,6 +15,9 @@ export type {
 // CSV export (client-side)
 export { generateCSV, downloadCSV, groupSessionsByDate } from './csv';
 
+// JSON export (client-side)
+export { generateJSON, generateJSONString, downloadJSON, type JSONExport } from './json';
+
 // Data preparation
 export { prepareExportData, getDateRange, formatPeriodLabel } from './prepare-data';
 

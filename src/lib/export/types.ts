@@ -25,7 +25,7 @@ export interface ExportOptions {
   projectName: string;
   startDate: Date;
   endDate: Date;
-  format: 'csv' | 'pdf';
+  format: 'csv' | 'pdf' | 'json';
   groupBy?: 'day' | 'task' | 'both';
 }
 

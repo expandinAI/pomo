@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { X, Download, FileText, FileSpreadsheet, FileJson, Loader2 } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import type { ExportPeriod } from '@/lib/export/types';
@@ -23,7 +23,7 @@ interface ExportDialogProps {
   }>;
 }
 
-type ExportFormat = 'csv' | 'pdf';
+type ExportFormat = 'csv' | 'pdf' | 'json';
 
 const PERIOD_OPTIONS: { value: ExportPeriod; label: string }[] = [
   { value: 'this-week', label: 'This Week' },
@@ -247,7 +247,7 @@ export function ExportDialog({
                     <button
                       onClick={() => setFormat('pdf')}
                       className={cn(
-                        'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         format === 'pdf'
                           ? 'bg-primary/10 light:bg-primary-dark/10 text-primary light:text-primary-dark'
                           : 'bg-tertiary/5 light:bg-tertiary-dark/5 text-secondary light:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
@@ -259,7 +259,7 @@ export function ExportDialog({
                     <button
                       onClick={() => setFormat('csv')}
                       className={cn(
-                        'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         format === 'csv'
                           ? 'bg-primary/10 light:bg-primary-dark/10 text-primary light:text-primary-dark'
                           : 'bg-tertiary/5 light:bg-tertiary-dark/5 text-secondary light:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
@@ -267,6 +267,18 @@ export function ExportDialog({
                     >
                       <FileSpreadsheet className="w-4 h-4" />
                       CSV
+                    </button>
+                    <button
+                      onClick={() => setFormat('json')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        format === 'json'
+                          ? 'bg-primary/10 light:bg-primary-dark/10 text-primary light:text-primary-dark'
+                          : 'bg-tertiary/5 light:bg-tertiary-dark/5 text-secondary light:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+                      )}
+                    >
+                      <FileJson className="w-4 h-4" />
+                      JSON
                     </button>
                   </div>
                 </div>

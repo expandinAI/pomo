@@ -16,10 +16,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { ExportData } from '@/lib/export/types';
 import { generateCSV } from '@/lib/export/csv';
+import { generateJSONString } from '@/lib/export/json';
 import { generatePDFBuffer } from '@/lib/export/pdf';
 
 interface ExportRequest {
-  format: 'csv' | 'pdf';
+  format: 'csv' | 'pdf' | 'json';
   projectName: string;
   sessions: Array<{
     id: string;
@@ -89,9 +90,20 @@ export async function POST(request: NextRequest) {
           'Content-Disposition': `attachment; filename="${filename}"`,
         },
       });
+    } else if (body.format === 'json') {
+      // Generate JSON
+      const json = generateJSONString(data);
+      const filename = `${safeName}_${dateStr}.json`;
+
+      return new NextResponse(json, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
     } else {
       return NextResponse.json(
-        { error: 'Invalid format. Use "csv" or "pdf".' },
+        { error: 'Invalid format. Use "csv", "pdf", or "json".' },
         { status: 400 }
       );
     }
