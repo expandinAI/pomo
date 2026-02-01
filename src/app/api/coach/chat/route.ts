@@ -120,8 +120,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     const systemPrompt = buildSystemPrompt(context);
 
     // Prepare messages for OpenRouter
-    // Convert 'coach' role to 'assistant' for API compatibility
-    const apiHistory = (history || []).map((msg) => ({
+    // Limit history to last 10 messages to control costs
+    // (Long conversations can accumulate thousands of tokens)
+    const MAX_HISTORY_MESSAGES = 10;
+    const recentHistory = (history || []).slice(-MAX_HISTORY_MESSAGES);
+
+    const apiHistory = recentHistory.map((msg) => ({
       role: msg.role === 'user' ? ('user' as const) : ('assistant' as const),
       content: msg.content,
     }));
