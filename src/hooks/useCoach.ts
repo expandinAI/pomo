@@ -29,34 +29,37 @@ function generateContextHash(context: CoachContext): string {
 
 /**
  * Try to load a cached insight from localStorage
+ * @param contextHash - Current context hash to check if cache is still relevant
+ * @returns Object with insight and whether it matches current context
  */
-function getCachedInsight(contextHash: string): CoachInsight | null {
-  if (typeof window === 'undefined') return null;
+function getCachedInsight(contextHash: string): { insight: CoachInsight | null; matchesContext: boolean } {
+  if (typeof window === 'undefined') return { insight: null, matchesContext: false };
 
   try {
     const stored = localStorage.getItem(INSIGHT_CACHE_KEY);
-    if (!stored) return null;
+    if (!stored) return { insight: null, matchesContext: false };
 
     const cached: CachedInsight = JSON.parse(stored);
 
-    // Check if cache is still valid
+    // Check if cache is still valid (not too old)
     const age = Date.now() - cached.generatedAt;
     if (age > CACHE_MAX_AGE_MS) {
       console.log('[useCoach] Cache expired (age:', Math.round(age / 1000 / 60), 'min)');
-      return null;
+      return { insight: null, matchesContext: false };
     }
 
-    // Check if context has changed significantly
-    if (cached.contextHash !== contextHash) {
-      console.log('[useCoach] Context changed, cache invalid');
+    // Check if context matches
+    const matchesContext = cached.contextHash === contextHash;
+    if (!matchesContext) {
+      console.log('[useCoach] Context changed, insight still valid for display');
       console.log('[useCoach]   cached:', cached.contextHash, '→ current:', contextHash);
-      return null;
+    } else {
+      console.log('[useCoach] Using cached insight (age:', Math.round(age / 1000 / 60), 'min)');
     }
 
-    console.log('[useCoach] Using cached insight (age:', Math.round(age / 1000 / 60), 'min)');
-    return cached.insight;
+    return { insight: cached.insight, matchesContext };
   } catch {
-    return null;
+    return { insight: null, matchesContext: false };
   }
 }
 
@@ -170,12 +173,12 @@ export function useCoach(): UseCoachResult {
     // Mark as attempted for this session
     hasAttemptedThisSession.current = true;
 
-    // Check cache first - always show cached insight regardless of frequency settings
+    // Check cache - always show cached insight first (even if context changed)
     const contextHash = generateContextHash(context);
-    const cachedInsight = getCachedInsight(contextHash);
+    const { insight: cachedInsight, matchesContext } = getCachedInsight(contextHash);
 
     if (cachedInsight) {
-      // Use cached insight - no API call needed!
+      // Always display the cached insight first
       setInsight(cachedInsight);
 
       // Dispatch event for CoachParticle glow + StatusMessage preview
@@ -185,12 +188,21 @@ export function useCoach(): UseCoachResult {
           preview: cachedInsight.title
         }
       }));
-      return;
+
+      // If context matches, we're done - no need to generate new
+      if (matchesContext) {
+        console.log('[useCoach] Cached insight matches current context, done');
+        return;
+      }
+
+      // Context changed - try to generate a new insight if frequency allows
+      console.log('[useCoach] Context changed, checking if we can generate new insight');
     }
 
     // Only check frequency settings when we need to make an API call
     if (!canGenerateInsight()) {
       console.log('[useCoach] Insight generation blocked by frequency settings');
+      // Still showing cached insight (if any) - that's fine
       return;
     }
 
