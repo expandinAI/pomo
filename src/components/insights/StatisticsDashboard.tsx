@@ -69,11 +69,12 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
     return calculateFocusScore(filteredSessions, sessions);
   }, [filteredSessions, sessions]);
 
-  // Get lifetime total hours (all-time, not filtered)
+  // Calculate total focus time for the selected time range
   const totalHours = useMemo(() => {
-    const stats = getLifetimeStats(sessions);
-    return formatHoursMinutes(stats.totalSeconds);
-  }, [sessions]);
+    const workSessions = filteredSessions.filter(s => s.type === 'work');
+    const totalSeconds = workSessions.reduce((sum, s) => sum + s.duration, 0);
+    return formatHoursMinutes(totalSeconds);
+  }, [filteredSessions]);
 
   // Calculate weekly stats for the chart (always show current week)
   const weeklyStats = useMemo(() => {

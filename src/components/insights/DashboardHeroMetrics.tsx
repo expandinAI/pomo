@@ -6,7 +6,7 @@ import { SPRING } from '@/styles/design-tokens';
 import { prefersReducedMotion } from '@/lib/utils';
 
 interface DashboardHeroMetricsProps {
-  totalHours: string;      // Formatted total hours (all-time)
+  totalHours: string;      // Formatted total hours (filtered by time range)
   particleCount: number;   // Filtered by time range
   focusScore: number;      // Filtered by time range (0-100)
 }
@@ -54,9 +54,10 @@ function HeroMetric({ value, label, icon, delay = 0 }: HeroMetricProps) {
 
 /**
  * Hero Metrics Section - Shows the three key statistics at a glance
- * - Total Focus: Lifetime hours (not filtered)
- * - Particles: Count filtered by time range
- * - Focus Score: Score filtered by time range
+ * All metrics are filtered by the selected time range (D/W/M/All)
+ * - Total Focus: Hours of focus time
+ * - Particles: Count of completed work sessions
+ * - Focus Score: Consistency score (0-100%)
  */
 export function DashboardHeroMetrics({
   totalHours,
