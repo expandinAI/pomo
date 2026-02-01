@@ -121,9 +121,12 @@ export function useCoach(): UseCoachResult {
         });
         hasGeneratedInsightRef.current = true;
 
-        // Dispatch event for toast notification
+        // Dispatch event for CoachParticle glow + StatusMessage preview
         window.dispatchEvent(new CustomEvent('particle:insight-ready', {
-          detail: { title: generated.title }
+          detail: {
+            title: generated.title,
+            preview: generated.title // Title is already concise, use as preview
+          }
         }));
       } else if (response.status === 429) {
         // Quota limit reached - graceful degradation

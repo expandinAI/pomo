@@ -33,6 +33,8 @@ interface StatusMessageProps {
   overflowEnabled?: boolean;
   /** Whether auto-start is enabled */
   autoStartEnabled?: boolean;
+  /** AI Coach insight preview (shown when new insight arrives) */
+  coachInsightPreview?: string | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -82,6 +84,7 @@ export function StatusMessage({
   hoveredModeIndicator,
   overflowEnabled,
   autoStartEnabled,
+  coachInsightPreview,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -91,11 +94,12 @@ export function StatusMessage({
    * 1. Auto-Start Countdown (highest priority)
    * 2. Explicit message (toast, celebration, skip, etc.)
    * 3. Session Feedback (kontextueller Moment after completion)
-   * 4. Mode indicator hover (overflow/autoStart icons)
-   * 5. Preset hover (only when idle)
-   * 6. Session status (when running)
-   * 7. End time preview
-   * 8. Wellbeing hint (lowest priority)
+   * 4. Coach Insight Preview (when new insight arrives)
+   * 5. Mode indicator hover (overflow/autoStart icons)
+   * 6. Preset hover (only when idle)
+   * 7. Session status (when running)
+   * 8. End time preview
+   * 9. Wellbeing hint (lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -113,18 +117,23 @@ export function StatusMessage({
       return formatFeedbackMessage(sessionFeedback);
     }
 
-    // 4. Mode indicator hover (overflow/autoStart icons)
+    // 4. Coach Insight Preview (when new insight arrives)
+    if (coachInsightPreview) {
+      return `✧ ${coachInsightPreview}`;
+    }
+
+    // 5. Mode indicator hover (overflow/autoStart icons)
     if (hoveredModeIndicator) {
       const isEnabled = hoveredModeIndicator === 'overflow' ? overflowEnabled : autoStartEnabled;
       return MODE_INDICATOR_DESCRIPTIONS[hoveredModeIndicator][isEnabled ? 'enabled' : 'disabled'];
     }
 
-    // 5. Preset hover (only when idle)
+    // 6. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 6. Session status (only when hovering collapsed view)
+    // 7. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);
@@ -140,12 +149,12 @@ export function StatusMessage({
       }
     }
 
-    // 7. End Time Preview (when setting enabled and timer running)
+    // 8. End Time Preview (when setting enabled and timer running)
     if (endTimePreview) {
       return endTimePreview;
     }
 
-    // 8. Wellbeing Hint (only during break, lowest priority)
+    // 9. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }

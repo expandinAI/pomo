@@ -61,41 +61,41 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
       aria-label={hasInsight ? 'New insight available - Open AI Coach' : 'Open AI Coach'}
       title="AI Coach · G C"
     >
-      {/* Aurora effect - soft wide glow when insight arrives */}
-      <AnimatePresence>
+      {/* Aurora effect - soft magical glow when insight arrives */}
+      <AnimatePresence mode="wait">
         {showAurora && (
           <>
-            {/* Wide aurora sweep */}
+            {/* Wide aurora sweep - slow, ethereal */}
             <motion.div
-              className="absolute inset-0 rounded-full bg-primary/20 light:bg-primary-dark/20"
+              className="absolute inset-0 rounded-full bg-primary/15 light:bg-primary-dark/15"
               initial={{ scale: 1, opacity: 0 }}
               animate={{
-                scale: [1, 2.5, 2],
-                opacity: [0, 0.7, 0],
+                scale: [1, 2.8, 2.2],
+                opacity: [0, 0.5, 0],
               }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, scale: 2.5, transition: { duration: 1.5, ease: 'easeOut' } }}
               transition={{
-                duration: 4,
-                ease: 'easeOut',
+                duration: 5,
+                ease: [0.4, 0, 0.2, 1], // Custom bezier for smooth flow
               }}
-              style={{ filter: 'blur(14px)' }}
+              style={{ filter: 'blur(16px)' }}
             />
 
-            {/* Inner glow */}
+            {/* Inner glow - gentle pulse */}
             <motion.div
-              className="absolute inset-0 rounded-full bg-primary/30 light:bg-primary-dark/30"
+              className="absolute inset-0 rounded-full bg-primary/20 light:bg-primary-dark/20"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{
-                scale: [0.8, 1.6, 1.3],
-                opacity: [0, 0.8, 0],
+                scale: [0.8, 1.8, 1.4],
+                opacity: [0, 0.6, 0],
               }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, scale: 1.6, transition: { duration: 1.2, ease: 'easeOut' } }}
               transition={{
-                duration: 3.5,
-                ease: 'easeOut',
-                delay: 0.3,
+                duration: 4.5,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.5,
               }}
-              style={{ filter: 'blur(8px)' }}
+              style={{ filter: 'blur(10px)' }}
             />
           </>
         )}

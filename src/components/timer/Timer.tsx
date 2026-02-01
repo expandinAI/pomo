@@ -386,6 +386,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Hovered mode indicator (overflow/autoStart icons)
   const [hoveredModeIndicator, setHoveredModeIndicator] = useState<'overflow' | 'autoStart' | null>(null);
 
+  // Coach insight preview (shown in StatusMessage when new insight arrives)
+  const [coachInsightPreview, setCoachInsightPreview] = useState<string | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -538,6 +541,26 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [welcomeMessage]);
+
+  // Listen for coach insight ready event (shows preview in StatusMessage)
+  useEffect(() => {
+    function handleInsightReady(e: Event) {
+      const customEvent = e as CustomEvent<{ title: string; preview: string }>;
+      setCoachInsightPreview(customEvent.detail.preview);
+    }
+    window.addEventListener('particle:insight-ready', handleInsightReady);
+    return () => window.removeEventListener('particle:insight-ready', handleInsightReady);
+  }, []);
+
+  // Auto-clear coach insight preview after 8 seconds
+  useEffect(() => {
+    if (coachInsightPreview) {
+      const timeout = setTimeout(() => {
+        setCoachInsightPreview(null);
+      }, 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [coachInsightPreview]);
 
   // Auto-clear contextual hint after 8 seconds
   useEffect(() => {
@@ -2012,6 +2035,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         hoveredModeIndicator={hoveredModeIndicator}
         overflowEnabled={overflowEnabled}
         autoStartEnabled={autoStartEnabled}
+        coachInsightPreview={coachInsightPreview}
       />
     </div>
   );
