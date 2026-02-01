@@ -19,23 +19,26 @@ interface ChatHistoryProps {
  * - User messages: Right-aligned with accent background
  * - Coach messages: Left-aligned with surface background
  * - Empty state: "Ask the Coach anything"
- * - Streaming support with auto-scroll
+ * - Streaming support with smooth auto-scroll
  */
 export function ChatHistory({
   messages,
   isLoading = false,
   isStreaming = false,
 }: ChatHistoryProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
   // Get the last message content for streaming updates
   const lastMessage = messages[messages.length - 1];
   const lastMessageContent = lastMessage?.content || '';
 
-  // Auto-scroll to bottom when new messages arrive or content updates during streaming
+  // Smooth auto-scroll to bottom when new messages arrive or content updates during streaming
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollAnchorRef.current && messages.length > 0) {
+      scrollAnchorRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
     }
   }, [messages.length, lastMessageContent]);
 
@@ -81,7 +84,7 @@ export function ChatHistory({
 
   // Message list
   return (
-    <div ref={scrollRef} className="space-y-3 py-4">
+    <div className="space-y-3 py-4">
       {messages.map((message, index) => {
         const isLastMessage = index === messages.length - 1;
         const isStreamingMessage =
@@ -116,6 +119,9 @@ export function ChatHistory({
           </motion.div>
         );
       })}
+
+      {/* Invisible scroll anchor for smooth auto-scroll */}
+      <div ref={scrollAnchorRef} aria-hidden="true" />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useCoach } from '@/hooks/useCoach';
 import { useCoachChat } from '@/hooks/useCoachChat';
 import { useAIQuota } from '@/lib/ai-quota/hooks';
-import { QuotaIndicatorCompact } from './QuotaIndicator';
+import { QuotaRing } from './QuotaRing';
 import { InsightCard } from './InsightCard';
 import { ChatHistory } from './ChatHistory';
 
@@ -125,14 +125,14 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
               >
                 {/* Header */}
                 <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <h2
                       id="coach-title"
                       className="text-base font-semibold text-primary light:text-primary-dark"
                     >
                       Coach
                     </h2>
-                    <QuotaIndicatorCompact />
+                    <QuotaRing />
                   </div>
                   <button
                     onClick={onClose}
