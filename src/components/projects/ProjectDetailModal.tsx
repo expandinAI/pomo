@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, Download } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { ProjectParticleViz } from './ProjectParticleViz';
@@ -10,6 +10,7 @@ import { ProjectStatsCards } from './ProjectStatsCards';
 import { ProjectSessionList } from './ProjectSessionList';
 import { ProjectForm } from './ProjectForm';
 import { ParticleDetailOverlay } from '@/components/timer/ParticleDetailOverlay';
+import { ExportDialog } from '@/components/export';
 import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
 import { useProjectStore } from '@/contexts/ProjectContext';
 import type { Project, ProjectWithStats } from '@/lib/projects';
@@ -47,6 +48,7 @@ export function ProjectDetailModal({
   checkDuplicateName,
 }: ProjectDetailModalProps) {
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const backButtonRef = useRef<HTMLButtonElement>(null);
@@ -134,8 +136,8 @@ export function ProjectDetailModal({
   // Keyboard shortcuts
   // Keyboard navigation - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
-    // Don't handle keys when editing project or session
-    if (!isOpen || showEditForm || editingSessionId) return;
+    // Don't handle keys when editing project or session or export dialog
+    if (!isOpen || showEditForm || showExportDialog || editingSessionId) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       // Close on Escape or Backspace
@@ -153,11 +155,19 @@ export function ProjectDetailModal({
         setShowEditForm(true);
         return;
       }
+
+      // Export on X
+      if (e.key === 'x' || e.key === 'X') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setShowExportDialog(true);
+        return;
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, showEditForm, editingSessionId, isNoProject, onClose]);
+  }, [isOpen, showEditForm, showExportDialog, editingSessionId, isNoProject, onClose]);
 
   // Handlers
   const handleClose = useCallback(() => {
@@ -254,17 +264,29 @@ export function ProjectDetailModal({
                       </div>
                     </div>
 
-                    {/* Edit button (only for real projects) */}
-                    {!isNoProject && (
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1">
+                      {/* Export button */}
                       <button
-                        onClick={() => setShowEditForm(true)}
+                        onClick={() => setShowExportDialog(true)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        title="Export time data"
                       >
-                        <Pencil className="w-4 h-4" />
-                        Edit
-                        <kbd className="ml-1 text-xs text-tertiary light:text-tertiary-dark">E</kbd>
+                        <Download className="w-4 h-4" />
+                        <kbd className="text-xs text-tertiary light:text-tertiary-dark">X</kbd>
                       </button>
-                    )}
+
+                      {/* Edit button (only for real projects) */}
+                      {!isNoProject && (
+                        <button
+                          onClick={() => setShowEditForm(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          <kbd className="text-xs text-tertiary light:text-tertiary-dark">E</kbd>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Content */}
@@ -299,6 +321,8 @@ export function ProjectDetailModal({
                   {/* Footer: Keyboard hints */}
                   <div className="px-6 py-2 border-t border-tertiary/10 light:border-tertiary-dark/10 text-xs text-tertiary light:text-tertiary-dark">
                     <kbd className="px-1 rounded bg-tertiary/10">Esc</kbd> back
+                    <span className="mx-2">·</span>
+                    <kbd className="px-1 rounded bg-tertiary/10">X</kbd> export
                     {!isNoProject && (
                       <>
                         <span className="mx-2">·</span>
@@ -333,6 +357,22 @@ export function ProjectDetailModal({
         onSessionDeleted={handleSessionDeleted}
         projects={allProjects}
         recentProjectIds={recentProjectIds}
+      />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        projectId={project?.id ?? null}
+        projectName={displayName}
+        sessions={projectSessions.map((s) => ({
+          id: s.id,
+          type: s.type,
+          duration: s.duration,
+          completedAt: s.completedAt,
+          task: s.task,
+          projectId: s.projectId,
+        }))}
       />
     </>
   );
