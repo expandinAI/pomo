@@ -175,6 +175,24 @@ function formatPeriod(start: Date, end: Date): string {
 }
 
 /**
+ * Format date as local YYYY-MM-DD (avoids UTC timezone issues)
+ */
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Parse local date key back to Date object
+ */
+function fromLocalDateKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
  * Group sessions by date
  */
 function groupByDate(sessions: ExportSession[]): Map<string, ExportSession[]> {
@@ -184,7 +202,8 @@ function groupByDate(sessions: ExportSession[]): Map<string, ExportSession[]> {
   const sorted = [...sessions].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   for (const session of sorted) {
-    const dateKey = session.date.toISOString().split('T')[0];
+    // Use local date format to avoid UTC timezone issues
+    const dateKey = toLocalDateKey(session.date);
     const existing = groups.get(dateKey) || [];
     existing.push(session);
     groups.set(dateKey, existing);
@@ -220,7 +239,7 @@ function TimeReport({ data }: TimeReportProps) {
         {/* Sessions grouped by day */}
         {Array.from(groupedSessions.entries()).map(([dateKey, sessions]) => {
           const dayTotal = sessions.reduce((sum, s) => sum + s.durationMinutes, 0);
-          const date = new Date(dateKey);
+          const date = fromLocalDateKey(dateKey);
 
           return (
             <View key={dateKey} style={styles.daySection}>

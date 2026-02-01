@@ -74,7 +74,8 @@ export function prepareExportData(
 
     return {
       id: session.id,
-      date: new Date(endTime.toDateString()), // Date only, no time
+      // Create date in local timezone (avoids UTC conversion issues)
+      date: new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate()),
       task: session.task,
       startTime: formatTime(startTime),
       endTime: formatTime(endTime),
