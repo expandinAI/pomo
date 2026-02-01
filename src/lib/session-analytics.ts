@@ -307,9 +307,18 @@ const DAY_NAMES_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 /**
  * Build a heatmap from session data
  * @param daysBack Number of days to analyze (default 30)
+ * @deprecated Use buildHeatmapFromSessions for time-range-filtered data
  */
 export function buildHeatmap(daysBack: number = 30): HeatmapData {
   const sessions = getSessionsFromDays(daysBack);
+  return buildHeatmapFromSessions(sessions);
+}
+
+/**
+ * Build a heatmap from a given array of sessions
+ * Use this with filterSessionsByTimeRange for calendar-based filtering
+ */
+export function buildHeatmapFromSessions(sessions: CompletedSession[]): HeatmapData {
 
   // Initialize 7×17 grid with zeros
   const grid: HeatmapCell[][] = [];

@@ -203,6 +203,7 @@ export function StatisticsDashboard({ refreshTrigger }: StatisticsDashboardProps
                     timeRange={timeRange}
                     onTimeRangeChange={setTimeRange}
                     refreshTrigger={refreshTrigger}
+                    filteredSessions={filteredSessions}
                     totalHours={totalHours}
                     particleCount={particleCount}
                     focusScore={focusScore}

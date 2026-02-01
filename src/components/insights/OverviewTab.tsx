@@ -9,6 +9,7 @@ import {
   formatTrendMessage,
 } from '@/lib/session-analytics';
 import type { ProjectBreakdown } from '@/lib/projects';
+import type { CompletedSession } from '@/lib/session-storage';
 import { DashboardHeroMetrics } from './DashboardHeroMetrics';
 import { DashboardHeatmap } from './DashboardHeatmap';
 import { WeeklyBarChart } from './WeeklyBarChart';
@@ -21,6 +22,7 @@ interface OverviewTabProps {
   timeRange: TimeRange;
   onTimeRangeChange: (range: TimeRange) => void;
   refreshTrigger?: number;
+  filteredSessions: CompletedSession[];
 
   // Computed metrics
   totalHours: string;
@@ -41,6 +43,7 @@ export function OverviewTab({
   timeRange,
   onTimeRangeChange,
   refreshTrigger,
+  filteredSessions,
   totalHours,
   particleCount,
   focusScore,
@@ -72,6 +75,7 @@ export function OverviewTab({
       {/* Focus Patterns Heatmap */}
       <DashboardHeatmap
         timeRange={timeRange}
+        sessions={filteredSessions}
         refreshTrigger={refreshTrigger}
       />
 

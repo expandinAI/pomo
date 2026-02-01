@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Grid3X3, Sparkles } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
-import { buildHeatmap, type HeatmapData, type TimeRange } from '@/lib/session-analytics';
+import { buildHeatmapFromSessions, type HeatmapData, type TimeRange } from '@/lib/session-analytics';
+import type { CompletedSession } from '@/lib/session-storage';
 import { HeatmapGrid } from './HeatmapGrid';
 import { prefersReducedMotion } from '@/lib/utils';
 import { useFeature, useHasAccount } from '@/lib/tiers';
@@ -12,22 +13,15 @@ import { useTrial } from '@/lib/trial';
 
 interface DashboardHeatmapProps {
   timeRange: TimeRange;
+  sessions: CompletedSession[];
   refreshTrigger?: number;
 }
 
-// Map time range to number of days for heatmap analysis
-const TIME_RANGE_DAYS: Record<TimeRange, number> = {
-  day: 1,
-  week: 7,
-  month: 30,
-  all: 365, // Max 1 year for performance
-};
-
-// Human-readable labels for time ranges
+// Human-readable labels for time ranges (calendar-based)
 const TIME_RANGE_LABELS: Record<TimeRange, string> = {
   day: 'today',
-  week: 'the last 7 days',
-  month: 'the last 30 days',
+  week: 'this week',
+  month: 'this month',
   all: 'all time',
 };
 
@@ -35,18 +29,17 @@ const TIME_RANGE_LABELS: Record<TimeRange, string> = {
  * Dashboard Heatmap Section - Inline heatmap that follows Time Range
  * Shows focus patterns based on the selected time period
  */
-export function DashboardHeatmap({ timeRange, refreshTrigger }: DashboardHeatmapProps) {
+export function DashboardHeatmap({ timeRange, sessions, refreshTrigger }: DashboardHeatmapProps) {
   const [data, setData] = useState<HeatmapData | null>(null);
   const reducedMotion = prefersReducedMotion();
   const hasAdvancedStats = useFeature('advancedStats');
   const hasAccount = useHasAccount();
   const trial = useTrial();
 
-  // Build heatmap data based on time range
+  // Build heatmap data from filtered sessions (calendar-based filtering)
   useEffect(() => {
-    const days = TIME_RANGE_DAYS[timeRange];
-    setData(buildHeatmap(days));
-  }, [timeRange, refreshTrigger]);
+    setData(buildHeatmapFromSessions(sessions));
+  }, [sessions, refreshTrigger]);
 
   const timeRangeLabel = useMemo(() => TIME_RANGE_LABELS[timeRange], [timeRange]);
 
