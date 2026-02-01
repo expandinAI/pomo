@@ -205,7 +205,7 @@ export function ParticleMenu({
   const handleHintEnter = () => {
     if (!isOpen) {
       window.dispatchEvent(new CustomEvent('particle:ui-hint', {
-        detail: { hint: 'Menu · G M' }
+        detail: { hint: 'Menu · G' }
       }));
     }
   };
