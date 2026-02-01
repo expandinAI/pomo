@@ -203,7 +203,7 @@ export function CommandRegistration({
       {
         id: 'open-coach',
         label: 'Open Coach',
-        shortcut: 'C',
+        shortcut: 'G C',
         category: 'navigation',
         action: () => {
           window.dispatchEvent(new CustomEvent('particle:open-coach'));
