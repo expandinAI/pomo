@@ -86,10 +86,22 @@ export function ShortcutsHelp() {
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen]);
 
+  const handleHintEnter = () => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', {
+      detail: { hint: 'Keyboard Shortcuts · ?' }
+    }));
+  };
+
+  const handleHintLeave = () => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', { detail: { hint: null } }));
+  };
+
   return (
     <div className="relative">
       <motion.button
         onClick={toggleOpen}
+        onMouseEnter={handleHintEnter}
+        onMouseLeave={handleHintLeave}
         className="relative w-10 h-10 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Show keyboard shortcuts"
         aria-expanded={isOpen}

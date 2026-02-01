@@ -202,11 +202,25 @@ export function ParticleMenu({
 
   const totalItems = menuItems.length;
 
+  const handleHintEnter = () => {
+    if (!isOpen) {
+      window.dispatchEvent(new CustomEvent('particle:ui-hint', {
+        detail: { hint: 'Menu · G M' }
+      }));
+    }
+  };
+
+  const handleHintLeave = () => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', { detail: { hint: null } }));
+  };
+
   return (
     <div ref={menuRef} className="relative">
       {/* The Particle - trigger button */}
       <motion.button
         onClick={handleButtonClick}
+        onMouseEnter={handleHintEnter}
+        onMouseLeave={handleHintLeave}
         className={cn(
           'w-10 h-10 rounded-full flex items-center justify-center',
           'transition-colors duration-fast',

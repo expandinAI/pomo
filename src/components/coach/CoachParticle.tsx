@@ -64,9 +64,21 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
 
   const isPulsing = hasInsight && !showAurora;
 
+  const handleHintEnter = () => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', {
+      detail: { hint: hasInsight ? 'New insight · G C' : 'AI Coach · G C' }
+    }));
+  };
+
+  const handleHintLeave = () => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', { detail: { hint: null } }));
+  };
+
   return (
     <motion.button
       onClick={onOpenCoach}
+      onMouseEnter={handleHintEnter}
+      onMouseLeave={handleHintLeave}
       className={cn(
         'relative w-9 h-9 rounded-full flex items-center justify-center',
         'text-tertiary light:text-tertiary-dark',

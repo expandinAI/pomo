@@ -89,6 +89,17 @@ function StandardView({
     }
   }, [onParticleHover, getSessionForIndex]);
 
+  // Hover handlers for empty particles (show goal hint)
+  const handleEmptyEnter = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', {
+      detail: { hint: 'Set Goal · G O' }
+    }));
+  }, []);
+
+  const handleEmptyLeave = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', { detail: { hint: null } }));
+  }, []);
+
   return (
     <>
       {Array.from({ length: totalDots }).map((_, index) => {
@@ -105,8 +116,8 @@ function StandardView({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', ...SPRING.gentle, delay: index * 0.05 }}
             className={shouldGlow ? 'animate-slot-glow rounded-full' : ''}
-            onMouseEnter={isCompleted ? () => handleMouseEnter(index) : undefined}
-            onMouseLeave={isCompleted ? handleMouseLeave : undefined}
+            onMouseEnter={isCompleted ? () => handleMouseEnter(index) : handleEmptyEnter}
+            onMouseLeave={isCompleted ? handleMouseLeave : handleEmptyLeave}
             onTouchStart={isCompleted ? () => handleTouchStart(index) : undefined}
           >
             <AnimatePresence mode="wait">

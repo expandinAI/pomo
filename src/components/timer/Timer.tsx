@@ -390,6 +390,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Coach insight preview (shown in StatusMessage when new insight arrives)
   const [coachInsightPreview, setCoachInsightPreview] = useState<string | null>(null);
 
+  // UI element hover hint (for discoverability - command palette, shortcuts, etc.)
+  const [uiHint, setUiHint] = useState<string | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -516,6 +519,15 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [toastMessage]);
+
+  // Listen for UI hint events (hover hints for discoverability)
+  useEffect(() => {
+    function handleUiHint(e: CustomEvent<{ hint: string | null }>) {
+      setUiHint(e.detail.hint);
+    }
+    window.addEventListener('particle:ui-hint', handleUiHint as EventListener);
+    return () => window.removeEventListener('particle:ui-hint', handleUiHint as EventListener);
+  }, []);
 
   // Auto-clear session feedback after 6 seconds
   useEffect(() => {
@@ -2049,6 +2061,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         overflowEnabled={overflowEnabled}
         autoStartEnabled={autoStartEnabled}
         coachInsightPreview={coachInsightPreview}
+        uiHint={uiHint}
       />
     </div>
   );
