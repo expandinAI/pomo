@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import type { CoachMessage } from './types';
 import { cn } from '@/lib/utils';
 
@@ -109,12 +110,37 @@ export function ChatHistory({
                   : 'bg-tertiary/10 light:bg-tertiary-dark/10 text-primary light:text-primary-dark rounded-bl-sm'
               )}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {message.content}
-                {isStreamingMessage && (
-                  <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary/60 light:bg-primary-dark/60 animate-pulse" />
-                )}
-              </p>
+              {message.role === 'coach' ? (
+                <span className="text-sm leading-relaxed">
+                  <ReactMarkdown
+                    allowedElements={['p', 'strong', 'em', 'code']}
+                    unwrapDisallowed={true}
+                    components={{
+                      p: ({ children }) => <span>{children}</span>,
+                      strong: ({ children }) => (
+                        <strong className="font-semibold">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic">{children}</em>
+                      ),
+                      code: ({ children }) => (
+                        <code className="px-1 py-0.5 rounded bg-tertiary/20 light:bg-tertiary-dark/20 font-mono text-xs">
+                          {children}
+                        </code>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                  {isStreamingMessage && (
+                    <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary/60 light:bg-primary-dark/60 animate-pulse" />
+                  )}
+                </span>
+              ) : (
+                <span className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {message.content}
+                </span>
+              )}
             </div>
           </motion.div>
         );
