@@ -1500,6 +1500,13 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         return;
       }
 
+      // Don't intercept keyboard shortcuts with Cmd/Ctrl/Alt modifiers
+      // (allows Cmd+R for refresh, Cmd+T for new tab, etc.)
+      // Shift is allowed as it's used for time adjustments (Shift+Arrow)
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
       switch (e.key) {
         case ' ':
           e.preventDefault();
