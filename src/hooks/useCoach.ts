@@ -162,11 +162,6 @@ export function useCoach(): UseCoachResult {
       console.log('[useCoach] Already attempted this session');
       return;
     }
-    // Skip if settings-based limits don't allow generation
-    if (!canGenerateInsight()) {
-      console.log('[useCoach] Insight generation blocked by frequency settings');
-      return;
-    }
     if (!context) {
       console.log('[useCoach] No context available yet');
       return;
@@ -175,7 +170,7 @@ export function useCoach(): UseCoachResult {
     // Mark as attempted for this session
     hasAttemptedThisSession.current = true;
 
-    // Check cache first (saves API costs)
+    // Check cache first - always show cached insight regardless of frequency settings
     const contextHash = generateContextHash(context);
     const cachedInsight = getCachedInsight(contextHash);
 
@@ -190,6 +185,12 @@ export function useCoach(): UseCoachResult {
           preview: cachedInsight.title
         }
       }));
+      return;
+    }
+
+    // Only check frequency settings when we need to make an API call
+    if (!canGenerateInsight()) {
+      console.log('[useCoach] Insight generation blocked by frequency settings');
       return;
     }
 
