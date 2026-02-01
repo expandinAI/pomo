@@ -7,6 +7,16 @@
 import type { ExportData } from './types';
 
 /**
+ * Format date as YYYY-MM-DD (using local timezone, not UTC)
+ */
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * JSON export format - clean, structured data
  */
 export interface JSONExport {
@@ -51,7 +61,7 @@ export function generateJSON(data: ExportData): JSONExport {
     },
     sessions: data.sessions.map((s) => ({
       id: s.id,
-      date: s.date.toISOString().split('T')[0],
+      date: formatLocalDate(s.date),
       task: s.task || null,
       startTime: s.startTime,
       endTime: s.endTime,
