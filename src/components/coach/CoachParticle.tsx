@@ -14,11 +14,15 @@ interface CoachParticleProps {
 /** Duration of the aurora entrance effect in ms */
 const AURORA_DURATION = 5000;
 
+/** Duration of the arrival glow effect in ms */
+const ARRIVAL_DURATION = 3000;
+
 /**
  * AI Coach Sparkle Button
  *
  * Appears next to the Library button for Flow users.
  * When a new insight arrives: soft aurora glow effect.
+ * When StatusMessage disappears: brief "arrival" glow as insight settles in.
  * After that: gentle breathing pulse on the sparkle.
  */
 export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticleProps) {
@@ -26,6 +30,9 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
 
   // Track if insight just arrived (for aurora effect)
   const [showAurora, setShowAurora] = useState(false);
+
+  // Track "arrival" effect when StatusMessage disappears
+  const [showArrival, setShowArrival] = useState(false);
 
   // When hasInsight becomes true, trigger aurora
   useEffect(() => {
@@ -39,6 +46,19 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
       setShowAurora(false);
     }
   }, [hasInsight]);
+
+  // Listen for "arrival" event when StatusMessage disappears
+  useEffect(() => {
+    function handleArrival() {
+      setShowArrival(true);
+      setTimeout(() => {
+        setShowArrival(false);
+      }, ARRIVAL_DURATION);
+    }
+
+    window.addEventListener('particle:insight-arrived', handleArrival);
+    return () => window.removeEventListener('particle:insight-arrived', handleArrival);
+  }, []);
 
   if (!hasAICoach) return null;
 
@@ -101,6 +121,26 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
         )}
       </AnimatePresence>
 
+      {/* Arrival effect - when StatusMessage disappears, insight "settles in" */}
+      <AnimatePresence>
+        {showArrival && (
+          <motion.div
+            className="absolute inset-0 rounded-full bg-primary/30 light:bg-primary-dark/30"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{
+              scale: [0.5, 1.6, 1.2],
+              opacity: [0, 0.8, 0],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 2.5,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+            style={{ filter: 'blur(12px)' }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Gentle breathing glow - after aurora */}
       {isPulsing && (
         <motion.div
@@ -121,7 +161,11 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
       {/* The sparkle icon with breathing animation */}
       <motion.div
         animate={
-          isPulsing
+          showArrival
+            ? {
+                scale: [1, 1.2, 1.05],
+              }
+            : isPulsing
             ? {
                 scale: [1, 1.08, 1],
               }
@@ -132,12 +176,12 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
             : undefined
         }
         transition={{
-          duration: isPulsing ? 4 : 2,
-          repeat: Infinity,
+          duration: showArrival ? 2.5 : isPulsing ? 4 : 2,
+          repeat: showArrival ? 0 : Infinity,
           ease: 'easeInOut',
         }}
       >
-        <SparkleIcon isPulsing={isPulsing} isAurora={showAurora} />
+        <SparkleIcon isPulsing={isPulsing} isAurora={showAurora} isArrival={showArrival} />
       </motion.div>
     </motion.button>
   );
@@ -146,7 +190,7 @@ export function CoachParticle({ onOpenCoach, hasInsight = false }: CoachParticle
 /**
  * Custom Sparkle Icon with alternating pulse animation
  */
-function SparkleIcon({ isPulsing, isAurora }: { isPulsing: boolean; isAurora: boolean }) {
+function SparkleIcon({ isPulsing, isAurora, isArrival }: { isPulsing: boolean; isAurora: boolean; isArrival: boolean }) {
   return (
     <svg
       className="w-4 h-4"
@@ -162,16 +206,23 @@ function SparkleIcon({ isPulsing, isAurora }: { isPulsing: boolean; isAurora: bo
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
-        style={isPulsing || isAurora ? { color: 'var(--color-primary)' } : undefined}
+        style={isPulsing || isAurora || isArrival ? { color: 'var(--color-primary)' } : undefined}
         animate={
-          isPulsing
+          isArrival
+            ? { opacity: [0.7, 1, 0.85] }
+            : isPulsing
             ? { opacity: [0.7, 1, 0.7] }
             : isAurora
             ? { opacity: [0.7, 1, 0.7] }
             : undefined
         }
         transition={
-          isPulsing
+          isArrival
+            ? {
+                duration: 2.5,
+                ease: 'easeOut',
+              }
+            : isPulsing
             ? {
                 duration: 4,
                 repeat: Infinity,
@@ -193,16 +244,23 @@ function SparkleIcon({ isPulsing, isAurora }: { isPulsing: boolean; isAurora: bo
         stroke="currentColor"
         strokeWidth="1"
         strokeLinecap="round"
-        style={isPulsing || isAurora ? { color: 'var(--color-primary)' } : undefined}
+        style={isPulsing || isAurora || isArrival ? { color: 'var(--color-primary)' } : undefined}
         animate={
-          isPulsing
+          isArrival
+            ? { opacity: [0.5, 1, 0.7] }
+            : isPulsing
             ? { opacity: [0.5, 1, 0.5] }
             : isAurora
             ? { opacity: [0.5, 0.9, 0.5] }
             : { opacity: 0.5 }
         }
         transition={
-          isPulsing
+          isArrival
+            ? {
+                duration: 2.5,
+                ease: 'easeOut',
+              }
+            : isPulsing
             ? {
                 duration: 4,
                 repeat: Infinity,

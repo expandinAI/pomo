@@ -552,11 +552,13 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     return () => window.removeEventListener('particle:insight-ready', handleInsightReady);
   }, []);
 
-  // Auto-clear coach insight preview after 8 seconds
+  // Auto-clear coach insight preview after 8 seconds, then trigger "arrival" effect
   useEffect(() => {
     if (coachInsightPreview) {
       const timeout = setTimeout(() => {
         setCoachInsightPreview(null);
+        // Dispatch event for CoachParticle "arrival" effect
+        window.dispatchEvent(new CustomEvent('particle:insight-arrived'));
       }, 8000);
       return () => clearTimeout(timeout);
     }
