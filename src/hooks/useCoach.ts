@@ -6,6 +6,80 @@ import { buildCoachContext, type CoachContext } from '@/lib/coach';
 import type { GeneratedInsight } from '@/lib/coach';
 import { useCoachSettings } from '@/hooks/useCoachSettings';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Insight Caching (saves API costs by reusing recent insights)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const INSIGHT_CACHE_KEY = 'particle:coach-insight-cache';
+const CACHE_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+interface CachedInsight {
+  insight: CoachInsight;
+  generatedAt: number;
+  contextHash: string;
+}
+
+/**
+ * Generate a simple hash from context to detect significant changes
+ * A new insight is generated when todayParticles changes (new session completed)
+ */
+function generateContextHash(context: CoachContext): string {
+  return `${context.sessionSummary.todayParticles}-${context.sessionSummary.totalParticles}`;
+}
+
+/**
+ * Try to load a cached insight from localStorage
+ */
+function getCachedInsight(contextHash: string): CoachInsight | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const stored = localStorage.getItem(INSIGHT_CACHE_KEY);
+    if (!stored) return null;
+
+    const cached: CachedInsight = JSON.parse(stored);
+
+    // Check if cache is still valid
+    const age = Date.now() - cached.generatedAt;
+    if (age > CACHE_MAX_AGE_MS) {
+      console.log('[useCoach] Cache expired (age:', Math.round(age / 1000 / 60), 'min)');
+      return null;
+    }
+
+    // Check if context has changed significantly
+    if (cached.contextHash !== contextHash) {
+      console.log('[useCoach] Context changed, cache invalid');
+      console.log('[useCoach]   cached:', cached.contextHash, '→ current:', contextHash);
+      return null;
+    }
+
+    console.log('[useCoach] Using cached insight (age:', Math.round(age / 1000 / 60), 'min)');
+    return cached.insight;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Save an insight to the cache
+ */
+function setCachedInsight(insight: CoachInsight, contextHash: string): void {
+  if (typeof window === 'undefined') return;
+
+  const cached: CachedInsight = {
+    insight,
+    generatedAt: Date.now(),
+    contextHash,
+  };
+
+  try {
+    localStorage.setItem(INSIGHT_CACHE_KEY, JSON.stringify(cached));
+    console.log('[useCoach] Insight cached for future use');
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 interface UseCoachResult {
   /** Current insight from the coach */
   insight: CoachInsight | null;
@@ -75,7 +149,12 @@ export function useCoach(): UseCoachResult {
   }, []);
 
   /**
-   * Generate a daily insight from the AI
+   * Generate a daily insight from the AI (with caching)
+   *
+   * Cache strategy:
+   * - Cached insights are reused for up to 4 hours
+   * - Cache is invalidated when todayParticles changes (new session completed)
+   * - This saves API costs while ensuring fresh insights after new work
    */
   const generateDailyInsight = useCallback(async () => {
     // Skip if already attempted this session (prevents infinite retry loops on errors)
@@ -95,6 +174,24 @@ export function useCoach(): UseCoachResult {
 
     // Mark as attempted for this session
     hasAttemptedThisSession.current = true;
+
+    // Check cache first (saves API costs)
+    const contextHash = generateContextHash(context);
+    const cachedInsight = getCachedInsight(contextHash);
+
+    if (cachedInsight) {
+      // Use cached insight - no API call needed!
+      setInsight(cachedInsight);
+
+      // Dispatch event for CoachParticle glow + StatusMessage preview
+      window.dispatchEvent(new CustomEvent('particle:insight-ready', {
+        detail: {
+          title: cachedInsight.title,
+          preview: cachedInsight.title
+        }
+      }));
+      return;
+    }
 
     console.log('[useCoach] Generating daily insight...', {
       todayParticles: context.sessionSummary.todayParticles,
@@ -123,15 +220,20 @@ export function useCoach(): UseCoachResult {
         const generated: GeneratedInsight = data.insight;
         console.log('[useCoach] Insight generated:', generated.title);
 
-        setInsight({
+        const newInsight: CoachInsight = {
           id: `insight-${Date.now()}`,
           type: generated.type,
           title: generated.title,
           content: generated.content,
           highlights: generated.highlights,
           createdAt: new Date(),
-        });
+        };
+
+        setInsight(newInsight);
         recordInsightGenerated();
+
+        // Cache the insight for future page loads
+        setCachedInsight(newInsight, contextHash);
 
         // Dispatch event for CoachParticle glow + StatusMessage preview
         window.dispatchEvent(new CustomEvent('particle:insight-ready', {
