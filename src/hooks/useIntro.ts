@@ -166,6 +166,13 @@ export function useIntro(): UseIntroReturn {
 
     // Mark as ready - we now know whether to show intro or not
     setIsReady(true);
+
+    // Cleanup: Reset ref for StrictMode remount
+    // Without this, StrictMode's second mount sees hasInitialized=true
+    // and returns early, leaving isReady=false (black screen bug)
+    return () => {
+      hasInitialized.current = false;
+    };
   }, []);
 
   // Phase transition timer
