@@ -36,7 +36,14 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
   const [inputText, setInputText] = useState('');
 
   // Coach data and context
-  const { insight, isLoading, isLoadingInsight, context } = useCoach();
+  const { insight, isLoading, isLoadingInsight, context, refreshContext } = useCoach();
+
+  // Refresh context when modal opens to get latest particles
+  useEffect(() => {
+    if (isOpen) {
+      refreshContext();
+    }
+  }, [isOpen, refreshContext]);
 
   // Chat functionality
   const { messages, sendMessage, isStreaming, error: chatError } = useCoachChat();

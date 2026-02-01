@@ -274,50 +274,43 @@ export function AccountMenu({
                 />
               )}
 
-              {/* Appearance Mode Selector */}
+              {/* Appearance Mode Selector - Pill Style */}
               {onAppearanceModeChange && (
                 <div className="px-3 py-2">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-tertiary light:text-tertiary-dark uppercase tracking-wider">
                       Appearance
                     </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {APPEARANCE_OPTIONS.map((option) => {
-                      const isActive = appearanceMode === option.id;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => onAppearanceModeChange(option.id)}
-                          className={cn(
-                            'flex flex-col items-center gap-1 py-2 px-1.5 rounded-lg transition-colors',
-                            isActive
-                              ? 'bg-accent/15 light:bg-accent-dark/15 ring-1 ring-accent/50 light:ring-accent-dark/50'
-                              : 'bg-tertiary/5 light:bg-tertiary-dark/5 hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
-                          )}
-                        >
-                          <span
+                    <div className="relative flex items-center bg-tertiary/8 light:bg-tertiary-dark/8 rounded-full p-0.5">
+                      {/* Sliding indicator */}
+                      <motion.div
+                        className="absolute w-7 h-7 bg-white/12 light:bg-black/8 rounded-full"
+                        initial={false}
+                        animate={{
+                          x: appearanceMode === 'light' ? 0 : appearanceMode === 'dark' ? 28 : 56,
+                        }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                      {/* Buttons */}
+                      {APPEARANCE_OPTIONS.map((option) => {
+                        const isActive = appearanceMode === option.id;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => onAppearanceModeChange(option.id)}
+                            title={option.label}
                             className={cn(
+                              'relative z-10 w-7 h-7 flex items-center justify-center rounded-full transition-colors duration-150',
                               isActive
-                                ? 'text-accent light:text-accent-dark'
-                                : 'text-tertiary light:text-tertiary-dark'
+                                ? 'text-primary light:text-primary-dark'
+                                : 'text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark'
                             )}
                           >
                             {option.icon}
-                          </span>
-                          <span
-                            className={cn(
-                              'text-[10px] font-medium',
-                              isActive
-                                ? 'text-accent light:text-accent-dark'
-                                : 'text-secondary light:text-secondary-dark'
-                            )}
-                          >
-                            {option.label}
-                          </span>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}

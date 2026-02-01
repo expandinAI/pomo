@@ -14,6 +14,7 @@ import {
   Trophy,
   Shield,
   User,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { SPRING } from '@/styles/design-tokens';
@@ -44,6 +45,7 @@ interface ParticleMenuProps {
   onOpenMilestones?: () => void;
   onOpenLearn?: () => void;
   onOpenAccount?: () => void;
+  onOpenCoach?: () => void;
   /** When true, menu opens automatically (triggered by G key) */
   isGPressed?: boolean;
   /** Auth status to show appropriate account action */
@@ -83,6 +85,7 @@ export function ParticleMenu({
   onOpenMilestones,
   onOpenLearn,
   onOpenAccount,
+  onOpenCoach,
   isGPressed = false,
   authStatus = 'anonymous',
   planType,
@@ -120,6 +123,7 @@ export function ParticleMenu({
   // Build menu items based on available callbacks
   const menuItems: MenuItem[] = [
     { id: 'timeline', icon: <CalendarDays className="w-4 h-4" />, label: 'Timeline', key: 'T', onClick: onOpenTimeline },
+    ...(onOpenCoach ? [{ id: 'coach', icon: <Sparkles className="w-4 h-4" />, label: 'Coach', key: 'C', onClick: onOpenCoach }] : []),
     { id: 'stats', icon: <BarChart3 className="w-4 h-4" />, label: 'Statistics', key: 'S', onClick: onOpenStats },
     ...(onOpenHistory ? [{ id: 'history', icon: <Clock className="w-4 h-4" />, label: 'History', key: 'H', onClick: onOpenHistory }] : []),
     { id: 'projects', icon: <FolderKanban className="w-4 h-4" />, label: 'Projects', key: 'P', onClick: onOpenProjects },

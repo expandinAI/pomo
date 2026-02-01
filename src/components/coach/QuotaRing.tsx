@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useAIQuota, getQuotaPercentage } from '@/lib/ai-quota';
+import { useAIQuota } from '@/lib/ai-quota';
 
 interface QuotaRingProps {
   /** Ring size in pixels */
@@ -15,15 +15,15 @@ interface QuotaRingProps {
 }
 
 /**
- * QuotaRing - Circular indicator for AI Coach quota usage
+ * QuotaRing - Circular indicator for AI Coach quota remaining
  *
- * A minimal ring that fills up as quota is used.
+ * Like the timer ring: starts full and depletes as quota is used.
  * Hover to see exact numbers in a tooltip.
  *
  * States:
- * - Normal: Primary color
- * - Warning (90%+): Amber
- * - Limit reached: Red with pulse
+ * - Normal (>10% remaining): Primary color
+ * - Warning (<10% remaining): Amber
+ * - Limit reached (0%): Red with pulse
  */
 export function QuotaRing({
   size = 18,
@@ -38,15 +38,16 @@ export function QuotaRing({
   const radius = center - strokeWidth;
   const circumference = 2 * Math.PI * radius;
 
-  // Get fill percentage (0-100)
-  const percentage = quota ? getQuotaPercentage(quota) : 0;
+  // Calculate remaining percentage (100 = full, 0 = empty)
+  const remaining = quota ? quota.limit - quota.used : 0;
+  const remainingPercentage = quota ? Math.max(0, Math.round((remaining / quota.limit) * 100)) : 100;
 
-  // Ring fills clockwise from 12 o'clock as usage increases
+  // Ring depletes clockwise from 12 o'clock as quota is used
   const strokeDashoffset = useMemo(() => {
-    const fillRatio = percentage / 100;
-    // Negative offset makes the fill grow clockwise
-    return -circumference * (1 - fillRatio);
-  }, [percentage, circumference]);
+    const fillRatio = remainingPercentage / 100;
+    // Offset makes the ring deplete (like timer ring)
+    return circumference * (1 - fillRatio);
+  }, [remainingPercentage, circumference]);
 
   // Determine visual state
   const isWarning = quota?.isWarning ?? false;
@@ -59,9 +60,9 @@ export function QuotaRing({
     return 'text-primary light:text-primary-dark';
   };
 
-  // Tooltip text
+  // Tooltip text - shows remaining (like timer shows remaining time)
   const tooltipText = quota
-    ? `${quota.used} of ${quota.limit} used`
+    ? `${remaining} of ${quota.limit} remaining`
     : 'Loading...';
 
   // Pulse animation for warning/limit states
@@ -118,7 +119,7 @@ export function QuotaRing({
           className="text-tertiary/20 light:text-tertiary-dark/20"
         />
 
-        {/* Progress ring (fills as usage increases) */}
+        {/* Remaining ring (depletes as quota is used, like timer) */}
         <motion.circle
           cx={center}
           cy={center}

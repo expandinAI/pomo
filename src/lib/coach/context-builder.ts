@@ -175,13 +175,14 @@ function buildRecentActivity(
         new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     );
 
-  // Last session
+  // Last session (including task)
   const lastSession = workSessions[0];
   const lastSessionInfo = lastSession
     ? {
         projectName: lastSession.projectId
           ? projects.find((p) => p.id === lastSession.projectId)?.name
           : undefined,
+        task: lastSession.task || undefined,
         durationMinutes: Math.round(lastSession.duration / 60),
         completedAt: new Date(lastSession.completedAt),
       }
@@ -197,7 +198,7 @@ function buildRecentActivity(
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - 7);
   const weekSessions = workSessions.filter(
-    (s) => new Date(s.completedAt) >= weekStart && s.projectId
+    (s) => new Date(s.completedAt) >= weekStart
   );
 
   const projectMinutes: Record<string, number> = {};
@@ -221,10 +222,22 @@ function buildRecentActivity(
     ? projects.find((p) => p.id === activeProjectId)?.name || null
     : null;
 
+  // Recent tasks (unique, from last 7 days, max 10)
+  const recentTasks: string[] = [];
+  const seenTasks = new Set<string>();
+  for (const session of weekSessions) {
+    if (session.task && !seenTasks.has(session.task)) {
+      seenTasks.add(session.task);
+      recentTasks.push(session.task);
+      if (recentTasks.length >= 10) break;
+    }
+  }
+
   return {
     lastSession: lastSessionInfo,
     last24Hours,
     activeProject,
+    recentTasks,
   };
 }
 
@@ -289,9 +302,21 @@ export function formatContextForPrompt(context: CoachContext): string {
     const projectInfo = lastSession.projectName
       ? ` on "${lastSession.projectName}"`
       : '';
+    const taskInfo = lastSession.task
+      ? ` working on: "${lastSession.task}"`
+      : '';
     lines.push(
-      `**Recent:** You just completed a ${lastSession.durationMinutes}-minute focus session${projectInfo}`
+      `**Recent:** You just completed a ${lastSession.durationMinutes}-minute focus session${projectInfo}${taskInfo}`
     );
+  }
+
+  // Recent tasks (what they've been working on)
+  if (recentActivity.recentTasks.length > 0) {
+    lines.push('');
+    lines.push('**Recent tasks (last 7 days):**');
+    for (const task of recentActivity.recentTasks) {
+      lines.push(`- ${task}`);
+    }
   }
 
   return lines.join('\n');

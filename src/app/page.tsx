@@ -299,6 +299,17 @@ function HomeContent() {
     return () => window.removeEventListener('particle:open-milestones', handleOpenMilestones);
   }, [setShowJourney]);
 
+  // Listen for coach open event (from Command Palette)
+  useEffect(() => {
+    function handleOpenCoach() {
+      setShowCoach(true);
+      setHasCoachInsight(false);
+    }
+
+    window.addEventListener('particle:open-coach', handleOpenCoach);
+    return () => window.removeEventListener('particle:open-coach', handleOpenCoach);
+  }, []);
+
   // Listen for replay intro event (from Command Palette)
   useEffect(() => {
     function handleReplayIntro() {
@@ -491,6 +502,7 @@ function HomeContent() {
           onOpenMilestones={() => setShowJourney(true)}
           onOpenLearn={() => { setLearnInitialView(undefined); setShowLearn(true); }}
           onOpenAccount={() => setShowAccountPanel(true)}
+          onOpenCoach={() => { setShowCoach(true); setHasCoachInsight(false); }}
         />
       </div>
 

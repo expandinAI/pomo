@@ -201,6 +201,17 @@ export function CommandRegistration({
         keywords: ['timeline', 'day', 'view', 'sessions', 'history'],
       },
       {
+        id: 'open-coach',
+        label: 'Open Coach',
+        shortcut: 'C',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-coach'));
+        },
+        icon: <Sparkles className="w-4 h-4" />,
+        keywords: ['coach', 'ai', 'assistant', 'help', 'insight', 'advice', 'chat'],
+      },
+      {
         id: 'open-settings',
         label: 'Go to Settings',
         shortcut: '⌘,',

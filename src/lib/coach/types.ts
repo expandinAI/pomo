@@ -66,6 +66,7 @@ export interface RecentActivity {
   /** Most recent session completed */
   lastSession: {
     projectName?: string;
+    task?: string;
     durationMinutes: number;
     completedAt: Date;
   } | null;
@@ -73,6 +74,8 @@ export interface RecentActivity {
   last24Hours: number;
   /** Active project (most worked on this week) */
   activeProject: string | null;
+  /** Recent tasks (from last 7 days, unique, max 10) */
+  recentTasks: string[];
 }
 
 /**
