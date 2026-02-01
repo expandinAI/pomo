@@ -247,9 +247,24 @@ export function UnifiedTaskInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Hover hint for discoverability
+  const handleHintEnter = useCallback(() => {
+    if (!isFocused && !disabled) {
+      window.dispatchEvent(new CustomEvent('particle:ui-hint', {
+        detail: { hint: '~30m for time · Comma for multiple' }
+      }));
+    }
+  }, [isFocused, disabled]);
+
+  const handleHintLeave = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('particle:ui-hint', { detail: { hint: null } }));
+  }, []);
+
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
       <motion.div
+        onMouseEnter={handleHintEnter}
+        onMouseLeave={handleHintLeave}
         className={`
           relative z-20 px-4 py-3
           bg-surface/40 light:bg-surface-dark/40
