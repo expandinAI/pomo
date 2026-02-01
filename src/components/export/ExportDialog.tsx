@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText, FileSpreadsheet, FileJson, Loader2 } from 'lucide-react';
+import { X, Download, FileText, FileSpreadsheet, FileJson, Loader2, ChevronDown } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
-import type { ExportPeriod } from '@/lib/export/types';
-import { getDateRange, formatPeriodLabel, prepareExportData } from '@/lib/export';
+import { prepareExportData } from '@/lib/export';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -25,18 +24,68 @@ interface ExportDialogProps {
 
 type ExportFormat = 'csv' | 'pdf' | 'json';
 
-const PERIOD_OPTIONS: { value: ExportPeriod; label: string }[] = [
-  { value: 'this-week', label: 'This Week' },
-  { value: 'this-month', label: 'This Month' },
-  { value: 'last-month', label: 'Last Month' },
-];
+interface PeriodOption {
+  id: string;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+/**
+ * Get all months that have sessions
+ */
+function getAvailableMonths(sessions: Array<{ completedAt: string }>): PeriodOption[] {
+  const monthsMap = new Map<string, { start: Date; end: Date; count: number }>();
+
+  for (const session of sessions) {
+    const date = new Date(session.completedAt);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const key = `${year}-${month}`;
+
+    if (!monthsMap.has(key)) {
+      const start = new Date(year, month, 1);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(year, month + 1, 0);
+      end.setHours(23, 59, 59, 999);
+
+      monthsMap.set(key, { start, end, count: 0 });
+    }
+
+    monthsMap.get(key)!.count++;
+  }
+
+  // Convert to sorted array (newest first)
+  const months = Array.from(monthsMap.entries())
+    .map(([key, value]) => {
+      const [year, month] = key.split('-').map(Number);
+      const date = new Date(year, month, 1);
+      const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      return {
+        id: key,
+        label,
+        startDate: value.start,
+        endDate: value.end,
+        timestamp: date.getTime(),
+      };
+    })
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  return months.map(({ id, label, startDate, endDate }) => ({
+    id,
+    label,
+    startDate,
+    endDate,
+  }));
+}
 
 /**
  * ExportDialog - Modal for exporting project time data
  *
  * Allows users to:
- * - Select time period (this week, this month, last month)
- * - Choose format (CSV or PDF)
+ * - Select time period (specific month or all time)
+ * - Choose format (PDF, CSV, JSON)
  * - Download the export
  */
 export function ExportDialog({
@@ -46,30 +95,63 @@ export function ExportDialog({
   projectName,
   sessions,
 }: ExportDialogProps) {
-  const [period, setPeriod] = useState<ExportPeriod>('this-month');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('all-time');
   const [format, setFormat] = useState<ExportFormat>('pdf');
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Get available months from sessions
+  const availableMonths = useMemo(() => getAvailableMonths(sessions), [sessions]);
+
+  // Build period options: All Time + available months
+  const periodOptions = useMemo((): PeriodOption[] => {
+    // Find earliest and latest session dates for "All Time"
+    if (sessions.length === 0) {
+      return [];
+    }
+
+    const dates = sessions.map((s) => new Date(s.completedAt).getTime());
+    const earliest = new Date(Math.min(...dates));
+    const latest = new Date(Math.max(...dates));
+
+    earliest.setHours(0, 0, 0, 0);
+    latest.setHours(23, 59, 59, 999);
+
+    const allTime: PeriodOption = {
+      id: 'all-time',
+      label: 'All Time',
+      startDate: earliest,
+      endDate: latest,
+    };
+
+    return [allTime, ...availableMonths];
+  }, [sessions, availableMonths]);
+
+  // Get current period option
+  const currentPeriod = useMemo(() => {
+    return periodOptions.find((p) => p.id === selectedPeriod) || periodOptions[0];
+  }, [periodOptions, selectedPeriod]);
 
   // Calculate preview stats for selected period
-  const previewStats = useCallback(() => {
-    const { start, end } = getDateRange(period as 'this-week' | 'this-month' | 'last-month');
+  const stats = useMemo(() => {
+    if (!currentPeriod) {
+      return { sessions: 0, totalMinutes: 0 };
+    }
 
     const data = prepareExportData(sessions, {
       projectId: projectId ?? undefined,
       projectName,
-      startDate: start,
-      endDate: end,
-      format: 'csv', // Doesn't matter for stats
+      startDate: currentPeriod.startDate,
+      endDate: currentPeriod.endDate,
+      format: 'csv',
     });
 
     return {
       sessions: data.sessionCount,
       totalMinutes: data.totalMinutes,
     };
-  }, [sessions, projectId, projectName, period]);
-
-  const stats = previewStats();
+  }, [sessions, projectId, projectName, currentPeriod]);
 
   // Format duration for display
   const formatDuration = (minutes: number): string => {
@@ -82,17 +164,17 @@ export function ExportDialog({
 
   // Handle export
   const handleExport = useCallback(async () => {
+    if (!currentPeriod) return;
+
     setIsExporting(true);
     setError(null);
 
     try {
-      const { start, end } = getDateRange(period as 'this-week' | 'this-month' | 'last-month');
-
       const exportData = prepareExportData(sessions, {
         projectId: projectId ?? undefined,
         projectName,
-        startDate: start,
-        endDate: end,
+        startDate: currentPeriod.startDate,
+        endDate: currentPeriod.endDate,
         format,
       });
 
@@ -141,7 +223,13 @@ export function ExportDialog({
     } finally {
       setIsExporting(false);
     }
-  }, [period, format, sessions, projectId, projectName, onClose]);
+  }, [currentPeriod, format, sessions, projectId, projectName, onClose]);
+
+  // Handle period selection
+  const handleSelectPeriod = useCallback((periodId: string) => {
+    setSelectedPeriod(periodId);
+    setIsDropdownOpen(false);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -198,26 +286,58 @@ export function ExportDialog({
                   </div>
                 </div>
 
-                {/* Period selector */}
+                {/* Period selector - Dropdown */}
                 <div>
                   <div className="text-xs text-tertiary light:text-tertiary-dark uppercase tracking-wider mb-2">
                     Period
                   </div>
-                  <div className="flex gap-2">
-                    {PERIOD_OPTIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setPeriod(option.value)}
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className={cn(
+                        'w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                        'bg-tertiary/5 light:bg-tertiary-dark/5 text-primary light:text-primary-dark',
+                        'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+                        'border border-tertiary/10 light:border-tertiary-dark/10'
+                      )}
+                    >
+                      <span>{currentPeriod?.label || 'Select period'}</span>
+                      <ChevronDown
                         className={cn(
-                          'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                          period === option.value
-                            ? 'bg-primary/10 light:bg-primary-dark/10 text-primary light:text-primary-dark'
-                            : 'bg-tertiary/5 light:bg-tertiary-dark/5 text-secondary light:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10'
+                          'w-4 h-4 text-tertiary transition-transform',
+                          isDropdownOpen && 'rotate-180'
                         )}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
+                      />
+                    </button>
+
+                    {/* Dropdown menu */}
+                    <AnimatePresence>
+                      {isDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface light:bg-surface-dark rounded-xl border border-tertiary/10 light:border-tertiary-dark/10 shadow-lg z-10"
+                        >
+                          {periodOptions.map((option) => (
+                            <button
+                              key={option.id}
+                              onClick={() => handleSelectPeriod(option.id)}
+                              className={cn(
+                                'w-full px-4 py-2.5 text-left text-sm transition-colors',
+                                'hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10',
+                                selectedPeriod === option.id
+                                  ? 'text-primary light:text-primary-dark font-medium bg-tertiary/5 light:bg-tertiary-dark/5'
+                                  : 'text-secondary light:text-secondary-dark'
+                              )}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
