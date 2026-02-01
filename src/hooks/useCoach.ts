@@ -120,6 +120,11 @@ export function useCoach(): UseCoachResult {
           createdAt: new Date(),
         });
         hasGeneratedInsightRef.current = true;
+
+        // Dispatch event for toast notification
+        window.dispatchEvent(new CustomEvent('particle:insight-ready', {
+          detail: { title: generated.title }
+        }));
       } else if (response.status === 429) {
         // Quota limit reached - graceful degradation
         console.log('[useCoach] Quota limit reached (429), skipping insight');

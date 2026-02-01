@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/timer/Timer';
 import { ParticleMenu } from '@/components/ui/ParticleMenu';
 import { CommandButton, LibraryButton } from '@/components/ui/CornerControls';
+import { CoachParticle } from '@/components/coach';
 import { useTimerSettingsContext } from '@/contexts/TimerSettingsContext';
 import { useCommandPalette } from '@/contexts/CommandPaletteContext';
 import { useGPrefixNavigation } from '@/hooks/useGPrefixNavigation';
@@ -71,6 +72,10 @@ const FlowCelebration = dynamic(
   () => import('@/components/celebration').then(mod => ({ default: mod.FlowCelebration })),
   { ssr: false }
 );
+const CoachView = dynamic(
+  () => import('@/components/coach').then(mod => ({ default: mod.CoachView })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
@@ -116,6 +121,10 @@ function HomeContent() {
 
   // Account panel state (opened via ParticleMenu)
   const [showAccountPanel, setShowAccountPanel] = useState(false);
+
+  // AI Coach state
+  const [showCoach, setShowCoach] = useState(false);
+  const [hasCoachInsight, setHasCoachInsight] = useState(false);
 
   // Reset initialView when panel closes
   const handleLearnClose = useCallback(() => {
@@ -250,6 +259,9 @@ function HomeContent() {
       onLearn: () => {
         setLearnInitialView(undefined); // Reset to menu for G+L navigation
         setShowLearn(true);
+      },
+      onCoach: () => {
+        setShowCoach(true);
       },
     }),
     [setShowJourney]
@@ -405,6 +417,17 @@ function HomeContent() {
     return () => window.removeEventListener('particle:trigger-sync', handleTriggerSync);
   }, [triggerUpgrade]);
 
+  // Listen for insight ready event (from useCoach hook)
+  // When an insight is ready, the CoachParticle starts glowing
+  useEffect(() => {
+    function handleInsightReady() {
+      setHasCoachInsight(true);
+    }
+
+    window.addEventListener('particle:insight-ready', handleInsightReady);
+    return () => window.removeEventListener('particle:insight-ready', handleInsightReady);
+  }, []);
+
   // First-time intro: show fullscreen (no timer in background)
   // This only happens once, on the very first app open
   if (showIntro && isOriginalIntro) {
@@ -515,14 +538,24 @@ function HomeContent() {
         <ShortcutsHelp />
       </div>
 
-      {/* Bottom-right: Library Button (hidden on mobile) */}
-      <div className="hidden sm:block absolute bottom-4 right-4">
-        <LibraryButton
-          onOpenLibrary={() => {
-            setLearnInitialView(undefined);
-            setShowLearn(true);
+      {/* Bottom-right: Coach (always visible) + Library (desktop only) */}
+      <div className="flex absolute bottom-4 right-4 items-center gap-3">
+        <CoachParticle
+          onOpenCoach={() => {
+            setShowCoach(true);
+            setHasCoachInsight(false);
           }}
+          hasInsight={hasCoachInsight}
         />
+        {/* Library only on desktop */}
+        <div className="hidden sm:block">
+          <LibraryButton
+            onOpenLibrary={() => {
+              setLearnInitialView(undefined);
+              setShowLearn(true);
+            }}
+          />
+        </div>
       </div>
 
       {/* Learn Panel */}
@@ -595,6 +628,9 @@ function HomeContent() {
 
       {/* Flow Celebration - shown after successful Stripe checkout */}
       <FlowCelebration isOpen={showCelebration} onDismiss={dismissCelebration} />
+
+      {/* AI Coach View */}
+      <CoachView isOpen={showCoach} onClose={() => setShowCoach(false)} />
 
     </motion.main>
   );
