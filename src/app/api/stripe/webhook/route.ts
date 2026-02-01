@@ -255,8 +255,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const customerId = invoice.customer as string;
 
   // Only handle subscription invoices
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const invoiceAny = invoice as any;
+  const invoiceAny = invoice as unknown as { subscription?: string };
   const subscriptionId = invoiceAny.subscription;
   if (!subscriptionId) return;
 

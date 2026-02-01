@@ -17,7 +17,8 @@ export type TierFeature =
   | 'advancedStats' // Focus heatmap, advanced analytics
   | 'unlimitedProjects' // No project limit
   | 'allAmbientSounds' // Premium ambient sounds
-  | 'allThemes'; // Premium themes
+  | 'allThemes' // Premium themes
+  | 'aiCoach'; // AI Coach with monthly query limit
 
 /** Limits that vary by tier */
 export type TierLimitKey =
@@ -42,6 +43,7 @@ export const LOCAL_CONFIG: TierConfig = {
     unlimitedProjects: false,
     allAmbientSounds: false,
     allThemes: false,
+    aiCoach: false,
   },
   limits: {
     maxActiveProjects: 3,
@@ -60,6 +62,7 @@ export const FREE_CONFIG: TierConfig = {
     unlimitedProjects: false,
     allAmbientSounds: false,
     allThemes: false,
+    aiCoach: false,
   },
   limits: {
     maxActiveProjects: 5,
@@ -78,6 +81,7 @@ export const FLOW_CONFIG: TierConfig = {
     unlimitedProjects: true,
     allAmbientSounds: true,
     allThemes: true,
+    aiCoach: true,
   },
   limits: {
     maxActiveProjects: 'unlimited',
@@ -130,5 +134,9 @@ export const FEATURE_INFO: Record<TierFeature, { name: string; description: stri
   allThemes: {
     name: 'Premium Themes',
     description: 'Customize with exclusive themes',
+  },
+  aiCoach: {
+    name: 'AI Coach',
+    description: 'Get personalized focus insights',
   },
 };

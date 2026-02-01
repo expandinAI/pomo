@@ -81,8 +81,8 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
     [handleSubmit]
   );
 
-  // Focus trap - focus the modal container itself to avoid visible ring on close button
-  useFocusTrap(modalRef, isOpen, { initialFocusRef: modalRef });
+  // Focus trap - focus the chat input for immediate typing (keyboard-first UX)
+  useFocusTrap(modalRef, isOpen, { initialFocusRef: inputRef });
 
   // Handle keyboard shortcuts - capture phase + stopImmediatePropagation prevents Timer interference
   useEffect(() => {
