@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Data Export UI (POMO-327, 2 SP)**:
+  - GDPR-compliant data export as JSON
+  - `src/lib/data-export.ts`: Collects all user data from IndexedDB and localStorage
+  - Export includes: sessions, projects, recentTasks, milestones, and all settings
+  - `DataExportSettings` component with loading/success/error states
+  - Added to Settings modal under new "Privacy" section
+  - Filename format: `particle-data-YYYY-MM-DD.json`
 - **Stripe Setup & Checkout (POMO-311, 3 SP)**:
   - Stripe Integration mit Test + Live Keys
   - Flow Monthly (€4.99) und Yearly (€39) Products
