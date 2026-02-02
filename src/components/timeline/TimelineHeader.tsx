@@ -57,10 +57,10 @@ export function TimelineHeader({
         {/* Previous day */}
         <button
           onClick={onPreviousDay}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="w-11 h-11 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           aria-label="Previous day"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-6 h-6 sm:w-5 sm:h-5" />
         </button>
 
         {/* Date label with subtle fade */}
@@ -81,10 +81,10 @@ export function TimelineHeader({
         <button
           onClick={onNextDay}
           disabled={!canGoForward}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-11 h-11 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Next day"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-6 h-6 sm:w-5 sm:h-5" />
         </button>
       </div>
 

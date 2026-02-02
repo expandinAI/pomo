@@ -137,6 +137,7 @@ export function TimelineBlock({
         }}
         transition={{ type: 'spring', ...SPRING.snappy }}
         whileHover={isWork ? { opacity: 1 } : undefined}
+        whileTap={isWork ? { scale: 0.95 } : undefined}
       />
     </motion.div>
   );

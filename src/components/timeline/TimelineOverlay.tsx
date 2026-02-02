@@ -151,7 +151,7 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                   className="bg-surface light:bg-surface-dark rounded-2xl shadow-xl border border-tertiary/10 light:border-tertiary-dark/10 focus:outline-none"
                 >
                   {/* Header */}
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
+                  <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-tertiary/10 light:border-tertiary-dark/10">
                     <h2
                       id="timeline-title"
                       className="text-lg font-semibold text-primary light:text-primary-dark"
@@ -168,7 +168,7 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                   </div>
 
                   {/* Content */}
-                  <div className="p-6 py-8 overflow-visible">
+                  <div className="p-4 py-6 sm:p-6 sm:py-8 overflow-visible">
                     {/* Day navigation */}
                     <TimelineHeader
                       date={date}
@@ -195,8 +195,8 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                     />
                   </div>
 
-                  {/* Footer hint */}
-                  <div className="px-6 py-3 border-t border-tertiary/10 light:border-tertiary-dark/10">
+                  {/* Footer hint - desktop: keyboard shortcuts */}
+                  <div className="hidden sm:block px-6 py-3 border-t border-tertiary/10 light:border-tertiary-dark/10">
                     <p className="text-xs text-tertiary light:text-tertiary-dark text-center">
                       Click a particle for details
                       <span className="mx-2 opacity-50">&middot;</span>
@@ -206,6 +206,13 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                       <span className="mx-2 opacity-50">&middot;</span>
                       <kbd className="px-1 rounded bg-tertiary/10 light:bg-tertiary-dark/10">T</kbd>
                       <span className="ml-1">for today</span>
+                    </p>
+                  </div>
+
+                  {/* Footer hint - mobile: touch hint */}
+                  <div className="block sm:hidden px-4 py-3 border-t border-tertiary/10 light:border-tertiary-dark/10">
+                    <p className="text-xs text-tertiary light:text-tertiary-dark text-center">
+                      Tap a particle for details
                     </p>
                   </div>
                 </div>

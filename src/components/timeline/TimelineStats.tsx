@@ -80,49 +80,58 @@ export function TimelineStats({
 
   return (
     <motion.div
-      className="flex items-center justify-center gap-16 pt-6 min-h-[72px]"
+      className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-16 pt-6 min-h-[72px]"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Particle count - fixed width */}
-      <motion.div variants={itemVariants} className="text-center min-w-[80px]">
+      {/* Particle count */}
+      <motion.div variants={itemVariants} className="flex sm:block items-center justify-between w-full sm:w-auto sm:text-center sm:min-w-[80px] px-2 sm:px-0">
+        <p className="text-xs text-tertiary light:text-tertiary-dark sm:hidden">
+          {particleCount === 1 ? 'particle' : 'particles'}
+        </p>
         <p className="text-2xl font-light text-primary light:text-primary-dark tabular-nums">
           {particleCount}
         </p>
-        <p className="text-xs text-tertiary light:text-tertiary-dark">
+        <p className="text-xs text-tertiary light:text-tertiary-dark hidden sm:block">
           {particleCount === 1 ? 'particle' : 'particles'}
         </p>
       </motion.div>
 
-      {/* Divider */}
+      {/* Divider - hidden on mobile */}
       <motion.div
         variants={itemVariants}
-        className="w-px h-10 bg-tertiary/20 light:bg-tertiary-dark/20"
+        className="hidden sm:block w-px h-10 bg-tertiary/20 light:bg-tertiary-dark/20"
       />
 
-      {/* Total focus time - fixed width for values like "1h 30m" */}
-      <motion.div variants={itemVariants} className="text-center min-w-[100px]">
+      {/* Total focus time */}
+      <motion.div variants={itemVariants} className="flex sm:block items-center justify-between w-full sm:w-auto sm:text-center sm:min-w-[100px] px-2 sm:px-0">
+        <p className="text-xs text-tertiary light:text-tertiary-dark sm:hidden">
+          focus time
+        </p>
         <p className="text-2xl font-light text-primary light:text-primary-dark tabular-nums">
           {formatDuration(totalFocusSeconds)}
         </p>
-        <p className="text-xs text-tertiary light:text-tertiary-dark">
+        <p className="text-xs text-tertiary light:text-tertiary-dark hidden sm:block">
           focus time
         </p>
       </motion.div>
 
-      {/* Divider */}
+      {/* Divider - hidden on mobile */}
       <motion.div
         variants={itemVariants}
-        className="w-px h-10 bg-tertiary/20 light:bg-tertiary-dark/20"
+        className="hidden sm:block w-px h-10 bg-tertiary/20 light:bg-tertiary-dark/20"
       />
 
-      {/* Active hours - fixed width for "00:00 - 00:00" format, always shown */}
-      <motion.div variants={itemVariants} className="text-center min-w-[140px]">
+      {/* Active hours */}
+      <motion.div variants={itemVariants} className="flex sm:block items-center justify-between w-full sm:w-auto sm:text-center sm:min-w-[140px] px-2 sm:px-0">
+        <p className="text-xs text-tertiary light:text-tertiary-dark sm:hidden">
+          active hours
+        </p>
         <p className="text-2xl font-light text-primary light:text-primary-dark tabular-nums">
           {activeHours ?? '—'}
         </p>
-        <p className="text-xs text-tertiary light:text-tertiary-dark">
+        <p className="text-xs text-tertiary light:text-tertiary-dark hidden sm:block">
           active hours
         </p>
       </motion.div>
