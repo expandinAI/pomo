@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 2
 feature: "[[features/gdpr-data-privacy]]"
 created: 2026-01-31
 updated: 2026-01-31
-done_date: null
+done_date: 2026-02-03
 tags: [gdpr, privacy, ui, settings]
 ---
 

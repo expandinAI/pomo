@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: "[[features/payment-integration]]"
 created: 2026-01-31
 updated: 2026-01-31
-done_date: null
+done_date: 2026-02-03
 tags: [payment, tier, flow]
 ---
 

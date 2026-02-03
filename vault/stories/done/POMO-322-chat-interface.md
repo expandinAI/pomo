@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: "[[features/ai-coach]]"
 created: 2026-01-31
-updated: 2026-01-31
-done_date: null
+updated: 2026-02-02
+done_date: 2026-02-02
 tags: [ai, coach, chat, llm]
 ---
 

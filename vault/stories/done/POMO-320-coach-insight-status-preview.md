@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 3
 feature: ai-coach
 created: 2025-02-01
-updated: 2025-02-01
-done_date: null
+updated: 2026-02-02
+done_date: 2026-02-02
 tags: [coach, status-message, notification]
 ---
 

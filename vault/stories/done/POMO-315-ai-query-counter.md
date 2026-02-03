@@ -1,13 +1,13 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
-feature: "[[features/payment-integration]]"
+feature: "[[features/ai-coach]]"
 created: 2026-01-31
-updated: 2026-01-31
-done_date: null
-tags: [payment, ai, limits]
+updated: 2026-02-02
+done_date: 2026-02-02
+tags: [ai, coach, limits]
 ---
 
 # POMO-315: AI Query Counter & Limits

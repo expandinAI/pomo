@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 2
 feature: "[[features/payment-integration]]"
 created: 2026-01-31
 updated: 2026-01-31
-done_date: null
+done_date: 2026-02-03
 tags: [payment, stripe, billing]
 ---
 

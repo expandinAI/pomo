@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p0
 effort: 5
 feature: "[[features/cloud-sync-accounts]]"
 created: 2026-01-28
 updated: 2026-01-29
-done_date: null
+done_date: 2026-02-03
 tags: [ui, auth, onboarding]
 ---
 

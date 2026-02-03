@@ -26,30 +26,86 @@ Some users want more insights, some want fewer. Make it configurable. Respect us
 
 ## Acceptance Criteria
 
-- [x] Setting: Proactive hints (More / Normal / Less / Off)
-- [ ] Setting: Weekly summary (On / Off) → moved to POMO-332
-- [x] Setting: Toast duration (3s / 5s / 8s)
-- [x] Settings in Account/Settings section
-- [x] Settings saved to localStorage
-- [x] Changes take effect immediately
+- [ ] Setting: Proactive hints (More / Normal / Less / Off)
+- [ ] Setting: Weekly summary (On / Off)
+- [ ] Setting: Toast duration (3s / 5s / 8s)
+- [ ] Settings in Account/Settings section
+- [ ] Settings saved to database
+- [ ] Changes take effect immediately
 
-## Implementation Notes
+## Technical Details
 
-### Implemented
-- `src/hooks/useCoachSettings.ts` - Settings hook with localStorage persistence
-- `src/components/settings/CoachSettings.tsx` - Settings UI (Flow-tier only)
-- Frequency logic: More (5/day, 1h), Normal (3/day, 2h), Less (1/day, 4h), Off
-- Toast duration: 3s / 5s / 8s configurable
-- Integrated with `useCoach.ts` for proactive insights
-- Integrated with `Timer.tsx` for StatusMessage duration
+### Files
+```
+src/
+├── components/
+│   └── settings/
+│       └── CoachSettings.tsx     # NEW
+└── lib/
+    └── coach/
+        └── settings.ts           # NEW: Defaults & types
+```
 
-### Not Implemented (moved to POMO-332)
-- Weekly Summary toggle (UI exists but functionality needs backend)
+### Settings Schema
+```typescript
+interface CoachSettings {
+  proactiveHints: 'more' | 'normal' | 'less' | 'off';
+  weeklySummary: boolean;
+  toastDuration: 3 | 5 | 8; // seconds
+}
+
+const DEFAULT_COACH_SETTINGS: CoachSettings = {
+  proactiveHints: 'normal',
+  weeklySummary: true,
+  toastDuration: 5,
+};
+```
+
+### Frequency Mapping
+
+| Setting | Max insights/day | Cooldown |
+|---------|------------------|----------|
+| `more` | 5 | 1h |
+| `normal` | 3 | 2h |
+| `less` | 1 | 4h |
+| `off` | 0 | – |
+
+### Database
+```sql
+ALTER TABLE users ADD COLUMN IF NOT EXISTS
+  coach_settings JSONB DEFAULT '{"proactiveHints": "normal", "weeklySummary": true, "toastDuration": 5}'::jsonb;
+```
+
+## UI/UX
+
+In Settings section:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Coach                                                            │
+│ ─────────────────────────────────────────────────────────────   │
+│                                                                   │
+│ Proactive Insights                                               │
+│ ┌─────────┬─────────┬─────────┬─────────┐                       │
+│ │  More   │ Normal  │  Less   │   Off   │                       │
+│ └─────────┴────●────┴─────────┴─────────┘                       │
+│ The Coach shares observations from time to time                  │
+│                                                                   │
+│ Weekly Summary                                         [●]       │
+│ Get a summary of your week every Monday                         │
+│                                                                   │
+│ Toast Duration                                                    │
+│ ┌─────────┬─────────┬─────────┐                                 │
+│ │   3s    │   5s    │   8s    │                                 │
+│ └─────────┴────●────┴─────────┘                                 │
+│ How long insights stay visible                                   │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Definition of Done
 
-- [x] Settings UI implemented
-- [x] Settings are saved (localStorage)
-- [x] Frequency logic respects settings
-- [x] Toast duration configurable
-- [ ] Weekly summary toggleable → POMO-332
+- [ ] Settings UI implemented
+- [ ] Settings are saved
+- [ ] Frequency logic respects settings
+- [ ] Toast duration configurable
+- [ ] Weekly summary toggleable
