@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: "[[ideas/10x-particle-of-the-week]]"
 created: 2026-02-03
-updated: 2026-02-03
-done_date: null
+updated: 2026-02-04
+done_date: 2026-02-04
 tags: [10x, emotion, coach, celebration, viral]
 ---
 
@@ -301,31 +301,31 @@ const isPOTW = potwSessionIds.includes(session.id);
 ## Phasen
 
 ### Phase 1: MVP (2-3 SP)
-- [ ] Auswahl-Logik (längste Session)
-- [ ] Gold-Partikel in Timeline
-- [ ] Coach-Insight mit Narrativ
-- [ ] Speicherung in localStorage
+- [x] Auswahl-Logik (längste Session)
+- [x] Gold-Partikel in Timeline
+- [x] Coach-Insight mit Narrativ
+- [x] Speicherung in localStorage
 
 ### Phase 2: Hall of Fame (2 SP)
-- [ ] `G F` Shortcut
-- [ ] Sammlung aller POTWs
-- [ ] Mini-Story pro Eintrag
+- [x] `G F` Shortcut
+- [x] Sammlung aller POTWs
+- [x] Mini-Story pro Eintrag
 
 ### Phase 3: Sharing (2 SP)
-- [ ] Share-Card Generierung
-- [ ] Social Media Integration
-- [ ] "Made with Particle" Branding
+- [x] Share-Card Generierung
+- [x] Social Media Integration
+- [x] "Made with Particle" Branding
 
 ---
 
 ## Definition of Done
 
-- [ ] Gold-Partikel visuell anders (nicht nur Badge)
-- [ ] Coach erzählt Geschichte (nicht Statistik)
-- [ ] Narrativ fühlt sich persönlich an
-- [ ] Hall of Fame speichert alle POTWs
-- [ ] Share-Funktion funktioniert
-- [ ] User sagt "Wow" (nicht "Ok cool")
+- [x] Gold-Partikel visuell anders (nicht nur Badge)
+- [x] Coach erzählt Geschichte (nicht Statistik)
+- [x] Narrativ fühlt sich persönlich an
+- [x] Hall of Fame speichert alle POTWs
+- [x] Share-Funktion funktioniert
+- [x] User sagt "Wow" (nicht "Ok cool")
 
 ---
 
@@ -340,5 +340,18 @@ const isPOTW = potwSessionIds.includes(session.id);
 
 ## Arbeitsverlauf
 
-### Gestartet:
-### Erledigt:
+### Gestartet: 2026-02-03
+### Erledigt: 2026-02-04
+
+**Implementiert:**
+- `src/lib/coach/particle-of-week.ts` — POTW-Auswahl und Narrativ-Generierung
+- `src/components/hall-of-fame/HallOfFameModal.tsx` — Hall of Fame Modal mit G F Shortcut
+- `src/components/share/ShareCard.tsx` — Visuelle Karte für Image-Export (480×320px)
+- `src/components/share/ShareModal.tsx` — Modal mit Twitter, LinkedIn, Copy, Download
+- `src/lib/share/share-utils.ts` — URL-Builder und Clipboard-Funktionen
+- `src/lib/share/generate-image.ts` — html2canvas Wrapper für PNG-Export
+
+**Retrospektive:**
+- Saubere Architektur mit Trennung von Utils und UI
+- Gold-Styling durchgängig konsistent
+- Verbesserungspotential: Toast-System für Feedback, Format-Auswahl, Tweet-Preview

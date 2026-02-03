@@ -7,6 +7,15 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Particle of the Week — Hall of Fame & Sharing (POMO-338, 5 SP)**:
+  - Gold-Partikel in Timeline für wöchentlichen Highlight-Moment
+  - Narrativ-Generierung: "Am Donnerstag um 9:14 ist etwas passiert..."
+  - 5 Auswahl-Kriterien: longest, overflow, early_bird, weekend, consistency
+  - Hall of Fame Modal (`G F`) mit chronologischer Sammlung aller POTWs
+  - Share-Funktion: Twitter, LinkedIn, Clipboard-Copy, PNG-Download
+  - ShareCard (480×320px) mit Gold-Particle, Narrativ und "made with Particle"
+  - html2canvas für 2x Retina-Qualität Image-Export
+  - Keyboard-Support: ESC schließt beide Modals sauber
 - **Breathing Text-Guidance (POMO-337, 2 SP)**:
   - Text-Anweisungen während Breaks: "Einatmen · · · 4" → "Halten · · · 3" → "Ausatmen · · · 2" → "Halten · · · 1"
   - 16s Box Breathing Zyklus synchron mit Timer-Animation
@@ -377,6 +386,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-338-particle-of-the-week]]
 - [[stories/done/POMO-337-breathing-guidance]]
 - [[stories/done/POMO-328-account-deletion]]
 - [[stories/done/POMO-331-privacy-policy-page]]
