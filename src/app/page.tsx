@@ -22,6 +22,8 @@ import { useParticleAuth } from '@/lib/auth/hooks';
 import { AccountMenu } from '@/components/auth';
 import type { LearnView } from '@/components/learn/LearnMenu';
 import { useRouter } from 'next/navigation';
+import { useSessionStore } from '@/contexts/SessionContext';
+import { exportCurrentWeekAsCSV } from '@/lib/export-utils';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -88,6 +90,9 @@ function HomeContent() {
   // Router for navigation
   const router = useRouter();
 
+  // Session data for export
+  const { sessions } = useSessionStore();
+
   // Auth state
   const auth = useParticleAuth();
 
@@ -125,6 +130,9 @@ function HomeContent() {
   // AI Coach state
   const [showCoach, setShowCoach] = useState(false);
   const [hasCoachInsight, setHasCoachInsight] = useState(false);
+
+  // Export message state (for G+E quick export)
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
 
   // Reset initialView when panel closes
   const handleLearnClose = useCallback(() => {
@@ -263,8 +271,16 @@ function HomeContent() {
       onCoach: () => {
         setShowCoach(true);
       },
+      onExport: () => {
+        const { success, weekNumber, totalHours } = exportCurrentWeekAsCSV(sessions);
+        if (success) {
+          setExportMessage(`Exported · Week ${weekNumber} · ${totalHours}h`);
+        } else {
+          setExportMessage('No particles this week');
+        }
+      },
     }),
-    [setShowJourney]
+    [setShowJourney, sessions]
   );
 
   const { isGPressed } = useGPrefixNavigation(gPrefixCallbacks);
@@ -309,6 +325,14 @@ function HomeContent() {
     window.addEventListener('particle:open-coach', handleOpenCoach);
     return () => window.removeEventListener('particle:open-coach', handleOpenCoach);
   }, []);
+
+  // Auto-clear export message after 2 seconds
+  useEffect(() => {
+    if (exportMessage) {
+      const timeout = setTimeout(() => setExportMessage(null), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [exportMessage]);
 
   // Listen for replay intro event (from Command Palette)
   useEffect(() => {
@@ -542,6 +566,7 @@ function HomeContent() {
       <Timer
         onTimelineOpen={() => setShowTimeline(true)}
         onBeforeStart={handleBeforeStart}
+        exportMessage={exportMessage}
       />
 
       {/* Bottom-left: Command Palette + Keyboard Shortcuts (hidden on mobile) */}

@@ -97,3 +97,63 @@ export function exportSessionsAsCSV(sessionsInput?: UnifiedSession[]): boolean {
 
   return true;
 }
+
+/**
+ * Get start and end of current ISO week (Monday 00:00 - Sunday 23:59)
+ */
+function getCurrentWeekRange(): { start: Date; end: Date; weekNumber: number } {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  // Convert to Monday-based (0 = Monday, 6 = Sunday)
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+  const start = new Date(now);
+  start.setDate(now.getDate() + mondayOffset);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+
+  // Calculate ISO week number
+  const jan4 = new Date(now.getFullYear(), 0, 4);
+  const daysSinceJan4 = Math.floor((start.getTime() - jan4.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNumber = Math.ceil((daysSinceJan4 + jan4.getDay() + 1) / 7);
+
+  return { start, end, weekNumber };
+}
+
+/**
+ * Export current week's work sessions as CSV
+ * Returns success status, week number, and total hours
+ */
+export function exportCurrentWeekAsCSV(
+  sessionsInput?: UnifiedSession[]
+): { success: boolean; weekNumber: number; totalHours: number } {
+  const sessions = sessionsInput ?? loadSessions();
+  const { start, end, weekNumber } = getCurrentWeekRange();
+
+  // Filter sessions: only work sessions in the current week
+  const weekSessions = sessions.filter(session => {
+    if (session.type !== 'work') return false;
+    const completedAt = new Date(session.completedAt);
+    return completedAt >= start && completedAt <= end;
+  });
+
+  if (weekSessions.length === 0) {
+    return { success: false, weekNumber, totalHours: 0 };
+  }
+
+  // Calculate total hours
+  const totalSeconds = weekSessions.reduce((sum, s) => sum + s.duration, 0);
+  const totalHours = Math.round((totalSeconds / 3600) * 10) / 10; // Round to 1 decimal
+
+  // Generate CSV and download
+  const csv = generateCSV(weekSessions as CompletedSession[]);
+  const year = new Date().getFullYear();
+  const weekStr = weekNumber.toString().padStart(2, '0');
+  const filename = `particle-export-${year}-W${weekStr}.csv`;
+  downloadFile(csv, filename);
+
+  return { success: true, weekNumber, totalHours };
+}

@@ -60,6 +60,7 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'G M', description: 'Open Milestones', category: 'navigation' },
   { key: 'G L', description: 'Open Library', category: 'navigation' },
   { key: 'G C', description: 'Open AI Coach', category: 'navigation' },
+  { key: 'G E', description: 'Export current week', category: 'navigation' },
   { key: 'G ,', description: 'Open Settings', category: 'navigation' },
 
   // General shortcuts

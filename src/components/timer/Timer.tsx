@@ -47,6 +47,8 @@ interface TimerProps {
    * If omitted, timer starts normally.
    */
   onBeforeStart?: () => boolean;
+  /** Export message to display in StatusMessage (from G+E quick export) */
+  exportMessage?: string | null;
 }
 
 interface TimerState {
@@ -229,7 +231,7 @@ const initialState: TimerState = {
   autoStartCountdown: null,
 };
 
-export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
+export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
   // Custom timer settings (shared context)
@@ -2238,6 +2240,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         uiHint={uiHint}
         flowContinueMessage={flowContinueMessage}
         sessionTooShortMessage={sessionTooShortMessage}
+        exportMessage={exportMessage}
       />
     </div>
   );

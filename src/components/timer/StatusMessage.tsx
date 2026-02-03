@@ -41,6 +41,8 @@ interface StatusMessageProps {
   flowContinueMessage?: string | null;
   /** Session too short message (when finishing early with <2min elapsed) */
   sessionTooShortMessage?: string | null;
+  /** Export message (when G+E quick export is triggered) */
+  exportMessage?: string | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -94,6 +96,7 @@ export function StatusMessage({
   uiHint,
   flowContinueMessage,
   sessionTooShortMessage,
+  exportMessage,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -102,16 +105,17 @@ export function StatusMessage({
    * Get display message with priority:
    * 1. Auto-Start Countdown (highest priority)
    * 2. Explicit message (toast, celebration, skip, etc.)
-   * 3. Session too short message (when finishing early with <2min)
-   * 4. Flow continue message (when continuing in flow)
-   * 5. Session Feedback (kontextueller Moment after completion)
-   * 6. Coach Insight Preview (when new insight arrives)
-   * 7. Mode indicator hover (overflow/autoStart icons)
-   * 8. UI element hover hint (for discoverability)
-   * 9. Preset hover (only when idle)
-   * 10. Session status (when running)
-   * 11. End time preview
-   * 12. Wellbeing hint (lowest priority)
+   * 3. Export message (after quick export)
+   * 4. Session too short message (when finishing early with <2min)
+   * 5. Flow continue message (when continuing in flow)
+   * 6. Session Feedback (kontextueller Moment after completion)
+   * 7. Coach Insight Preview (when new insight arrives)
+   * 8. Mode indicator hover (overflow/autoStart icons)
+   * 9. UI element hover hint (for discoverability)
+   * 10. Preset hover (only when idle)
+   * 11. Session status (when running)
+   * 12. End time preview
+   * 13. Wellbeing hint (lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -124,43 +128,48 @@ export function StatusMessage({
       return message;
     }
 
-    // 3. Session too short message (when finishing early with <2min)
+    // 3. Export message (after quick export)
+    if (exportMessage) {
+      return exportMessage;
+    }
+
+    // 4. Session too short message (when finishing early with <2min)
     if (sessionTooShortMessage) {
       return sessionTooShortMessage;
     }
 
-    // 4. Flow continue message (when continuing in flow)
+    // 5. Flow continue message (when continuing in flow)
     if (flowContinueMessage) {
       return flowContinueMessage;
     }
 
-    // 5. Session Feedback (kontextueller Moment after completion)
+    // 6. Session Feedback (kontextueller Moment after completion)
     if (sessionFeedback) {
       return formatFeedbackMessage(sessionFeedback);
     }
 
-    // 6. Coach Insight Preview (when new insight arrives)
+    // 7. Coach Insight Preview (when new insight arrives)
     if (coachInsightPreview) {
       return `✧ ${coachInsightPreview}`;
     }
 
-    // 7. Mode indicator hover (overflow/autoStart icons)
+    // 8. Mode indicator hover (overflow/autoStart icons)
     if (hoveredModeIndicator) {
       const isEnabled = hoveredModeIndicator === 'overflow' ? overflowEnabled : autoStartEnabled;
       return MODE_INDICATOR_DESCRIPTIONS[hoveredModeIndicator][isEnabled ? 'enabled' : 'disabled'];
     }
 
-    // 8. UI element hover hint (for discoverability)
+    // 9. UI element hover hint (for discoverability)
     if (uiHint) {
       return uiHint;
     }
 
-    // 9. Preset hover (only when idle)
+    // 10. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 10. Session status (only when hovering collapsed view)
+    // 11. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);
@@ -176,12 +185,12 @@ export function StatusMessage({
       }
     }
 
-    // 11. End Time Preview (when setting enabled and timer running)
+    // 12. End Time Preview (when setting enabled and timer running)
     if (endTimePreview) {
       return endTimePreview;
     }
 
-    // 12. Wellbeing Hint (only during break, lowest priority)
+    // 13. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }
