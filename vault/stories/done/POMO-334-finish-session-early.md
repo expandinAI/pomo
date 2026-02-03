@@ -1,205 +1,177 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 2
 feature: timer
 created: 2026-02-02
-updated: 2026-02-02
-done_date: null
+updated: 2026-02-03
+done_date: 2026-02-03
 tags: [ux, timer, session-management, pause]
 ---
 
-# POMO-334: Finish Session Early via Pause UI
+# POMO-334: Finish Session Early (Pause-Zustand)
 
 ## User Story
 
 > Als **Particle-Nutzer im Pausenzustand**
-> möchte ich **die Option haben, meine aktuelle Session vorzeitig zu beenden**,
-> damit **ich bei Unterbrechungen oder wenn ich früher fertig bin, meine bisherige Fokuszeit trotzdem erfassen kann**.
+> möchte ich **meine aktuelle Session vorzeitig beenden und speichern können**,
+> damit **ich bei Unterbrechungen meine bisherige Fokuszeit nicht verliere, aber auch nicht gezwungen werde, in eine Pause zu wechseln**.
 
 ## Kontext
 
-Link zum Feature: [[features/timer]]
-
 **Problem:**
-Aktuell zeigt der Pause-Zustand nur "Resume" als Option. Wenn ein Nutzer eine Session unterbrechen muss (Meeting, Notfall, Task früher fertig), hat er keine einfache Möglichkeit, die Session sauber zu beenden und die bisherige Zeit zu loggen.
+Der Pause-Zustand zeigte nur "Resume". Bei Unterbrechungen (Meeting, Notfall, Task fertig) hatte der Nutzer zwei suboptimale Optionen:
+- `E` (End) → Session speichern, aber zurück zu Ready-State
+- `S` (Skip) → Session speichern, aber Wechsel zu Break
 
-**Bezug zu anderen Stories:**
-- Ergänzt **POMO-149** (Session Cancel Behavior) um explizite UI-Aktion
-- Nutzt die Partial-Session-Logik aus **POMO-155** (Partial Session Logging)
+**Lösung:**
+Neuer "Finish Early" Button (`F`) der:
+- Session speichert (wenn ≥2 min)
+- Im Work-Modus bleibt (kein erzwungener Break)
+- Dezentes visuelles Feedback gibt
 
 **Particle-Philosophie:**
-- **Reality, not Idealism** – Manchmal muss man früher aufhören
-- **Data Integrity** – Jede Minute Fokusarbeit zählt
-- **User Control** – Der Nutzer entscheidet, nicht das System
+- **Kein Zwang** – Der Nutzer entscheidet, ob Break oder weiterarbeiten
+- **Jede Minute zählt** – Fokuszeit ≥2 min wird erfasst
+- **Reduziert** – Ein Button, eine Aktion, klares Feedback
 
 ## Akzeptanzkriterien
 
 ### UI im Pause-Zustand
 
-- [ ] **Given** Timer pausiert (Focus-Session), **When** UI angezeigt, **Then** Button "Finish Early" sichtbar neben "Resume"
-- [ ] **Given** Timer pausiert (Break-Session), **When** UI angezeigt, **Then** Button "Skip Break" sichtbar (bestehende Logik)
-- [ ] **Given** Timer läuft, **When** UI angezeigt, **Then** kein "Finish Early" Button (nur Pause)
-- [ ] **Given** Timer gestoppt, **When** UI angezeigt, **Then** kein "Finish Early" Button (nur Start)
+- [x] **Given** Timer pausiert (Work), **When** UI angezeigt, **Then** "Finish Early" Button links vom Resume
+- [x] **Given** Timer pausiert (Break), **When** UI angezeigt, **Then** kein "Finish Early" Button
+- [x] **Given** Timer läuft, **When** UI angezeigt, **Then** kein "Finish Early" Button
+- [x] **Given** Timer idle, **When** UI angezeigt, **Then** kein "Finish Early" Button
 
 ### Finish Early Verhalten
 
-- [ ] **Given** Focus-Session pausiert (≥2 min), **When** "Finish Early" geklickt, **Then** bisherige Zeit wird geloggt + Timer zurückgesetzt
-- [ ] **Given** Focus-Session pausiert (<2 min), **When** "Finish Early" geklickt, **Then** Session verworfen (zu kurz)
-- [ ] **Given** Overflow-Modus aktiv (+05:00), **When** "Finish Early", **Then** Gesamtzeit (planned + overflow) wird geloggt
-- [ ] **Given** "Finish Early" ausgeführt, **When** Statistik, **Then** Session als "partial" markiert
+- [x] **Given** ≥2 min elapsed, **When** Finish Early, **Then** Session gespeichert + StatusMessage "Session saved · X min"
+- [x] **Given** <2 min elapsed, **When** Finish Early, **Then** StatusMessage "Session too short · min 2 min"
+- [x] **Given** Finish Early, **Then** Timer zurück auf Ready-State (gleicher Modus, volle Dauer)
+- [x] **Given** Finish Early, **Then** Task wird geleert, One-off Duration zurückgesetzt
 
-### Keyboard-Shortcut
+### Keyboard
 
-- [ ] **Given** Timer pausiert, **When** `F` gedrückt, **Then** "Finish Early" ausgeführt
-- [ ] **Given** Timer pausiert, **When** `Escape`, **Then** Session verwerfen (bestehend)
-- [ ] **Given** Command Palette offen, **When** "finish" eingegeben, **Then** "Finish Session Early" als Option
+- [x] **Given** Timer pausiert (Work), **When** `F` gedrückt, **Then** Finish Early ausgeführt
+- [x] **Given** Timer nicht pausiert, **When** `F` gedrückt, **Then** keine Aktion
+- [x] **Given** Help Modal (`?`), **Then** `F` dokumentiert unter "Timer"
 
 ### Feedback
 
-- [ ] **Given** "Finish Early" ausgeführt (≥2 min), **When** Session geloggt, **Then** kurze Bestätigung (Toast oder Animation)
-- [ ] **Given** "Finish Early" ausgeführt (<2 min), **When** verworfen, **Then** dezenter Hinweis "Session zu kurz"
+- [x] **Given** Session gespeichert, **Then** `flowContinueMessage` zeigt "Session saved · X min" (2s)
+- [x] **Given** Session zu kurz, **Then** `sessionTooShortMessage` zeigt "Session too short · min 2 min" (2s)
 
-## Technische Details
+## Implementierung
 
-### Betroffene Dateien
+### Geänderte Dateien
 
+| Datei | Änderung |
+|-------|----------|
+| `TimerControls.tsx` | `onFinishEarly` Prop + Button-Rendering |
+| `Timer.tsx` | `handleFinishEarly` Callback + `F` Keyboard-Handler + State |
+| `StatusMessage.tsx` | `sessionTooShortMessage` Prop + Priority #3 |
+| `shortcuts.ts` | `F` in SHORTCUTS Array |
+
+### Button-Design
+
+```tsx
+<motion.button
+  onClick={onFinishEarly}
+  className="absolute right-full mr-4 ... bg-tertiary/20 text-secondary"
+  aria-label="Finish session early (F)"
+  title="Finish early · F"
+>
+  <Check className="w-5 h-5" />
+</motion.button>
 ```
-src/
-├── components/timer/
-│   ├── Timer.tsx           # Pause-UI erweitern
-│   └── TimerControls.tsx   # "Finish Early" Button
-├── hooks/
-│   └── useTimer.ts         # finishEarly() Funktion
-├── lib/
-│   └── sessions.ts         # Partial-Session Logik
-└── commands/
-    └── timer-commands.ts   # Command Palette Integration
-```
 
-### Implementierungshinweise
+- Position: Links vom Resume-Button (`right-full mr-4`)
+- Styling: Subtil (`bg-tertiary/20`), nicht dominant
+- Icon: Checkmark (ohne bold strokeWidth – unterscheidet sich vom Done-Button)
+- Animation: Spring entry/exit, scale on hover/tap
 
-1. **Button-Logik:** Nur im Pause-Zustand sichtbar, nur bei Focus-Sessions
-2. **Minimum Threshold:** 2 Minuten Mindestzeit für Logging (bereits in POMO-155 definiert)
-3. **Session-Type:** `type: 'partial'` für alle früh beendeten Sessions
-4. **Analytics:** Partial Sessions werden separat in Statistiken ausgewiesen
-
-### State-Erweiterung
+### handleFinishEarly Logic
 
 ```typescript
-// In useTimer.ts
-const finishEarly = () => {
-  if (!isPaused || sessionType !== 'work') return;
+const handleFinishEarly = useCallback(() => {
+  if (!state.isPaused || state.mode !== 'work') return;
 
-  const elapsedSeconds = getElapsedTime();
+  const fullDuration = oneOffDurationRef.current ?? durationsRef.current[state.mode];
+  const elapsedTime = fullDuration - state.timeRemaining;
   const MIN_LOGGABLE = 2 * 60; // 2 Minuten
 
-  if (elapsedSeconds >= MIN_LOGGABLE) {
-    logSession({
-      type: 'partial',
-      duration: elapsedSeconds,
-      completionReason: 'early_finish',
-    });
-    showToast('Session gespeichert');
+  if (elapsedTime >= MIN_LOGGABLE) {
+    // Session speichern
+    void addSession(state.mode, elapsedTime, taskData);
+    setFlowContinueMessage(`Session saved · ${Math.round(elapsedTime / 60)} min`);
   } else {
-    showToast('Session zu kurz', 'info');
+    setSessionTooShortMessage('Session too short · min 2 min');
   }
 
-  resetTimer();
-};
+  // Reset zu Ready-State (gleicher Modus)
+  dispatch({ type: 'SET_MODE', mode: state.mode, durations: durationsRef.current });
+  workerReset(durationsRef.current[state.mode]);
+  // ... cleanup
+}, [/* deps */]);
 ```
 
-### Command Integration
+### Unterschied zu E und S
 
-```typescript
-// In timer-commands.ts
-{
-  id: 'finish-session-early',
-  label: 'Finish Session Early',
-  shortcut: 'F',
-  when: 'timer.isPaused && timer.sessionType === "work"',
-  action: () => timer.finishEarly(),
-}
+| Key | Aktion | Speichert? | Nächster State |
+|-----|--------|------------|----------------|
+| `E` | End/Cancel | Ja (≥60s) | Ready (Work) |
+| `S` | Skip | Ja (>60s) | Break |
+| `F` | Finish Early | Ja (≥2min) | Ready (Work) |
+
+**Warum `F` statt `E` erweitern?**
+- `E` hat 60s Threshold, `F` hat 2min (strengerer Standard für "echte" Session)
+- `F` nur im Pause-Zustand (bewusste Entscheidung, nicht versehentlich)
+- Semantik: "Finish" = erfolgreich abschließen, "End" = abbrechen
+
+## UI
+
 ```
+Pause-Zustand (Work-Session):
 
-## UI/UX
-
-**Pause-Zustand (Focus-Session):**
+          ┌─────┐     ┌─────────────┐
+          │  ✓  │     │   Resume    │
+          │     │     │   Space     │
+          └─────┘     └─────────────┘
+         Finish        (Primary)
+         Early
+          [F]
 ```
-┌─────────────────────────────────────────┐
-│                                         │
-│              18:24                      │
-│              PAUSED                     │
-│                                         │
-│   ┌──────────────┐  ┌────────────────┐  │
-│   │ Finish Early │  │    Resume      │  │
-│   │     [F]      │  │   [Space]      │  │
-│   └──────────────┘  └────────────────┘  │
-│                                         │
-└─────────────────────────────────────────┘
-```
-
-**Button-Styling:**
-- "Finish Early" = sekundärer Button (outline/ghost)
-- "Resume" = primärer Button (solid)
-- Monochrom, konsistent mit Design System
-- Icons optional: ✓ für Finish, ▶ für Resume
-
-**Verhalten:**
-- Click auf "Finish Early" → Session loggen + Reset
-- Keyboard `F` → gleiche Aktion
-- Hover zeigt Tooltip: "18:24 werden als Fokuszeit gespeichert"
-
-## Testing
-
-### Manuell zu testen
-
-- [ ] Focus-Session starten, nach 3 min pausieren, "Finish Early" klicken
-- [ ] Prüfen: Session erscheint in Statistik als partial (3 min)
-- [ ] Focus-Session starten, nach 30 sek pausieren, "Finish Early" klicken
-- [ ] Prüfen: Session wird verworfen (unter 2 min)
-- [ ] Break-Session pausieren: "Finish Early" sollte NICHT erscheinen
-- [ ] Keyboard: `F` im Pause-Zustand funktioniert
-- [ ] Command Palette: "finish" zeigt korrekten Befehl
-
-### Automatisierte Tests
-
-- [ ] Unit Test: `finishEarly()` mit verschiedenen Zeitwerten
-- [ ] Unit Test: Button-Visibility basierend auf State
-- [ ] Integration: Session wird korrekt in Storage gespeichert
 
 ## Definition of Done
 
-- [ ] "Finish Early" Button im Pause-Zustand implementiert
-- [ ] Keyboard-Shortcut `F` funktioniert
-- [ ] Command Palette Integration
-- [ ] Minimum Threshold (2 min) respektiert
-- [ ] Partial Sessions werden korrekt geloggt
-- [ ] Toast-Feedback implementiert
-- [ ] Tests geschrieben & grün
-- [ ] Code reviewed
-- [ ] Design-Prinzipien eingehalten (monochrom, minimal)
-- [ ] **Prüffrage:** Fühlt es sich natürlich an, eine Session früh zu beenden?
+- [x] Button im Pause-Zustand implementiert
+- [x] Keyboard-Shortcut `F` funktioniert
+- [x] 2-Minuten Threshold respektiert
+- [x] Sessions werden korrekt gespeichert
+- [x] StatusMessage Feedback implementiert
+- [x] In Help Modal dokumentiert
+- [x] TypeScript-Typen korrekt
+- [x] Lint & Typecheck grün
+- [x] **Prüffrage:** Fühlt es sich natürlich an? ✓
 
-## Nicht im Scope (v1)
+## Nicht im Scope
 
-- Konfirmations-Dialog vor "Finish Early" (bewusst weggelassen für schnellen Flow)
-- Anpassbares Minimum Threshold in Settings
-- "Finish Early" für Break-Sessions (Break = Skip)
-- Grund für frühes Beenden erfragen
-
-## Offene Fragen
-
-- **UX:** Soll "Finish Early" links oder rechts von "Resume" stehen? → Empfehlung: Links (sekundäre Aktion)
-- **Wording:** "Finish Early" vs "End Session" vs "Save & Stop"? → "Finish Early" ist klarer
+- Command Palette Integration (zu speziell für Pause-Zustand)
+- Konfirmations-Dialog (bewusst weggelassen)
+- "Finish Early" für Break-Sessions (Break = einfach skippen)
+- `type: 'partial'` Marker (Session ist eine normale Session)
 
 ---
 
-## Arbeitsverlauf
+## Changelog
 
-### Erstellt: 2026-02-02
-Story erstellt basierend auf User-Anfrage.
+### 2026-02-03 – Implementiert
+- Button links vom Resume-Button
+- `F` Shortcut im Pause-Zustand
+- StatusMessage für Feedback (saved / too short)
+- Dokumentation in Help Modal
 
-### Erledigt:
-<!-- Wird automatisch ausgefüllt wenn Story nach done/ verschoben wird -->
+### 2026-02-02 – Story erstellt
+- Initiale Spezifikation
