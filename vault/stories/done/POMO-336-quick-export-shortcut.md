@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 1
 feature: export
 created: 2026-02-03
 updated: 2026-02-03
-done_date: null
+done_date: 2026-02-03
 tags: [10x, quick-win, keyboard, freelancer, export]
 ---
 
@@ -43,22 +43,22 @@ Freelancer-Killer-Feature. Von 5 Klicks auf 2 Tasten. Existierende Logik, neuer 
 
 ### Shortcut
 
-- [ ] **Given** User ist in der App (kein Modal offen), **When** `G E` gedrückt, **Then** CSV der aktuellen Woche wird heruntergeladen
-- [ ] **Given** Modal/Overlay offen, **When** `G E`, **Then** keine Aktion (Shortcut blockiert)
-- [ ] Shortcut erscheint in Help-Modal (`?`) unter "Navigation"
+- [x] **Given** User ist in der App (kein Modal offen), **When** `G E` gedrückt, **Then** CSV der aktuellen Woche wird heruntergeladen
+- [x] **Given** Modal/Overlay offen, **When** `G E`, **Then** keine Aktion (Shortcut blockiert)
+- [x] Shortcut erscheint in Help-Modal (`?`) unter "Navigation"
 
 ### Export
 
-- [ ] **Given** Sessions diese Woche vorhanden, **When** Export, **Then** Datei `particle-export-2026-W05.csv` heruntergeladen
-- [ ] **Given** keine Sessions diese Woche, **When** Export, **Then** Toast "No particles this week"
-- [ ] CSV enthält nur Work-Sessions (keine Breaks)
-- [ ] CSV-Format identisch mit bestehendem Export (gleiche Spalten)
+- [x] **Given** Sessions diese Woche vorhanden, **When** Export, **Then** Datei `particle-export-2026-W05.csv` heruntergeladen
+- [x] **Given** keine Sessions diese Woche, **When** Export, **Then** Toast "No particles this week"
+- [x] CSV enthält nur Work-Sessions (keine Breaks)
+- [x] CSV-Format identisch mit bestehendem Export (gleiche Spalten)
 
 ### Feedback
 
-- [ ] **Given** Export erfolgreich, **Then** StatusMessage zeigt "Exported · Week 5 · 12.5h" (KW + Gesamtstunden)
-- [ ] **Given** Export leer, **Then** StatusMessage zeigt "No particles this week"
-- [ ] Message verschwindet nach 2s (wie `flowContinueMessage`)
+- [x] **Given** Export erfolgreich, **Then** StatusMessage zeigt "Exported · Week 5 · 12.5h" (KW + Gesamtstunden)
+- [x] **Given** Export leer, **Then** StatusMessage zeigt "No particles this week"
+- [x] Message verschwindet nach 2s (wie `flowContinueMessage`)
 
 ## Implementierung
 
@@ -226,12 +226,12 @@ No particles this week
 
 ## Definition of Done
 
-- [ ] `exportCurrentWeekAsCSV()` implementiert
-- [ ] `G E` Shortcut funktioniert
-- [ ] StatusMessage-Feedback (Erfolg + Leer)
-- [ ] Help-Modal aktualisiert
-- [ ] TypeScript-Typen korrekt
-- [ ] Lint & Typecheck grün
+- [x] `exportCurrentWeekAsCSV()` implementiert
+- [x] `G E` Shortcut funktioniert
+- [x] StatusMessage-Feedback (Erfolg + Leer)
+- [x] Help-Modal aktualisiert
+- [x] TypeScript-Typen korrekt
+- [x] Lint & Typecheck grün
 
 ## Nicht im Scope (v1)
 
@@ -252,5 +252,15 @@ No particles this week
 
 ## Arbeitsverlauf
 
-### Gestartet:
-### Erledigt:
+### Gestartet: 2026-02-03
+### Erledigt: 2026-02-03
+
+**Commit:** `1f18ef8` – feat(export): Add G E quick export shortcut (POMO-336)
+
+**Geänderte Dateien:**
+- `src/lib/export-utils.ts` – `getCurrentWeekRange()` + `exportCurrentWeekAsCSV()`
+- `src/hooks/useGPrefixNavigation.ts` – `onExport` Callback + case 'e'
+- `src/lib/shortcuts.ts` – `G E` Dokumentation
+- `src/components/timer/StatusMessage.tsx` – `exportMessage` Prop
+- `src/components/timer/Timer.tsx` – Prop durchreichen
+- `src/app/page.tsx` – State + Callback + Auto-clear
