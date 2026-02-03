@@ -217,10 +217,10 @@ export function AccountMenu({
             <div className="px-4 py-3 border-b border-tertiary/10 light:border-tertiary-dark/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <p className="text-sm text-primary light:text-primary-dark font-medium truncate">
+                  <p className="text-sm text-primary light:text-primary-dark font-medium truncate min-w-0">
                     {email || 'User'}
                   </p>
-                  <TierBadge tier={tier} />
+                  <TierBadge tier={tier} className="flex-shrink-0" />
                 </div>
                 {isControlled && (
                   <button

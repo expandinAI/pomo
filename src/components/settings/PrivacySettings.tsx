@@ -50,9 +50,6 @@ export function PrivacySettings({ onOpenDeleteModal }: PrivacySettingsProps) {
   const handleDeleteAccount = useCallback(() => {
     if (onOpenDeleteModal) {
       onOpenDeleteModal();
-    } else {
-      // Placeholder until POMO-328 is implemented
-      alert('Account deletion will be available soon. Contact support@particle.app for immediate requests.');
     }
   }, [onOpenDeleteModal]);
 
@@ -202,7 +199,7 @@ export function PrivacySettings({ onOpenDeleteModal }: PrivacySettingsProps) {
               </p>
             </div>
             <p className="text-xs text-tertiary light:text-tertiary-dark">
-              Permanently delete your account and all data. 30-day cooling-off period.
+              Permanently delete your account and all data.
             </p>
             <button
               onClick={handleDeleteAccount}

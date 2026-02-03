@@ -22,6 +22,8 @@ import { BreakBreathingSettings } from './BreakBreathingSettings';
 import { WellbeingHintsSettings } from './WellbeingHintsSettings';
 import { CoachSettings } from './CoachSettings';
 import { DailyIntentionSettings } from './DailyIntentionSettings';
+import { DeleteAccountModal } from './DeleteAccountModal';
+import { exportAllData } from '@/lib/data-export';
 
 interface TimerSettingsProps {
   onSettingsChange?: (durations: TimerDurations) => void;
@@ -31,6 +33,7 @@ interface TimerSettingsProps {
 export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { durations, applyPreset, activePresetId, isLoaded, presets } = useTimerSettingsContext();
   const { pullNow, pushNow, isAvailable: isSyncAvailable } = useSettingsSyncActions();
 
@@ -78,10 +81,14 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
   }, [durations, isLoaded, onSettingsChange]);
 
   // Close on Escape - stopImmediatePropagation prevents Timer from receiving the event
+  // Skip if DeleteAccountModal is open (it handles its own Escape)
   useEffect(() => {
     if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
+      // Don't handle Escape if DeleteAccountModal is open
+      if (showDeleteModal) return;
+
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -91,7 +98,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
     window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, handleClose]);
+  }, [isOpen, handleClose, showDeleteModal]);
 
   // Listen for custom event to open settings (from Cmd+, shortcut)
   useEffect(() => {
@@ -316,7 +323,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* ═══ Privacy Section ═══ */}
                   <div className="pt-4 mt-4 border-t border-tertiary/10 light:border-tertiary-dark/10">
-                    <PrivacySettings />
+                    <PrivacySettings onOpenDeleteModal={() => setShowDeleteModal(true)} />
                   </div>
                 </div>
 
@@ -332,6 +339,15 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
           </>
         )}
       </AnimatePresence>
+
+      {/* Delete Account Confirmation Modal */}
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onExportFirst={async () => {
+          await exportAllData();
+        }}
+      />
     </div>
   );
 }
