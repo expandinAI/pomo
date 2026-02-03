@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Check } from 'lucide-react';
+import { Play, Pause, Check, FastForward } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KeyboardHint } from '@/components/ui/KeyboardHint';
 import { SPRING, type SessionType, SESSION_LABELS } from '@/styles/design-tokens';
@@ -12,6 +12,7 @@ interface TimerControlsProps {
   onStart: () => void;
   onPause: () => void;
   onComplete?: () => void;
+  onContinue?: () => void;
   mode: SessionType;
   isOverflow?: boolean;
 }
@@ -22,6 +23,7 @@ export function TimerControls({
   onStart,
   onPause,
   onComplete,
+  onContinue,
   mode,
   isOverflow = false,
 }: TimerControlsProps) {
@@ -29,6 +31,10 @@ export function TimerControls({
   const sessionLabel = SESSION_LABELS[mode].toLowerCase();
   const startLabel = isPaused ? 'Resume timer' : `Start ${sessionLabel}`;
   const pauseLabel = 'Pause timer';
+  const continueLabel = 'Continue in flow (save and start new session)';
+
+  // In overflow mode, main button becomes "Continue" instead of "Pause"
+  const showContinueButton = isOverflow && isRunning;
 
   return (
     <motion.div
@@ -44,11 +50,17 @@ export function TimerControls({
       <Button
         variant="primary"
         size="lg"
-        onClick={isRunning ? onPause : onStart}
+        onClick={showContinueButton ? onContinue : (isRunning ? onPause : onStart)}
         className="group min-w-[140px] gap-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-        aria-label={isRunning ? pauseLabel : startLabel}
+        aria-label={showContinueButton ? continueLabel : (isRunning ? pauseLabel : startLabel)}
       >
-        {isRunning ? (
+        {showContinueButton ? (
+          <>
+            <FastForward className="w-5 h-5" aria-hidden="true" />
+            Continue
+            <KeyboardHint shortcut="Space" className="ml-1" />
+          </>
+        ) : isRunning ? (
           <>
             <Pause className="w-5 h-5" aria-hidden="true" />
             Pause
@@ -69,8 +81,8 @@ export function TimerControls({
           <motion.button
             onClick={onComplete}
             className="absolute left-full ml-4 flex items-center justify-center w-10 h-10 rounded-full bg-accent light:bg-accent-dark text-background light:text-background-light"
-            aria-label="Complete session (Enter)"
-            title="Complete session (↵)"
+            aria-label="Complete session (Enter or Space)"
+            title="Complete session · ↵ Done · Space Continue"
             initial={{ opacity: 0, scale: 0.9, x: 8 }}
             animate={{
               opacity: 1,

@@ -37,6 +37,8 @@ interface StatusMessageProps {
   coachInsightPreview?: string | null;
   /** UI element hover hint (for discoverability) */
   uiHint?: string | null;
+  /** Flow continue message (when continuing in flow from overflow) */
+  flowContinueMessage?: string | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -50,7 +52,7 @@ const PRESET_DESCRIPTIONS: Record<string, string> = {
 /** Mode indicator descriptions */
 const MODE_INDICATOR_DESCRIPTIONS = {
   overflow: {
-    enabled: 'Overflow Mode · Timer continues past zero · Press Enter when ready',
+    enabled: 'Overflow Mode · Timer continues past zero · ↵ Done · Space Continue',
     disabled: 'Overflow Mode is off · Timer stops at zero',
   },
   autoStart: {
@@ -88,6 +90,7 @@ export function StatusMessage({
   autoStartEnabled,
   coachInsightPreview,
   uiHint,
+  flowContinueMessage,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -96,14 +99,15 @@ export function StatusMessage({
    * Get display message with priority:
    * 1. Auto-Start Countdown (highest priority)
    * 2. Explicit message (toast, celebration, skip, etc.)
-   * 3. Session Feedback (kontextueller Moment after completion)
-   * 4. Coach Insight Preview (when new insight arrives)
-   * 5. Mode indicator hover (overflow/autoStart icons)
-   * 6. UI element hover hint (for discoverability)
-   * 7. Preset hover (only when idle)
-   * 8. Session status (when running)
-   * 9. End time preview
-   * 10. Wellbeing hint (lowest priority)
+   * 3. Flow continue message (when continuing in flow)
+   * 4. Session Feedback (kontextueller Moment after completion)
+   * 5. Coach Insight Preview (when new insight arrives)
+   * 6. Mode indicator hover (overflow/autoStart icons)
+   * 7. UI element hover hint (for discoverability)
+   * 8. Preset hover (only when idle)
+   * 9. Session status (when running)
+   * 10. End time preview
+   * 11. Wellbeing hint (lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -116,33 +120,38 @@ export function StatusMessage({
       return message;
     }
 
-    // 3. Session Feedback (kontextueller Moment after completion)
+    // 3. Flow continue message (when continuing in flow)
+    if (flowContinueMessage) {
+      return flowContinueMessage;
+    }
+
+    // 4. Session Feedback (kontextueller Moment after completion)
     if (sessionFeedback) {
       return formatFeedbackMessage(sessionFeedback);
     }
 
-    // 4. Coach Insight Preview (when new insight arrives)
+    // 5. Coach Insight Preview (when new insight arrives)
     if (coachInsightPreview) {
       return `✧ ${coachInsightPreview}`;
     }
 
-    // 5. Mode indicator hover (overflow/autoStart icons)
+    // 6. Mode indicator hover (overflow/autoStart icons)
     if (hoveredModeIndicator) {
       const isEnabled = hoveredModeIndicator === 'overflow' ? overflowEnabled : autoStartEnabled;
       return MODE_INDICATOR_DESCRIPTIONS[hoveredModeIndicator][isEnabled ? 'enabled' : 'disabled'];
     }
 
-    // 6. UI element hover hint (for discoverability)
+    // 7. UI element hover hint (for discoverability)
     if (uiHint) {
       return uiHint;
     }
 
-    // 7. Preset hover (only when idle)
+    // 8. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 8. Session status (only when hovering collapsed view)
+    // 9. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);
@@ -158,12 +167,12 @@ export function StatusMessage({
       }
     }
 
-    // 9. End Time Preview (when setting enabled and timer running)
+    // 10. End Time Preview (when setting enabled and timer running)
     if (endTimePreview) {
       return endTimePreview;
     }
 
-    // 10. Wellbeing Hint (only during break, lowest priority)
+    // 11. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }

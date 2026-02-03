@@ -393,6 +393,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // UI element hover hint (for discoverability - command palette, shortcuts, etc.)
   const [uiHint, setUiHint] = useState<string | null>(null);
 
+  // Flow continue message (shown when continuing in flow from overflow)
+  const [flowContinueMessage, setFlowContinueMessage] = useState<string | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -589,6 +592,16 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [contextualHint]);
+
+  // Auto-clear flow continue message after 2 seconds
+  useEffect(() => {
+    if (flowContinueMessage) {
+      const timeout = setTimeout(() => {
+        setFlowContinueMessage(null);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [flowContinueMessage]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -1309,6 +1322,85 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     }
   }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown, addSession, getTotalSessionCount]);
 
+  // Continue in flow from overflow mode (Space key in overflow)
+  // Saves session, increments counter, starts new session immediately (no celebration, no break)
+  const handleContinueInFlow = useCallback(() => {
+    if (!isOverflow || !state.isRunning) return;
+
+    const sessionMode = state.mode;
+    // Use refs to get current values (avoid closure issues)
+    const currentOverflowSeconds = overflowSecondsRef.current;
+    // Use one-off duration if set, otherwise use preset
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[sessionMode];
+    const totalDuration = fullDuration + currentOverflowSeconds;
+    const wasWorkSession = sessionMode === 'work';
+
+    // Save session with full duration + overflow
+    const formattedTask = formatTasksForStorage(state.currentTask);
+    const taskData = {
+      ...(wasWorkSession && formattedTask && { task: formattedTask }),
+      presetId: activePresetIdRef.current,
+      ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+      // Track overflow separately
+      ...(currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
+      estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
+    };
+
+    // Fire and forget - state is updated by SessionProvider
+    void addSession(sessionMode, totalDuration, taskData);
+
+    // Save task to recent tasks (only for work sessions with a task)
+    if (wasWorkSession && state.currentTask) {
+      addRecentTasksFromInput(state.currentTask);
+    }
+
+    // Track overflow for contextual hints (work sessions only)
+    if (wasWorkSession) {
+      trackOverflow();
+    }
+
+    // Increment counter (like COMPLETE, but we don't change mode)
+    // We stay in work mode and restart immediately
+    const newCount = wasWorkSession ? state.completedPomodoros + 1 : state.completedPomodoros;
+
+    // Reset worker to same mode (work), full duration
+    workerReset(durationsRef.current.work);
+    elapsedRef.current = 0;
+
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
+    // Clear task after completion (only for work sessions)
+    if (wasWorkSession) {
+      dispatch({ type: 'CLEAR_TASK' });
+    }
+
+    // Reset one-off duration (next session uses preset)
+    setOneOffDuration(null);
+
+    // Update completedPomodoros manually (we're not using COMPLETE action since we stay in work mode)
+    // We need to dispatch a custom action - but since we don't have one, we use SET_MODE which resets
+    // Actually, we need to trigger the count increment. Let's dispatch a minimal state update.
+    // The COMPLETE action changes mode, which we don't want. So we manually handle the state.
+
+    // Restart timer immediately with work duration
+    workerStart(durationsRef.current.work, 0, overflowEnabledRef.current);
+
+    // Manually increment pomodoro count by dispatching COMPLETE then SET_MODE back to work
+    // This is a bit hacky but preserves the counter increment
+    dispatch({ type: 'COMPLETE', durations: durationsRef.current, sessionsUntilLong: sessionsUntilLongRef.current });
+
+    // Immediately set back to work mode and start
+    dispatch({ type: 'SET_MODE', mode: 'work', durations: durationsRef.current });
+    dispatch({ type: 'START' });
+
+    vibrate('light');
+
+    // Show status message (not toast - more subtle, fits the flow)
+    setFlowContinueMessage('Continuing in flow...');
+  }, [isOverflow, state.isRunning, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, workerStart, trackOverflow, addSession]);
+
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
   const handleEndEarly = useCallback(() => {
@@ -1522,6 +1614,11 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       switch (e.key) {
         case ' ':
           e.preventDefault();
+          // In overflow mode: Continue in flow (save + new session)
+          if (isOverflow && state.isRunning) {
+            handleContinueInFlow();
+            break;
+          }
           // Cancel auto-start countdown if active
           if (state.autoStartCountdown !== null && state.autoStartCountdown > 0) {
             dispatch({ type: 'CANCEL_AUTO_COUNTDOWN' });
@@ -1737,7 +1834,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, handleContinueInFlow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -1988,6 +2085,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         onStart={handleStart}
         onPause={handlePause}
         onComplete={handleCompleteFromOverflow}
+        onContinue={handleContinueInFlow}
         mode={state.mode}
         isOverflow={isOverflow}
       />
@@ -2062,6 +2160,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         autoStartEnabled={autoStartEnabled}
         coachInsightPreview={coachInsightPreview}
         uiHint={uiHint}
+        flowContinueMessage={flowContinueMessage}
       />
     </div>
   );
