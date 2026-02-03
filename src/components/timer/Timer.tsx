@@ -396,6 +396,9 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
   // Flow continue message (shown when continuing in flow from overflow)
   const [flowContinueMessage, setFlowContinueMessage] = useState<string | null>(null);
 
+  // Session too short message (shown when finishing early with <2min elapsed)
+  const [sessionTooShortMessage, setSessionTooShortMessage] = useState<string | null>(null);
+
   // Task input ref for T shortcut
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -602,6 +605,16 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
       return () => clearTimeout(timeout);
     }
   }, [flowContinueMessage]);
+
+  // Auto-clear session too short message after 2 seconds
+  useEffect(() => {
+    if (sessionTooShortMessage) {
+      const timeout = setTimeout(() => {
+        setSessionTooShortMessage(null);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [sessionTooShortMessage]);
 
   // Handle timer tick from worker
   const handleTick = useCallback((remaining: number, overflow?: number) => {
@@ -1401,6 +1414,60 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
     setFlowContinueMessage('Continuing in flow...');
   }, [isOverflow, state.isRunning, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, workerStart, trackOverflow, addSession]);
 
+  // Finish session early from pause state (F key)
+  // Saves elapsed time if ≥2 min, otherwise shows "too short" message
+  // Resets to ready state (same mode) - does NOT advance to break
+  const handleFinishEarly = useCallback(() => {
+    if (!state.isPaused || state.mode !== 'work') return;
+
+    const fullDuration = oneOffDurationRef.current ?? durationsRef.current[state.mode];
+    const elapsedTime = fullDuration - state.timeRemaining;
+    const MIN_LOGGABLE = 2 * 60; // 2 minutes
+
+    if (elapsedTime >= MIN_LOGGABLE) {
+      // Save session with elapsed time
+      const formattedTask = formatTasksForStorage(state.currentTask);
+      const taskData = {
+        ...(formattedTask && { task: formattedTask }),
+        presetId: activePresetIdRef.current,
+        ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
+        estimatedDuration: fullDuration,
+      };
+
+      void addSession(state.mode, elapsedTime, taskData);
+
+      // Save task to recent tasks
+      if (state.currentTask) {
+        addRecentTasksFromInput(state.currentTask);
+      }
+
+      // Show feedback with saved time
+      const minutes = Math.round(elapsedTime / 60);
+      setFlowContinueMessage(`Session saved · ${minutes} min`);
+    } else {
+      // Too short - show message
+      setSessionTooShortMessage('Session too short · min 2 min');
+    }
+
+    // Reset to ready state (same mode, full duration) - NOT advancing to break
+    dispatch({ type: 'SET_MODE', mode: state.mode, durations: durationsRef.current });
+    workerReset(durationsRef.current[state.mode]);
+    elapsedRef.current = 0;
+
+    // Reset overflow state
+    setIsOverflow(false);
+    setOverflowSeconds(0);
+
+    // Clear task
+    dispatch({ type: 'CLEAR_TASK' });
+
+    // Reset one-off duration
+    setOneOffDuration(null);
+
+    // Light haptic feedback
+    vibrate('light');
+  }, [state.isPaused, state.mode, state.timeRemaining, state.currentTask, workerReset, vibrate, addSession]);
+
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
   const handleEndEarly = useCallback(() => {
@@ -1760,6 +1827,14 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
             handleCancel();
           }
           break;
+        // F = Finish session early (only in paused work sessions)
+        case 'f':
+        case 'F':
+          if (state.isPaused && state.mode === 'work') {
+            e.preventDefault();
+            handleFinishEarly();
+          }
+          break;
         // Sound controls
         case 'm':
         case 'M':
@@ -1834,7 +1909,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, handleContinueInFlow, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, handleContinueInFlow, handleFinishEarly, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -2086,6 +2161,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         onPause={handlePause}
         onComplete={handleCompleteFromOverflow}
         onContinue={handleContinueInFlow}
+        onFinishEarly={handleFinishEarly}
         mode={state.mode}
         isOverflow={isOverflow}
       />
@@ -2161,6 +2237,7 @@ export function Timer({ onTimelineOpen, onBeforeStart }: TimerProps = {}) {
         coachInsightPreview={coachInsightPreview}
         uiHint={uiHint}
         flowContinueMessage={flowContinueMessage}
+        sessionTooShortMessage={sessionTooShortMessage}
       />
     </div>
   );

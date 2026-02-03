@@ -21,6 +21,7 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'R', description: 'Random Pick (2+ tasks)', category: 'timer' },
   { key: 'S', description: 'Skip to next session', category: 'timer' },
   { key: 'E', description: 'End session early', category: 'timer' },
+  { key: 'F', description: 'Finish early (paused)', category: 'timer' },
   { key: 'T', description: 'Focus task input', category: 'timer' },
   { key: '↑', description: '+1 minute (paused)', category: 'timer' },
   { key: '↓', description: '-1 minute (paused)', category: 'timer' },

@@ -13,6 +13,7 @@ interface TimerControlsProps {
   onPause: () => void;
   onComplete?: () => void;
   onContinue?: () => void;
+  onFinishEarly?: () => void;
   mode: SessionType;
   isOverflow?: boolean;
 }
@@ -24,6 +25,7 @@ export function TimerControls({
   onPause,
   onComplete,
   onContinue,
+  onFinishEarly,
   mode,
   isOverflow = false,
 }: TimerControlsProps) {
@@ -74,6 +76,30 @@ export function TimerControls({
           </>
         )}
       </Button>
+
+      {/* Finish Early button - appears to the left in paused state (work sessions only) */}
+      <AnimatePresence>
+        {isPaused && mode === 'work' && onFinishEarly && (
+          <motion.button
+            onClick={onFinishEarly}
+            className="absolute right-full mr-4 flex items-center justify-center w-10 h-10 rounded-full bg-tertiary/20 light:bg-tertiary-dark/20 text-secondary light:text-secondary-dark hover:bg-tertiary/30 light:hover:bg-tertiary-dark/30 transition-colors"
+            aria-label="Finish session early (F)"
+            title="Finish early · F"
+            initial={{ opacity: 0, scale: 0.9, x: -8 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: -8 }}
+            transition={{
+              type: 'spring',
+              ...SPRING.gentle,
+              exit: { duration: 0.15 },
+            }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Check className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Done button - appears to the right, doesn't shift main button */}
       <AnimatePresence>
