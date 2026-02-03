@@ -1,0 +1,1 @@
+export { HallOfFameModal } from './HallOfFameModal';

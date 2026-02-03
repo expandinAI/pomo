@@ -78,6 +78,10 @@ const CoachView = dynamic(
   () => import('@/components/coach').then(mod => ({ default: mod.CoachView })),
   { ssr: false }
 );
+const HallOfFameModal = dynamic(
+  () => import('@/components/hall-of-fame').then(mod => ({ default: mod.HallOfFameModal })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
@@ -130,6 +134,9 @@ function HomeContent() {
   // AI Coach state
   const [showCoach, setShowCoach] = useState(false);
   const [hasCoachInsight, setHasCoachInsight] = useState(false);
+
+  // Hall of Fame state
+  const [showHallOfFame, setShowHallOfFame] = useState(false);
 
   // Export message state (for G+E quick export)
   const [exportMessage, setExportMessage] = useState<string | null>(null);
@@ -279,6 +286,7 @@ function HomeContent() {
           setExportMessage('No particles this week');
         }
       },
+      onHallOfFame: () => setShowHallOfFame(true),
     }),
     [setShowJourney, sessions]
   );
@@ -668,6 +676,12 @@ function HomeContent() {
 
       {/* AI Coach View */}
       <CoachView isOpen={showCoach} onClose={() => setShowCoach(false)} />
+
+      {/* Hall of Fame Modal */}
+      <HallOfFameModal
+        isOpen={showHallOfFame}
+        onClose={() => setShowHallOfFame(false)}
+      />
 
     </motion.main>
   );
