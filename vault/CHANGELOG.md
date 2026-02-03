@@ -7,6 +7,23 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **GDPR & Data Privacy Complete (POMO-327, 328, 330, 331, 12 SP)**:
+  - Data Export: Download all user data as JSON (sessions, projects, settings, milestones)
+  - Account Deletion: Immediate deletion with "DELETE" confirmation
+  - Cancels Stripe subscription, deletes from Supabase (CASCADE), deletes from Clerk
+  - Privacy Settings UI with export button, analytics opt-out, delete account
+  - Privacy Policy page at /privacy
+  - TierBadge fix: "Particle Flow" no longer wraps in AccountMenu
+- **AI Coach Feature Complete (POMO-315, 319-326, 35 SP)**:
+  - Coach Particle UI mit Aurora-Effekt bei neuen Insights
+  - Coach View (G C) mit Insights und Chat-Interface
+  - Insight Engine Backend mit Pattern-Erkennung und Anomalie-Detection
+  - Chat-Interface mit Streaming und Conversation History
+  - Master Prompt mit warmem, unterstützendem Charakter
+  - AI Query Counter (300/Monat für Flow-User)
+  - Export-Funktion für Zeitberichte (CSV/PDF)
+  - Coach Settings (Insight-Frequenz, Weekly Summary)
+  - Insight Status Preview in Status Message
 - **Data Export UI (POMO-327, 2 SP)**:
   - GDPR-compliant data export as JSON
   - `src/lib/data-export.ts`: Collects all user data from IndexedDB and localStorage
@@ -347,6 +364,10 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-328-account-deletion]]
+- [[stories/done/POMO-331-privacy-policy-page]]
+- [[stories/done/POMO-330-privacy-settings-ui]]
+- [[stories/done/POMO-327-data-export]]
 - [[stories/done/POMO-306-conflict-resolution]]
 - [[stories/done/POMO-305-sync-service]]
 - [[stories/done/POMO-304-upgrade-flow]]
