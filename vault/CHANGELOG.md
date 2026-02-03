@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Breathing Text-Guidance (POMO-337, 2 SP)**:
+  - Text-Anweisungen während Breaks: "Einatmen · · · 4" → "Halten · · · 3" → "Ausatmen · · · 2" → "Halten · · · 1"
+  - 16s Box Breathing Zyklus synchron mit Timer-Animation
+  - "Breathing Opacity" Animation: Text atmet mit (0.5 → 1.0 Opacity)
+  - Aktiviert wenn Break Breathing Setting ON
+  - Hook: `useBreathingGuide.ts` für Phase-Tracking
+  - Sauberer Exit bei Session-Wechsel
 - **Quick Export Shortcut (POMO-336, 1 SP)**:
   - `G E` exportiert sofort die aktuelle Kalenderwoche als CSV
   - Dateiname: `particle-export-2026-W05.csv`
@@ -370,6 +377,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-337-breathing-guidance]]
 - [[stories/done/POMO-328-account-deletion]]
 - [[stories/done/POMO-331-privacy-policy-page]]
 - [[stories/done/POMO-330-privacy-settings-ui]]

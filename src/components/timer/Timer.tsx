@@ -35,6 +35,7 @@ import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
 import { useMilestones } from '@/components/milestones';
 import { useWellbeingHint } from '@/hooks/useWellbeingHint';
+import { useBreathingGuide } from '@/hooks/useBreathingGuide';
 import { useContextualHints } from '@/hooks/useContextualHints';
 import { useCoachSettings } from '@/hooks/useCoachSettings';
 
@@ -428,6 +429,10 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
   // Wellbeing hints (only during breaks, when enabled)
   const isBreak = state.mode === 'shortBreak' || state.mode === 'longBreak';
   const wellbeingHint = useWellbeingHint({ isBreak, enabled: wellbeingHintsEnabled });
+
+  // Breathing text-guidance (syncs with Box Breathing animation)
+  const isBreathingActive = isBreak && state.isRunning && breakBreathingEnabled;
+  const breathingPhase = useBreathingGuide(isBreathingActive);
 
   // Contextual hints (shown after session completion based on user patterns)
   const { trackOverflow, trackEarlyStop, trackSessionStart, checkForHint, markHintShown } = useContextualHints();
@@ -2233,6 +2238,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         sessionFeedback={sessionFeedback}
         endTimePreview={showEndTime && state.isRunning ? formatEndTime(isOverflow ? overflowSeconds : state.timeRemaining, isOverflow, state.mode) : null}
         wellbeingHint={wellbeingHint}
+        breathingPhase={isBreathingActive ? breathingPhase : null}
         hoveredModeIndicator={hoveredModeIndicator}
         overflowEnabled={overflowEnabled}
         autoStartEnabled={autoStartEnabled}

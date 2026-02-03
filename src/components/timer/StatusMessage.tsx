@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING, type SessionType } from '@/styles/design-tokens';
 import type { TimerDurations } from '@/contexts/TimerSettingsContext';
 import { type SessionFeedback, formatFeedbackMessage } from '@/lib/session-feedback';
+import type { BreathingPhase, BreathingAction } from '@/hooks/useBreathingGuide';
 
 interface StatusMessageProps {
   message: string | null;
@@ -43,6 +44,8 @@ interface StatusMessageProps {
   sessionTooShortMessage?: string | null;
   /** Export message (when G+E quick export is triggered) */
   exportMessage?: string | null;
+  /** Breathing phase guidance (during breaks with breathing enabled) */
+  breathingPhase?: BreathingPhase | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -97,6 +100,7 @@ export function StatusMessage({
   flowContinueMessage,
   sessionTooShortMessage,
   exportMessage,
+  breathingPhase,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -110,12 +114,13 @@ export function StatusMessage({
    * 5. Flow continue message (when continuing in flow)
    * 6. Session Feedback (kontextueller Moment after completion)
    * 7. Coach Insight Preview (when new insight arrives)
-   * 8. Mode indicator hover (overflow/autoStart icons)
-   * 9. UI element hover hint (for discoverability)
-   * 10. Preset hover (only when idle)
-   * 11. Session status (when running)
-   * 12. End time preview
-   * 13. Wellbeing hint (lowest priority)
+   * 8. Breathing text-guidance (during breaks with breathing enabled)
+   * 9. Mode indicator hover (overflow/autoStart icons)
+   * 10. UI element hover hint (for discoverability)
+   * 11. Preset hover (only when idle)
+   * 12. Session status (when running)
+   * 13. End time preview
+   * 14. Wellbeing hint (lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -153,23 +158,34 @@ export function StatusMessage({
       return `✧ ${coachInsightPreview}`;
     }
 
-    // 8. Mode indicator hover (overflow/autoStart icons)
+    // 8. Breathing text-guidance (during breaks with breathing enabled)
+    if (breathingPhase) {
+      const labels: Record<BreathingAction, string> = {
+        'inhale': 'Einatmen',
+        'hold-in': 'Halten',
+        'exhale': 'Ausatmen',
+        'hold-out': 'Halten',
+      };
+      return `${labels[breathingPhase.action]} · · · ${breathingPhase.countdown}`;
+    }
+
+    // 9. Mode indicator hover (overflow/autoStart icons)
     if (hoveredModeIndicator) {
       const isEnabled = hoveredModeIndicator === 'overflow' ? overflowEnabled : autoStartEnabled;
       return MODE_INDICATOR_DESCRIPTIONS[hoveredModeIndicator][isEnabled ? 'enabled' : 'disabled'];
     }
 
-    // 9. UI element hover hint (for discoverability)
+    // 10. UI element hover hint (for discoverability)
     if (uiHint) {
       return uiHint;
     }
 
-    // 10. Preset hover (only when idle)
+    // 11. Preset hover (only when idle)
     if (hoveredPresetId && !isRunning) {
       return PRESET_DESCRIPTIONS[hoveredPresetId] || null;
     }
 
-    // 11. Session status (only when hovering collapsed view)
+    // 12. Session status (only when hovering collapsed view)
     if (isCollapsedHovered && isRunning && durations && mode) {
       if (mode === 'work') {
         const workMin = Math.floor(durations.work / 60);
@@ -185,12 +201,12 @@ export function StatusMessage({
       }
     }
 
-    // 12. End Time Preview (when setting enabled and timer running)
+    // 13. End Time Preview (when setting enabled and timer running)
     if (endTimePreview) {
       return endTimePreview;
     }
 
-    // 13. Wellbeing Hint (only during break, lowest priority)
+    // 14. Wellbeing Hint (only during break, lowest priority)
     if (wellbeingHint) {
       return wellbeingHint;
     }
@@ -200,11 +216,60 @@ export function StatusMessage({
 
   const displayMessage = getDisplayMessage();
 
-  // For countdown: stable key so text updates in place without re-animation
+  // Detect if current message is breathing guidance
+  const isBreathingMessage = !!breathingPhase && !isCountdownActive && !message && !exportMessage && !sessionTooShortMessage && !flowContinueMessage && !sessionFeedback && !coachInsightPreview;
+
+  // For countdown & breathing: stable key so text updates in place without re-animation
   // For regular messages: key changes to trigger enter/exit animation
   const messageKey = isCountdownActive
     ? 'countdown-active'
-    : `message-${displayMessage}`;
+    : isBreathingMessage
+      ? 'breathing-active'
+      : `message-${displayMessage}`;
+
+  // Breathing opacity: derived from current phase action
+  // Inhale/Hold-in → bright (1.0) | Exhale/Hold-out → dim (0.5)
+  const getBreathingOpacity = (): number => {
+    if (!breathingPhase) return 1;
+    switch (breathingPhase.action) {
+      case 'inhale':
+      case 'hold-in':
+        return 1;
+      case 'exhale':
+      case 'hold-out':
+        return 0.5;
+    }
+  };
+
+  // Breathing transition: 4s for inhale/exhale, instant for hold phases
+  const getBreathingDuration = (): number => {
+    if (!breathingPhase) return 0.2;
+    switch (breathingPhase.action) {
+      case 'inhale':
+      case 'exhale':
+        return 4;
+      case 'hold-in':
+      case 'hold-out':
+        return 0.1; // Quick snap, already at target
+    }
+  };
+
+  // Standard animation for regular messages
+  const standardAnimation = { opacity: 1, y: 0 };
+  const standardTransition = {
+    type: 'spring' as const,
+    ...SPRING.gentle,
+    opacity: { duration: 0.2 },
+  };
+
+  // Breathing animation: opacity synced with phase
+  const breathingAnimation = { opacity: getBreathingOpacity(), y: 0 };
+  const breathingTransition = {
+    opacity: {
+      duration: getBreathingDuration(),
+      ease: 'easeInOut',
+    },
+  };
 
   return (
     <div
@@ -216,14 +281,10 @@ export function StatusMessage({
         {displayMessage && (
           <motion.p
             key={messageKey}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: isBreathingMessage ? 0.5 : 0, y: isBreathingMessage ? 0 : 8 }}
+            animate={isBreathingMessage ? breathingAnimation : standardAnimation}
             exit={{ opacity: 0, y: -4 }}
-            transition={{
-              type: 'spring',
-              ...SPRING.gentle,
-              opacity: { duration: 0.2 }
-            }}
+            transition={isBreathingMessage ? breathingTransition : standardTransition}
             className="text-sm text-secondary light:text-secondary-dark text-center max-w-sm"
           >
             {displayMessage}
