@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Quick Export Shortcut (POMO-336, 1 SP)**:
+  - `G E` exportiert sofort die aktuelle Kalenderwoche als CSV
+  - Dateiname: `particle-export-2026-W05.csv`
+  - StatusMessage-Feedback: "Exported · Week 5 · 12.5h"
+  - Nur Work-Sessions, keine Breaks
+  - Dokumentiert in Help-Modal (`?`)
 - **GDPR & Data Privacy Complete (POMO-327, 328, 330, 331, 12 SP)**:
   - Data Export: Download all user data as JSON (sessions, projects, settings, milestones)
   - Account Deletion: Immediate deletion with "DELETE" confirmation
