@@ -6,10 +6,10 @@ High-level overview of features and milestones.
 
 ## Current Focus
 
-> **Phase 2: Monetization & AI Coach** - Payment, AI Coach, GDPR
+> **Phase 3: Native Apps** - Mac & iOS
 
-**Goal:** Revenue-ready product with AI-powered coaching
-**Status:** Phase 1 complete, Phase 2 ready to start
+**Goal:** Native desktop and mobile experience
+**Status:** Phase 2 complete, Phase 3 ready to start
 
 ---
 
@@ -72,13 +72,13 @@ High-level overview of features and milestones.
 
 ---
 
-## Now: Phase 2 - Monetization & AI Coach
+## Done: Phase 2 - Monetization & AI Coach ✅
 
-### Priority Order (decided)
+### Priority Order (completed)
 
-1. **Payment Integration** (revenue first)
-2. **AI Coach** (killer feature)
-3. **GDPR Compliance** (before launch)
+1. **Payment Integration** ✅ (revenue first)
+2. **AI Coach** ✅ (killer feature)
+3. **GDPR Compliance** ✅ (before launch)
 
 ### Payment Integration
 
@@ -95,43 +95,44 @@ High-level overview of features and milestones.
 
 *Note: POMO-315 moved to AI Coach, POMO-318 moved to Icebox*
 
-### AI Coach
+### AI Coach ✅
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
-| POMO-315 | AI Query Counter & Limits | 3 | 📋 Ready |
-| POMO-319 | Coach Particle UI | 3 | 📋 Ready |
-| POMO-320 | Toast Notification System | 3 | 📋 Ready |
-| POMO-321 | Coach View | 5 | 📋 Ready |
-| POMO-322 | Chat Interface | 5 | 📋 Ready |
-| POMO-323 | Insight Engine Backend | 8 | 📋 Ready |
-| POMO-324 | Master Prompt & Tuning | 3 | 📋 Ready |
-| POMO-325 | Export Function | 3 | 📋 Ready |
-| POMO-326 | Coach Settings | 2 | 📋 Ready |
+| POMO-315 | AI Query Counter & Limits | 3 | ✅ Done |
+| POMO-319 | Coach Particle UI | 3 | ✅ Done |
+| POMO-320 | Coach Insight Status Preview | 3 | ✅ Done |
+| POMO-321 | Coach View | 5 | ✅ Done |
+| POMO-322 | Chat Interface | 5 | ✅ Done |
+| POMO-323 | Insight Engine Backend | 8 | ✅ Done |
+| POMO-324 | Master Prompt & Tuning | 3 | ✅ Done |
+| POMO-325 | Export Function | 3 | ✅ Done |
+| POMO-326 | Coach Settings | 2 | ✅ Done |
 
-**Total: 35 Story Points**
+**Total: 35 Story Points (✅ Complete)**
 
-### GDPR & Data Privacy
+### GDPR & Data Privacy ✅
 
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
-| POMO-327 | Data Export API + UI | 3 | 📋 Ready |
-| POMO-328 | Account Deletion Flow | 5 | 📋 Ready |
-| POMO-329 | Deletion Cron Job | 2 | 📋 Ready |
-| POMO-330 | Privacy Settings UI | 2 | 📋 Ready |
-| POMO-331 | Privacy Policy Page | 2 | 📋 Ready |
+| POMO-327 | Data Export API + UI | 3 | ✅ Done |
+| POMO-328 | Account Deletion Flow | 5 | ✅ Done |
+| POMO-330 | Privacy Settings UI | 2 | ✅ Done |
+| POMO-331 | Privacy Policy Page | 2 | ✅ Done |
 
-**Total: 14 Story Points**
+**Total: 12 Story Points (✅ Complete)**
 
-**Phase 2 Total: ~70 Story Points**
+*Note: POMO-329 (Deletion Cron) removed - immediate deletion implemented instead*
+
+**Phase 2 Total: ~64 Story Points (✅ Complete)**
 
 ---
 
-## Next: Phase 3 - Native Apps
+## Now: Phase 3 - Native Apps
 
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
-| [[features/native-mac-app]] | TBD | ~50 | Draft |
+| [[features/native-mac-app]] | TBD | ~50 | 📋 Next |
 | [[features/native-ios-app]] | TBD | ~30 | Draft |
 
 **Total Phase 3: ~80 Story Points**
@@ -162,20 +163,20 @@ Documented in [[decisions/]]:
 │  ✅ Local-First Persistence (IndexedDB)       17 SP  DONE        │
 │  ✅ Cloud Sync & Accounts (Clerk + Supabase)  40 SP  DONE        │
 │                                                                  │
-│  PHASE 2: Monetization & AI                   ~70 SP             │
+│  PHASE 2: Monetization & AI                   ~64 SP             │
 │  ─────────────────────────────────────                          │
-│  ☐ Payment Integration (Stripe)              24 SP  ← NEXT      │
-│  ☐ AI Coach                                  32 SP              │
-│  ☐ GDPR & Data Privacy                       14 SP              │
+│  ✅ Payment Integration (Stripe)              17 SP  DONE        │
+│  ✅ AI Coach                                  35 SP  DONE        │
+│  ✅ GDPR & Data Privacy                       12 SP  DONE        │
 │                                                                  │
 │  PHASE 3: Native Apps                         ~80 SP             │
 │  ─────────────────────────────────────                          │
-│  ☐ Native Mac App (Swift/SwiftUI)            ~50 SP             │
+│  ☐ Native Mac App (Swift/SwiftUI)            ~50 SP  ← NEXT     │
 │  ☐ Native iOS App (SwiftUI, reduced scope)   ~30 SP             │
 │                                                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  REMAINING: ~150 Story Points                                    │
-│  At ~5 SP/week: ~30 weeks (~7 months)                           │
+│  REMAINING: ~80 Story Points                                     │
+│  At ~5 SP/week: ~16 weeks (~4 months)                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -189,14 +190,14 @@ Cloud Sync & Accounts ✅
          │
     ┌────┴────┐
     ▼         ▼
-Payment    AI Coach
+Payment ✅  AI Coach ✅
     │         │
     └────┬────┘
          ▼
-      GDPR
+      GDPR ✅
          │
          ▼
-   Native Mac App
+   Native Mac App ← NEXT
          │
          ▼
    Native iOS App
@@ -342,11 +343,11 @@ Payment    AI Coach
 - [x] Conflict Resolution (LWW, Server wins on tie) (POMO-306)
 - [x] Settings Sync (POMO-308)
 
-### v2.1 - Monetization & AI Coach 🔜
-- [ ] Stripe Payment Integration
-- [ ] Subscription Management
-- [ ] AI Coach (Coach Particle, Insights, Chat)
-- [ ] GDPR Compliance (Export, Deletion)
+### v2.1 - Monetization & AI Coach ✅
+- [x] Stripe Payment Integration
+- [x] Subscription Management
+- [x] AI Coach (Coach Particle, Insights, Chat)
+- [x] GDPR Compliance (Export, Deletion, Privacy Policy)
 
 ### v3.0 - Native Mac App
 - [ ] SwiftUI App
@@ -378,4 +379,4 @@ Parked ideas:
 
 ---
 
-*Last updated: 2026-01-31 (Phase 1 complete, Phase 2 ready)*
+*Last updated: 2026-02-03 (Phase 2 complete, Native Apps next)*
