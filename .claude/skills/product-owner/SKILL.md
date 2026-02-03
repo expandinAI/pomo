@@ -23,6 +23,15 @@ Dieser Skill hilft beim gesamten Lifecycle von der Idee bis zur fertigen User St
 - Backlog pflegen
 - Fortschritt tracken
 
+### 🚀 10x Integration
+
+Dieser Skill integriert den `/game-changing-features` Skill für strategisches Produkt-Denken:
+- Bei **Ideen-Validierung**: Automatischer 10x-Check
+- Bei **Feature-Erstellung**: Optionale 10x Opportunity Exploration
+- Bei **Roadmap-Review**: Dedizierter Befehl für High-Leverage Analyse
+
+Ziel: Nicht nur Features bauen, sondern die **richtigen** Features mit maximalem Hebel.
+
 ## .vault Integration
 
 Alle Outputs werden direkt im `vault/`-Verzeichnis des Projekts gespeichert:
@@ -82,10 +91,14 @@ vault/
    - Markt/Bedarf prüfen (ggf. Web-Suche)
    - Machbarkeit einschätzen
    - Business Value bewerten
-3. Empfehlung geben: promoted | rejected | needs-more-info
-4. Idee updaten mit Ergebnis
+3. **10x-Check:** Invoke `/game-changing-features` mindset:
+   - Könnte diese Idee ein 10x Feature werden?
+   - Was würde sie von "nice-to-have" zu "game-changer" machen?
+   - Gibt es einen größeren Hebel, den wir übersehen?
+4. Empfehlung geben: promoted | rejected | needs-more-info | **10x-potential**
+5. Idee updaten mit Ergebnis
 
-**Output:** Strukturierte Analyse mit Empfehlung.
+**Output:** Strukturierte Analyse mit Empfehlung. Bei 10x-Potential explizit darauf hinweisen.
 
 ---
 
@@ -101,11 +114,17 @@ vault/
    - Welche Lösung schwebt dir vor?
    - Was ist explizit NICHT im Scope?
    - Wie messen wir Erfolg?
-3. Template laden: `view vault/_templates/feature.md`
-4. PRD erstellen: `vault/features/{slug}.md`
-5. Idee-Status auf `promoted` setzen, Link zum Feature eintragen
+3. **10x Opportunity Exploration** (vor PRD-Erstellung):
+   - Frage: "Bevor ich das PRD schreibe - soll ich kurz prüfen ob es einen 10x-Hebel gibt?"
+   - Falls ja: Invoke `/game-changing-features` mit dem Feature-Kontext
+   - Identifiziere high-leverage Verbesserungen die den Impact vervielfachen könnten
+   - Integriere erkannte 10x-Opportunities ins PRD (separater Abschnitt)
+4. Template laden: `view vault/_templates/feature.md`
+5. PRD erstellen: `vault/features/{slug}.md`
+   - Bei 10x-Potential: Abschnitt "## 10x Opportunities" hinzufügen
+6. Idee-Status auf `promoted` setzen, Link zum Feature eintragen
 
-**Output:** Vollständiges PRD, Frage nach Review/Anpassungen.
+**Output:** Vollständiges PRD mit optionalem 10x-Abschnitt, Frage nach Review/Anpassungen.
 
 ---
 
@@ -184,6 +203,29 @@ vault/
 
 ---
 
+### 10x Roadmap Review
+
+**User sagt:** "Was wäre 10x?" / "Finde High-Leverage Features" / "Produkt-Strategie" / "Was sollten wir als nächstes bauen?"
+
+**Aktion:**
+1. Invoke `/game-changing-features` Skill mit vollem Produkt-Kontext:
+   - `view vault/ROADMAP.md` - Aktueller Stand
+   - `view vault/stories/backlog/` - Geplante Stories
+   - `view vault/features/` - Feature-Specs
+   - `view VISION.md` und `BRAND.md` - Produkt-Philosophie
+2. Analysiere:
+   - Welche geplanten Features haben 10x-Potential?
+   - Welche Features fehlen komplett, die Game-Changer wären?
+   - Wo investieren wir Effort ohne entsprechenden Hebel?
+3. Erstelle priorisierte Liste von High-Leverage Opportunities
+
+**Output:**
+- Top 3-5 High-Leverage Opportunities mit Begründung
+- Empfehlung welche bestehenden Backlog-Items priorisiert werden sollten
+- Optionale neue Ideen für `vault/ideas/`
+
+---
+
 ## Interview-Methodik
 
 Bei Feature-Spezifikation führt dieser Skill ein strukturiertes Interview:
@@ -256,15 +298,23 @@ Claude:
 User: [beantwortet Fragen]
 
 Claude:
-1. Validiert Idee → empfiehlt "promoted"
-2. "Soll ich direkt ein Feature-PRD daraus machen?"
+1. Validiert Idee
+2. 🚀 10x-Check: "Das könnte ein Game-Changer sein, wenn wir nicht nur
+   Meetings vorschlagen, sondern proaktiv Meeting-freie Deep-Work-Blöcke
+   schützen. Das wäre der eigentliche Hebel."
+3. Empfiehlt: "promoted" mit 10x-Potential markiert
+4. "Soll ich direkt ein Feature-PRD daraus machen? Ich würde den
+   10x-Aspekt (Deep-Work-Protection) mit reinbringen."
 
 User: "Ja"
 
 Claude:
 1. Führt strukturiertes Interview
-2. Erstellt vault/features/auto-meeting-suggestions.md
-3. "PRD erstellt! Soll ich User Stories ableiten?"
+2. 🚀 Fragt: "Bevor ich das PRD schreibe - soll ich noch weitere
+   10x-Opportunities erkunden?"
+3. Erstellt vault/features/auto-meeting-suggestions.md
+   - Inkl. Abschnitt "## 10x Opportunities"
+4. "PRD erstellt! Soll ich User Stories ableiten?"
 
 User: "Ja, mach mal"
 
@@ -272,7 +322,29 @@ Claude:
 1. Analysiert PRD
 2. Erstellt 4 Stories in vault/stories/backlog/
 3. "Ich habe 4 Stories erstellt, priorisiert nach Abhängigkeiten.
+    Die 10x-Story (Deep-Work-Protection) ist als P1 markiert.
     Willst du mit 'meetings-01-calendar-sync' anfangen?"
+```
+
+### 10x Review Beispiel
+
+```
+User: "Was wäre 10x für Particle?"
+
+Claude:
+1. Liest VISION.md, BRAND.md, ROADMAP.md, alle Features und Stories
+2. Invoked game-changing-features Mindset
+3. Analysiert: "Basierend auf eurer Vision 'Die Arbeit eines Lebens
+   besteht aus vielen Partikeln' sehe ich 3 High-Leverage Opportunities:
+
+   🥇 Particle Legacy View - Zeige alle Partikel eines Jahres/Lebens
+      als Sternenhimmel. Emotional, einzigartig, differenzierend.
+
+   🥈 Particle Sharing - Ein einzelnes Partikel als schönes Bild
+      exportieren/teilen. Virales Potential.
+
+   🥉 Focus Sanctuary Mode - Blocke alle Notifications systemweit
+      während eines Partikels. Tiefe Integration = hoher Moat."
 ```
 
 ## Fehlerbehandlung
