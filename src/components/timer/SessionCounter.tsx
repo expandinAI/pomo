@@ -4,6 +4,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import { type CompletedSession, formatSessionInfo, formatDuration, getTotalDuration } from '@/lib/session-storage';
+import { useParticleOfWeek } from '@/hooks/useParticleOfWeek';
 
 // Threshold for switching to compact view
 const COMPACT_THRESHOLD = 9;
@@ -41,6 +42,7 @@ function StandardView({
   getSessionIdForIndex,
   particleSelectMode,
   getParticleNumber,
+  isPOTW,
 }: {
   totalDots: number;
   filledCount: number;
@@ -53,6 +55,7 @@ function StandardView({
   getSessionIdForIndex?: (index: number) => string | null;
   particleSelectMode?: boolean;
   getParticleNumber?: (index: number) => number | null;
+  isPOTW?: (sessionId: string) => boolean;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -122,36 +125,65 @@ function StandardView({
           >
             <AnimatePresence mode="wait">
               {isCompleted ? (
-                <motion.div
-                  key="completed"
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ type: 'spring', ...SPRING.bouncy }}
-                  className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer relative flex items-center justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onParticleClick && getSessionIdForIndex) {
-                      const sessionId = getSessionIdForIndex(index);
-                      if (sessionId) onParticleClick(sessionId);
-                    }
-                  }}
-                >
-                  {/* Particle number overlay in select mode */}
-                  <AnimatePresence>
-                    {particleSelectMode && getParticleNumber && (
-                      <motion.span
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        transition={{ type: 'spring', ...SPRING.bouncy, delay: index * 0.03 }}
-                        className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-background light:text-background-light select-none"
-                      >
-                        {getParticleNumber(index)}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                (() => {
+                  // Check if this particle is the POTW (gold styling)
+                  const sessionId = getSessionIdForIndex ? getSessionIdForIndex(index) : null;
+                  const isGold = sessionId && isPOTW ? isPOTW(sessionId) : false;
+
+                  return (
+                    <motion.div
+                      key="completed"
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{
+                        scale: 1,
+                        opacity: 1,
+                        boxShadow: isGold
+                          ? [
+                              '0 0 4px rgba(255, 215, 0, 0.3)',
+                              '0 0 12px rgba(255, 215, 0, 0.5)',
+                              '0 0 4px rgba(255, 215, 0, 0.3)',
+                            ]
+                          : undefined,
+                      }}
+                      exit={{ scale: 0.5, opacity: 0 }}
+                      transition={{
+                        type: 'spring',
+                        ...SPRING.bouncy,
+                        boxShadow: isGold
+                          ? { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+                          : undefined,
+                      }}
+                      className={`w-5 h-5 rounded-full cursor-pointer relative flex items-center justify-center ${
+                        isGold
+                          ? 'bg-gradient-to-br from-[#FFD700] to-[#FFA500]'
+                          : 'bg-primary light:bg-primary-dark'
+                      }`}
+                      style={isGold ? { boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)' } : undefined}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onParticleClick && getSessionIdForIndex) {
+                          const clickedSessionId = getSessionIdForIndex(index);
+                          if (clickedSessionId) onParticleClick(clickedSessionId);
+                        }
+                      }}
+                    >
+                      {/* Particle number overlay in select mode */}
+                      <AnimatePresence>
+                        {particleSelectMode && getParticleNumber && (
+                          <motion.span
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: 'spring', ...SPRING.bouncy, delay: index * 0.03 }}
+                            className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-background light:text-background-light select-none"
+                          >
+                            {getParticleNumber(index)}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })()
               ) : (
                 <motion.div
                   key="empty"
@@ -297,6 +329,9 @@ export function SessionCounter({
   onParticleClick,
   particleSelectMode = false,
 }: SessionCounterProps) {
+  // Particle of the Week (gold styling)
+  const { isPOTW } = useParticleOfWeek();
+
   // Goal mode: show daily goal progress
   // Non-goal mode: show cycle progress (sessions until long break)
   const showGoalMode = dailyGoal !== null;
@@ -512,6 +547,7 @@ export function SessionCounter({
               getSessionIdForIndex={getSessionIdForIndex}
               particleSelectMode={particleSelectMode}
               getParticleNumber={getParticleNumber}
+              isPOTW={isPOTW}
             />
           </motion.div>
         )}

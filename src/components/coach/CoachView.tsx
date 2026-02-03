@@ -8,6 +8,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useCoach } from '@/hooks/useCoach';
 import { useCoachChat } from '@/hooks/useCoachChat';
 import { useAIQuota } from '@/lib/ai-quota/hooks';
+import { useParticleOfWeek } from '@/hooks/useParticleOfWeek';
 import { QuotaRing } from './QuotaRing';
 import { InsightCard } from './InsightCard';
 import { ChatHistory } from './ChatHistory';
@@ -50,6 +51,9 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
 
   // Quota management
   const { quota } = useAIQuota();
+
+  // Particle of the Week
+  const { potw, isLoading: potwLoading } = useParticleOfWeek();
 
   // Determine if chat is available
   const isChatDisabled = isStreaming || !context || !quota;
@@ -154,6 +158,46 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* Scrollable area */}
                   <div className="flex-1 overflow-y-auto px-5 py-4">
+                    {/* Particle of the Week */}
+                    {potw && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 p-5 rounded-xl bg-gradient-to-br from-[#FFD700]/10 to-[#FFA500]/5 border border-[#FFD700]/20"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-[#FFD700]">✧</span>
+                          <h3 className="text-sm font-medium text-primary light:text-primary-dark">
+                            Particle of the Week
+                          </h3>
+                        </div>
+
+                        <div className="space-y-2 text-secondary light:text-secondary-dark">
+                          <p className="text-sm">{potw.narrative.opening}</p>
+                          <p className="text-sm">{potw.narrative.body}</p>
+                          <p className="text-sm italic">{potw.narrative.meaning}</p>
+                        </div>
+
+                        {/* Session Info */}
+                        <div className="mt-4 p-3 rounded-lg bg-surface/50 light:bg-surface-dark/50 border border-tertiary/10 light:border-tertiary-dark/10">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#FFD700]">✧</span>
+                            <span className="text-sm text-primary light:text-primary-dark">
+                              {Math.round(potw.session.duration / 60)} min
+                              {potw.session.task && ` · ${potw.session.task}`}
+                            </span>
+                          </div>
+                          <div className="text-xs text-tertiary light:text-tertiary-dark mt-1">
+                            {new Date(potw.session.completedAt).toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
                     {/* Insight Card */}
                     <div className="mb-6">
                       <InsightCard insight={insight} isLoading={isLoading || isLoadingInsight} />
