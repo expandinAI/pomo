@@ -12,7 +12,7 @@ import { AmbientSettings } from './AmbientSettings';
 import { VisualEffectsSettings } from './VisualEffectsSettings';
 import { CustomPresetEditor } from './CustomPresetEditor';
 import { WeekStartSetting } from './WeekStartSetting';
-import { DataExportSettings } from './DataExportSettings';
+import { PrivacySettings } from './PrivacySettings';
 import { OverflowSettings } from './OverflowSettings';
 import { AutoStartSettings } from './AutoStartSettings';
 import { EndTimeSettings } from './EndTimeSettings';
@@ -316,7 +316,7 @@ export function TimerSettings({ onSettingsChange, disabled }: TimerSettingsProps
 
                   {/* ═══ Privacy Section ═══ */}
                   <div className="pt-4 mt-4 border-t border-tertiary/10 light:border-tertiary-dark/10">
-                    <DataExportSettings />
+                    <PrivacySettings />
                   </div>
                 </div>
 
