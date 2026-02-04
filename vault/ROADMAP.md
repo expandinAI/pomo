@@ -6,10 +6,69 @@ High-level overview of features and milestones.
 
 ## Current Focus
 
-> **Phase 3: Native Apps** - Mac & iOS
+> **Daily Intentions** - Your Compass for the Day
+
+**Goal:** Show the gap between intention and reality
+**Status:** Phase 1 complete, Phase 2 & 3 in backlog
+
+---
+
+## In Progress: Daily Intentions
+
+### Phase 1: Core (MVP) ✅
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-350 | Intention data model & storage | 2 | ✅ Done |
+| POMO-351 | IntentionOverlay (unified) | 5 | ✅ Done |
+| POMO-352 | Intention display below timer | 2 | ✅ Done |
+| POMO-353 | Keyboard shortcut G I + Shift+I | 2 | ✅ Done |
+
+**Total Phase 1: 11 SP (✅ Complete)**
+
+### Phase 2: Visual Language
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-354 | Aligned/Reactive particle colors | 3 | 📋 Backlog |
+| POMO-355 | Alignment toggle in ParticleDetail | 3 | 📋 Backlog |
+| POMO-356 | Session counter with colors | 2 | 📋 Backlog |
+| POMO-357 | Timeline with alignment styling | 3 | 📋 Backlog |
+
+**Total Phase 2: 11 SP**
+
+### Phase 3: Reflection & Gap
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-358 | Evening reflection UI | 5 | 📋 Backlog |
+| POMO-359 | Intention status (done/partial/deferred) | 2 | 📋 Backlog |
+| POMO-360 | Week intentions view with gap | 8 | 📋 Backlog |
+| POMO-361 | "Tomorrow" → Intention suggestion | 3 | 📋 Backlog |
+
+**Total Phase 3: 18 SP**
+
+### Phase 4: Intelligence (Future)
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-362 | Coach prompt integration | 3 | 📋 Future |
+| POMO-363 | Auto-alignment detection | 5 | 📋 Future |
+| POMO-364 | Alignment statistics for Coach | 5 | 📋 Future |
+| POMO-365 | Supabase sync for intentions | 3 | 📋 Future |
+
+**Total Phase 4: 16 SP**
+
+**Daily Intentions Total: 56 SP**
+
+---
+
+## Next: Phase 3 - Native Apps
+
+> Mac & iOS
 
 **Goal:** Native desktop and mobile experience
-**Status:** Phase 2 complete, Phase 3 ready to start
+**Status:** Ready to start after Daily Intentions Phase 2
 
 ---
 

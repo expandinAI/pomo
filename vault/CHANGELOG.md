@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Intention Keyboard Shortcuts (POMO-353, 2 SP)**:
+  - `G I` opens IntentionOverlay (replaces `G O`)
+  - `Shift+I` clears today's intention with toast feedback
+  - `G O` still works (backwards compat, marked as legacy)
+  - Command Palette: "Set Intention" (G I) and "Clear Intention" (⇧I)
+  - Help Modal updated with new shortcuts
 - **Intention Display Below Timer (POMO-352, 2 SP)**:
   - IntentionDisplay component shows daily intention below timer
   - Subtle secondary text, highlights to primary on hover
@@ -404,6 +410,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-353-intention-keyboard-shortcut]]
 - [[stories/done/POMO-352-intention-display]]
 - [[stories/done/POMO-351-intention-overlay]]
 - [[stories/done/POMO-350-intention-data-model]]
