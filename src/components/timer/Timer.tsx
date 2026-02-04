@@ -797,6 +797,11 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
       }, 100);
     }
 
+    // Emit work session complete event (for evening reflection trigger)
+    if (wasWorkSession) {
+      window.dispatchEvent(new CustomEvent('particle:work-session-complete'));
+    }
+
     // Check for contextual hint after celebration (3.5s delay)
     if (wasWorkSession) {
       setTimeout(() => {
@@ -1352,6 +1357,11 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
       setTimeout(() => {
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
+    }
+
+    // Emit work session complete event (for evening reflection trigger)
+    if (wasWorkSession) {
+      window.dispatchEvent(new CustomEvent('particle:work-session-complete'));
     }
 
     // Check for contextual hint after celebration (3.5s delay)

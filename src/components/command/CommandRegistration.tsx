@@ -267,6 +267,16 @@ export function CommandRegistration({
         keywords: ['intention', 'clear', 'remove', 'reset', 'delete'],
       },
       {
+        id: 'end-of-day',
+        label: 'End of Day',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-evening-reflection'));
+        },
+        icon: <Moon className="w-4 h-4" />,
+        keywords: ['evening', 'reflection', 'end', 'day', 'done', 'close', 'night'],
+      },
+      {
         id: 'open-rhythm',
         label: 'Go to Rhythm',
         shortcut: 'G R',

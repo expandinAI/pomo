@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 3
 feature: daily-intentions
 created: 2026-02-04
 updated: 2026-02-04
-done_date: null
+done_date: 2026-02-04
 tags: [intentions, timeline, visual-language, particles]
 ---
 

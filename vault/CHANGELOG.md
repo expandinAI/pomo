@@ -7,6 +7,19 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Evening Reflection UI (POMO-358, 5 SP)**:
+  - Calm end-of-day reflection overlay after work sessions (>= 6pm)
+  - Phase 1: Shows intention text, particles with alignment colors, summary
+  - Phase 2: "How does this feel?" - Done/Partial/Tomorrow selection
+  - Updates intention status (completed/partial/deferred)
+  - Command Palette: "End of Day" for manual trigger
+  - Keyboard: Space to continue, D/P/T or 1/2/3 to select, Escape to dismiss
+  - Respects reduced motion preference
+- **Timeline with Alignment Styling (POMO-357, 3 SP)**:
+  - Timeline blocks show alignment-based colors (white for aligned, gray for reactive)
+  - TimelineSession interface extended with intentionAlignment field
+  - Tooltip shows "· Aligned" or "· Reactive" for work sessions
+  - Consistent visual language with SessionCounter (POMO-356)
 - **Session Counter with Alignment Colors (POMO-356, 2 SP)**:
   - Particle dots in SessionCounter show alignment-based colors
   - Aligned particles: White (#FFFFFF)
@@ -433,6 +446,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-358-evening-reflection]]
+- [[stories/done/POMO-357-timeline-alignment-styling]]
 - [[stories/done/POMO-356-session-counter-colors]]
 - [[stories/done/POMO-355-alignment-toggle]]
 - [[stories/done/POMO-353-intention-keyboard-shortcut]]

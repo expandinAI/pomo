@@ -24,6 +24,7 @@ import type { LearnView } from '@/components/learn/LearnMenu';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/contexts/SessionContext';
 import { exportCurrentWeekAsCSV } from '@/lib/export-utils';
+import { useIntention } from '@/hooks/useIntention';
 
 // Lazy load non-critical modal components
 const ShortcutsHelp = dynamic(
@@ -82,6 +83,10 @@ const HallOfFameModal = dynamic(
   () => import('@/components/hall-of-fame').then(mod => ({ default: mod.HallOfFameModal })),
   { ssr: false }
 );
+const EveningReflection = dynamic(
+  () => import('@/components/intentions').then(mod => ({ default: mod.EveningReflection })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
@@ -138,8 +143,14 @@ function HomeContent() {
   // Hall of Fame state
   const [showHallOfFame, setShowHallOfFame] = useState(false);
 
+  // Evening Reflection state
+  const [showEveningReflection, setShowEveningReflection] = useState(false);
+
   // Export message state (for G+E quick export)
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+
+  // Intention hook for evening reflection
+  const { todayIntention, updateIntentionStatus, refresh: refreshIntention } = useIntention();
 
   // Reset initialView when panel closes
   const handleLearnClose = useCallback(() => {
@@ -209,6 +220,56 @@ function HomeContent() {
         console.error('[Storage] Migration failed:', error);
       });
     }
+  }, []);
+
+  // Evening reflection trigger - shows after work session completion in evening
+  useEffect(() => {
+    function handleWorkSessionComplete() {
+      // Only show if:
+      // 1. It's evening (after 6pm)
+      // 2. There's an intention set for today
+      // 3. Intention is still active (not already completed/partial/deferred)
+      const hour = new Date().getHours();
+      const isEvening = hour >= 18;
+
+      if (isEvening && todayIntention && todayIntention.status === 'active') {
+        // Small delay to let the celebration finish
+        setTimeout(() => {
+          setShowEveningReflection(true);
+        }, 2000);
+      }
+    }
+
+    // Manual trigger via Command Palette
+    function handleOpenReflection() {
+      // Only show if there's an active intention
+      if (todayIntention && todayIntention.status === 'active') {
+        setShowEveningReflection(true);
+      } else {
+        // Show toast if no active intention
+        window.dispatchEvent(new CustomEvent('particle:toast', {
+          detail: { message: 'No active intention for today' }
+        }));
+      }
+    }
+
+    window.addEventListener('particle:work-session-complete', handleWorkSessionComplete);
+    window.addEventListener('particle:open-evening-reflection', handleOpenReflection);
+    return () => {
+      window.removeEventListener('particle:work-session-complete', handleWorkSessionComplete);
+      window.removeEventListener('particle:open-evening-reflection', handleOpenReflection);
+    };
+  }, [todayIntention]);
+
+  // Handle evening reflection completion
+  const handleReflectionComplete = useCallback(async (status: 'completed' | 'partial' | 'deferred' | 'active' | 'skipped') => {
+    await updateIntentionStatus(status);
+    setShowEveningReflection(false);
+    refreshIntention();
+  }, [updateIntentionStatus, refreshIntention]);
+
+  const handleReflectionDismiss = useCallback(() => {
+    setShowEveningReflection(false);
   }, []);
 
   // Onboarding - shows on first start attempt (after intro)
@@ -697,6 +758,16 @@ function HomeContent() {
         isOpen={showHallOfFame}
         onClose={() => setShowHallOfFame(false)}
       />
+
+      {/* Evening Reflection - shown after work session in evening when intention exists */}
+      <AnimatePresence>
+        {showEveningReflection && (
+          <EveningReflection
+            onComplete={handleReflectionComplete}
+            onDismiss={handleReflectionDismiss}
+          />
+        )}
+      </AnimatePresence>
 
     </motion.main>
   );

@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: daily-intentions
 created: 2026-02-04
 updated: 2026-02-04
-done_date: null
+done_date: 2026-02-04
 tags: [intentions, reflection, evening, emotional-design]
 ---
 
