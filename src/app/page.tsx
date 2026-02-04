@@ -323,6 +323,16 @@ function HomeContent() {
     return () => window.removeEventListener('particle:open-milestones', handleOpenMilestones);
   }, [setShowJourney]);
 
+  // Listen for hall of fame open event (from Command Palette G F)
+  useEffect(() => {
+    function handleOpenHallOfFame() {
+      setShowHallOfFame(true);
+    }
+
+    window.addEventListener('particle:open-hall-of-fame', handleOpenHallOfFame);
+    return () => window.removeEventListener('particle:open-hall-of-fame', handleOpenHallOfFame);
+  }, []);
+
   // Listen for coach open event (from Command Palette)
   useEffect(() => {
     function handleOpenCoach() {
