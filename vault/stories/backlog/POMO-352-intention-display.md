@@ -29,10 +29,21 @@ The intention is always visible during focus. Not prominent, but present. A cons
 ### Display
 
 - [ ] Intention text shown below timer when set
-- [ ] Position: Centered, below timer display, above controls
+- [ ] Position: Centered, below timer display, above session dots
 - [ ] Style: Subtle, secondary text color
 - [ ] Truncate long intentions with ellipsis (max ~40 chars visible)
 - [ ] Full text shown on hover (tooltip)
+
+### Layout
+
+```
+                    25:00
+
+          Ship the login feature
+               ●●●○ (3/4)
+
+     [ Presets ]  [ Controls ]
+```
 
 ### Visibility
 
@@ -42,7 +53,7 @@ The intention is always visible during focus. Not prominent, but present. A cons
 
 ### Interaction
 
-- [ ] Click on intention → Opens edit modal (or triggers `I` shortcut behavior)
+- [ ] Click on intention → Opens IntentionOverlay (`G I`)
 - [ ] Hover → Shows full text if truncated
 
 ### Animation
@@ -58,7 +69,7 @@ The intention is always visible during focus. Not prominent, but present. A cons
 ```
 src/components/intentions/
 ├── IntentionDisplay.tsx       # NEW: Display component
-└── index.ts                   # Update exports
+└── index.ts                   # Exports
 
 src/components/timer/
 └── Timer.tsx                  # Integrate IntentionDisplay
@@ -84,7 +95,7 @@ export function IntentionDisplay({ intention, onClick }: IntentionDisplayProps) 
   return (
     <motion.button
       onClick={onClick}
-      className="text-sm text-secondary light:text-secondary-dark text-center max-w-xs mx-auto truncate"
+      className="text-sm text-secondary light:text-secondary-dark text-center max-w-xs mx-auto truncate hover:text-primary light:hover:text-primary-dark transition-colors"
       title={intention}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -99,18 +110,17 @@ export function IntentionDisplay({ intention, onClick }: IntentionDisplayProps) 
 ### Integration in Timer
 
 ```typescript
-// In Timer.tsx, below TimerDisplay
+// In Timer.tsx
 
 const { todayIntention } = useIntention();
 
-// In render, after timer display:
+// In render, after timer display, before session dots:
 <AnimatePresence>
   {todayIntention && (
     <IntentionDisplay
       intention={todayIntention.text}
       onClick={() => {
-        // Open intention edit (could dispatch event or use callback)
-        window.dispatchEvent(new CustomEvent('particle:edit-intention'));
+        window.dispatchEvent(new CustomEvent('particle:open-intention'));
       }}
     />
   )}
@@ -123,16 +133,16 @@ const { todayIntention } = useIntention();
 ```
                     25:00
 
-          Finish the presentation
+          Ship the login feature
 
-     [ Start ]  [ Settings ]  [ ... ]
+               ●●●○
 ```
 
 ### Without Intention
 ```
                     25:00
 
-     [ Start ]  [ Settings ]  [ ... ]
+               ●●●○
 ```
 
 ### Long Intention (Truncated)
@@ -141,13 +151,12 @@ const { todayIntention } = useIntention();
 
      Complete the quarterly report and...
                     ↑
-              (hover for full text)
+              (hover for full)
 ```
 
 ## Styling
 
 ```css
-/* Intention display styling */
 .intention-display {
   font-size: 0.875rem;           /* text-sm */
   color: var(--color-secondary);
@@ -169,20 +178,21 @@ const { todayIntention } = useIntention();
 - [ ] Hides when no intention
 - [ ] Truncates long text correctly
 - [ ] Tooltip shows full text on hover
-- [ ] Click triggers edit action
+- [ ] Click opens IntentionOverlay
 - [ ] Animation works (fade in/out)
 - [ ] Reduced motion respected
-- [ ] Mobile: Tap works, no hover state issues
+- [ ] Mobile: Tap works
 
 ## Definition of Done
 
 - [ ] IntentionDisplay component created
 - [ ] Integrated below timer in Timer.tsx
 - [ ] Truncation and tooltip working
-- [ ] Click handler connected
+- [ ] Click handler opens IntentionOverlay
 - [ ] Animations smooth
 - [ ] Mobile responsive
 
 ## Dependencies
 
-- POMO-350 (Intention data model) must be complete
+- POMO-350 (Intention data model) ✓ Complete
+- POMO-351 (IntentionOverlay) — For click handler target

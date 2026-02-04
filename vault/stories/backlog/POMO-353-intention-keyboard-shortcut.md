@@ -2,37 +2,36 @@
 type: story
 status: backlog
 priority: p1
-effort: 1
+effort: 2
 feature: daily-intentions
 created: 2026-02-04
 updated: 2026-02-04
 done_date: null
-tags: [intentions, keyboard, shortcuts, command-palette]
+tags: [intentions, keyboard, shortcuts, command-palette, breaking-change]
 ---
 
-# POMO-353: Keyboard Shortcut `I` for Intention
+# POMO-353: Keyboard Shortcut `G I` for Intention
 
 ## User Story
 
 > As a **keyboard-first Particle user**,
-> I want **to press `I` to set or edit my intention**,
+> I want **to press `G I` to set or edit my intention**,
 > so that **I can manage my daily focus without touching the mouse**.
 
 ## Context
 
 Link: [[features/daily-intentions]]
 
-Keyboard-first is a core Particle principle. `I` for Intention — simple, memorable.
+**Breaking Change:** This replaces `G O` (Daily Goal) with `G I` (Intention). The unified IntentionOverlay handles both intention text and particle count.
 
 ## Acceptance Criteria
 
-### Shortcut: `I`
+### Shortcut: `G I`
 
-- [ ] `I` opens intention ritual/editor
-- [ ] If no intention today → Opens morning ritual (Phase 2: Question)
-- [ ] If intention exists → Opens edit mode (simple input overlay)
+- [ ] `G I` opens IntentionOverlay
 - [ ] Works when timer is idle or running
 - [ ] Does NOT work when modal is open or input is focused
+- [ ] Replaces `G O` behavior
 
 ### Shortcut: `Shift+I`
 
@@ -40,25 +39,56 @@ Keyboard-first is a core Particle principle. `I` for Intention — simple, memor
 - [ ] Shows brief confirmation toast: "Intention cleared"
 - [ ] Only works if intention exists
 
+### Backwards Compatibility: `G O`
+
+- [ ] `G O` still works but triggers `G I` behavior
+- [ ] Shows deprecation hint in Help Modal: "G O → G I"
+- [ ] Eventually remove in future version
+
 ### Command Palette
 
 - [ ] "Set Intention" command added
-- [ ] Shortcut shown: `I`
-- [ ] Keywords: intention, focus, today, goal, direction
+- [ ] Shortcut shown: `G I`
+- [ ] Keywords: intention, focus, today, goal, direction, planning
+- [ ] "Clear Intention" command added (Shift+I)
+
+### Help Modal
+
+- [ ] Update shortcut from "G O · Daily Goal" to "G I · Intention"
+- [ ] Add under Navigation category
+- [ ] Remove or deprecate "Daily Goal" entry
 
 ### Event System
 
-- [ ] `particle:open-intention` event opens ritual/editor
+- [ ] `particle:open-intention` event opens IntentionOverlay
 - [ ] `particle:clear-intention` event clears intention
+- [ ] `particle:open-goal` redirects to `particle:open-intention` (backwards compat)
 
 ## Technical Details
 
 ### Files to Modify
 
 ```
-src/components/command/CommandRegistration.tsx  # Add intention commands
-src/app/page.tsx                                 # Add event listeners
-src/hooks/useKeyboardShortcuts.ts               # Add I shortcut (if not in CommandRegistration)
+src/hooks/useGPrefixNavigation.ts      # Add G I, redirect G O
+src/components/command/CommandRegistration.tsx  # Update commands
+src/components/help/HelpModal.tsx      # Update shortcut docs
+src/app/page.tsx                       # Event listeners
+```
+
+### G-Prefix Navigation Update
+
+```typescript
+// In useGPrefixNavigation.ts
+
+const G_PREFIX_SHORTCUTS: Record<string, () => void> = {
+  // ... existing shortcuts ...
+
+  // NEW: Intention
+  'i': () => window.dispatchEvent(new CustomEvent('particle:open-intention')),
+
+  // DEPRECATED: Goal → redirects to Intention
+  'o': () => window.dispatchEvent(new CustomEvent('particle:open-intention')),
+};
 ```
 
 ### Command Registration
@@ -66,17 +96,16 @@ src/hooks/useKeyboardShortcuts.ts               # Add I shortcut (if not in Comm
 ```typescript
 // In CommandRegistration.tsx
 
-// Add to commands array:
 {
   id: 'set-intention',
   label: 'Set Intention',
-  shortcut: 'I',
+  shortcut: 'G I',
   category: 'navigation',
   action: () => {
     window.dispatchEvent(new CustomEvent('particle:open-intention'));
   },
-  icon: <Target className="w-4 h-4" />,  // or Compass icon
-  keywords: ['intention', 'focus', 'today', 'goal', 'direction', 'morning'],
+  icon: <Target className="w-4 h-4" />,
+  keywords: ['intention', 'focus', 'today', 'goal', 'direction', 'planning', 'morning'],
 },
 {
   id: 'clear-intention',
@@ -88,8 +117,14 @@ src/hooks/useKeyboardShortcuts.ts               # Add I shortcut (if not in Comm
   },
   icon: <X className="w-4 h-4" />,
   keywords: ['intention', 'clear', 'remove', 'reset'],
-  disabled: () => !todayIntention,  // Only enabled if intention exists
 },
+
+// Remove or mark as deprecated:
+// {
+//   id: 'set-daily-goal',
+//   label: 'Set Daily Goal',  // → DEPRECATED
+//   ...
+// },
 ```
 
 ### Event Listeners in page.tsx
@@ -97,22 +132,14 @@ src/hooks/useKeyboardShortcuts.ts               # Add I shortcut (if not in Comm
 ```typescript
 // In page.tsx
 
-// Listen for intention events
 useEffect(() => {
   function handleOpenIntention() {
-    if (todayIntention) {
-      // Edit mode - show simple overlay
-      setShowIntentionEdit(true);
-    } else {
-      // No intention - show full ritual (starting at Phase 2)
-      setShowIntentionRitual(true);
-    }
+    setShowIntentionOverlay(true);
   }
 
   function handleClearIntention() {
     clearIntention();
-    // Show toast
-    window.dispatchEvent(new CustomEvent('particle:show-toast', {
+    window.dispatchEvent(new CustomEvent('particle:status-message', {
       detail: { message: 'Intention cleared' }
     }));
   }
@@ -120,78 +147,64 @@ useEffect(() => {
   window.addEventListener('particle:open-intention', handleOpenIntention);
   window.addEventListener('particle:clear-intention', handleClearIntention);
 
+  // Backwards compat: G O → G I
+  window.addEventListener('particle:open-goal', handleOpenIntention);
+
   return () => {
     window.removeEventListener('particle:open-intention', handleOpenIntention);
     window.removeEventListener('particle:clear-intention', handleClearIntention);
+    window.removeEventListener('particle:open-goal', handleOpenIntention);
   };
-}, [todayIntention, clearIntention]);
+}, [clearIntention]);
 ```
 
-### Simple Edit Overlay
-
-When intention exists and user presses `I`, show a minimal edit overlay:
+### Help Modal Update
 
 ```typescript
-// IntentionEditOverlay.tsx (simplified version of ritual)
+// In shortcut definitions
 
-interface IntentionEditOverlayProps {
-  currentIntention: string;
-  onSave: (text: string) => void;
-  onClose: () => void;
-}
+// Before:
+{ key: 'G O', description: 'Daily Goal' }
 
-export function IntentionEditOverlay({ currentIntention, onSave, onClose }: IntentionEditOverlayProps) {
-  const [text, setText] = useState(currentIntention);
-
-  const handleSubmit = () => {
-    if (text.trim()) {
-      onSave(text.trim());
-    }
-    onClose();
-  };
-
-  return (
-    <motion.div className="fixed inset-0 bg-background/95 flex items-center justify-center z-50">
-      <div className="text-center">
-        <p className="text-secondary mb-4">What matters today?</p>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSubmit();
-            if (e.key === 'Escape') onClose();
-          }}
-          className="bg-transparent border-b border-tertiary/30 text-primary text-xl text-center w-80 py-2 focus:outline-none focus:border-primary"
-          autoFocus
-        />
-        <p className="text-tertiary text-xs mt-4">↵ Save · Esc Cancel</p>
-      </div>
-    </motion.div>
-  );
-}
+// After:
+{ key: 'G I', description: 'Set Intention' }
+{ key: 'G O', description: 'Set Intention (legacy)', deprecated: true }  // Optional
 ```
 
 ## Testing
 
-- [ ] `I` opens ritual when no intention
-- [ ] `I` opens edit when intention exists
+- [ ] `G I` opens IntentionOverlay
+- [ ] `G O` still works (backwards compat)
 - [ ] `Shift+I` clears intention
 - [ ] `Shift+I` shows toast
 - [ ] `Shift+I` disabled when no intention
-- [ ] Command palette shows "Set Intention"
-- [ ] Shortcut doesn't fire when input focused
-- [ ] Shortcut doesn't fire when modal open
+- [ ] Command palette shows "Set Intention" with `G I`
+- [ ] Help modal updated
+- [ ] Shortcuts don't fire when input focused
+- [ ] Shortcuts don't fire when modal open
 
 ## Definition of Done
 
-- [ ] `I` shortcut working
+- [ ] `G I` shortcut working
+- [ ] `G O` redirects to `G I` (backwards compat)
 - [ ] `Shift+I` shortcut working
-- [ ] Command palette integration
-- [ ] Edit overlay for existing intentions
+- [ ] Command palette updated
+- [ ] Help modal updated
 - [ ] Toast feedback for clear
 - [ ] No conflicts with other shortcuts
+- [ ] Breaking change documented
 
 ## Dependencies
 
-- POMO-350 (Intention data model)
-- POMO-351 (Morning ritual) — for opening ritual
+- POMO-350 (Intention data model) ✓ Complete
+- POMO-351 (IntentionOverlay) — Target for G I
+
+## Breaking Changes
+
+| Before | After | Notes |
+|--------|-------|-------|
+| `G O` | `G I` | `G O` still works but deprecated |
+| "Daily Goal" | "Intention" | Terminology change |
+| Separate commands | Unified command | One command for planning |
+
+Document in CHANGELOG under "Changed" section.

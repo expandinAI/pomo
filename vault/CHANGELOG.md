@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Daily Intentions Data Model (POMO-350, 2 SP)**:
+  - IntentionAlignment, IntentionStatus types and DBIntention interface
+  - Intentions table in IndexedDB (schema v4)
+  - CRUD operations in `src/lib/intentions/storage.ts`
+  - `useIntention` hook for React state management
+  - DBSession extended with optional intentionAlignment field
 - **Particle of the Week — Hall of Fame & Sharing (POMO-338, 5 SP)**:
   - Gold-Partikel in Timeline für wöchentlichen Highlight-Moment
   - Narrativ-Generierung: "Am Donnerstag um 9:14 ist etwas passiert..."
@@ -381,11 +387,17 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Dark Mode: Weiß (#FFFFFF) als Akzent
   - Light Mode: Schwarz (#171717) als Akzent
   - Maximaler Kontrast bei allen interaktiven Elementen
+- **Daily Goal → Intention (BREAKING CHANGE)**:
+  - `G O` (Daily Goal) → `G I` (Intention)
+  - `DailyGoalOverlay` → `IntentionOverlay`
+  - Unified planning: Intention text + particle count in one view
+  - `G O` still works (backwards compat), redirects to `G I`
 
 ### Fixed
 -
 
 ### Stories completed
+- [[stories/done/POMO-350-intention-data-model]]
 - [[stories/done/POMO-338-particle-of-the-week]]
 - [[stories/done/POMO-337-breathing-guidance]]
 - [[stories/done/POMO-328-account-deletion]]
