@@ -1,3 +1,15 @@
+---
+type: story
+status: done
+priority: p1
+effort: 5
+feature: timeline
+created: 2026-02-02
+updated: 2026-02-04
+done_date: 2026-02-04
+tags: [mobile, timeline, responsive, ux]
+---
+
 # POMO-333: Mobile-Native Timeline Redesign
 
 **Type:** Enhancement
