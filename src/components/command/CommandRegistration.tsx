@@ -25,6 +25,7 @@ import {
   Shuffle,
   BookOpen,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
@@ -232,15 +233,38 @@ export function CommandRegistration({
         keywords: ['projects', 'list', 'view', 'manage'],
       },
       {
+        id: 'set-intention',
+        label: 'Set Intention',
+        shortcut: 'G I',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-intentions'));
+        },
+        icon: <Target className="w-4 h-4" />,
+        keywords: ['intention', 'focus', 'daily', 'goal', 'target', 'particles', 'objective', 'what'],
+      },
+      {
         id: 'set-daily-goal',
         label: 'Set Daily Goal',
         shortcut: 'G O',
         category: 'navigation',
         action: () => {
-          window.dispatchEvent(new CustomEvent('particle:open-goals'));
+          // Backwards compat: redirect to intentions
+          window.dispatchEvent(new CustomEvent('particle:open-intentions'));
         },
         icon: <Target className="w-4 h-4" />,
         keywords: ['goal', 'daily', 'target', 'particles', 'objective'],
+      },
+      {
+        id: 'clear-intention',
+        label: 'Clear Intention',
+        shortcut: '⇧I',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:clear-intention'));
+        },
+        icon: <X className="w-4 h-4" />,
+        keywords: ['intention', 'clear', 'remove', 'reset', 'delete'],
       },
       {
         id: 'open-rhythm',

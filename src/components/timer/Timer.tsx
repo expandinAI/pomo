@@ -8,7 +8,8 @@ import { PresetSelector } from './PresetSelector';
 import { SessionCounter } from './SessionCounter';
 import { StatusMessage } from './StatusMessage';
 import { EndConfirmationModal } from './EndConfirmationModal';
-import { DailyGoalOverlay } from './DailyGoalOverlay';
+import { IntentionOverlay } from './IntentionOverlay';
+import { IntentionDisplay } from '@/components/intentions';
 import { ParticleDetailOverlay } from './ParticleDetailOverlay';
 import { useTimerWorker } from '@/hooks/useTimerWorker';
 import { useSound } from '@/hooks/useSound';
@@ -33,6 +34,7 @@ import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage, parseMultiLineInput } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
 import { useProjects } from '@/hooks/useProjects';
+import { useIntention } from '@/hooks/useIntention';
 import { useMilestones } from '@/components/milestones';
 import { useWellbeingHint } from '@/hooks/useWellbeingHint';
 import { useBreathingGuide } from '@/hooks/useBreathingGuide';
@@ -342,8 +344,8 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
   // End confirmation modal (legacy - kept for potential future use)
   const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
-  // Daily goal overlay
-  const [showDailyGoalOverlay, setShowDailyGoalOverlay] = useState(false);
+  // Intention overlay (unified daily intention + particle goal)
+  const [showIntentionOverlay, setShowIntentionOverlay] = useState(false);
 
   // Particle detail overlay
   const [selectedParticleId, setSelectedParticleId] = useState<string | null>(null);
@@ -414,6 +416,14 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     isLoading: projectsLoading,
     getById,
   } = useProjects();
+
+  // Daily intention (text + optional particle goal)
+  const {
+    todayIntention,
+    setIntention,
+    clearIntention,
+    particleGoal: intentionParticleGoal,
+  } = useIntention();
 
   // Session store (IndexedDB/localStorage abstraction)
   const {
@@ -503,15 +513,29 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     }
   }, [showDailyGoalReached]);
 
-  // Listen for G O navigation shortcut to open daily goal overlay
+  // Listen for G I / G O navigation shortcut to open intention overlay
   useEffect(() => {
-    function handleOpenGoals() {
-      setShowDailyGoalOverlay(true);
+    function handleOpenIntentions() {
+      setShowIntentionOverlay(true);
     }
 
-    window.addEventListener('particle:open-goals', handleOpenGoals);
-    return () => window.removeEventListener('particle:open-goals', handleOpenGoals);
-  }, []);
+    function handleClearIntention() {
+      if (todayIntention) {
+        clearIntention();
+        setToastMessage('Intention cleared');
+      }
+    }
+
+    // Support both new and legacy event names
+    window.addEventListener('particle:open-intentions', handleOpenIntentions);
+    window.addEventListener('particle:open-goals', handleOpenIntentions);
+    window.addEventListener('particle:clear-intention', handleClearIntention);
+    return () => {
+      window.removeEventListener('particle:open-intentions', handleOpenIntentions);
+      window.removeEventListener('particle:open-goals', handleOpenIntentions);
+      window.removeEventListener('particle:clear-intention', handleClearIntention);
+    };
+  }, [todayIntention, clearIntention]);
 
   // Listen for toast events and auto-clear after 2 seconds
   useEffect(() => {
@@ -1729,7 +1753,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         // O = Open particle select mode
         case 'o':
         case 'O':
-          if (!showParticleDetailOverlay && !showDailyGoalOverlay) {
+          if (!showParticleDetailOverlay && !showIntentionOverlay) {
             // Get fresh sessions from localStorage to ensure we have current data
             const freshSessions = getTodaySessions();
             if (freshSessions.length > 0) {
@@ -1862,6 +1886,17 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
             cycleAmbientType();
           }
           break;
+        case 'i':
+        case 'I':
+          if (e.shiftKey) {
+            // Shift+I = Clear Intention
+            e.preventDefault();
+            if (todayIntention) {
+              clearIntention();
+              setToastMessage('Intention cleared');
+            }
+          }
+          break;
         // Task input focus (only when idle and in work mode)
         case 't':
         case 'T':
@@ -1916,7 +1951,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, handleContinueInFlow, handleFinishEarly, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showDailyGoalOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions]);
+  }, [state.isRunning, state.mode, state.isPaused, state.autoStartCountdown, state.currentTask, isOverflow, appearanceMode, setAppearanceMode, toggleMute, cycleAmbientType, applyPreset, handleSkip, handleCancel, handleCompleteFromOverflow, handleContinueInFlow, handleFinishEarly, autoStartEnabled, setAutoStartEnabled, particleSelectMode, todaySessions, showParticleDetailOverlay, showIntentionOverlay, pickedTaskIndex, handleStart, handlePause, getTodaySessions, todayIntention, clearIntention]);
 
   const handleModeChange = useCallback((mode: SessionType) => {
     dispatch({ type: 'SET_MODE', mode, durations: durationsRef.current });
@@ -2063,13 +2098,26 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         onCancel={handleEndCancel}
       />
 
-      {/* Daily Goal Overlay */}
-      <DailyGoalOverlay
-        isOpen={showDailyGoalOverlay}
-        onClose={() => setShowDailyGoalOverlay(false)}
-        currentGoal={dailyGoal}
+      {/* Intention Overlay (unified daily intention + particle goal) */}
+      <IntentionOverlay
+        isOpen={showIntentionOverlay}
+        onClose={() => setShowIntentionOverlay(false)}
+        currentIntention={todayIntention ? {
+          text: todayIntention.text,
+          particleGoal: intentionParticleGoal,
+        } : null}
         todayCount={todayCount}
-        onGoalChange={setDailyGoal}
+        onSave={async (text, particleGoal) => {
+          await setIntention(text, undefined, particleGoal ?? undefined);
+          // Also update the dailyGoal in context for backwards compat with existing UI
+          if (particleGoal !== null) {
+            setDailyGoal(particleGoal);
+          }
+        }}
+        onClear={async () => {
+          await clearIntention();
+          setDailyGoal(null);
+        }}
       />
 
       {/* Particle Detail Overlay */}
@@ -2142,6 +2190,16 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         />
       </button>
 
+      {/* Daily intention display - clickable to open overlay */}
+      <AnimatePresence>
+        {todayIntention && (
+          <IntentionDisplay
+            intention={todayIntention.text}
+            onClick={() => setShowIntentionOverlay(true)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Unified task and project input (only for work sessions) */}
       {state.mode === 'work' && !projectsLoading && (
         <UnifiedTaskInput
@@ -2182,7 +2240,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         refreshPositionTrigger={refreshPositionTrigger}
         dailyGoal={dailyGoal}
         todayCount={todayCount}
-        onCounterClick={() => setShowDailyGoalOverlay(true)}
+        onCounterClick={() => setShowIntentionOverlay(true)}
         todaySessions={todaySessions}
         projectNameMap={projectNameMap}
         onParticleHover={(info) => setParticleHoverInfo(info?.displayText ?? null)}
