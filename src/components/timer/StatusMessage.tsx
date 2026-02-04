@@ -161,10 +161,10 @@ export function StatusMessage({
     // 8. Breathing text-guidance (during breaks with breathing enabled)
     if (breathingPhase) {
       const labels: Record<BreathingAction, string> = {
-        'inhale': 'Einatmen',
-        'hold-in': 'Halten',
-        'exhale': 'Ausatmen',
-        'hold-out': 'Halten',
+        'inhale': 'Inhale',
+        'hold-in': 'Hold',
+        'exhale': 'Exhale',
+        'hold-out': 'Hold',
       };
       return `${labels[breathingPhase.action]} · · · ${breathingPhase.countdown}`;
     }
