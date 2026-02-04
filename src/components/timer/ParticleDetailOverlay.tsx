@@ -6,13 +6,16 @@ import { Minus, Plus, X, Trash2, Zap } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
+import { useIntention } from '@/hooks/useIntention';
 import {
   formatTime24h,
   formatDuration,
   formatDate,
 } from '@/lib/session-storage';
 import { ProjectDropdown } from '@/components/task/ProjectDropdown';
+import { cn } from '@/lib/utils';
 import type { Project } from '@/lib/projects';
+import type { IntentionAlignment } from '@/lib/db/types';
 
 interface ParticleDetailOverlayProps {
   isOpen: boolean;
@@ -89,9 +92,15 @@ export function ParticleDetailOverlay({
   // Delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Alignment state
+  const [alignment, setAlignment] = useState<IntentionAlignment | null>(null);
+
   // Quick edit mode for duration
   const [isEditingDuration, setIsEditingDuration] = useState(false);
   const [durationInput, setDurationInput] = useState('');
+
+  // Get today's intention
+  const { todayIntention } = useIntention();
 
   // Focus trap
   useFocusTrap(modalRef, isOpen, { initialFocusRef: taskInputRef });
@@ -105,6 +114,8 @@ export function ParticleDetailOverlay({
         setTask(loadedSession.task || '');
         setProjectId(loadedSession.projectId || null);
         setDuration(loadedSession.duration);
+        // intentionAlignment only exists on DBSession, not CompletedSession
+        setAlignment(('intentionAlignment' in loadedSession ? loadedSession.intentionAlignment : undefined) ?? null);
         setIsDirty(false);
         setShowDeleteConfirm(false);
         setIsEditingDuration(false);
@@ -119,11 +130,12 @@ export function ParticleDetailOverlay({
         task: task || undefined,
         projectId: projectId || undefined,
         duration,
+        intentionAlignment: alignment ?? undefined,
       });
       onSessionUpdated();
     }
     onClose();
-  }, [isDirty, sessionId, task, projectId, duration, onSessionUpdated, onClose, updateSession]);
+  }, [isDirty, sessionId, task, projectId, duration, alignment, onSessionUpdated, onClose, updateSession]);
 
   // Handle delete
   const handleDelete = useCallback(async () => {
@@ -205,13 +217,29 @@ export function ParticleDetailOverlay({
           e.stopImmediatePropagation();
           const delta = e.shiftKey ? -5 * 60 : -60; // Shift = -5 min, else -1 min
           adjustDuration(delta);
+        } else if (e.key === 'a' || e.key === 'A') {
+          // Alignment shortcut - only when intention exists
+          if (todayIntention) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            setAlignment('aligned');
+            setIsDirty(true);
+          }
+        } else if (e.key === 'r' || e.key === 'R') {
+          // Reactive shortcut - only when intention exists
+          if (todayIntention) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            setAlignment('reactive');
+            setIsDirty(true);
+          }
         }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration]);
+  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration, todayIntention]);
 
   // Quick edit duration
   const startDurationEdit = () => {
@@ -503,6 +531,49 @@ export function ParticleDetailOverlay({
                       />
                     </div>
                   </motion.div>
+
+                  {/* Alignment Toggle - only shown when today has an intention */}
+                  {todayIntention && (
+                    <motion.div variants={itemVariants} className="space-y-3 pt-2">
+                      <p className="text-xs text-tertiary light:text-tertiary-dark text-center">
+                        Today&apos;s intention: &ldquo;{todayIntention.text}&rdquo;
+                      </p>
+                      <div className="flex gap-3 justify-center">
+                        <button
+                          onClick={() => {
+                            setAlignment('aligned');
+                            setIsDirty(true);
+                          }}
+                          className={cn(
+                            'flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all',
+                            alignment === 'aligned'
+                              ? 'bg-white/10 ring-1 ring-white text-primary light:bg-primary-dark/10 light:ring-primary-dark light:text-primary-dark'
+                              : 'bg-tertiary/10 text-secondary hover:bg-tertiary/20 light:text-secondary-dark'
+                          )}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-white light:bg-primary-dark" />
+                          Aligned
+                          <kbd className="text-xs opacity-50">A</kbd>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAlignment('reactive');
+                            setIsDirty(true);
+                          }}
+                          className={cn(
+                            'flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all',
+                            alignment === 'reactive'
+                              ? 'bg-tertiary/20 ring-1 ring-tertiary text-primary light:text-primary-dark'
+                              : 'bg-tertiary/10 text-secondary hover:bg-tertiary/20 light:text-secondary-dark'
+                          )}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-tertiary" />
+                          Reactive
+                          <kbd className="text-xs opacity-50">R</kbd>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
 
                 {/* Footer - Actions */}

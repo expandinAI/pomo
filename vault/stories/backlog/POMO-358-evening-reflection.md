@@ -34,7 +34,7 @@ Particle shows: "You wanted to ship the login feature with 4 particles. 4 of 5 w
 
 ### Trigger Conditions
 
-- [ ] After last particle when time > 6pm (configurable?)
+- [ ] After last particle when time > 6pm (configurable? yes)
 - [ ] When closing app in evening (on blur/close)
 - [ ] Via `G I` when intention exists and > 6pm
 - [ ] Manual trigger: Command Palette "End of Day"
