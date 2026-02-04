@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Aligned/Reactive Particle Colors (POMO-354, 1 SP)**:
+  - PARTICLE_COLORS tokens in design-tokens.ts (aligned: white, reactive: gray)
+  - PARTICLE_LIGHT_MODE_CLASSES for visibility on light backgrounds
+  - Helper functions: getParticleColorClass(), getParticleHexColor(), isReactiveParticle()
+  - Combined utility: getParticleClasses() for color + light mode
+  - Unit tests (17 tests) in utils.test.ts
 - **Intention Keyboard Shortcuts (POMO-353, 2 SP)**:
   - `G I` opens IntentionOverlay (replaces `G O`)
   - `Shift+I` clears today's intention with toast feedback
