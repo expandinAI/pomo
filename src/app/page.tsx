@@ -532,6 +532,7 @@ function HomeContent() {
           onOpenHistory={() => window.dispatchEvent(new CustomEvent('particle:open-history'))}
           onOpenYear={() => window.dispatchEvent(new CustomEvent('particle:open-year'))}
           onOpenMilestones={() => setShowJourney(true)}
+          onOpenHallOfFame={() => setShowHallOfFame(true)}
           onOpenLearn={() => { setLearnInitialView(undefined); setShowLearn(true); }}
           onOpenAccount={() => setShowAccountPanel(true)}
           onOpenCoach={() => { setShowCoach(true); setHasCoachInsight(false); }}

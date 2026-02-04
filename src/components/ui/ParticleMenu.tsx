@@ -15,6 +15,7 @@ import {
   Shield,
   User,
   Sparkles,
+  Award,
 } from 'lucide-react';
 import Link from 'next/link';
 import { SPRING } from '@/styles/design-tokens';
@@ -43,6 +44,7 @@ interface ParticleMenuProps {
   onOpenHistory?: () => void;
   onOpenYear?: () => void;
   onOpenMilestones?: () => void;
+  onOpenHallOfFame?: () => void;
   onOpenLearn?: () => void;
   onOpenAccount?: () => void;
   onOpenCoach?: () => void;
@@ -83,6 +85,7 @@ export function ParticleMenu({
   onOpenHistory,
   onOpenYear,
   onOpenMilestones,
+  onOpenHallOfFame,
   onOpenLearn,
   onOpenAccount,
   onOpenCoach,
@@ -131,6 +134,7 @@ export function ParticleMenu({
     { id: 'rhythm', icon: <Activity className="w-4 h-4" />, label: 'Rhythm', key: 'R', onClick: onOpenRhythm },
     ...(onOpenYear ? [{ id: 'year', icon: <Calendar className="w-4 h-4" />, label: 'Year View', key: 'Y', onClick: onOpenYear }] : []),
     ...(onOpenMilestones ? [{ id: 'milestones', icon: <Trophy className="w-4 h-4" />, label: 'Milestones', key: 'M', onClick: onOpenMilestones }] : []),
+    ...(onOpenHallOfFame ? [{ id: 'hallOfFame', icon: <Award className="w-4 h-4" />, label: 'Hall of Fame', key: 'F', onClick: onOpenHallOfFame }] : []),
     ...(onOpenLearn ? [{ id: 'library', icon: <GraduationCap className="w-4 h-4" />, label: 'Library', key: 'L', onClick: onOpenLearn }] : []),
   ];
 

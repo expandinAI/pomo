@@ -275,6 +275,17 @@ export function CommandRegistration({
         icon: <BarChart3 className="w-4 h-4" />,
         keywords: ['statistics', 'stats', 'dashboard', 'charts', 'analytics', 'insights'],
       },
+      {
+        id: 'open-hall-of-fame',
+        label: 'Go to Hall of Fame',
+        shortcut: 'G F',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-hall-of-fame'));
+        },
+        icon: <Award className="w-4 h-4" />,
+        keywords: ['hall', 'fame', 'potw', 'particle', 'week', 'highlights', 'best', 'gold'],
+      },
 
       // Project commands
       {
