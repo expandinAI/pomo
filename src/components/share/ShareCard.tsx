@@ -69,7 +69,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
             fontSize: 48,
             fontWeight: 600,
             color: '#FAFAFA',
-            marginBottom: 8,
+            marginBottom: 16,
           }}
         >
           {duration} min

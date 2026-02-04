@@ -16,19 +16,23 @@ interface UseIntentionReturn {
   /** Loading state */
   isLoading: boolean;
   /** Set a new intention for today */
-  setIntention: (text: string, projectId?: string) => Promise<DBIntention>;
+  setIntention: (text: string, projectId?: string, particleGoal?: number) => Promise<DBIntention>;
   /** Update the status of today's intention */
   updateIntentionStatus: (status: IntentionStatus) => Promise<DBIntention | null>;
   /** Update the text of today's intention */
   updateIntentionText: (text: string) => Promise<DBIntention | null>;
   /** Update the project of today's intention */
   updateIntentionProject: (projectId: string | null) => Promise<DBIntention | null>;
+  /** Update the particle goal of today's intention */
+  updateIntentionGoal: (particleGoal: number | null) => Promise<DBIntention | null>;
   /** Clear (delete) today's intention */
   clearIntention: () => Promise<boolean>;
   /** Refresh intention from storage */
   refresh: () => Promise<void>;
   /** Check if there's an intention set for today */
   hasIntention: boolean;
+  /** Current particle goal (null if not set) */
+  particleGoal: number | null;
 }
 
 /**
@@ -72,7 +76,7 @@ export function useIntention(): UseIntentionReturn {
 
   // Set a new intention for today
   const setIntentionHandler = useCallback(
-    async (text: string, projectId?: string): Promise<DBIntention> => {
+    async (text: string, projectId?: string, particleGoal?: number): Promise<DBIntention> => {
       const today = getTodayDateString();
 
       // If there's already an intention for today, delete it first
@@ -84,6 +88,7 @@ export function useIntention(): UseIntentionReturn {
         text,
         date: today,
         projectId,
+        particleGoal,
       });
 
       setTodayIntention(newIntention);
@@ -147,6 +152,22 @@ export function useIntention(): UseIntentionReturn {
     [todayIntention]
   );
 
+  // Update the particle goal of today's intention
+  const updateIntentionGoal = useCallback(
+    async (particleGoal: number | null): Promise<DBIntention | null> => {
+      if (!todayIntention) return null;
+
+      const updated = await updateIntention(todayIntention.id, { particleGoal });
+
+      if (updated) {
+        setTodayIntention(updated);
+      }
+
+      return updated;
+    },
+    [todayIntention]
+  );
+
   // Clear (delete) today's intention
   const clearIntention = useCallback(async (): Promise<boolean> => {
     if (!todayIntention) return false;
@@ -173,8 +194,10 @@ export function useIntention(): UseIntentionReturn {
     updateIntentionStatus,
     updateIntentionText,
     updateIntentionProject,
+    updateIntentionGoal,
     clearIntention,
     refresh,
     hasIntention: todayIntention !== null,
+    particleGoal: todayIntention?.particleGoal ?? null,
   };
 }

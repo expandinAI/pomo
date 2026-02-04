@@ -20,6 +20,7 @@ export interface CreateIntentionInput {
   date: string; // "2026-02-04" (ISO date only)
   projectId?: string;
   deferredFrom?: string;
+  particleGoal?: number; // 1-9, optional daily particle target
 }
 
 /**
@@ -31,4 +32,5 @@ export interface UpdateIntentionInput {
   status?: 'active' | 'completed' | 'partial' | 'deferred' | 'skipped';
   completedAt?: number;
   deferredFrom?: string;
+  particleGoal?: number | null; // 1-9, optional daily particle target (null to clear)
 }

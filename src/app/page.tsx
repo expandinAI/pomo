@@ -262,8 +262,12 @@ function HomeContent() {
       onProjects: () => {
         window.dispatchEvent(new CustomEvent('particle:open-projects'));
       },
+      onIntentions: () => {
+        window.dispatchEvent(new CustomEvent('particle:open-intentions'));
+      },
       onGoals: () => {
-        window.dispatchEvent(new CustomEvent('particle:open-goals'));
+        // Backwards compat: redirect to intentions
+        window.dispatchEvent(new CustomEvent('particle:open-intentions'));
       },
       onRhythm: () => {
         setShowRhythm(true);
@@ -537,7 +541,7 @@ function HomeContent() {
           onOpenTimeline={() => setShowTimeline(true)}
           onOpenRhythm={() => setShowRhythm(true)}
           onOpenProjects={() => window.dispatchEvent(new CustomEvent('particle:open-projects'))}
-          onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-goals'))}
+          onOpenGoals={() => window.dispatchEvent(new CustomEvent('particle:open-intentions'))}
           onOpenStats={() => window.dispatchEvent(new CustomEvent('particle:open-dashboard'))}
           onOpenHistory={() => window.dispatchEvent(new CustomEvent('particle:open-history'))}
           onOpenYear={() => window.dispatchEvent(new CustomEvent('particle:open-year'))}

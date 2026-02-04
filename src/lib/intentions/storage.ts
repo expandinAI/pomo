@@ -36,6 +36,7 @@ export async function saveIntention(input: CreateIntentionInput): Promise<DBInte
     status: 'active' as const,
     ...(input.projectId && { projectId: input.projectId }),
     ...(input.deferredFrom && { deferredFrom: input.deferredFrom }),
+    ...(input.particleGoal !== undefined && { particleGoal: input.particleGoal }),
   });
 
   await db.intentions.add(intention);
@@ -75,6 +76,9 @@ export async function updateIntention(
     ...(updates.status !== undefined && { status: updates.status }),
     ...(updates.completedAt !== undefined && { completedAt: updates.completedAt }),
     ...(updates.deferredFrom !== undefined && { deferredFrom: updates.deferredFrom }),
+    ...(updates.particleGoal !== undefined && {
+      particleGoal: updates.particleGoal === null ? undefined : updates.particleGoal,
+    }),
   });
 
   await db.intentions.put(updated);

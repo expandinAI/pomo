@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Intention Display Below Timer (POMO-352, 2 SP)**:
+  - IntentionDisplay component shows daily intention below timer
+  - Subtle secondary text, highlights to primary on hover
+  - Truncates long text (>40 chars) with tooltip for full text
+  - Click opens IntentionOverlay (`G I`)
+  - Fade in/out animation with Framer Motion
+  - Integrated in Timer.tsx with consistent gap-8 spacing
 - **Daily Intentions Data Model (POMO-350, 2 SP)**:
   - IntentionAlignment, IntentionStatus types and DBIntention interface
   - Intentions table in IndexedDB (schema v4)
@@ -397,6 +404,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-352-intention-display]]
+- [[stories/done/POMO-351-intention-overlay]]
 - [[stories/done/POMO-350-intention-data-model]]
 - [[stories/done/POMO-338-particle-of-the-week]]
 - [[stories/done/POMO-337-breathing-guidance]]

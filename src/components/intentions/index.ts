@@ -1,0 +1,1 @@
+export { IntentionDisplay } from './IntentionDisplay';

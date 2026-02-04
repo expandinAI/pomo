@@ -67,6 +67,7 @@ export interface DBIntention extends SyncableEntity {
   status: IntentionStatus;
   completedAt?: number; // Unix timestamp when completed
   deferredFrom?: string; // Date string if deferred from another day
+  particleGoal?: number; // 1-9, optional daily particle target
 }
 
 /**

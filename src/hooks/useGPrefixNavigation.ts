@@ -10,6 +10,7 @@ interface GPrefixCallbacks {
   onYear?: () => void;
   onProjects?: () => void;
   onGoals?: () => void;
+  onIntentions?: () => void;
   onRhythm?: () => void;
   onMilestones?: () => void;
   onLearn?: () => void;
@@ -118,10 +119,16 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
             e.stopImmediatePropagation();
             callbacks.onProjects?.();
             break;
-          case 'o':
+          case 'i':
             e.preventDefault();
             e.stopImmediatePropagation();
-            callbacks.onGoals?.();
+            callbacks.onIntentions?.();
+            break;
+          case 'o':
+            // Backwards compat: G O redirects to intentions
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onIntentions?.() ?? callbacks.onGoals?.();
             break;
           case 'r':
             e.preventDefault();
