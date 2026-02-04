@@ -1,7 +1,7 @@
 // src/lib/db/database.ts
 
 import Dexie, { type Table } from 'dexie';
-import type { DBSession, DBProject, DBRecentTask, DBSettings, DBQueuedChange } from './types';
+import type { DBSession, DBProject, DBRecentTask, DBSettings, DBQueuedChange, DBIntention } from './types';
 
 export class ParticleDB extends Dexie {
   sessions!: Table<DBSession, string>;
@@ -9,6 +9,7 @@ export class ParticleDB extends Dexie {
   recentTasks!: Table<DBRecentTask, string>;
   settings!: Table<DBSettings, string>;
   syncQueue!: Table<DBQueuedChange, string>;
+  intentions!: Table<DBIntention, string>;
 
   constructor() {
     super('ParticleDB');
@@ -48,6 +49,17 @@ export class ParticleDB extends Dexie {
       recentTasks: 'text, lastUsed',
       settings: 'key',
       syncQueue: 'id, entityType, createdAt, nextRetryAt',
+    });
+
+    // Schema v4 - Add intentions table for Daily Intentions feature
+    this.version(4).stores({
+      sessions: 'id, completedAt, projectId, syncStatus, type, serverId',
+      projects: 'id, archived, syncStatus, serverId',
+      recentTasks: 'text, lastUsed',
+      settings: 'key',
+      syncQueue: 'id, entityType, createdAt, nextRetryAt',
+      // New: Intentions table indexed by id, date, and status
+      intentions: 'id, date, status',
     });
   }
 }

@@ -1,7 +1,7 @@
 // src/lib/db/sessions.ts
 
 import { getDB } from './database';
-import type { DBSession } from './types';
+import type { DBSession, IntentionAlignment } from './types';
 import { withSyncMetadata, markAsUpdated, markAsDeleted } from './types';
 import type { SessionType } from '@/styles/design-tokens';
 
@@ -49,6 +49,7 @@ export interface CreateSessionInput {
   presetId?: string;
   overflowDuration?: number;
   estimatedDuration?: number;
+  intentionAlignment?: IntentionAlignment;
 }
 
 /**
@@ -68,6 +69,7 @@ export async function saveSession(input: CreateSessionInput): Promise<DBSession>
     ...(input.presetId && { presetId: input.presetId }),
     ...(input.overflowDuration && { overflowDuration: input.overflowDuration }),
     ...(input.estimatedDuration && { estimatedDuration: input.estimatedDuration }),
+    ...(input.intentionAlignment && { intentionAlignment: input.intentionAlignment }),
   });
 
   await db.sessions.add(session);
@@ -81,6 +83,7 @@ export interface UpdateSessionInput {
   task?: string;
   projectId?: string | null;
   duration?: number;
+  intentionAlignment?: IntentionAlignment | null;
 }
 
 export async function updateSession(
@@ -101,6 +104,9 @@ export async function updateSession(
       projectId: updates.projectId === null ? undefined : updates.projectId
     }),
     ...(updates.duration !== undefined && { duration: updates.duration }),
+    ...(updates.intentionAlignment !== undefined && {
+      intentionAlignment: updates.intentionAlignment === null ? undefined : updates.intentionAlignment
+    }),
   });
 
   await db.sessions.put(updated);

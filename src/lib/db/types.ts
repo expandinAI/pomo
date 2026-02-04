@@ -3,6 +3,24 @@
 import type { SessionType } from '@/styles/design-tokens';
 
 /**
+ * Intention alignment indicates how a session relates to the day's intention
+ * - aligned: Session directly supports the daily intention
+ * - reactive: Session was reactive/unplanned work
+ * - none: No alignment specified (default for backwards compat)
+ */
+export type IntentionAlignment = 'aligned' | 'reactive' | 'none';
+
+/**
+ * Status of a daily intention
+ * - active: Intention set for today, not yet completed
+ * - completed: Fully achieved
+ * - partial: Partially achieved
+ * - deferred: Moved to another day
+ * - skipped: Intentionally not pursued
+ */
+export type IntentionStatus = 'active' | 'completed' | 'partial' | 'deferred' | 'skipped';
+
+/**
  * Sync Status für spätere Cloud-Integration
  * - local: Nur lokal vorhanden
  * - pending: Geändert, wartet auf Sync
@@ -36,6 +54,19 @@ export interface DBSession extends SyncableEntity {
   presetId?: string;
   overflowDuration?: number;
   estimatedDuration?: number;
+  intentionAlignment?: IntentionAlignment; // How this session relates to daily intention
+}
+
+/**
+ * Daily Intention - One focused goal per day
+ */
+export interface DBIntention extends SyncableEntity {
+  date: string; // "2026-02-04" (ISO date only)
+  text: string;
+  projectId?: string;
+  status: IntentionStatus;
+  completedAt?: number; // Unix timestamp when completed
+  deferredFrom?: string; // Date string if deferred from another day
 }
 
 /**

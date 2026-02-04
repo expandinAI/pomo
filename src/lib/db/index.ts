@@ -15,6 +15,9 @@ export {
   type DBProject,
   type DBRecentTask,
   type DBSettings,
+  type DBIntention,
+  type IntentionAlignment,
+  type IntentionStatus,
   // Helper Functions
   withSyncMetadata,
   markAsUpdated,
