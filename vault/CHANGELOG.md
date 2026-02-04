@@ -7,6 +7,23 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Session Counter with Alignment Colors (POMO-356, 2 SP)**:
+  - Particle dots in SessionCounter show alignment-based colors
+  - Aligned particles: White (#FFFFFF)
+  - Reactive particles: Gray (#525252)
+  - Default (no alignment): White
+  - Hover tooltip shows "· Aligned" or "· Reactive"
+  - Compact view (9+ particles) shows most recent session's color
+  - Light mode: White particles get subtle shadow/ring for visibility
+  - Gold particles (POTW) still take precedence over alignment colors
+- **Alignment Toggle in ParticleDetail (POMO-355, 3 SP)**:
+  - AlignmentToggle UI in ParticleDetailOverlay
+  - Shows today's intention text as context
+  - Two buttons: "Aligned" (white dot) / "Reactive" (gray dot)
+  - Selected state with ring + background highlight
+  - Keyboard shortcuts: `A` = Aligned, `R` = Reactive
+  - Only visible when today has an intention set
+  - Saves intentionAlignment to IndexedDB
 - **Aligned/Reactive Particle Colors (POMO-354, 1 SP)**:
   - PARTICLE_COLORS tokens in design-tokens.ts (aligned: white, reactive: gray)
   - PARTICLE_LIGHT_MODE_CLASSES for visibility on light backgrounds
@@ -416,6 +433,8 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-356-session-counter-colors]]
+- [[stories/done/POMO-355-alignment-toggle]]
 - [[stories/done/POMO-353-intention-keyboard-shortcut]]
 - [[stories/done/POMO-352-intention-display]]
 - [[stories/done/POMO-351-intention-overlay]]

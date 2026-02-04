@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SPRING } from '@/styles/design-tokens';
 import { type CompletedSession, formatSessionInfo, formatDuration, getTotalDuration } from '@/lib/session-storage';
 import { useParticleOfWeek } from '@/hooks/useParticleOfWeek';
+import { getParticleClasses } from '@/lib/intentions';
+import type { IntentionAlignment } from '@/lib/db/types';
 
 // Threshold for switching to compact view
 const COMPACT_THRESHOLD = 9;
@@ -43,6 +45,7 @@ function StandardView({
   particleSelectMode,
   getParticleNumber,
   isPOTW,
+  getSessionColorClass,
 }: {
   totalDots: number;
   filledCount: number;
@@ -56,6 +59,7 @@ function StandardView({
   particleSelectMode?: boolean;
   getParticleNumber?: (index: number) => number | null;
   isPOTW?: (sessionId: string) => boolean;
+  getSessionColorClass?: (index: number) => string;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -156,7 +160,7 @@ function StandardView({
                       className={`w-5 h-5 rounded-full cursor-pointer relative flex items-center justify-center ${
                         isGold
                           ? 'bg-gradient-to-br from-[#FFD700] to-[#FFA500]'
-                          : 'bg-primary light:bg-primary-dark'
+                          : getSessionColorClass ? getSessionColorClass(index) : 'bg-primary light:bg-primary-dark'
                       }`}
                       style={isGold ? { boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)' } : undefined}
                       onClick={(e) => {
@@ -211,6 +215,7 @@ function CompactView({
   getCompactSummary,
   onParticleClick,
   getMostRecentSessionId,
+  mostRecentColorClass,
 }: {
   completedCount: number;
   showGlow: boolean;
@@ -220,6 +225,7 @@ function CompactView({
   getCompactSummary?: () => string | null;
   onParticleClick?: (sessionId: string) => void;
   getMostRecentSessionId?: () => string | null;
+  mostRecentColorClass?: string;
 }) {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -273,7 +279,7 @@ function CompactView({
 
       {/* Filled particle symbol */}
       <div
-        className="w-5 h-5 rounded-full bg-primary light:bg-primary-dark cursor-pointer"
+        className={`w-5 h-5 rounded-full cursor-pointer ${mostRecentColorClass || 'bg-primary light:bg-primary-dark'}`}
         onClick={(e) => {
           e.stopPropagation();
           if (onParticleClick && getMostRecentSessionId) {
@@ -447,7 +453,18 @@ export function SessionCounter({
     if (sessionIndex < 0 || sessionIndex >= todaySessions.length) return null;
     const session = todaySessions[sessionIndex];
     const projectName = session.projectId && projectNameMap?.get(session.projectId);
-    return formatSessionInfo(session, projectName || undefined);
+    const baseInfo = formatSessionInfo(session, projectName || undefined);
+
+    // Add alignment status to hover info
+    const alignment = 'intentionAlignment' in session
+      ? (session.intentionAlignment as IntentionAlignment | undefined)
+      : undefined;
+    if (alignment === 'aligned') {
+      return `${baseInfo} · Aligned`;
+    } else if (alignment === 'reactive') {
+      return `${baseInfo} · Reactive`;
+    }
+    return baseInfo;
   }, [todaySessions, projectNameMap]);
 
   // Get session ID for a given particle index (for click handler)
@@ -487,6 +504,36 @@ export function SessionCounter({
     return `${todaySessions.length} ${particleWord} · ${formatDuration(totalSeconds)} today`;
   }, [todaySessions]);
 
+  // Get color class for a session at the given display index (for alignment-based coloring)
+  const getSessionColorClass = useCallback((index: number): string => {
+    if (!todaySessions || todaySessions.length === 0) {
+      return 'bg-primary light:bg-primary-dark'; // Default white
+    }
+    // Reverse index: index 0 (leftmost) = oldest session
+    const sessionIndex = todaySessions.length - 1 - index;
+    if (sessionIndex < 0 || sessionIndex >= todaySessions.length) {
+      return 'bg-primary light:bg-primary-dark';
+    }
+    const session = todaySessions[sessionIndex];
+    // Check if session has intentionAlignment (DBSession type)
+    const alignment = 'intentionAlignment' in session
+      ? (session.intentionAlignment as IntentionAlignment | undefined)
+      : undefined;
+    return getParticleClasses(alignment);
+  }, [todaySessions]);
+
+  // Get color class for the most recent session (for compact view)
+  const getMostRecentColorClass = useCallback((): string => {
+    if (!todaySessions || todaySessions.length === 0) {
+      return 'bg-primary light:bg-primary-dark';
+    }
+    const session = todaySessions[0]; // Most recent
+    const alignment = 'intentionAlignment' in session
+      ? (session.intentionAlignment as IntentionAlignment | undefined)
+      : undefined;
+    return getParticleClasses(alignment);
+  }, [todaySessions]);
+
   return (
     <div
       className={`flex items-center gap-3 focus:outline-none focus-visible:ring-0 ${onCounterClick ? 'cursor-pointer' : ''}`}
@@ -524,6 +571,7 @@ export function SessionCounter({
               getCompactSummary={getCompactSummary}
               onParticleClick={onParticleClick}
               getMostRecentSessionId={getMostRecentSessionId}
+              mostRecentColorClass={getMostRecentColorClass()}
             />
           </motion.div>
         ) : (
@@ -548,6 +596,7 @@ export function SessionCounter({
               particleSelectMode={particleSelectMode}
               getParticleNumber={getParticleNumber}
               isPOTW={isPOTW}
+              getSessionColorClass={getSessionColorClass}
             />
           </motion.div>
         )}

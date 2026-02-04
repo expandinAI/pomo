@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 2
 feature: daily-intentions
 created: 2026-02-04
 updated: 2026-02-04
-done_date: null
+done_date: 2026-02-04
 tags: [intentions, session-counter, visual-language, particles]
 ---
 
@@ -37,28 +37,28 @@ Link: [[features/daily-intentions]]
 
 ### Visual Rendering
 
-- [ ] Aligned particles: White (#FFFFFF)
-- [ ] Reactive particles: Gray (#525252)
-- [ ] Particles without alignment: White (default)
-- [ ] Order: Chronological (earliest first)
+- [x] Aligned particles: White (#FFFFFF)
+- [x] Reactive particles: Gray (#525252)
+- [x] Particles without alignment: White (default)
+- [x] Order: Chronological (earliest first)
 
 ### Data Source
 
-- [ ] Read `intentionAlignment` from each session in `todaySessions`
-- [ ] Map alignment to color
-- [ ] Pass colors to SessionCounter dots
+- [x] Read `intentionAlignment` from each session in `todaySessions`
+- [x] Map alignment to color
+- [x] Pass colors to SessionCounter dots
 
 ### Counter Behavior
 
-- [ ] Show filled dots for completed particles (with alignment color)
-- [ ] Show empty dots for remaining goal (if daily goal set)
-- [ ] Glow effect respects particle color
-- [ ] Hover info shows alignment status
+- [x] Show filled dots for completed particles (with alignment color)
+- [x] Show empty dots for remaining goal (if daily goal set)
+- [x] Glow effect respects particle color
+- [x] Hover info shows alignment status
 
 ### Hover Tooltip Enhancement
 
-- [ ] Show alignment status: "Aligned" or "Reactive"
-- [ ] Show alongside existing info (time, task, project)
+- [x] Show alignment status: "Aligned" or "Reactive"
+- [x] Show alongside existing info (time, task, project)
 
 ## Technical Details
 
@@ -118,21 +118,21 @@ setParticleHoverInfo(`${timeInfo}${alignmentText}`);
 
 ## Testing
 
-- [ ] Aligned particles render white
-- [ ] Reactive particles render gray
-- [ ] Mixed sessions show correct colors
-- [ ] Hover shows alignment status
-- [ ] Colors persist after page refresh
-- [ ] Light mode: colors still visible
-- [ ] Animation works with both colors
+- [x] Aligned particles render white
+- [x] Reactive particles render gray
+- [x] Mixed sessions show correct colors
+- [x] Hover shows alignment status
+- [x] Colors persist after page refresh
+- [x] Light mode: colors still visible
+- [x] Animation works with both colors
 
 ## Definition of Done
 
-- [ ] SessionCounter shows alignment colors
-- [ ] Hover tooltip includes alignment status
-- [ ] Visual matches design spec
-- [ ] No performance regression
-- [ ] Works with existing goal/glow features
+- [x] SessionCounter shows alignment colors
+- [x] Hover tooltip includes alignment status
+- [x] Visual matches design spec
+- [x] No performance regression
+- [x] Works with existing goal/glow features
 
 ## Dependencies
 
