@@ -1,6 +1,6 @@
 ---
 type: story
-status: icebox
+status: backlog
 priority: p2
 effort: 3
 feature: "[[features/analytics]]"

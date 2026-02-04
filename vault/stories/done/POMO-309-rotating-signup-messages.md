@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 2
 feature: signup-nudge
 created: 2025-01-31
-updated: 2025-01-31
-done_date: null
+updated: 2026-02-04
+done_date: 2026-02-04
 tags: [conversion, growth, particle-menu]
 ---
 
