@@ -5,6 +5,17 @@ import { motion } from 'framer-motion';
 import { SPRING, SESSION_LABELS } from '@/styles/design-tokens';
 import type { TimelineSession } from '@/hooks/useTimelineData';
 import { formatDuration, formatTime24h } from '@/lib/session-storage';
+import { getParticleHexColor } from '@/lib/intentions';
+
+/**
+ * Convert hex color to rgba string
+ */
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 interface TimelineBlockProps {
   session: TimelineSession;
@@ -35,6 +46,12 @@ export function TimelineBlock({
 
   // Work blocks use project brightness, breaks use fixed low opacity
   const opacity = isWork ? session.brightness : 0.3;
+
+  // Get alignment-based color (white for aligned/none, gray for reactive)
+  // Breaks always use white regardless of alignment
+  const blockColor = isWork
+    ? getParticleHexColor(session.intentionAlignment)
+    : '#FFFFFF';
 
   // Smart tooltip positioning based on block position
   // Left edge: align tooltip left, Right edge: align tooltip right, Center: center it
@@ -112,6 +129,18 @@ export function TimelineBlock({
               <span className="tabular-nums">{startTime} – {endTime}</span>
               <span className="opacity-50">·</span>
               <span>{formatDuration(session.duration)}</span>
+              {isWork && session.intentionAlignment === 'aligned' && (
+                <>
+                  <span className="opacity-50">·</span>
+                  <span>Aligned</span>
+                </>
+              )}
+              {isWork && session.intentionAlignment === 'reactive' && (
+                <>
+                  <span className="opacity-50">·</span>
+                  <span>Reactive</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -127,7 +156,7 @@ export function TimelineBlock({
         className="w-full rounded-sm"
         style={{
           height: `${height}px`,
-          backgroundColor: `rgba(255, 255, 255, ${opacity})`,
+          backgroundColor: hexToRgba(blockColor, opacity),
           cursor: isWork ? 'pointer' : 'default',
         }}
         initial={false}

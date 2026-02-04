@@ -5,6 +5,7 @@ import { useSessionStore } from '@/contexts/SessionContext';
 import { type CompletedSession } from '@/lib/session-storage';
 import { useProjects } from './useProjects';
 import type { SessionType } from '@/styles/design-tokens';
+import type { IntentionAlignment } from '@/lib/db/types';
 
 /**
  * Extended session data for timeline display
@@ -20,6 +21,7 @@ export interface TimelineSession {
   projectId?: string;
   projectName?: string;
   brightness: number;
+  intentionAlignment?: IntentionAlignment;
 }
 
 /**
@@ -143,6 +145,11 @@ export function useTimelineData(): UseTimelineDataReturn {
         }
       }
 
+      // Extract intentionAlignment (only exists on DBSession, not CompletedSession)
+      const intentionAlignment = ('intentionAlignment' in session)
+        ? (session.intentionAlignment as IntentionAlignment | undefined)
+        : undefined;
+
       return {
         id: session.id,
         type: session.type,
@@ -153,6 +160,7 @@ export function useTimelineData(): UseTimelineDataReturn {
         projectId: session.projectId,
         projectName,
         brightness,
+        intentionAlignment,
       };
     });
 
