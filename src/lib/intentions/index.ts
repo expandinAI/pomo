@@ -30,3 +30,12 @@ export {
   getPendingSyncIntentions,
   clearAllIntentions,
 } from './storage';
+
+// Particle color utilities
+export {
+  getParticleColorClass,
+  getParticleHexColor,
+  isReactiveParticle,
+  getParticleLightModeClass,
+  getParticleClasses,
+} from './utils';

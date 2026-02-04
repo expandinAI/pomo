@@ -101,6 +101,41 @@ export const MICRO_ANIMATION = {
   },
 };
 
+/**
+ * Particle Alignment Colors
+ * Used to visually distinguish aligned vs reactive work
+ */
+export const PARTICLE_COLORS = {
+  aligned: {
+    bg: 'bg-white',
+    bgDark: 'bg-primary',
+    hex: '#FFFFFF',
+  },
+  reactive: {
+    bg: 'bg-tertiary',
+    bgDark: 'bg-tertiary',
+    hex: '#525252',
+  },
+  // Default when no intention set - same as aligned
+  none: {
+    bg: 'bg-white',
+    bgDark: 'bg-primary',
+    hex: '#FFFFFF',
+  },
+} as const;
+
+export type ParticleColorKey = keyof typeof PARTICLE_COLORS;
+
+/**
+ * Light mode needs subtle styling for white particles on white bg
+ * These classes add a subtle border/shadow
+ */
+export const PARTICLE_LIGHT_MODE_CLASSES = {
+  aligned: 'light:shadow-sm light:ring-1 light:ring-tertiary/20',
+  reactive: '', // Gray is visible on white, no extra styling needed
+  none: 'light:shadow-sm light:ring-1 light:ring-tertiary/20',
+} as const;
+
 // Colors (for use in JS/TS, e.g., Framer Motion) - Pure Monochrome
 // Dark mode is the default/primary theme
 export const COLORS = {
