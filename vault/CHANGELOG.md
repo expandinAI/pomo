@@ -7,6 +7,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Session Start Nudge (POMO-380, 2 SP)**:
+  - Personalized one-liner in StatusMessage when timer is idle
+  - 6 nudge types in priority chain: Intention > Time Peak > Project Strength > Progress Context > Task Continuity > Gentle Reminder
+  - Pure local heuristics, no API calls
+  - Requires 10+ work sessions for activation
+  - Subtle text-tertiary styling (dimmer than regular status messages)
+  - 500ms debounce on project/task changes
+  - 27 unit tests covering all nudge types and edge cases
 - **Timeline Context — Average per Day (POMO-373, 2 SP)**:
   - 4th stat in TimelineStats: `~X.X avg/day` showing lifetime average particles per active day
   - Only shown when >= 7 active days exist (enough data for meaningful average)
@@ -483,6 +491,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-380-session-start-nudge]]
 - [[stories/done/POMO-373-timeline-context]]
 - [[stories/done/POMO-370-particle-age-account]]
 - [[stories/done/POMO-359-intention-status]]
