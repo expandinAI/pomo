@@ -6,14 +6,52 @@ High-level overview of features and milestones.
 
 ## Current Focus
 
-> **Daily Intentions** - Your Compass for the Day
+> **Intelligent Particles** - AI Woven Into Every Moment
 
-**Goal:** Show the gap between intention and reality
-**Status:** Phase 1 complete, Phase 2 & 3 in backlog
+**Goal:** Transform AI from "a feature" to "the soul of the app"
+**Status:** Stories created, ready for development
 
 ---
 
-## In Progress: Daily Intentions
+## Next: Intelligent Particles (10x AI)
+
+> "The best AI is the one you don't notice. It manifests not as a feeling: this app understands me."
+
+### Layer 1: Silent Intelligence (No API)
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-380 | Session Start Nudge | 2 | 📋 Backlog |
+| POMO-384 | Silent Intelligence (Smart Presets, Task Prediction, Empty States) | 3 | 📋 Backlog |
+
+### Layer 2: Contextual Moments (API-enhanced)
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-381 | Particle Memory | 5 | 📋 Backlog |
+| POMO-382 | Intention-Coach Bridge | 3 | 📋 Backlog |
+| POMO-383 | Weekly Narrative | 3 | 📋 Backlog |
+
+**Total: 16 Story Points**
+
+### The 3-Layer AI Architecture
+
+```
+Layer 3: Coach Modal (G C)        ← EXISTS
+         Deep analysis, chat, export
+
+Layer 2: Contextual Moments       ← NEW (POMO-381, 382, 383)
+         Particle Memory, Evening Insight,
+         Intention Bridge, Weekly Narrative
+
+Layer 1: Silent Intelligence      ← NEW (POMO-380, 384)
+         Start Nudge, Smart Presets,
+         Task Prediction, Empty States
+```
+
+---
+
+## Done: Daily Intentions
 
 ### Phase 1: Core (MVP) ✅
 
