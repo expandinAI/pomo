@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClerk } from '@clerk/nextjs';
 import { Settings, BookOpen, LogOut, Sparkles, Cloud, Moon, Sun, Monitor, X, CreditCard } from 'lucide-react';
@@ -8,6 +8,7 @@ import { SPRING } from '@/styles/design-tokens';
 import { cn } from '@/lib/utils';
 import { useParticleAuth } from '@/lib/auth/hooks';
 import { useTrial } from '@/lib/trial';
+import { getLifetimeStats, formatFirstSessionDate } from '@/lib/session-analytics';
 import { TierBadge } from './TierBadge';
 import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
 
@@ -96,6 +97,11 @@ export function AccountMenu({
   const email = auth.status === 'authenticated' ? auth.email : null;
   const tier = auth.status === 'authenticated' ? auth.tier : 'free';
   const trial = useTrial();
+
+  const collectingSince = useMemo(() => {
+    const stats = getLifetimeStats();
+    return stats.firstSessionDate ? formatFirstSessionDate(stats.firstSessionDate) : null;
+  }, []);
 
   // Check if initial sync is pending (has local data but not synced yet)
   const [hasPendingSync, setHasPendingSync] = useState(false);
@@ -239,6 +245,11 @@ export function AccountMenu({
                   </button>
                 )}
               </div>
+              {collectingSince && (
+                <p className="text-xs text-tertiary light:text-tertiary-dark mt-1">
+                  Collecting since {collectingSince}
+                </p>
+              )}
             </div>
 
             {/* Menu items */}
