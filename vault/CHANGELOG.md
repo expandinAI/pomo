@@ -7,6 +7,10 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Particle Age in AccountMenu (POMO-370, 1 SP)**:
+  - "Collecting since {date}" unter E-Mail im AccountMenu-Header
+  - Nutzt bestehende `getLifetimeStats()` und `formatFirstSessionDate()`
+  - Nur sichtbar wenn mindestens 1 Partikel existiert
 - **Tomorrow Suggestion (POMO-361, 3 SP)**:
   - Deferred intention detection: checks if yesterday's intention was deferred
   - Suggestion banner in IntentionOverlay: "Continue from yesterday?"
@@ -467,6 +471,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-370-particle-age-account]]
 - [[stories/done/POMO-359-intention-status]]
 - [[stories/done/POMO-358-evening-reflection]]
 - [[stories/done/POMO-357-timeline-alignment-styling]]
