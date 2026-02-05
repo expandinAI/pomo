@@ -423,6 +423,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     setIntention,
     clearIntention,
     particleGoal: intentionParticleGoal,
+    deferredSuggestion,
   } = useIntention();
 
   // Session store (IndexedDB/localStorage abstraction)
@@ -2117,8 +2118,10 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
           particleGoal: intentionParticleGoal,
         } : null}
         todayCount={todayCount}
+        deferredSuggestion={deferredSuggestion}
         onSave={async (text, particleGoal) => {
-          await setIntention(text, undefined, particleGoal ?? undefined);
+          const deferredFrom = deferredSuggestion?.date;
+          await setIntention(text, undefined, particleGoal ?? undefined, deferredFrom);
           // Also update the dailyGoal in context for backwards compat with existing UI
           if (particleGoal !== null) {
             setDailyGoal(particleGoal);

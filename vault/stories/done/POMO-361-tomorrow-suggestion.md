@@ -1,15 +1,16 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 3
 feature: daily-intentions
 created: 2026-02-04
-updated: 2026-02-04
-done_date: null
+updated: 2026-02-05
+done_date: 2026-02-05
 tags: [intentions, suggestion, ux, continuity]
 ---
 
+****
 # POMO-361: "Tomorrow" → Intention Suggestion
 
 ## User Story

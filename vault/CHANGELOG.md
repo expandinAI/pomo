@@ -7,6 +7,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Tomorrow Suggestion (POMO-361, 3 SP)**:
+  - Deferred intention detection: checks if yesterday's intention was deferred
+  - Suggestion banner in IntentionOverlay: "Continue from yesterday?"
+  - Click to pre-fill intention text and particle goal
+  - Stores `deferredFrom` reference for continuity tracking
+  - Only shows when today has no intention yet
+- **Date-based Intention in ParticleDetailOverlay**:
+  - Overlay now shows the intention of the day the particle was created (not always today's)
+  - No intention on that day → section hidden entirely
+  - Cleaner label: "Intention" + quoted text instead of "Today's intention: ..."
 - **Week Intentions View (POMO-360, 5 SP)**:
   - Standalone modal (G W) with 7-day week overview
   - Each day shows intention text, particle dots with alignment colors, alignment %, status icon

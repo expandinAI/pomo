@@ -11,6 +11,7 @@ interface IntentionOverlayProps {
   onClose: () => void;
   currentIntention: { text: string; particleGoal: number | null } | null;
   todayCount: number;
+  deferredSuggestion?: { text: string; date: string; particleGoal?: number } | null;
   onSave: (text: string, particleGoal: number | null) => void;
   onClear: () => void;
 }
@@ -36,6 +37,7 @@ export function IntentionOverlay({
   onClose,
   currentIntention,
   todayCount,
+  deferredSuggestion,
   onSave,
   onClear,
 }: IntentionOverlayProps) {
@@ -188,6 +190,36 @@ export function IntentionOverlay({
                   >
                     What&apos;s your focus today?
                   </h2>
+
+                  {/* Deferred Suggestion Banner */}
+                  {deferredSuggestion && !currentIntention && (
+                    <motion.button
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ type: 'spring', ...SPRING.gentle }}
+                      onClick={() => {
+                        setIntentionText(deferredSuggestion.text);
+                        if (deferredSuggestion.particleGoal) {
+                          setPreviewGoal(deferredSuggestion.particleGoal);
+                        }
+                        setTimeout(() => {
+                          textInputRef.current?.focus();
+                          textInputRef.current?.setSelectionRange(
+                            deferredSuggestion.text.length,
+                            deferredSuggestion.text.length
+                          );
+                        }, 50);
+                      }}
+                      className="w-full mb-4 px-4 py-3 rounded-xl bg-tertiary/10 light:bg-tertiary-dark/10 text-left text-sm text-secondary light:text-secondary-dark hover:bg-tertiary/15 light:hover:bg-tertiary-dark/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <span className="text-tertiary light:text-tertiary-dark text-xs">
+                        Continue from yesterday?
+                      </span>
+                      <span className="block mt-0.5 text-primary light:text-primary-dark truncate">
+                        &ldquo;{deferredSuggestion.text}&rdquo;
+                      </span>
+                    </motion.button>
+                  )}
 
                   {/* Intention Text Input */}
                   <div className="mb-6">

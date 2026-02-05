@@ -6,7 +6,8 @@ import { Minus, Plus, X, Trash2, Zap } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
-import { useIntention } from '@/hooks/useIntention';
+import { getIntentionForDate } from '@/lib/intentions';
+import type { DBIntention, IntentionAlignment } from '@/lib/db/types';
 import {
   formatTime24h,
   formatDuration,
@@ -15,7 +16,6 @@ import {
 import { ProjectDropdown } from '@/components/task/ProjectDropdown';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/lib/projects';
-import type { IntentionAlignment } from '@/lib/db/types';
 
 interface ParticleDetailOverlayProps {
   isOpen: boolean;
@@ -99,8 +99,8 @@ export function ParticleDetailOverlay({
   const [isEditingDuration, setIsEditingDuration] = useState(false);
   const [durationInput, setDurationInput] = useState('');
 
-  // Get today's intention
-  const { todayIntention } = useIntention();
+  // Intention for the session's day
+  const [sessionIntention, setSessionIntention] = useState<DBIntention | null>(null);
 
   // Focus trap
   useFocusTrap(modalRef, isOpen, { initialFocusRef: taskInputRef });
@@ -119,7 +119,15 @@ export function ParticleDetailOverlay({
         setIsDirty(false);
         setShowDeleteConfirm(false);
         setIsEditingDuration(false);
+
+        // Load the intention for the session's day
+        const sessionDate = loadedSession.completedAt.split('T')[0];
+        getIntentionForDate(sessionDate).then(intention => {
+          setSessionIntention(intention ?? null);
+        });
       }
+    } else if (!isOpen) {
+      setSessionIntention(null);
     }
   }, [isOpen, sessionId, getSessionById]);
 
@@ -219,7 +227,7 @@ export function ParticleDetailOverlay({
           adjustDuration(delta);
         } else if (e.key === 'a' || e.key === 'A') {
           // Alignment shortcut - only when intention exists
-          if (todayIntention) {
+          if (sessionIntention) {
             e.preventDefault();
             e.stopImmediatePropagation();
             setAlignment('aligned');
@@ -227,7 +235,7 @@ export function ParticleDetailOverlay({
           }
         } else if (e.key === 'r' || e.key === 'R') {
           // Reactive shortcut - only when intention exists
-          if (todayIntention) {
+          if (sessionIntention) {
             e.preventDefault();
             e.stopImmediatePropagation();
             setAlignment('reactive');
@@ -239,7 +247,7 @@ export function ParticleDetailOverlay({
 
     window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration, todayIntention]);
+  }, [isOpen, showDeleteConfirm, handleSaveAndClose, handleDelete, isEditingDuration, commitDurationEdit, adjustDuration, sessionIntention]);
 
   // Quick edit duration
   const startDurationEdit = () => {
@@ -532,11 +540,14 @@ export function ParticleDetailOverlay({
                     </div>
                   </motion.div>
 
-                  {/* Alignment Toggle - only shown when today has an intention */}
-                  {todayIntention && (
+                  {/* Alignment Toggle - only shown when session's day has an intention */}
+                  {sessionIntention && (
                     <motion.div variants={itemVariants} className="space-y-3 pt-2">
                       <p className="text-xs text-tertiary light:text-tertiary-dark text-center">
-                        Today&apos;s intention: &ldquo;{todayIntention.text}&rdquo;
+                        Intention
+                      </p>
+                      <p className="text-sm text-secondary light:text-secondary-dark text-center italic">
+                        &ldquo;{sessionIntention.text}&rdquo;
                       </p>
                       <div className="flex gap-3 justify-center">
                         <button

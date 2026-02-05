@@ -16,7 +16,7 @@ interface UseIntentionReturn {
   /** Loading state */
   isLoading: boolean;
   /** Set a new intention for today */
-  setIntention: (text: string, projectId?: string, particleGoal?: number) => Promise<DBIntention>;
+  setIntention: (text: string, projectId?: string, particleGoal?: number, deferredFrom?: string) => Promise<DBIntention>;
   /** Update the status of today's intention */
   updateIntentionStatus: (status: IntentionStatus) => Promise<DBIntention | null>;
   /** Update the text of today's intention */
@@ -33,6 +33,8 @@ interface UseIntentionReturn {
   hasIntention: boolean;
   /** Current particle goal (null if not set) */
   particleGoal: number | null;
+  /** Yesterday's deferred intention (if any) for suggestion */
+  deferredSuggestion: DBIntention | null;
 }
 
 /**
@@ -55,6 +57,7 @@ interface UseIntentionReturn {
 export function useIntention(): UseIntentionReturn {
   const [todayIntention, setTodayIntention] = useState<DBIntention | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [deferredSuggestion, setDeferredSuggestion] = useState<DBIntention | null>(null);
 
   // Load today's intention on mount
   const loadIntention = useCallback(async () => {
@@ -74,9 +77,36 @@ export function useIntention(): UseIntentionReturn {
     loadIntention();
   }, [loadIntention]);
 
+  // Check if yesterday's intention was deferred (for suggestion banner)
+  useEffect(() => {
+    async function checkDeferred() {
+      // Only suggest if today has no intention yet
+      if (todayIntention) {
+        setDeferredSuggestion(null);
+        return;
+      }
+      try {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayIntention = await getIntentionForDate(yesterdayStr);
+        if (yesterdayIntention?.status === 'deferred') {
+          setDeferredSuggestion(yesterdayIntention);
+        } else {
+          setDeferredSuggestion(null);
+        }
+      } catch {
+        setDeferredSuggestion(null);
+      }
+    }
+    if (!isLoading) {
+      checkDeferred();
+    }
+  }, [todayIntention, isLoading]);
+
   // Set a new intention for today
   const setIntentionHandler = useCallback(
-    async (text: string, projectId?: string, particleGoal?: number): Promise<DBIntention> => {
+    async (text: string, projectId?: string, particleGoal?: number, deferredFrom?: string): Promise<DBIntention> => {
       const today = getTodayDateString();
 
       // If there's already an intention for today, delete it first
@@ -89,6 +119,7 @@ export function useIntention(): UseIntentionReturn {
         date: today,
         projectId,
         particleGoal,
+        deferredFrom,
       });
 
       setTodayIntention(newIntention);
@@ -199,5 +230,6 @@ export function useIntention(): UseIntentionReturn {
     refresh,
     hasIntention: todayIntention !== null,
     particleGoal: todayIntention?.particleGoal ?? null,
+    deferredSuggestion,
   };
 }
