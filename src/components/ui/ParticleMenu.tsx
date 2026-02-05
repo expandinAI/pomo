@@ -48,6 +48,7 @@ interface ParticleMenuProps {
   onOpenLearn?: () => void;
   onOpenAccount?: () => void;
   onOpenCoach?: () => void;
+  onOpenWeekIntentions?: () => void;
   /** When true, menu opens automatically (triggered by G key) */
   isGPressed?: boolean;
   /** Auth status to show appropriate account action */
@@ -89,6 +90,7 @@ export function ParticleMenu({
   onOpenLearn,
   onOpenAccount,
   onOpenCoach,
+  onOpenWeekIntentions,
   isGPressed = false,
   authStatus = 'anonymous',
   planType,
@@ -131,6 +133,7 @@ export function ParticleMenu({
     ...(onOpenHistory ? [{ id: 'history', icon: <Clock className="w-4 h-4" />, label: 'History', key: 'H', onClick: onOpenHistory }] : []),
     { id: 'projects', icon: <FolderKanban className="w-4 h-4" />, label: 'Projects', key: 'P', onClick: onOpenProjects },
     { id: 'goals', icon: <Target className="w-4 h-4" />, label: 'Goals', key: 'O', onClick: onOpenGoals },
+    ...(onOpenWeekIntentions ? [{ id: 'weekIntentions', icon: <Calendar className="w-4 h-4" />, label: 'Week', key: 'W', onClick: onOpenWeekIntentions }] : []),
     { id: 'rhythm', icon: <Activity className="w-4 h-4" />, label: 'Rhythm', key: 'R', onClick: onOpenRhythm },
     ...(onOpenYear ? [{ id: 'year', icon: <Calendar className="w-4 h-4" />, label: 'Year View', key: 'Y', onClick: onOpenYear }] : []),
     ...(onOpenMilestones ? [{ id: 'milestones', icon: <Trophy className="w-4 h-4" />, label: 'Milestones', key: 'M', onClick: onOpenMilestones }] : []),

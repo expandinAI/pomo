@@ -26,6 +26,7 @@ import {
   BookOpen,
   Sparkles,
   X,
+  CalendarDays,
 } from 'lucide-react';
 import { registerCommands, clearCommands, type Command } from '@/lib/commandRegistry';
 import type { AppearanceMode } from '@/contexts/TimerSettingsContext';
@@ -254,6 +255,17 @@ export function CommandRegistration({
         },
         icon: <Target className="w-4 h-4" />,
         keywords: ['goal', 'daily', 'target', 'particles', 'objective'],
+      },
+      {
+        id: 'open-week-intentions',
+        label: 'Week Intentions',
+        shortcut: 'G W',
+        category: 'navigation',
+        action: () => {
+          window.dispatchEvent(new CustomEvent('particle:open-week-intentions'));
+        },
+        icon: <CalendarDays className="w-4 h-4" />,
+        keywords: ['week', 'intentions', 'review', 'alignment', 'days'],
       },
       {
         id: 'clear-intention',

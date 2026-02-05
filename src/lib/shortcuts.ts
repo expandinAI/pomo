@@ -56,6 +56,7 @@ export const SHORTCUTS: Shortcut[] = [
   { key: 'G P', description: 'Go to Projects', category: 'navigation' },
   { key: 'G Y', description: 'Open Year View', category: 'navigation' },
   { key: 'G I', description: 'Set Intention', category: 'navigation' },
+  { key: 'G W', description: 'Week Intentions', category: 'navigation' },
   { key: '⇧I', description: 'Clear Intention', category: 'navigation' },
   { key: 'G O', description: 'Set Intention (legacy)', category: 'navigation' },
   { key: 'G R', description: 'Open Rhythm', category: 'navigation' },

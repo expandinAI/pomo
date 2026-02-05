@@ -17,6 +17,7 @@ interface GPrefixCallbacks {
   onCoach?: () => void;
   onExport?: () => void;
   onHallOfFame?: () => void;
+  onWeekIntentions?: () => void;
 }
 
 /**
@@ -34,6 +35,7 @@ interface GPrefixCallbacks {
  * G C = Open AI Coach
  * G E = Export current week
  * G F = Open Hall of Fame
+ * G W = Open Week Intentions
  * G , = Open Settings
  *
  * After pressing G, user has 1 second to press the second key
@@ -159,6 +161,11 @@ export function useGPrefixNavigation(callbacks: GPrefixCallbacks): { isGPressed:
             e.preventDefault();
             e.stopImmediatePropagation();
             callbacks.onHallOfFame?.();
+            break;
+          case 'w':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            callbacks.onWeekIntentions?.();
             break;
           case ',':
             e.preventDefault();

@@ -87,6 +87,10 @@ const EveningReflection = dynamic(
   () => import('@/components/intentions').then(mod => ({ default: mod.EveningReflection })),
   { ssr: false }
 );
+const WeekIntentionsView = dynamic(
+  () => import('@/components/intentions').then(mod => ({ default: mod.WeekIntentionsView })),
+  { ssr: false }
+);
 // IntroExperience is NOT lazy-loaded - must be ready immediately on first visit
 import { IntroExperience } from '@/components/intro';
 import { TrialExpiredBanner } from '@/components/trial';
@@ -352,6 +356,9 @@ function HomeContent() {
         }
       },
       onHallOfFame: () => setShowHallOfFame(true),
+      onWeekIntentions: () => {
+        window.dispatchEvent(new CustomEvent('particle:open-week-intentions'));
+      },
     }),
     [setShowJourney, sessions]
   );
@@ -608,6 +615,7 @@ function HomeContent() {
           onOpenYear={() => window.dispatchEvent(new CustomEvent('particle:open-year'))}
           onOpenMilestones={() => setShowJourney(true)}
           onOpenHallOfFame={() => setShowHallOfFame(true)}
+          onOpenWeekIntentions={() => window.dispatchEvent(new CustomEvent('particle:open-week-intentions'))}
           onOpenLearn={() => { setLearnInitialView(undefined); setShowLearn(true); }}
           onOpenAccount={() => setShowAccountPanel(true)}
           onOpenCoach={() => { setShowCoach(true); setHasCoachInsight(false); }}
@@ -637,6 +645,9 @@ function HomeContent() {
 
       {/* Project List Modal (opened via G+P keyboard shortcut) */}
       <ProjectListModal />
+
+      {/* Week Intentions View (opened via G+W keyboard shortcut) */}
+      <WeekIntentionsView />
 
       {/* Rhythm View (opened via G+R keyboard shortcut or Command Palette) */}
       <RhythmView isOpen={showRhythm} onClose={() => setShowRhythm(false)} />
