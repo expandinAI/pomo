@@ -7,6 +7,11 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Timeline Context — Average per Day (POMO-373, 2 SP)**:
+  - 4th stat in TimelineStats: `~X.X avg/day` showing lifetime average particles per active day
+  - Only shown when >= 7 active days exist (enough data for meaningful average)
+  - Whole numbers without decimal (`~5`), decimals with one place (`~4.2`)
+  - Consistent styling with existing stats, responsive layout
 - **Year View Image Export (POMO-372, 5 SP)**:
   - Download button in Year View header (only visible when particles > 0)
   - Canvas 2D renderer generates 1080×dynamic PNG (always dark mode)
@@ -478,6 +483,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-373-timeline-context]]
 - [[stories/done/POMO-370-particle-age-account]]
 - [[stories/done/POMO-359-intention-status]]
 - [[stories/done/POMO-358-evening-reflection]]
