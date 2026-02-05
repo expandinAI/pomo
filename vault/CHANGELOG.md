@@ -7,6 +7,17 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Week Intentions View (POMO-360, 5 SP)**:
+  - Standalone modal (G W) with 7-day week overview
+  - Each day shows intention text, particle dots with alignment colors, alignment %, status icon
+  - Week navigation (←/→), day navigation (↑/↓), jump to current week (0)
+  - Enter on today opens Intention Overlay
+  - Weekly summary: total particles, intentional %, days with intention
+  - Integrated in ParticleMenu, Command Palette, shortcuts registry
+- **Intention Status (POMO-359, 2 SP)**: Already implemented as part of POMO-350 data model.
+  IntentionStatus type (`active | completed | partial | deferred | skipped`) and status
+  transitions were included in the initial intentions data model and are used by
+  Evening Reflection (POMO-358) for done/partial/tomorrow selection.
 - **Evening Reflection UI (POMO-358, 5 SP)**:
   - Calm end-of-day reflection overlay after work sessions (>= 6pm)
   - Phase 1: Shows intention text, particles with alignment colors, summary
@@ -446,6 +457,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-359-intention-status]]
 - [[stories/done/POMO-358-evening-reflection]]
 - [[stories/done/POMO-357-timeline-alignment-styling]]
 - [[stories/done/POMO-356-session-counter-colors]]
@@ -518,10 +530,15 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 Erster Release / MVP
 
 ### Added
+- **Intention Status (POMO-359, 2 SP)**: Already implemented as part of POMO-350 data model.
+  IntentionStatus type (`active | completed | partial | deferred | skipped`) and status
+  transitions were included in the initial intentions data model and are used by
+  Evening Reflection (POMO-358) for done/partial/tomorrow selection.
 - Initial Setup
 - ...
 
 ### Stories completed
+- [[stories/done/POMO-359-intention-status]]
 - [[stories/done/...]]
 
 ---
@@ -531,6 +548,10 @@ Erster Release / MVP
 ## [vX.Y.Z] - YYYY-MM-DD
 
 ### Added
+- **Intention Status (POMO-359, 2 SP)**: Already implemented as part of POMO-350 data model.
+  IntentionStatus type (`active | completed | partial | deferred | skipped`) and status
+  transitions were included in the initial intentions data model and are used by
+  Evening Reflection (POMO-358) for done/partial/tomorrow selection.
 - Neue Features
 
 ### Changed  
@@ -543,6 +564,7 @@ Erster Release / MVP
 - Entfernte Features
 
 ### Stories completed
+- [[stories/done/POMO-359-intention-status]]
 - [[stories/done/feature-01-story]]
 - [[stories/done/feature-02-story]]
 
