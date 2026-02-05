@@ -53,3 +53,6 @@ export {
 
 // Mock data generator (for demo and testing)
 export { generateMockYearData } from './mock-data';
+
+// Image export
+export { renderYearExportImage } from './export-image';

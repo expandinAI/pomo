@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { prefersReducedMotion } from '@/lib/utils';
 import type { YearViewDay } from '@/lib/year-view';
 
-interface YearHighlight {
+export interface YearHighlight {
   label: string;
   value: string;
 }
@@ -16,7 +16,7 @@ interface YearHighlightsProps {
   gridAnimationComplete: boolean;
 }
 
-function computeHighlights(
+export function computeHighlights(
   days: YearViewDay[],
   isProjectFiltered: boolean,
 ): YearHighlight[] {

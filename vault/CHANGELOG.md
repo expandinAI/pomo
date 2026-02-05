@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Year View Image Export (POMO-372, 5 SP)**:
+  - Download button in Year View header (only visible when particles > 0)
+  - Canvas 2D renderer generates 1080×dynamic PNG (always dark mode)
+  - Grid dots with correct brightness, peak day glow, future days dimmed
+  - Summary stats, highlights, branding footer
+  - Preview modal with loading state and one-click download
+  - Font resolution from CSS custom properties (Next.js hashed names)
 - **Particle Age in AccountMenu (POMO-370, 1 SP)**:
   - "Collecting since {date}" unter E-Mail im AccountMenu-Header
   - Nutzt bestehende `getLifetimeStats()` und `formatFirstSessionDate()`

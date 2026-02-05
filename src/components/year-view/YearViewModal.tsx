@@ -2,16 +2,18 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useWeekStart } from '@/hooks/useWeekStart';
 import { prefersReducedMotion } from '@/lib/utils';
-import { getYearViewData } from '@/lib/year-view';
+import { getYearViewData, generateYearGrid } from '@/lib/year-view';
 import { generateMockYearData } from '@/lib/year-view/mock-data';
+import { renderYearExportImage } from '@/lib/year-view/export-image';
 import type { YearViewData } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
-import { YearGrid, YearTooltip, YearSummary, YearSelector, YearHighlights } from './index';
+import { YearGrid, YearTooltip, YearSummary, YearSelector, YearHighlights, YearExportPreview } from './index';
+import { computeHighlights } from './YearHighlights';
 import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdown';
 import { useProjects } from '@/hooks/useProjects';
 import { useSessionStore } from '@/contexts/SessionContext';
@@ -39,6 +41,9 @@ export function YearViewModal() {
   const [useMockData, setUseMockData] = useState(false);
   const [realData, setRealData] = useState<YearViewData | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [exportPreviewOpen, setExportPreviewOpen] = useState(false);
+  const [exportBlob, setExportBlob] = useState<Blob | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const { weekStartsOnMonday } = useWeekStart();
   const { activeProjects } = useProjects();
@@ -112,6 +117,36 @@ export function YearViewModal() {
     setIsOpen(false);
     setHoveredCell(null);
     setSelectedProjectId(null); // Reset filter on close
+  }, []);
+
+  // Handle export
+  const handleExport = useCallback(async () => {
+    if (isExporting || data.summary.totalParticles === 0) return;
+    setIsExporting(true);
+    setExportBlob(null);
+    setExportPreviewOpen(true);
+    try {
+      const gridData = generateYearGrid(data, weekStartsOnMonday);
+      const highlights = computeHighlights(data.days, selectedProjectId !== null);
+      const blob = await renderYearExportImage({
+        yearData: data,
+        gridData,
+        weekStartsOnMonday,
+        highlights: highlights.length > 0 ? highlights : undefined,
+      });
+      setExportBlob(blob);
+    } catch (err) {
+      console.error('Year export failed:', err);
+      setExportPreviewOpen(false);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [data, weekStartsOnMonday, selectedProjectId, isExporting]);
+
+  // Clean up export blob when closing
+  const handleExportPreviewClose = useCallback(() => {
+    setExportPreviewOpen(false);
+    setExportBlob(null);
   }, []);
 
   // Close on Escape - capture phase + stopImmediatePropagation prevents Timer interference
@@ -216,6 +251,17 @@ export function YearViewModal() {
                         {useMockData ? 'Demo' : 'Real'}
                       </button>
                     )}
+                    {/* Export button - only show when data exists */}
+                    {hasYearView && data.summary.totalParticles > 0 && (
+                      <button
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30"
+                        aria-label="Export as image"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={handleClose}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -302,6 +348,15 @@ export function YearViewModal() {
             cell={hoveredCell}
             dayData={hoveredDayData}
             anchorRect={hoveredRect}
+          />
+
+          {/* Export Preview Modal */}
+          <YearExportPreview
+            isOpen={exportPreviewOpen}
+            onClose={handleExportPreviewClose}
+            imageBlob={exportBlob}
+            year={currentYear}
+            isGenerating={isExporting}
           />
         </>
       )}
