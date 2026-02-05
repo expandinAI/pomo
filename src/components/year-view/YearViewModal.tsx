@@ -11,7 +11,7 @@ import { getYearViewData } from '@/lib/year-view';
 import { generateMockYearData } from '@/lib/year-view/mock-data';
 import type { YearViewData } from '@/lib/year-view';
 import type { GridCell } from '@/lib/year-view/grid';
-import { YearGrid, YearTooltip, YearSummary, YearSelector } from './index';
+import { YearGrid, YearTooltip, YearSummary, YearSelector, YearHighlights } from './index';
 import { ProjectFilterDropdown } from '@/components/insights/ProjectFilterDropdown';
 import { useProjects } from '@/hooks/useProjects';
 import { useSessionStore } from '@/contexts/SessionContext';
@@ -272,6 +272,19 @@ export function YearViewModal() {
                             transition={{ duration: 0.2, ease: 'easeOut' }}
                           >
                             <YearSummary summary={data.summary} />
+                          </motion.div>
+
+                          {/* Year Highlights - narrative text below summary */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={gridAnimationComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2, delay: 0.1, ease: 'easeOut' }}
+                          >
+                            <YearHighlights
+                              days={data.days}
+                              isProjectFiltered={selectedProjectId !== null}
+                              gridAnimationComplete={gridAnimationComplete}
+                            />
                           </motion.div>
                         </motion.div>
                       </AnimatePresence>

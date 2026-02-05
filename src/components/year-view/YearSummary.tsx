@@ -70,13 +70,22 @@ export function YearSummary({ summary }: YearSummaryProps) {
     totalDuration,
     longestStreak,
     activeDays,
+    averagePerActiveDay,
   } = summary;
 
+  const avgFormatted = activeDays > 0
+    ? averagePerActiveDay.toFixed(1)
+    : '0';
+
   return (
-    <div className="grid grid-cols-2 sm:flex sm:justify-center gap-6 sm:gap-8 py-6 sm:py-8 px-4 mt-6 sm:mt-8 border-t border-border light:border-border-light">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-6 sm:gap-8 py-6 sm:py-8 px-4 mt-6 sm:mt-8 border-t border-border light:border-border-light">
       <SummaryCard
         value={formatNumber(totalParticles)}
         label="Particles"
+      />
+      <SummaryCard
+        value={avgFormatted}
+        label="Per Day"
       />
       <SummaryCard
         value={formatYearDuration(totalDuration)}

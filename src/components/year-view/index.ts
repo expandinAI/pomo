@@ -21,3 +21,4 @@ export { YearSummary } from './YearSummary';
 export { YearSelector } from './YearSelector';
 export { ParticleDots } from './ParticleDots';
 export { YearViewModal } from './YearViewModal';
+export { YearHighlights } from './YearHighlights';
