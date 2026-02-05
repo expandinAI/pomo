@@ -9,6 +9,7 @@ interface TimelineStatsProps {
   totalFocusSeconds: number;
   firstStart: Date | null;
   lastEnd: Date | null;
+  averagePerDay?: number | null;
 }
 
 // Stagger animation variants
@@ -43,6 +44,7 @@ export function TimelineStats({
   totalFocusSeconds,
   firstStart,
   lastEnd,
+  averagePerDay,
 }: TimelineStatsProps) {
   // Format active hours range
   const activeHours = firstStart && lastEnd
@@ -135,6 +137,27 @@ export function TimelineStats({
           active hours
         </p>
       </motion.div>
+
+      {/* Average context */}
+      {averagePerDay != null && (
+        <>
+          <motion.div
+            variants={itemVariants}
+            className="hidden sm:block w-px h-10 bg-tertiary/20 light:bg-tertiary-dark/20"
+          />
+          <motion.div variants={itemVariants} className="flex sm:block items-center justify-between w-full sm:w-auto sm:text-center px-2 sm:px-0">
+            <p className="text-xs text-tertiary light:text-tertiary-dark sm:hidden">
+              avg/day
+            </p>
+            <p className="text-2xl font-light text-primary light:text-primary-dark tabular-nums">
+              ~{Number.isInteger(averagePerDay) ? averagePerDay : averagePerDay.toFixed(1)}
+            </p>
+            <p className="text-xs text-tertiary light:text-tertiary-dark hidden sm:block">
+              avg/day
+            </p>
+          </motion.div>
+        </>
+      )}
     </motion.div>
   );
 }

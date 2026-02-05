@@ -63,6 +63,9 @@ export interface UseTimelineDataReturn {
 
   /** Force refresh timeline data */
   refresh: () => void;
+
+  /** Lifetime average particles per active day (null if < 7 active days) */
+  averageParticlesPerDay: number | null;
 }
 
 /**
@@ -214,6 +217,24 @@ export function useTimelineData(): UseTimelineDataReturn {
     refreshContextSessions();
   }, [refreshContextSessions]);
 
+  // Compute lifetime average particles per active day
+  const averageParticlesPerDay = useMemo(() => {
+    const allSessions = contextSessions as CompletedSession[];
+    const workSessions = allSessions.filter(s => s.type === 'work');
+
+    // Count unique active days
+    const activeDaySet = new Set<string>();
+    for (const s of workSessions) {
+      activeDaySet.add(s.completedAt.split('T')[0]);
+    }
+    const activeDays = activeDaySet.size;
+
+    // Only show when enough data (>= 7 active days)
+    if (activeDays < 7) return null;
+
+    return workSessions.length / activeDays;
+  }, [contextSessions]);
+
   const isToday = isSameDay(date, today);
   const canGoForward = !isToday;
 
@@ -230,5 +251,6 @@ export function useTimelineData(): UseTimelineDataReturn {
     canGoForward,
     isToday,
     refresh,
+    averageParticlesPerDay,
   };
 }

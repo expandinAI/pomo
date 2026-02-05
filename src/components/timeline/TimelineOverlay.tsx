@@ -45,6 +45,7 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
     canGoForward,
     isToday,
     refresh,
+    averageParticlesPerDay,
   } = useTimelineData();
 
   // Projects for particle detail overlay
@@ -192,6 +193,7 @@ export function TimelineOverlay({ isOpen, onClose }: TimelineOverlayProps) {
                       totalFocusSeconds={totalFocusSeconds}
                       firstStart={firstStart}
                       lastEnd={lastEnd}
+                      averagePerDay={averageParticlesPerDay}
                     />
                   </div>
 
