@@ -46,6 +46,8 @@ interface StatusMessageProps {
   exportMessage?: string | null;
   /** Breathing phase guidance (during breaks with breathing enabled) */
   breathingPhase?: BreathingPhase | null;
+  /** Start nudge — contextual one-liner when timer is idle */
+  startNudge?: string | null;
 }
 
 /** Preset descriptions with philosophy */
@@ -101,6 +103,7 @@ export function StatusMessage({
   sessionTooShortMessage,
   exportMessage,
   breathingPhase,
+  startNudge,
 }: StatusMessageProps) {
   // Check if countdown is active (must be > 0, not just truthy)
   const isCountdownActive = typeof autoStartCountdown === 'number' && autoStartCountdown > 0;
@@ -120,7 +123,8 @@ export function StatusMessage({
    * 11. Preset hover (only when idle)
    * 12. Session status (when running)
    * 13. End time preview
-   * 14. Wellbeing hint (lowest priority)
+   * 14. Wellbeing hint (during breaks)
+   * 15. Start nudge (contextual insight when idle, lowest priority)
    */
   function getDisplayMessage(): string | null {
     // 1. Auto-start countdown (highest priority)
@@ -206,15 +210,23 @@ export function StatusMessage({
       return endTimePreview;
     }
 
-    // 14. Wellbeing Hint (only during break, lowest priority)
+    // 14. Wellbeing Hint (only during break)
     if (wellbeingHint) {
       return wellbeingHint;
+    }
+
+    // 15. Start Nudge (contextual insight when idle, lowest priority)
+    if (startNudge) {
+      return startNudge;
     }
 
     return null;
   }
 
   const displayMessage = getDisplayMessage();
+
+  // Detect if current message is a start nudge (for subtler styling)
+  const isNudgeMessage = !!startNudge && displayMessage === startNudge;
 
   // Detect if current message is breathing guidance
   const isBreathingMessage = !!breathingPhase && !isCountdownActive && !message && !exportMessage && !sessionTooShortMessage && !flowContinueMessage && !sessionFeedback && !coachInsightPreview;
@@ -285,7 +297,11 @@ export function StatusMessage({
             animate={isBreathingMessage ? breathingAnimation : standardAnimation}
             exit={{ opacity: 0, y: -4 }}
             transition={isBreathingMessage ? breathingTransition : standardTransition}
-            className="text-sm text-secondary light:text-secondary-dark text-center max-w-sm"
+            className={`text-sm text-center max-w-sm ${
+              isNudgeMessage
+                ? 'text-tertiary light:text-tertiary-dark'
+                : 'text-secondary light:text-secondary-dark'
+            }`}
           >
             {displayMessage}
           </motion.p>

@@ -40,6 +40,7 @@ import { useWellbeingHint } from '@/hooks/useWellbeingHint';
 import { useBreathingGuide } from '@/hooks/useBreathingGuide';
 import { useContextualHints } from '@/hooks/useContextualHints';
 import { useCoachSettings } from '@/hooks/useCoachSettings';
+import { useStartNudge } from '@/hooks/useStartNudge';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -450,6 +451,14 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
 
   // Coach settings (for insight display duration)
   const { insightDisplayDuration } = useCoachSettings();
+
+  // Start nudge (contextual one-liner below start button when idle)
+  const { nudge: startNudge } = useStartNudge({
+    isTimerIdle: !state.isRunning && !state.isPaused && !isOverflow,
+    selectedProjectId,
+    currentTask: state.currentTask,
+    isWorkMode: state.mode === 'work',
+  });
 
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
@@ -2318,6 +2327,12 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         flowContinueMessage={flowContinueMessage}
         sessionTooShortMessage={sessionTooShortMessage}
         exportMessage={exportMessage}
+        startNudge={
+          !state.isRunning && !state.isPaused && !isOverflow &&
+          state.mode === 'work' && !showIntentionOverlay && !showParticleDetailOverlay
+            ? startNudge
+            : null
+        }
       />
     </div>
   );
