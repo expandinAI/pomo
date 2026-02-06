@@ -19,10 +19,21 @@ export type {
   ChatRequest,
   InsightRequest,
   IntentionContext,
+  DailyIntentionEntry,
+  WeeklyIntentionSummary,
+  DeferredChain,
 } from './types';
 
 // Context Builder
-export { buildCoachContext, formatContextForPrompt } from './context-builder';
+export {
+  buildCoachContext,
+  formatContextForPrompt,
+  getMondayDateString,
+  traceDeferralChain,
+  buildDeferredChains,
+  buildSingleWeekSummary,
+  buildWeeklyIntentions,
+} from './context-builder';
 
 // Prompts
 export {

@@ -11,7 +11,8 @@ import {
   getTodaySessions,
 } from '@/lib/db/sessions';
 import { loadProjects } from '@/lib/db/projects';
-import { getTodayIntention } from '@/lib/intentions/storage';
+import { getTodayIntention, getIntentionsForWeek } from '@/lib/intentions/storage';
+import { getWeekBoundaries } from '@/lib/session-analytics';
 import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 import { detectAllPatterns } from './patterns';
 import type {
@@ -24,6 +25,9 @@ import type {
   DailySummary,
   TaskFrequency,
   IntentionContext,
+  WeeklyIntentionSummary,
+  DailyIntentionEntry,
+  DeferredChain,
 } from './types';
 
 /**
@@ -50,14 +54,23 @@ const DAILY_TREND_DAYS = 14;
  */
 export async function buildCoachContext(): Promise<CoachContext> {
   // Load all required data
-  const [allSessions, recentSessions, todaySessions, projects, todayIntention] =
-    await Promise.all([
-      loadSessions(),
-      getSessionsFromDays(CONTEXT_DAYS),
-      getTodaySessions(),
-      loadProjects(),
-      getTodayIntention(),
-    ]);
+  const [
+    allSessions,
+    recentSessions,
+    todaySessions,
+    projects,
+    todayIntention,
+    thisWeekIntentions,
+    lastWeekIntentions,
+  ] = await Promise.all([
+    loadSessions(),
+    getSessionsFromDays(CONTEXT_DAYS),
+    getTodaySessions(),
+    loadProjects(),
+    getTodayIntention(),
+    getIntentionsForWeek(getMondayDateString(0)),
+    getIntentionsForWeek(getMondayDateString(-1)),
+  ]);
 
   // Build each part of the context
   const sessionSummary = buildSessionSummary(
@@ -78,6 +91,13 @@ export async function buildCoachContext(): Promise<CoachContext> {
     todaySessions
   );
 
+  // Build weekly intention summaries
+  const weeklyIntentions = buildWeeklyIntentions(
+    thisWeekIntentions,
+    lastWeekIntentions,
+    recentSessions
+  );
+
   return {
     sessionSummary,
     projectBreakdown,
@@ -87,6 +107,7 @@ export async function buildCoachContext(): Promise<CoachContext> {
     dailyTrend,
     taskFrequency,
     ...(intentionContext ? { todayIntention: intentionContext } : {}),
+    ...(weeklyIntentions.length > 0 ? { weeklyIntentions } : {}),
   };
 }
 
@@ -403,6 +424,37 @@ export function formatContextForPrompt(context: CoachContext): string {
     }
   }
 
+  // Weekly intention patterns
+  if (context.weeklyIntentions && context.weeklyIntentions.length > 0) {
+    lines.push('');
+    lines.push('## Intention Patterns');
+    for (const week of context.weeklyIntentions) {
+      const label = week.weekLabel === 'current' ? 'This week' : 'Last week';
+      const alignPct = week.alignmentPct !== null ? `${week.alignmentPct}% aligned` : 'no particles';
+      lines.push(`${label}: ${week.daysWithIntention}/7 days with intention, ${week.totalParticles}p, ${alignPct}`);
+      for (const day of week.days) {
+        if (day.text || day.particles > 0) {
+          const intentionText = day.text ? `"${day.text}"` : '(no intention)';
+          const statusInfo = day.status ? ` [${day.status}]` : '';
+          const deferInfo = day.deferralDepth > 0 ? ` (deferred ${day.deferralDepth}x)` : '';
+          const alignInfo = day.particles > 0
+            ? ` — ${day.particles}p ${day.alignmentPct !== null ? `${day.alignmentPct}%` : ''}`
+            : '';
+          lines.push(`  ${day.dayLabel}: ${intentionText}${statusInfo}${deferInfo}${alignInfo}`);
+        }
+      }
+      // Deferred chains
+      for (const chain of week.deferredChains) {
+        lines.push(`  ⚠ "${chain.text}" deferred ${chain.deferralCount}x (since ${chain.originalDate})`);
+      }
+      // Top reactive tasks
+      if (week.topReactiveTasks.length > 0) {
+        const reactiveParts = week.topReactiveTasks.map(t => `"${t.task}" ${t.count}x`);
+        lines.push(`  Reactive: ${reactiveParts.join(', ')}`);
+      }
+    }
+  }
+
   return lines.join('\n');
 }
 
@@ -584,6 +636,223 @@ function buildTaskFrequency(
   return frequencies
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
+}
+
+// ============================================
+// Weekly Intention Builder Functions
+// ============================================
+
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/**
+ * Get the Monday date string for a given week offset (0 = this week, -1 = last week)
+ */
+export function getMondayDateString(weekOffset: number): string {
+  const { start } = getWeekBoundaries(weekOffset);
+  return start.toISOString().split('T')[0];
+}
+
+/**
+ * Trace a deferral chain backwards from an intention.
+ * Returns the depth (number of deferrals) and original date.
+ */
+export function traceDeferralChain(
+  intention: DBIntention,
+  allIntentionsMap: Map<string, DBIntention>
+): { depth: number; originalDate: string } {
+  let depth = 0;
+  let originalDate = intention.date;
+  let currentId = intention.deferredFrom;
+  const visited = new Set<string>();
+
+  while (currentId) {
+    if (visited.has(currentId)) break; // circular reference guard
+    visited.add(currentId);
+
+    // deferredFrom stores the date it was deferred from
+    const prev = allIntentionsMap.get(currentId);
+    if (!prev) break;
+
+    depth++;
+    originalDate = prev.date;
+    currentId = prev.deferredFrom;
+  }
+
+  return { depth, originalDate };
+}
+
+/**
+ * Build deferred chains from a week's intentions
+ */
+export function buildDeferredChains(
+  weekIntentions: DBIntention[],
+  allIntentionsMap: Map<string, DBIntention>
+): DeferredChain[] {
+  const chains: DeferredChain[] = [];
+
+  for (const intention of weekIntentions) {
+    if (!intention.deferredFrom) continue;
+
+    const { depth, originalDate } = traceDeferralChain(intention, allIntentionsMap);
+
+    chains.push({
+      text: intention.text,
+      deferralCount: depth,
+      originalDate,
+      currentDate: intention.date,
+      currentStatus: intention.status,
+    });
+  }
+
+  return chains;
+}
+
+/**
+ * Build a single week's intention summary
+ */
+export function buildSingleWeekSummary(
+  weekLabel: string,
+  weekOffset: number,
+  intentions: DBIntention[],
+  allIntentionsMap: Map<string, DBIntention>,
+  recentSessions: DBSession[]
+): WeeklyIntentionSummary | null {
+  const { start } = getWeekBoundaries(weekOffset);
+  const weekStart = start.toISOString().split('T')[0];
+
+  // Build a map of intentions by date
+  const intentionByDate = new Map<string, DBIntention>();
+  for (const int of intentions) {
+    intentionByDate.set(int.date, int);
+  }
+
+  // Filter work sessions for this week
+  const { end } = getWeekBoundaries(weekOffset);
+  const weekWorkSessions = recentSessions.filter((s) => {
+    if (s.type !== 'work') return false;
+    const d = new Date(s.completedAt);
+    return d >= start && d <= end;
+  });
+
+  // Build per-day entries
+  const days: DailyIntentionEntry[] = [];
+  let daysWithIntention = 0;
+  let totalParticles = 0;
+  let totalAligned = 0;
+  let totalReactive = 0;
+  const reactiveTaskCounts: Record<string, number> = {};
+
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(start);
+    dayDate.setDate(start.getDate() + i);
+    const dateStr = dayDate.toISOString().split('T')[0];
+    const dayLabel = DAY_LABELS[i];
+
+    const intention = intentionByDate.get(dateStr) ?? null;
+
+    // Sessions for this specific day
+    const dayStart = new Date(dayDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const daySessions = weekWorkSessions.filter((s) => {
+      const d = new Date(s.completedAt);
+      return d >= dayStart && d <= dayEnd;
+    });
+
+    const particles = daySessions.length;
+    const aligned = daySessions.filter((s) => s.intentionAlignment === 'aligned').length;
+    const reactive = daySessions.filter((s) => s.intentionAlignment === 'reactive').length;
+
+    // Track reactive tasks
+    for (const s of daySessions) {
+      if (s.intentionAlignment === 'reactive' && s.task) {
+        reactiveTaskCounts[s.task] = (reactiveTaskCounts[s.task] || 0) + 1;
+      }
+    }
+
+    // Trace deferral chain
+    let deferralDepth = 0;
+    let originalDate: string | null = null;
+    if (intention?.deferredFrom) {
+      const chain = traceDeferralChain(intention, allIntentionsMap);
+      deferralDepth = chain.depth;
+      originalDate = chain.originalDate;
+    }
+
+    if (intention) daysWithIntention++;
+    totalParticles += particles;
+    totalAligned += aligned;
+    totalReactive += reactive;
+
+    days.push({
+      date: dateStr,
+      dayLabel,
+      text: intention?.text ?? null,
+      status: intention?.status ?? null,
+      deferralDepth,
+      originalDate,
+      particles,
+      alignedCount: aligned,
+      reactiveCount: reactive,
+      alignmentPct: particles > 0 ? Math.round((aligned / particles) * 100) : null,
+    });
+  }
+
+  // Skip entirely empty weeks
+  if (daysWithIntention === 0 && totalParticles === 0) return null;
+
+  // Build deferred chains
+  const deferredChains = buildDeferredChains(intentions, allIntentionsMap);
+
+  // Top reactive tasks (sorted by count, max 5)
+  const topReactiveTasks = Object.entries(reactiveTaskCounts)
+    .map(([task, count]) => ({ task, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return {
+    weekLabel,
+    weekStart,
+    days,
+    daysWithIntention,
+    totalParticles,
+    totalAligned,
+    totalReactive,
+    alignmentPct: totalParticles > 0 ? Math.round((totalAligned / totalParticles) * 100) : null,
+    deferredChains,
+    topReactiveTasks,
+  };
+}
+
+/**
+ * Build weekly intention summaries for current and previous week
+ */
+export function buildWeeklyIntentions(
+  thisWeekIntentions: DBIntention[],
+  lastWeekIntentions: DBIntention[],
+  recentSessions: DBSession[]
+): WeeklyIntentionSummary[] {
+  // Combine all intentions into a shared map for cross-week deferral tracing
+  const allIntentionsMap = new Map<string, DBIntention>();
+  for (const int of [...thisWeekIntentions, ...lastWeekIntentions]) {
+    allIntentionsMap.set(int.date, int);
+  }
+
+  const results: WeeklyIntentionSummary[] = [];
+
+  const current = buildSingleWeekSummary(
+    'current', 0, thisWeekIntentions, allIntentionsMap, recentSessions
+  );
+  if (current) results.push(current);
+
+  const previous = buildSingleWeekSummary(
+    'previous', -1, lastWeekIntentions, allIntentionsMap, recentSessions
+  );
+  if (previous) results.push(previous);
+
+  return results;
 }
 
 // ============================================

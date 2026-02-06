@@ -144,6 +144,8 @@ export interface CoachContext {
   taskFrequency: TaskFrequency[];
   /** Today's intention and alignment data (if set) */
   todayIntention?: IntentionContext;
+  /** Weekly intention summaries (current + previous week) */
+  weeklyIntentions?: WeeklyIntentionSummary[];
 }
 
 /**
@@ -164,6 +166,43 @@ export interface IntentionContext {
     /** Alignment percentage (0-100) */
     percentage: number;
   };
+}
+
+/** Single day's intention with alignment stats */
+export interface DailyIntentionEntry {
+  date: string;              // "YYYY-MM-DD"
+  dayLabel: string;          // "Mon", "Tue", etc.
+  text: string | null;       // null if no intention set
+  status: string | null;     // IntentionStatus or null
+  deferralDepth: number;     // 0 = not deferred, N = deferred N times
+  originalDate: string | null; // first date in deferral chain
+  particles: number;
+  alignedCount: number;
+  reactiveCount: number;
+  alignmentPct: number | null; // 0-100, null if 0 particles
+}
+
+/** Aggregated weekly intention summary */
+export interface WeeklyIntentionSummary {
+  weekLabel: string;         // "current" | "previous"
+  weekStart: string;         // ISO date for Monday
+  days: DailyIntentionEntry[];
+  daysWithIntention: number;
+  totalParticles: number;
+  totalAligned: number;
+  totalReactive: number;
+  alignmentPct: number | null;
+  deferredChains: DeferredChain[];
+  topReactiveTasks: Array<{ task: string; count: number }>;
+}
+
+/** A deferred intention chain */
+export interface DeferredChain {
+  text: string;
+  deferralCount: number;
+  originalDate: string;
+  currentDate: string;
+  currentStatus: string;
 }
 
 /**
