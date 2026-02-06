@@ -8,6 +8,8 @@ created: 2026-02-05
 updated: 2026-02-05
 done_date: null
 tags: [ai, coach, intention, alignment, reflection, 10x]
+depends_on: []
+blocks: []
 ---
 
 # POMO-382: Intention-Coach Bridge — "The Compass Speaks"
@@ -20,44 +22,57 @@ tags: [ai, coach, intention, alignment, reflection, 10x]
 
 ## Context
 
-Currently, Intentions (`G I`) and Coach (`G C`) are separate worlds. You set an intention in the morning, but the Coach never mentions it. The Evening Reflection exists, but it doesn't leverage AI for personalized insights.
+Currently, Intentions (`G I`) and Coach (`G C`) are separate worlds. You set an intention in the morning, but the Coach never mentions it. The Evening Reflection (POMO-358, done) exists and shows alignment stats, but it doesn't leverage AI for personalized insights.
 
-This story creates **three touchpoints** where the Coach meets your Intention:
+This story creates **drei Bruecken** zwischen Intention und Coach:
 
-1. **Morning Nudge** — When setting your intention, get context from past data
-2. **Session Awareness** — The app knows if your current work aligns
-3. **Evening Insight** — A personalized sentence about your intention-reality gap
+1. **Morning Context** — Beim Setzen der Intention: historische Daten zeigen
+2. **Evening Insight** — Am Abend: AI-generierte Reflexion ueber den Tag
+3. **Coach Awareness** — Im Chat: Coach kennt die Intention
 
 ### The 10x Philosophy
 
 > "A compass that only works in the morning is just a decoration."
 
+### Abgrenzung zu POMO-380 (Start Nudge)
+
+POMO-380 zeigt einen Nudge unter dem Start-Button basierend auf Patterns. POMO-382 zeigt einen Insight **im IntentionOverlay** basierend auf dem eingetippten Intentions-Text. Unterschiedlicher Ort, unterschiedlicher Trigger:
+
+| | POMO-380 (Start Nudge) | POMO-382 (Morning Context) |
+|---|---|---|
+| **Wo** | Timer-Hauptansicht, unter Start | IntentionOverlay (`G I`) |
+| **Trigger** | Timer idle, automatisch | User tippt Intention ein |
+| **Content** | Pattern-basiert (Zeit, Projekt, Progress) | Match auf historische Projekte/Tasks |
+| **Beispiel** | "Tuesday 9am — peak window." | "Last week: 4 particles on Brand Redesign." |
+
 ## Acceptance Criteria
 
-### A) Morning Nudge (IntentionOverlay)
+### A) Morning Context (IntentionOverlay)
 
-- [ ] **Given** user opens IntentionOverlay to set intention, **When** they type an intention, **Then** show contextual insight if relevant data exists
-- [ ] **Given** intention matches a known project/task, **When** data exists, **Then** show "Last week: 4 particles on this. Your sweet spot was 90-min sessions."
-- [ ] **Given** intention is new/unknown, **When** no matching data, **Then** show nothing (no generic fluff)
+- [ ] **Given** user opens IntentionOverlay (`G I`) to set intention, **When** they type text that matches an existing project name or recent task, **Then** show a contextual insight below the input field
+- [ ] **Given** intention text matches a known project (fuzzy match), **When** historical data exists (>= 3 sessions on that project last 14 days), **Then** show insight like "Last week: 4 particles on Brand Redesign. Best sessions around 9am."
+- [ ] **Given** intention text matches a frequent task pattern, **When** data exists, **Then** show insight like "You spend ~3 particles/week on emails. Usually 15-20 min each."
+- [ ] **Given** intention text is new/unknown (no matching project or task), **When** no matching data, **Then** show nothing (no generic fluff, no empty state)
+- [ ] **Given** user types quickly, **When** text changes, **Then** debounce search by 500ms to avoid flicker
 
-### B) Live Alignment Awareness
+### B) Evening Reflection Enhancement
 
-- [ ] **Given** intention is set and session is running, **When** current task/project doesn't match intention, **Then** alignment toggle defaults to "Reactive" (existing behavior, just document)
-- [ ] **Given** IntentionDisplay below timer, **When** current session is reactive, **Then** subtle visual differentiation (already exists via POMO-352)
+Die bestehende EveningReflection (POMO-358, done) zeigt bereits Alignment-Stats und Status-Auswahl. Diese Story erweitert sie um einen **AI-generierten Insight-Satz**:
 
-*Note: This section confirms existing behavior is intentional, no new development needed.*
+- [ ] **Given** user triggers Evening Reflection (automatisch >= 18 Uhr oder manuell via Command Palette), **When** intention was set today AND at least 1 work session exists, **Then** show AI-generated insight sentence below the alignment stats
+- [ ] **Given** some particles were aligned and some reactive, **Then** insight mentions the split: "3 of 5 aligned. The 2 reactive ones were emails — 40 minutes total."
+- [ ] **Given** 100% aligned, **Then** celebrate subtly: "Fully aligned day. Every particle served your intention."
+- [ ] **Given** 0% aligned (all reactive), **Then** neutral observation: "Life happened. Tomorrow's a fresh page."
+- [ ] **Given** no intention was set today, **Then** no AI insight shown (existing Evening Reflection behavior unchanged)
+- [ ] **Given** user is on Free tier, **Then** use local template-based insight (no API call)
+- [ ] **Given** user is on Flow tier, **Then** use API-generated insight (counts toward quota)
+- [ ] **Given** API fails, **Then** fall back to local template (silent degradation)
 
-### C) Evening Reflection Enhancement
+### C) Coach Context Extension
 
-- [ ] **Given** user triggers Evening Reflection, **When** intention was set today, **Then** show AI-generated insight about the day
-- [ ] **Given** Evening Reflection shows, **When** some particles were aligned and some reactive, **Then** insight mentions the split: "3 of 5 aligned. The 2 reactive ones were emails — 40 minutes total."
-- [ ] **Given** Evening Reflection shows, **When** 100% aligned, **Then** celebrate: "Fully aligned day. Every particle served your intention."
-- [ ] **Given** Evening Reflection shows, **When** 0% aligned, **Then** neutral observation: "Life happened. Tomorrow's a fresh page."
-
-### D) Coach Context Extension
-
-- [ ] **Given** user opens Coach modal, **When** intention is set, **Then** Coach has full context of today's intention + alignment data
-- [ ] **Given** chatting with Coach, **When** asking about today, **Then** Coach can reference intention and alignment
+- [ ] **Given** user opens Coach modal (`G C`), **When** intention is set today, **Then** Coach system prompt includes today's intention text + alignment stats
+- [ ] **Given** chatting with Coach, **When** asking about today, **Then** Coach can reference intention and alignment data in responses
+- [ ] **Given** no intention set today, **Then** Coach context unchanged (no mention of intentions)
 
 ## Technical Details
 
@@ -66,88 +81,145 @@ This story creates **three touchpoints** where the Coach meets your Intention:
 ```
 src/
 ├── components/
-│   ├── timer/
-│   │   ├── IntentionOverlay.tsx      # Add morning nudge section
-│   │   └── EveningReflection.tsx     # Add AI insight
-│   └── coach/
-│       └── CoachView.tsx             # Context already includes intention
+│   └── timer/
+│       ├── IntentionOverlay.tsx      # Add morning context section below input
+│       └── EveningReflection.tsx     # Add AI insight below alignment stats
 ├── lib/
 │   └── coach/
-│       ├── context-builder.ts        # Extend with intention data
-│       ├── intention-insights.ts     # NEW: Intention-specific insights
-│       └── prompts.ts                # Add intention-aware prompts
+│       ├── context-builder.ts        # Extend CoachContext with intention data
+│       ├── intention-insights.ts     # NEW: Morning context + evening insight logic
+│       └── prompts.ts                # Extend COACH_SYSTEM_PROMPT with intention context
+├── app/
+│   └── api/
+│       └── coach/
+│           └── evening/
+│               └── route.ts          # NEW: Evening insight endpoint
 └── hooks/
-    └── useIntentionInsight.ts        # NEW: Hook for intention insights
+    ├── useIntentionInsight.ts        # NEW: Hook for morning context in IntentionOverlay
+    └── useEveningInsight.ts          # NEW: Hook for evening AI insight
 ```
 
-### A) Morning Nudge Implementation
-
-```typescript
-// In IntentionOverlay.tsx
-const { insight, isLoading } = useIntentionInsight(intentionText);
-
-// Display below input:
-{insight && (
-  <p className="text-xs text-tertiary mt-2">
-    {insight}
-  </p>
-)}
-```
+### A) Morning Context Implementation
 
 ```typescript
 // src/hooks/useIntentionInsight.ts
-function useIntentionInsight(intentionText: string) {
-  // Debounce the input (500ms)
-  // Search sessions for matching project/task names
-  // If found, calculate stats:
-  //   - How many particles last week on this topic
-  //   - Average session duration
-  //   - Most productive time
-  // Return insight string or null
+import { useSessionStore } from '@/lib/db';
+import { useProjects } from '@/hooks/useProjects';
+
+export function useIntentionInsight(intentionText: string): {
+  insight: string | null;
+  isLoading: boolean;
+} {
+  // 1. Debounce intentionText (500ms)
+  // 2. Fuzzy-match against project names (case-insensitive substring)
+  // 3. Fuzzy-match against recent task names (last 30 days)
+  // 4. If match found with >= 3 sessions in last 14 days:
+  //    - Count particles on matched project/task last 7 days
+  //    - Calculate average session duration
+  //    - Find most common hour (peak time)
+  //    - Build insight string
+  // 5. Return null if no match or insufficient data
 }
 ```
 
-**Examples:**
-- Input: "Brand redesign" → Match project "Brand Redesign" → "Last week: 4 particles. Best sessions around 9am."
-- Input: "emails" → Match task pattern → "You spend ~3 particles/week on emails. Usually 15-20 min each."
-- Input: "something new" → No match → Show nothing
-
-### C) Evening Reflection Enhancement
-
+**Matching-Logik:**
 ```typescript
-// In EveningReflection.tsx
-// After showing alignment stats, add AI insight:
+function findMatchingContext(
+  text: string,
+  projects: Project[],
+  recentSessions: DBSession[]
+): MatchResult | null {
+  const lowerText = text.toLowerCase().trim();
+  if (lowerText.length < 3) return null; // Mindestlaenge
 
-const { insight } = useEveningInsight({
-  intention: todayIntention,
-  sessions: todaySessions,
-  alignedCount,
-  reactiveCount,
-});
+  // 1. Exakter Projekt-Match (case-insensitive)
+  const projectMatch = projects.find(p =>
+    p.name.toLowerCase().includes(lowerText) ||
+    lowerText.includes(p.name.toLowerCase())
+  );
 
-// Display:
-<p className="text-sm text-secondary italic mt-4">
-  "{insight}"
-</p>
-```
+  if (projectMatch) {
+    const projectSessions = recentSessions.filter(
+      s => s.projectId === projectMatch.id && s.type === 'work'
+    );
+    if (projectSessions.length >= 3) {
+      return { type: 'project', name: projectMatch.name, sessions: projectSessions };
+    }
+  }
 
-```typescript
-// src/lib/coach/intention-insights.ts
-async function generateEveningInsight(context: EveningContext): Promise<string> {
-  // For Flow users: API call with context
-  // For Free users: Local template-based insight
+  // 2. Task-Pattern-Match (haeufigste Tasks der letzten 30 Tage)
+  const taskMatch = findFrequentTaskMatch(lowerText, recentSessions);
+  if (taskMatch && taskMatch.sessions.length >= 3) {
+    return { type: 'task', name: taskMatch.taskName, sessions: taskMatch.sessions };
+  }
 
-  // Context includes:
-  // - Intention text
-  // - Total particles today
-  // - Aligned vs reactive count
-  // - Reactive sessions' tasks/projects
-  // - Total time aligned vs reactive
+  return null;
 }
 ```
 
-**AI Prompt for Evening Insight:**
+**Insight-Templates (lokal, kein API-Call):**
+```typescript
+function buildMorningInsight(match: MatchResult): string {
+  const lastWeekCount = countLastWeek(match.sessions);
+  const avgDuration = averageDuration(match.sessions);
+  const peakHour = findPeakHour(match.sessions);
 
+  if (peakHour !== null) {
+    return `Last week: ${lastWeekCount} particles on ${match.name}. Best sessions around ${peakHour}.`;
+  }
+  return `Last week: ${lastWeekCount} particles on ${match.name}. Avg ${avgDuration} min each.`;
+}
+```
+
+### B) Evening Insight Implementation
+
+```typescript
+// src/hooks/useEveningInsight.ts
+interface EveningInsightContext {
+  intentionText: string;
+  totalParticles: number;
+  alignedCount: number;
+  reactiveCount: number;
+  alignedMinutes: number;
+  reactiveMinutes: number;
+  reactiveTasks: string[];  // Task-Namen der reaktiven Sessions
+}
+
+export function useEveningInsight(context: EveningInsightContext | null): {
+  insight: string | null;
+  isLoading: boolean;
+} {
+  // null context = no intention today → return null
+  // Free tier → generateLocalEveningInsight(context)
+  // Flow tier → API call to /api/coach/evening
+  // API fail → fallback to local
+}
+```
+
+**Lokale Evening-Insight Templates (Free Tier):**
+```typescript
+function generateLocalEveningInsight(ctx: EveningInsightContext): string {
+  const { alignedCount, reactiveCount, totalParticles, reactiveTasks } = ctx;
+
+  if (totalParticles === 0) {
+    return "A quiet day. Tomorrow's a fresh page.";
+  }
+  if (reactiveCount === 0) {
+    return "Fully aligned day. Every particle served your intention.";
+  }
+  if (alignedCount === 0) {
+    return "Life happened. Tomorrow's a fresh page.";
+  }
+
+  const reactiveTaskSummary = reactiveTasks.length > 0
+    ? reactiveTasks.slice(0, 2).join(' & ')
+    : 'unplanned work';
+
+  return `${alignedCount} of ${totalParticles} aligned. ${reactiveTaskSummary} took the rest.`;
+}
+```
+
+**API Prompt (Flow Tier, fuer Haiku):**
 ```typescript
 const EVENING_INSIGHT_PROMPT = `Generate a single reflective sentence about someone's workday.
 
@@ -161,10 +233,11 @@ Context:
 
 Rules:
 - One sentence, maximum 20 words
-- Specific to their data (mention numbers, tasks)
+- Specific to their data (mention numbers, task names)
 - Neutral tone — no judgment, no guilt
 - No advice or "you should"
-- No emojis
+- No emojis, no exclamation marks
+- Use em dash (—) for pause
 
 Good: "3 of 5 aligned. Emails took the other 40 minutes — worth knowing."
 Bad: "Great job staying focused!" (generic)
@@ -172,29 +245,45 @@ Bad: "You should reduce email time." (advice)
 `;
 ```
 
-### D) Coach Context Extension
+### C) Coach Context Extension
 
 ```typescript
-// src/lib/coach/context-builder.ts
-interface CoachContext {
-  // ... existing fields ...
+// In src/lib/coach/context-builder.ts
+// Extend the existing buildCoachContext() function:
 
-  // NEW: Intention data
+interface CoachContext {
+  // ... existing fields (sessions, patterns, etc.) ...
+
+  // NEU: Intention-Daten fuer heute
   todayIntention?: {
     text: string;
     particleGoal?: number;
+    status: IntentionStatus;
     alignedCount: number;
     reactiveCount: number;
     alignedMinutes: number;
     reactiveMinutes: number;
-    reactiveTasks: string[];  // What pulled attention away
+    reactiveTasks: string[];
   };
 }
 ```
 
+**System-Prompt Erweiterung:**
+```typescript
+// In prompts.ts, append to COACH_SYSTEM_PROMPT when intention exists:
+const INTENTION_CONTEXT_ADDENDUM = `
+Today's intention: "{text}"
+Alignment: {alignedCount}/{totalCount} particles aligned ({alignedMinutes} min)
+Reactive work: {reactiveTasks}
+
+When discussing today, reference the intention and alignment naturally.
+Don't lecture about alignment — just acknowledge it as context.
+`;
+```
+
 ## UI/UX
 
-### Morning Nudge in IntentionOverlay
+### Morning Context in IntentionOverlay
 
 ```
 ┌─────────────────────────────────────┐
@@ -204,16 +293,22 @@ interface CoachContext {
 │  │ Brand redesign finalize        │││
 │  └─────────────────────────────────┘│
 │                                     │
-│  Last week: 4 particles on Brand    │  ← Morning nudge
-│  Redesign. Sweet spot: 90-min.      │
+│  Last week: 4 particles on Brand   │  ← Morning context (text-xs text-tertiary)
+│  Redesign. Best sessions around 9am│
 │                                     │
-│  Particles: [3] [4] [5] [6] [·]     │
+│  Particles: [3] [4] [5] [6] [·]    │
 │                                     │
 │             [Set Intention]         │
 └─────────────────────────────────────┘
 ```
 
-### Evening Reflection with Insight
+**Styling:**
+- `text-xs text-tertiary light:text-tertiary-dark`
+- Below input, above particle goal selector
+- Fade in (200ms) when insight becomes available
+- Max 2 lines, truncate if needed
+
+### Evening Reflection with AI Insight
 
 ```
 ┌─────────────────────────────────────┐
@@ -221,10 +316,10 @@ interface CoachContext {
 │                                     │
 │  Your intention: "Brand redesign"   │
 │                                     │
-│  ○ ○ ● ● ○                         │
+│  ● ● ● ○ ○                         │
 │  3 aligned · 2 reactive             │
 │                                     │
-│  "3 of 5 aligned. Emails took the   │  ← AI insight
+│  "3 of 5 aligned. Emails took the   │  ← AI insight (text-sm italic text-secondary)
 │   other 40 minutes — worth knowing."│
 │                                     │
 │  How does this feel?                │
@@ -232,38 +327,54 @@ interface CoachContext {
 └─────────────────────────────────────┘
 ```
 
+**Styling des Insight-Satzes:**
+- `text-sm italic text-secondary light:text-secondary-dark`
+- Anführungszeichen links und rechts
+- Fade in nach 300ms (wirkt nachdenklich)
+- Position: Zwischen Alignment-Stats und "How does this feel?"
+
 ## Testing
 
 ### Manual Testing
 
-- [ ] Set intention matching existing project → insight appears
-- [ ] Set intention with unknown text → no insight
+- [ ] Set intention matching existing project → insight appears below input
+- [ ] Set intention with partial project name → still matches (fuzzy)
+- [ ] Set intention with unknown text → no insight shown
+- [ ] Type quickly → no flicker (500ms debounce works)
+- [ ] Clear intention input → insight disappears
 - [ ] Complete day with mixed alignment → evening insight reflects split
-- [ ] Complete day 100% aligned → evening insight celebrates
+- [ ] Complete day 100% aligned → evening insight celebrates subtly
 - [ ] Complete day 0% aligned → evening insight is neutral
-- [ ] Open Coach, ask about intention → Coach knows context
-- [ ] Free tier user → local insights (no API)
-- [ ] Flow tier user → AI-generated insights
+- [ ] No intention set → Evening Reflection unchanged, no insight
+- [ ] Free tier: morning context local, evening insight local template
+- [ ] Flow tier: morning context local, evening insight via API
+- [ ] API failure → fallback to local template (no error shown)
+- [ ] Open Coach (`G C`), ask about intention → Coach references it naturally
+- [ ] Open Coach without intention → no intention mentioned
 
 ### Automated Tests
 
-- [ ] Unit test intention matching logic
-- [ ] Unit test evening insight generation
-- [ ] Test context builder includes intention data
+- [ ] Unit test `findMatchingContext()` — project match, task match, no match
+- [ ] Unit test morning insight builder with various data
+- [ ] Unit test `generateLocalEveningInsight()` — all alignment scenarios
+- [ ] Test debounce in `useIntentionInsight` hook
+- [ ] Test context builder includes intention data when set
+- [ ] Test context builder omits intention when not set
 
 ## Definition of Done
 
-- [ ] Morning nudge shows relevant context when setting intention
-- [ ] Evening reflection includes AI-generated insight
-- [ ] Coach has full intention context for chat
-- [ ] Graceful handling for users without intention
-- [ ] Works for both Free (local) and Flow (API) tiers
+- [ ] Morning context shows relevant historical data when typing intention
+- [ ] Evening reflection includes AI-generated (Flow) or template-based (Free) insight
+- [ ] Coach system prompt includes intention + alignment context when set
+- [ ] Graceful handling for users without intention (no changes to existing behavior)
+- [ ] Morning context is purely local (no API cost)
+- [ ] Evening insight costs max 1 API query per day (Flow only)
 - [ ] Typecheck + Lint pass
 - [ ] Tested end-to-end: morning → day → evening flow
 
 ## Notes
 
-**The rhythm this creates:**
+**Der Rhythmus, den diese Story erzeugt:**
 
 ```
 Morning:  "Brand redesign — you did 4 particles on this last week."
@@ -276,8 +387,14 @@ Evening:  "3 of 5 aligned. Emails took the other 40 minutes."
           [User reflects on the gap between intention and reality]
 ```
 
-This is a **daily rhythm with meaning** — not just tracking, but understanding.
+**API-Kosten:**
+- Morning context: $0 (rein lokal, kein API-Call)
+- Evening insight: ~$0.0005 pro Tag (1x Haiku, nur Flow Tier, nur wenn Intention gesetzt)
+- Coach context: $0 (wird nur dem System-Prompt hinzugefuegt, kein Extra-Call)
 
-**API cost:**
-- 1 query for evening insight (only if Flow + intention set)
-- Morning nudge is pure local heuristics (no API)
+**Abhaengigkeiten:**
+- IntentionOverlay (POMO-351, done) muss erweitert werden
+- EveningReflection (POMO-358, done) muss erweitert werden
+- `useIntention()` Hook (done) liefert alle nötigen Daten
+- Coach context-builder (done) muss erweitert werden
+- Kann parallel zu POMO-380, 381, 383, 384 entwickelt werden

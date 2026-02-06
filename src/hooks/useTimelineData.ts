@@ -22,6 +22,7 @@ export interface TimelineSession {
   projectName?: string;
   brightness: number;
   intentionAlignment?: IntentionAlignment;
+  memory?: string;
 }
 
 /**
@@ -153,6 +154,11 @@ export function useTimelineData(): UseTimelineDataReturn {
         ? (session.intentionAlignment as IntentionAlignment | undefined)
         : undefined;
 
+      // Extract memory (only exists on DBSession, not CompletedSession)
+      const memory = ('memory' in session)
+        ? (session.memory as string | undefined)
+        : undefined;
+
       return {
         id: session.id,
         type: session.type,
@@ -164,6 +170,7 @@ export function useTimelineData(): UseTimelineDataReturn {
         projectName,
         brightness,
         intentionAlignment,
+        memory,
       };
     });
 

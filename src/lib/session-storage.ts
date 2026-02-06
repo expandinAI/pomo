@@ -23,6 +23,7 @@ export interface CompletedSession {
   projectId?: string; // Optional project assignment
   overflowDuration?: number; // Time spent past 0:00 (in seconds)
   estimatedDuration?: number; // Planned duration in seconds (from Smart Input or preset)
+  memory?: string; // AI-generated memory sentence
 }
 
 const STORAGE_KEY = 'particle_session_history';

@@ -8,6 +8,8 @@ created: 2026-02-05
 updated: 2026-02-05
 done_date: null
 tags: [ai, coach, memory, storytelling, 10x]
+depends_on: []
+blocks: []
 ---
 
 # POMO-381: Particle Memory — "Every Particle Remembers"
@@ -28,42 +30,54 @@ This story transforms each particle into **a moment with meaning**. A single sen
 
 > "Numbers you forget. Stories you remember."
 
+### Scope
+
+- **Nur Work-Sessions** erhalten Memories. Breaks sind Pausen, keine Leistungen.
+- **Nur nach COMPLETE-Action** — nicht nach SKIP (< 60s Arbeit verdient kein Memory)
+- **Immutable** — einmal generiert, nie ueberschrieben. Wie ein Tagebuch-Eintrag.
+
 ## Acceptance Criteria
 
 ### Memory Generation
 
-- [ ] **Given** a work session completes, **When** saving to IndexedDB, **Then** generate and store a memory sentence
-- [ ] **Given** the AI API fails, **When** saving the session, **Then** save without memory (graceful degradation)
-- [ ] **Given** the user is on Free tier, **When** session completes, **Then** generate memory using local heuristics (no API)
+- [ ] **Given** a work session completes (COMPLETE action, not SKIP), **When** saving to IndexedDB, **Then** generate and store a memory sentence
+- [ ] **Given** the AI API fails or is unavailable, **When** saving the session, **Then** save session without memory (graceful degradation, no error shown to user)
+- [ ] **Given** the user is on Free tier (no API access), **When** session completes, **Then** generate memory using local heuristics (template-based, no API)
+- [ ] **Given** the user is on Flow tier, **When** session completes, **Then** generate memory via API call (Haiku model)
+- [ ] **Given** a break session completes, **When** saving, **Then** no memory generated (breaks don't get memories)
+- [ ] **Given** multiple sessions complete in quick succession, **When** generating memories, **Then** queue API calls (max 1 concurrent, fire-and-forget pattern)
 
 ### Memory Display
 
-- [ ] **Given** a particle has a memory, **When** viewing ParticleDetailOverlay, **Then** display the memory below the time/duration info
-- [ ] **Given** a particle has no memory, **When** viewing ParticleDetailOverlay, **Then** show nothing (no empty state)
-- [ ] **Given** viewing Timeline, **When** hovering a particle with memory, **Then** show memory in tooltip
+- [ ] **Given** a particle has a memory, **When** viewing ParticleDetailOverlay, **Then** display the memory in a quote-style block below the time/duration/task info
+- [ ] **Given** a particle has no memory (old session or generation failed), **When** viewing ParticleDetailOverlay, **Then** show nothing in the memory area (no empty state)
+- [ ] **Given** viewing Timeline, **When** hovering a particle with memory, **Then** show memory in tooltip below existing info
+- [ ] **Given** viewing Timeline, **When** hovering a particle without memory, **Then** show normal tooltip (no change)
 
 ### Memory Types
 
-Memories should capture what made this session **unique**:
+Memories capture what made this session **unique**:
 
-| Type | Example | Trigger |
-|------|---------|---------|
-| **Duration Milestone** | "Your longest particle this week — 12 minutes of overflow." | Longest in 7 days |
-| **Streak Moment** | "5 particles in a single day — last achieved January 14th." | Daily record |
-| **Return After Break** | "First particle after 3 days of rest." | Gap > 2 days |
-| **Deep Work** | "52 uninterrupted minutes. No task switch." | Long session, single task |
-| **Ritual Detection** | "7:30am Tuesday — like every Tuesday." | Recurring time pattern |
-| **Project Dedication** | "3rd consecutive particle on Design System." | Same project streak |
-| **Early Bird** | "Started at 6:14am. Ahead of the world." | Session before 7am |
-| **Night Owl** | "11:47pm. The quiet hours." | Session after 10pm |
-| **Overflow Champion** | "Planned 25, worked 41. In the zone." | Significant overflow |
-| **Milestone Proximity** | "Particle #99. One more to a hundred." | Near round number |
+| Type | Example | Trigger Condition |
+|------|---------|-------------------|
+| **Duration Milestone** | "Longest particle this week — 12 minutes of overflow." | `session.duration > max(sessions last 7 days)` |
+| **Daily Record** | "5 particles in a single day — a new daily record." | `todayCount > max(allDailyCounts)` |
+| **Return After Break** | "First particle after 3 days of rest." | `daysSinceLastSession >= 3` |
+| **Deep Work** | "52 uninterrupted minutes. No task switch." | `duration >= 45min && single task` |
+| **Ritual Detection** | "7:30am Tuesday — like every Tuesday." | Pattern match via `detectTimeOfDayPattern()` |
+| **Project Dedication** | "3rd consecutive particle on Design System." | `consecutiveSameProject >= 3` |
+| **Early Bird** | "Started at 6:14am. Ahead of the world." | `sessionStartHour < 7` |
+| **Night Owl** | "11:47pm. The quiet hours." | `sessionStartHour >= 22` |
+| **Overflow Champion** | "Planned 25, worked 41. In the zone." | `overflowDuration >= estimatedDuration * 0.5` |
+| **Milestone Proximity** | "Particle #99. One more to a hundred." | `lifetimeCount % 100 >= 95 OR lifetimeCount % 50 >= 48` |
 
 ### Data Model
 
-- [ ] Add `memory?: string` field to `DBSession` interface
-- [ ] Memory is optional — older sessions won't have it
-- [ ] Memory is immutable once generated (no regeneration)
+- [ ] Add `memory?: string` field to `DBSession` interface in `src/lib/db/types.ts`
+- [ ] Bump Dexie schema version (v4 -> v5) with migration that adds nothing (field is optional)
+- [ ] Memory is optional — older sessions won't have it (backward compatible)
+- [ ] Memory is immutable once generated (no update/regenerate API)
+- [ ] Max length: 80 characters (enforced in both local and API generation)
 
 ## Technical Details
 
@@ -73,106 +87,147 @@ Memories should capture what made this session **unique**:
 src/
 ├── lib/
 │   ├── db/
-│   │   └── types.ts                    # Add memory field to DBSession
+│   │   ├── types.ts                    # Add memory?: string to DBSession
+│   │   └── database.ts                 # Bump schema version v4 -> v5
 │   └── coach/
-│       └── memory-generator.ts         # NEW: Memory generation logic
+│       └── memory-generator.ts         # NEW: Memory generation (local + API)
 ├── components/
 │   └── timer/
-│       ├── Timer.tsx                   # Trigger memory generation on complete
+│       ├── Timer.tsx                   # Trigger memory generation after COMPLETE
 │       └── ParticleDetailOverlay.tsx   # Display memory
 ├── app/
 │   └── api/
 │       └── coach/
 │           └── memory/
-│               └── route.ts            # NEW: Memory generation endpoint
+│               └── route.ts            # NEW: Memory generation endpoint (Flow tier)
 └── hooks/
-    └── useParticleMemory.ts            # NEW: Hook for memory operations
+    └── useParticleMemory.ts            # NEW: Hook for memory generation queue
 ```
+
+### DB Migration
+
+```typescript
+// In database.ts — Dexie schema bump
+// v4 (current): sessions table has existing fields
+// v5 (new): add memory field (optional, no data migration needed)
+
+db.version(5).stores({
+  sessions: '++localId, id, serverId, type, completedAt, projectId, syncStatus',
+  // memory field is not indexed — just stored as optional property
+});
+```
+
+**Wichtig:** Da `memory` nicht indexiert wird, reicht ein Schema-Bump ohne Daten-Migration. Dexie fuegt das Feld automatisch bei neuen Eintraegen hinzu, bestehende Eintraege behalten ihren Zustand.
 
 ### Memory Generation Flow
 
 ```
-Session Completes
+Work Session Completes (COMPLETE action)
        │
        ▼
 ┌──────────────────────┐
-│ Collect Context:     │
+│ Build MemoryContext:  │
 │ - Session data       │
+│ - Today's sessions   │
+│ - This week's max    │
+│ - Lifetime count     │
 │ - Recent sessions    │
 │ - Patterns           │
-│ - Milestones         │
 └──────────────────────┘
        │
        ▼
 ┌──────────────────────┐
 │ User Tier?           │
 ├──────────────────────┤
-│ Flow → API Call      │
-│ Free → Local Heuristic│
+│ Flow → API Call      │──→ POST /api/coach/memory
+│ Free → Local Logic   │──→ generateLocalMemory()
 └──────────────────────┘
        │
        ▼
 ┌──────────────────────┐
-│ Save session with    │
-│ memory field         │
+│ Update session with  │
+│ memory field in DB   │  (fire-and-forget, no blocking)
 └──────────────────────┘
+```
+
+**Wichtig: Fire-and-Forget Pattern**
+
+Die Memory-Generierung darf den normalen Session-Completion-Flow **nicht blockieren**. Die Session wird sofort gespeichert. Das Memory wird asynchron nachgeliefert:
+
+```typescript
+// In Timer.tsx nach COMPLETE:
+// 1. Session sofort speichern (ohne memory)
+const savedSession = await saveSession(sessionData);
+
+// 2. Memory asynchron generieren + updaten (fire-and-forget)
+generateAndSaveMemory(savedSession.id, memoryContext).catch(() => {
+  // Silent fail — session ist schon gespeichert
+});
 ```
 
 ### API Endpoint
 
 ```typescript
 // POST /api/coach/memory
+// Counts toward 300/month AI quota
+
 // Request:
-{
+interface MemoryRequest {
   session: {
-    id: string;
-    type: 'work';
-    duration: number;
+    duration: number;           // seconds
     task?: string;
-    projectId?: string;
+    projectName?: string;
     completedAt: string;
     overflowDuration?: number;
+    estimatedDuration?: number;
   };
   context: {
     todayCount: number;
     weekCount: number;
-    longestThisWeek: number;
-    lastSessionGap: number; // hours since last session
-    projectStreak: number;  // consecutive sessions on same project
-    totalLifetime: number;
-    patterns: DetectedPatterns;
+    longestThisWeekDuration: number;  // seconds
+    daysSinceLastSession: number;
+    consecutiveSameProject: number;
+    lifetimeCount: number;
+    sessionStartHour: number;
+    isNewDailyRecord: boolean;
+    detectedPatterns: { type: string; description: string }[];
   };
 }
 
 // Response:
-{
-  memory: string; // e.g., "Your longest particle this week — 12 minutes of overflow."
+interface MemoryResponse {
+  memory: string;  // max 80 chars
 }
 ```
 
-### AI Prompt
+### AI Prompt (fuer Haiku)
 
 ```typescript
 const MEMORY_SYSTEM_PROMPT = `You generate a single memorable sentence about a focus session.
 
 Rules:
-- Maximum 15 words
-- Specific, not generic
-- Celebratory but not over-the-top
-- Reference actual data (numbers, times, project names)
-- No emojis
+- Maximum 15 words, maximum 80 characters
+- Specific, not generic — reference actual data (numbers, times, project names)
+- Celebratory but understated — Dieter Rams, not cheerleader
+- No emojis, no exclamation marks
 - No questions
 - No "you should" or advice
+- No "Great job!" or motivational fluff
+- Use em dash (—) for dramatic pause
+- Write in second person ("Your..." not "The user's...")
 
 Good examples:
-- "Your longest particle this week — 12 minutes of overflow."
-- "5 particles in a single day — last achieved January 14th."
+- "Longest particle this week — 12 minutes of overflow."
+- "5 particles today — last achieved January 14th."
 - "7:30am Tuesday — like every Tuesday."
+- "First particle after 3 days. Welcome back."
+- "Planned 25, worked 41. In the zone."
 
 Bad examples:
 - "Great job!" (too generic)
 - "You worked for 25 minutes." (just restating data)
 - "Keep up the good work!" (motivational fluff)
+- "What a productive session!" (empty praise)
 `;
 ```
 
@@ -180,26 +235,49 @@ Bad examples:
 
 ```typescript
 // src/lib/coach/memory-generator.ts
-function generateLocalMemory(session: DBSession, context: MemoryContext): string | null {
-  // Check triggers in priority order
-  if (isLongestThisWeek(session, context)) {
-    return `Longest particle this week — ${formatDuration(session.duration)}.`;
-  }
-  if (isDailyRecord(context)) {
+function generateLocalMemory(
+  session: DBSession,
+  context: MemoryContext
+): string | null {
+  // Check triggers in priority order — return first match
+
+  if (context.isNewDailyRecord) {
     return `${context.todayCount} particles today — a new daily record.`;
   }
-  if (isReturnAfterBreak(context)) {
-    return `First particle after ${context.lastSessionGap} days.`;
+  if (context.daysSinceLastSession >= 3) {
+    return `First particle after ${context.daysSinceLastSession} days.`;
   }
-  if (isEarlyBird(session)) {
+  if (session.duration > context.longestThisWeekDuration) {
+    const overflow = session.overflowDuration
+      ? ` — ${Math.round(session.overflowDuration / 60)} min overflow.`
+      : '.';
+    return `Longest particle this week${overflow}`;
+  }
+  if (context.sessionStartHour < 7) {
     return `${formatTime(session.completedAt)} — ahead of the world.`;
   }
-  // ... more heuristics
+  if (context.sessionStartHour >= 22) {
+    return `${formatTime(session.completedAt)} — the quiet hours.`;
+  }
+  if (context.consecutiveSameProject >= 3 && session.projectName) {
+    return `${context.consecutiveSameProject}x ${session.projectName} in a row.`;
+  }
+  if (session.overflowDuration && session.estimatedDuration &&
+      session.overflowDuration >= session.estimatedDuration * 0.5) {
+    const planned = Math.round(session.estimatedDuration / 60);
+    const actual = Math.round(session.duration / 60);
+    return `Planned ${planned}, worked ${actual}. In the zone.`;
+  }
+  if (context.lifetimeCount % 100 >= 95 || context.lifetimeCount % 50 >= 48) {
+    return `Particle #${context.lifetimeCount}. Almost there.`;
+  }
 
-  // Return null if nothing noteworthy
+  // Nothing noteworthy — return null (no memory)
   return null;
 }
 ```
+
+**Wichtig:** Nicht jede Session braucht ein Memory. ~40-60% der Sessions werden eins bekommen. Das macht die, die eins haben, wertvoller.
 
 ## UI/UX
 
@@ -215,8 +293,8 @@ function generateLocalMemory(session: DBSession, context: MemoryContext): string
 │  "Implement color tokens"           │
 │                                     │
 │  ┌─────────────────────────────────┐│
-│  │ "Your longest particle this     ││
-│  │  week — 12 minutes of overflow."││  ← Memory (italic, subtle)
+│  │ Longest particle this week —   ││
+│  │ 12 minutes of overflow.        ││  ← Memory (italic, quote-style)
 │  └─────────────────────────────────┘│
 │                                     │
 │  [Aligned] [Reactive]               │
@@ -225,11 +303,13 @@ function generateLocalMemory(session: DBSession, context: MemoryContext): string
 ```
 
 **Memory Styling:**
-- Font: `text-sm italic text-secondary`
-- Background: `bg-tertiary/5` (very subtle)
+- Font: `text-sm italic text-secondary light:text-secondary-dark`
+- Background: `bg-tertiary/5 light:bg-tertiary-dark/5`
 - Padding: `px-3 py-2`
-- Border: `border-l-2 border-tertiary/20` (quote-style)
+- Border: `border-l-2 border-tertiary/20 light:border-tertiary-dark/20` (quote-style)
+- Border radius: `rounded-r-md`
 - Animation: Fade in after 200ms
+- Position: Between task info and alignment toggle
 
 ### Timeline Tooltip Enhancement
 
@@ -238,7 +318,7 @@ function generateLocalMemory(session: DBSession, context: MemoryContext): string
 │ 09:14 - 09:52                │
 │ Design System · 38 min       │
 │                              │
-│ "Your longest this week."    │  ← Memory in tooltip
+│ Longest particle this week.  │  ← Memory in tooltip (wenn vorhanden)
 └──────────────────────────────┘
 ```
 
@@ -246,28 +326,40 @@ function generateLocalMemory(session: DBSession, context: MemoryContext): string
 
 ### Manual Testing
 
-- [ ] Complete a session as Flow user → memory generated via API
-- [ ] Complete a session as Free user → memory generated locally (or none)
-- [ ] API fails → session saved without memory, no error shown
-- [ ] Old sessions without memory → no memory displayed
-- [ ] Memory appears in ParticleDetailOverlay
+- [ ] Complete work session as Flow user → memory generated via API, visible in ParticleDetailOverlay
+- [ ] Complete work session as Free user → memory generated locally (or null if nothing noteworthy)
+- [ ] Complete break session → no memory generated
+- [ ] Skip session (S-Taste) → no memory generated
+- [ ] API fails → session saved without memory, no error toast
+- [ ] Complete 3 sessions quickly → memories queued, all eventually generated
+- [ ] Old sessions without memory → no memory section in overlay
+- [ ] Memory appears in ParticleDetailOverlay below task info
 - [ ] Memory appears in Timeline tooltip
-- [ ] Very long memory → truncated gracefully
+- [ ] Memory with 80 chars → no overflow
+- [ ] Light mode + Dark mode: Quote-style block has correct contrast
 
 ### Automated Tests
 
-- [ ] Unit tests for local memory generator with various triggers
-- [ ] Unit tests for memory context builder
-- [ ] Integration test for API endpoint
-- [ ] Test graceful degradation on API failure
+- [ ] Unit tests for `generateLocalMemory()` — all trigger types
+- [ ] Test daily record detection
+- [ ] Test return-after-break detection
+- [ ] Test longest-this-week detection
+- [ ] Test null return when nothing noteworthy
+- [ ] Test max length enforcement (80 chars)
+- [ ] Test context builder produces correct data
+- [ ] Integration test for `/api/coach/memory` endpoint
 
 ## Definition of Done
 
-- [ ] `memory` field added to DBSession
-- [ ] Memory generated on session completion (API or local)
-- [ ] Memory displayed in ParticleDetailOverlay
+- [ ] `memory?: string` field added to `DBSession` in types.ts
+- [ ] Dexie schema bumped to v5 (backward compatible)
+- [ ] Memory generated on work session COMPLETE (not SKIP, not break)
+- [ ] Fire-and-forget pattern — session save not blocked by memory generation
+- [ ] Memory displayed in ParticleDetailOverlay (existing single source of truth)
 - [ ] Memory shown in Timeline tooltip
-- [ ] Graceful fallback when API unavailable
+- [ ] Local heuristic fallback for Free tier
+- [ ] API generation for Flow tier (counts toward 300/month quota)
+- [ ] Graceful fallback when API unavailable (silent fail)
 - [ ] No breaking changes to existing sessions
 - [ ] Typecheck + Lint pass
 - [ ] Tested with Flow and Free tier users
@@ -275,14 +367,20 @@ function generateLocalMemory(session: DBSession, context: MemoryContext): string
 ## Notes
 
 **Cost consideration:**
-- ~$0.001 per memory (Haiku)
-- Flow users only (300 queries/month includes memories)
-- Each session = 1 query toward quota
+- ~$0.001 per memory (Haiku model via existing OpenRouter setup)
+- Flow users only — counts toward 300 queries/month
+- Each completed work session = 1 query
+- At 5 sessions/day = ~150 queries/month for memories alone
+- **Empfehlung:** Memory-Generierung teilt sich das Quota mit Coach Chat und Insights. Bei 300/Monat ist das knapp. Alternative: Memories nur lokal generieren (auch fuer Flow) und API nur fuer Chat/Insights reservieren.
 
 **Why immutable?**
 Memories should feel like journal entries — written once, preserved forever. Regenerating would destroy the authenticity.
+
+**Warum nicht jede Session ein Memory bekommt:**
+Nicht jede Fokus-Session ist bemerkenswert. Die Local-Heuristic returned `null` wenn nichts Besonderes passiert ist. Das ist gewollt — es macht die Memories, die existieren, bedeutungsvoller.
 
 **Future enhancements:**
 - Memory search ("Show me all overflow particles")
 - Memory export (for personal journaling)
 - Memory themes (poetic, professional, minimal)
+- Batch-generate memories for old sessions (one-time backfill)

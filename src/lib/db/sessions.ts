@@ -84,6 +84,7 @@ export interface UpdateSessionInput {
   projectId?: string | null;
   duration?: number;
   intentionAlignment?: IntentionAlignment | null;
+  memory?: string;
 }
 
 export async function updateSession(
@@ -107,6 +108,7 @@ export async function updateSession(
     ...(updates.intentionAlignment !== undefined && {
       intentionAlignment: updates.intentionAlignment === null ? undefined : updates.intentionAlignment
     }),
+    ...(updates.memory !== undefined && { memory: updates.memory }),
   });
 
   await db.sessions.put(updated);

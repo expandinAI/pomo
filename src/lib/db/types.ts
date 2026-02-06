@@ -55,6 +55,7 @@ export interface DBSession extends SyncableEntity {
   overflowDuration?: number;
   estimatedDuration?: number;
   intentionAlignment?: IntentionAlignment; // How this session relates to daily intention
+  memory?: string; // AI-generated memory sentence (max 80 chars, immutable)
 }
 
 /**

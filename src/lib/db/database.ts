@@ -61,6 +61,16 @@ export class ParticleDB extends Dexie {
       // New: Intentions table indexed by id, date, and status
       intentions: 'id, date, status',
     });
+
+    // Schema v5 - Add memory field to sessions (not indexed, just stored)
+    this.version(5).stores({
+      sessions: 'id, completedAt, projectId, syncStatus, type, serverId',
+      projects: 'id, archived, syncStatus, serverId',
+      recentTasks: 'text, lastUsed',
+      settings: 'key',
+      syncQueue: 'id, entityType, createdAt, nextRetryAt',
+      intentions: 'id, date, status',
+    });
   }
 }
 

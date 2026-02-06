@@ -124,6 +124,13 @@ export function TimelineBlock({
               </p>
             )}
 
+            {/* Memory */}
+            {isWork && session.memory && (
+              <p className="text-xs italic text-secondary/70 light:text-secondary-dark/70 mt-1 mb-1">
+                {session.memory}
+              </p>
+            )}
+
             {/* Time and duration info */}
             <div className="flex items-center gap-3 text-xs text-tertiary light:text-tertiary-dark">
               <span className="tabular-nums">{startTime} – {endTime}</span>

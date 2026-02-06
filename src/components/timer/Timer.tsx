@@ -41,6 +41,7 @@ import { useBreathingGuide } from '@/hooks/useBreathingGuide';
 import { useContextualHints } from '@/hooks/useContextualHints';
 import { useCoachSettings } from '@/hooks/useCoachSettings';
 import { useStartNudge } from '@/hooks/useStartNudge';
+import { useParticleMemory } from '@/hooks/useParticleMemory';
 
 interface TimerProps {
   /** Callback when user clicks timer display to open timeline */
@@ -460,6 +461,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     isWorkMode: state.mode === 'work',
   });
 
+  // Particle Memory — generates a memory sentence after work session completes
+  const { generateMemoryForSession } = useParticleMemory();
+
   // Keep ref in sync with selectedProjectId
   useEffect(() => {
     selectedProjectIdRef.current = selectedProjectId;
@@ -699,7 +703,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     };
 
     // Fire and forget - state is updated by SessionProvider
-    void addSession(sessionMode, sessionDuration, taskData);
+    void addSession(sessionMode, sessionDuration, taskData).then(session => {
+      if (wasWorkSession) generateMemoryForSession(session);
+    });
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -822,7 +828,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         }
       }, 3500);
     }
-  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, checkForHint, markHintShown, addSession, getTotalSessionCount]);
+  }, [playSound, state.mode, state.currentTask, vibrate, completionSoundEnabled, oneOffDuration, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, checkForHint, markHintShown, addSession, getTotalSessionCount, generateMemoryForSession]);
 
   // Initialize Web Worker timer
   const {
@@ -1257,7 +1263,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     };
 
     // Fire and forget - state is updated by SessionProvider
-    void addSession(sessionMode, totalDuration, taskData);
+    void addSession(sessionMode, totalDuration, taskData).then(session => {
+      if (wasWorkSession) generateMemoryForSession(session);
+    });
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -1384,7 +1392,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         }
       }, 3500);
     }
-  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown, addSession, getTotalSessionCount]);
+  }, [isOverflow, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, trackOverflow, checkForHint, markHintShown, addSession, getTotalSessionCount, generateMemoryForSession]);
 
   // Continue in flow from overflow mode (Space key in overflow)
   // Saves session, increments counter, starts new session immediately (no celebration, no break)
@@ -1411,7 +1419,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     };
 
     // Fire and forget - state is updated by SessionProvider
-    void addSession(sessionMode, totalDuration, taskData);
+    void addSession(sessionMode, totalDuration, taskData).then(session => {
+      if (wasWorkSession) generateMemoryForSession(session);
+    });
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -1463,7 +1473,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
 
     // Show status message (not toast - more subtle, fits the flow)
     setFlowContinueMessage('Continuing in flow...');
-  }, [isOverflow, state.isRunning, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, workerStart, trackOverflow, addSession]);
+  }, [isOverflow, state.isRunning, state.mode, state.currentTask, state.completedPomodoros, vibrate, workerReset, workerStart, trackOverflow, addSession, generateMemoryForSession]);
 
   // Finish session early from pause state (F key)
   // Saves elapsed time if ≥2 min, otherwise shows "too short" message
@@ -1485,7 +1495,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         estimatedDuration: fullDuration,
       };
 
-      void addSession(state.mode, elapsedTime, taskData);
+      void addSession(state.mode, elapsedTime, taskData).then(session => {
+        generateMemoryForSession(session);
+      });
 
       // Save task to recent tasks
       if (state.currentTask) {
@@ -1517,7 +1529,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
 
     // Light haptic feedback
     vibrate('light');
-  }, [state.isPaused, state.mode, state.timeRemaining, state.currentTask, workerReset, vibrate, addSession]);
+  }, [state.isPaused, state.mode, state.timeRemaining, state.currentTask, workerReset, vibrate, addSession, generateMemoryForSession]);
 
   // End session early with success (E key confirmation)
   // This is a proper completion with elapsed time - user earns the particle
@@ -1539,7 +1551,9 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     };
 
     // Fire and forget - state is updated by SessionProvider
-    void addSession(sessionMode, elapsedTime, taskData);
+    void addSession(sessionMode, elapsedTime, taskData).then(session => {
+      if (wasWorkSession) generateMemoryForSession(session);
+    });
 
     // Save task to recent tasks (only for work sessions with a task)
     if (wasWorkSession && state.currentTask) {
@@ -1651,7 +1665,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         dispatch({ type: 'START_AUTO_COUNTDOWN', delay: countdownDelay });
       }, 100);
     }
-  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, addSession, getTotalSessionCount]);
+  }, [state.mode, state.timeRemaining, state.currentTask, state.completedPomodoros, vibrate, workerReset, playSound, completionSoundEnabled, todayCount, dailyGoal, setShouldTriggerBurst, checkForMilestones, addSession, getTotalSessionCount, generateMemoryForSession]);
 
   // Early complete from clicking break in collapsed view
   // Only works during work sessions with >60s elapsed

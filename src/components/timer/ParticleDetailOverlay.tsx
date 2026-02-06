@@ -540,6 +540,15 @@ export function ParticleDetailOverlay({
                     </div>
                   </motion.div>
 
+                  {/* Memory — AI-generated sentence for this particle */}
+                  {session && 'memory' in session && session.memory && (
+                    <motion.div variants={itemVariants}>
+                      <p className="text-sm italic text-tertiary light:text-tertiary-dark text-center py-1">
+                        {session.memory}
+                      </p>
+                    </motion.div>
+                  )}
+
                   {/* Alignment Toggle - only shown when session's day has an intention */}
                   {sessionIntention && (
                     <motion.div variants={itemVariants} className="space-y-3 pt-2">
