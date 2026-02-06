@@ -13,6 +13,14 @@ import type { CoachContext } from '../types';
 // Test Helpers
 // ============================================
 
+/** Format Date as "YYYY-MM-DD" in local timezone (mirrors production helper) */
+function toLocalDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function makeIntention(overrides: Partial<DBIntention> = {}): DBIntention {
   return {
     id: `int-${Math.random().toString(36).slice(2, 8)}`,
@@ -234,7 +242,7 @@ describe('buildSingleWeekSummary', () => {
     monday.setDate(now.getDate() - isoDay);
     monday.setHours(0, 0, 0, 0);
 
-    const mondayStr = monday.toISOString().split('T')[0];
+    const mondayStr = toLocalDateString(monday);
 
     const intention = makeIntention({ date: mondayStr, text: 'Deep work', status: 'completed' });
     const map = new Map<string, DBIntention>();
@@ -279,10 +287,10 @@ describe('buildSingleWeekSummary', () => {
     monday.setDate(now.getDate() - isoDay);
     monday.setHours(0, 0, 0, 0);
 
-    const mondayStr = monday.toISOString().split('T')[0];
+    const mondayStr = toLocalDateString(monday);
     const tuesday = new Date(monday);
     tuesday.setDate(monday.getDate() + 1);
-    const tuesdayStr = tuesday.toISOString().split('T')[0];
+    const tuesdayStr = toLocalDateString(tuesday);
 
     const int1 = makeIntention({ date: mondayStr, text: 'Task A', status: 'completed' });
     const int2 = makeIntention({ date: tuesdayStr, text: 'Task B', status: 'active' });
@@ -319,7 +327,7 @@ describe('buildSingleWeekSummary', () => {
     monday.setDate(now.getDate() - isoDay);
     monday.setHours(0, 0, 0, 0);
 
-    const mondayStr = monday.toISOString().split('T')[0];
+    const mondayStr = toLocalDateString(monday);
     const intention = makeIntention({ date: mondayStr, text: 'Deep work' });
     const map = new Map<string, DBIntention>();
     map.set(mondayStr, intention);
@@ -349,7 +357,7 @@ describe('buildSingleWeekSummary', () => {
     monday.setDate(now.getDate() - isoDay);
     monday.setHours(0, 0, 0, 0);
 
-    const mondayStr = monday.toISOString().split('T')[0];
+    const mondayStr = toLocalDateString(monday);
     const intention = makeIntention({ date: mondayStr, text: 'Deep work' });
     const map = new Map<string, DBIntention>();
     map.set(mondayStr, intention);

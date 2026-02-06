@@ -645,11 +645,22 @@ function buildTaskFrequency(
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /**
+ * Format a Date as "YYYY-MM-DD" in **local** timezone.
+ * Using toISOString() would convert to UTC and shift the date in timezones ahead of UTC.
+ */
+function toLocalDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Get the Monday date string for a given week offset (0 = this week, -1 = last week)
  */
 export function getMondayDateString(weekOffset: number): string {
   const { start } = getWeekBoundaries(weekOffset);
-  return start.toISOString().split('T')[0];
+  return toLocalDateString(start);
 }
 
 /**
@@ -717,8 +728,8 @@ export function buildSingleWeekSummary(
   allIntentionsMap: Map<string, DBIntention>,
   recentSessions: DBSession[]
 ): WeeklyIntentionSummary | null {
-  const { start } = getWeekBoundaries(weekOffset);
-  const weekStart = start.toISOString().split('T')[0];
+  const { start, end } = getWeekBoundaries(weekOffset);
+  const weekStart = toLocalDateString(start);
 
   // Build a map of intentions by date
   const intentionByDate = new Map<string, DBIntention>();
@@ -727,7 +738,6 @@ export function buildSingleWeekSummary(
   }
 
   // Filter work sessions for this week
-  const { end } = getWeekBoundaries(weekOffset);
   const weekWorkSessions = recentSessions.filter((s) => {
     if (s.type !== 'work') return false;
     const d = new Date(s.completedAt);
@@ -745,7 +755,7 @@ export function buildSingleWeekSummary(
   for (let i = 0; i < 7; i++) {
     const dayDate = new Date(start);
     dayDate.setDate(start.getDate() + i);
-    const dateStr = dayDate.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(dayDate);
     const dayLabel = DAY_LABELS[i];
 
     const intention = intentionByDate.get(dateStr) ?? null;
