@@ -9,6 +9,8 @@ import { KeyboardHint } from '@/components/ui/KeyboardHint';
 import { getRecentTasks, filterTasks, type RecentTask } from '@/lib/task-storage';
 import { parseSmartInput, formatDurationPreview, parseMultiLineInput, formatTotalTime } from '@/lib/smart-input-parser';
 import type { Project, ProjectWithStats } from '@/lib/projects';
+import { getTaskPrediction } from '@/lib/coach/silent-intelligence';
+import { useSessionStore } from '@/contexts/SessionContext';
 
 interface UnifiedTaskInputProps {
   // Task
@@ -81,6 +83,13 @@ export function UnifiedTaskInput({
 
   const showSmartPreview = !hasMultipleTasks && singleLineParsed?.durationSeconds !== null;
   const showTotalTime = hasMultipleTasks && totalMinutes > 0;
+
+  // Task prediction from session history
+  const { sessions } = useSessionStore();
+  const predictedTask = useMemo(() => {
+    const now = new Date();
+    return getTaskPrediction(sessions, now.getDay(), now.getHours());
+  }, [sessions]);
 
   // Count pending (uncompleted) tasks for Random Pick hint
   const pendingTaskCount = useMemo(() => {
@@ -168,6 +177,13 @@ export function UnifiedTaskInput({
         }
       }
 
+      // Tab = accept prediction
+      if (e.key === 'Tab' && predictedTask && !taskText) {
+        e.preventDefault();
+        onTaskChange(predictedTask);
+        return;
+      }
+
       // Enter = Submit (start session or recalculate if running)
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -196,7 +212,7 @@ export function UnifiedTaskInput({
         }
       }
     },
-    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, singleLineParsed, inputRef, totalMinutes, taskText, isSessionRunning]
+    [showSuggestions, filteredTasks, suggestionIndex, handleSelectTask, onEnter, onSubmitWithDuration, singleLineParsed, inputRef, totalMinutes, taskText, isSessionRunning, predictedTask, onTaskChange]
   );
 
   // Listen for T key to enter edit mode (even when showing compact view)
@@ -354,7 +370,7 @@ export function UnifiedTaskInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               disabled={disabled}
-              placeholder="What are you working on?"
+              placeholder={predictedTask && !taskText ? `${predictedTask}?` : 'What are you working on?'}
               maxLength={MAX_TASK_LENGTH * 10}
               className={`
                 flex-1 bg-transparent

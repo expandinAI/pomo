@@ -1,8 +1,11 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { formatDuration, formatTime24h } from '@/lib/session-storage';
 import { SPRING } from '@/styles/design-tokens';
+import { getSmartEmptyState } from '@/lib/coach/silent-intelligence';
+import { useSessionStore } from '@/contexts/SessionContext';
 
 interface TimelineStatsProps {
   particleCount: number;
@@ -51,6 +54,13 @@ export function TimelineStats({
     ? `${formatTime24h(firstStart.toISOString())} - ${formatTime24h(lastEnd.toISOString())}`
     : null;
 
+  // Smart empty state message
+  const { sessions } = useSessionStore();
+  const emptyMessage = useMemo(() => {
+    const now = new Date();
+    return getSmartEmptyState(sessions, now.getDay(), now.getHours());
+  }, [sessions]);
+
   // Empty state - breathing dot with inviting message
   if (particleCount === 0) {
     return (
@@ -74,7 +84,7 @@ export function TimelineStats({
           }}
         />
         <p className="text-tertiary light:text-tertiary-dark text-xs">
-          A blank canvas
+          {emptyMessage}
         </p>
       </motion.div>
     );

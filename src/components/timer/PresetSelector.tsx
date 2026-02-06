@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FastForward, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTimerSettingsContext, type TimerDurations } from '@/contexts/TimerSettingsContext';
 import { PRESETS, getPresetLabel, SPRING, type TimerPreset, type SessionType } from '@/styles/design-tokens';
+import { getSmartPreset } from '@/lib/coach/silent-intelligence';
+import { useSessionStore } from '@/contexts/SessionContext';
 
 interface PresetSelectorProps {
   disabled: boolean;
@@ -150,6 +152,11 @@ function CollapsedPresetView({
 
 export function PresetSelector({ disabled, onPresetChange, isSessionActive, currentMode, durations: propDurations, nextBreakIsLong, overrideWorkDuration, autoStartEnabled, overflowEnabled, onPresetHover, onCollapsedHover, onModeIndicatorHover, onEarlyComplete }: PresetSelectorProps) {
   const { activePresetId, applyPreset, getActivePreset, customDurations, customSessionsUntilLong } = useTimerSettingsContext();
+  const { sessions } = useSessionStore();
+  const smartPreset = useMemo(
+    () => getSmartPreset(sessions, new Date().getHours()),
+    [sessions]
+  );
 
   // Build a virtual custom preset with actual custom values (not dependent on active preset)
   const customPreset: TimerPreset = {
@@ -318,7 +325,9 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
                       'disabled:cursor-not-allowed disabled:opacity-50',
                       isActive
                         ? 'text-primary light:text-primary-dark'
-                        : 'text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark'
+                        : 'text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark',
+                      !isActive && smartPreset.presetId === presetId &&
+                        'ring-1 ring-tertiary/20 light:ring-tertiary-dark/20'
                     )}
                   >
                     {getPresetLabel(preset)}
