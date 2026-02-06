@@ -105,7 +105,7 @@ export function useStartNudge({
   }, []);
 
   // Generate nudge
-  const result = useMemo(() => {
+  const generatedNudge = useMemo(() => {
     if (!isTimerIdle || !isWorkMode) return { nudge: null, nudgeType: null };
 
     const nudgeResult = generateNudge({
@@ -142,5 +142,20 @@ export function useStartNudge({
     totalWorkSessionCount,
   ]);
 
-  return result;
+  // Auto-dismiss: show nudge for 5s then fade out
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!generatedNudge.nudge) {
+      setVisible(false);
+      return;
+    }
+    setVisible(true);
+    const timer = setTimeout(() => setVisible(false), 5000);
+    return () => clearTimeout(timer);
+  }, [generatedNudge.nudge]);
+
+  return {
+    nudge: visible ? generatedNudge.nudge : null,
+    nudgeType: visible ? generatedNudge.nudgeType : null,
+  };
 }
