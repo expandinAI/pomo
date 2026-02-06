@@ -9,9 +9,11 @@ import { useCoach } from '@/hooks/useCoach';
 import { useCoachChat } from '@/hooks/useCoachChat';
 import { useAIQuota } from '@/lib/ai-quota/hooks';
 import { useParticleOfWeek } from '@/hooks/useParticleOfWeek';
+import { useWeeklyNarrative } from '@/hooks/useWeeklyNarrative';
 import { QuotaRing } from './QuotaRing';
 import { InsightCard } from './InsightCard';
 import { ChatHistory } from './ChatHistory';
+import { WeeklyNarrative } from './WeeklyNarrative';
 
 interface CoachViewProps {
   isOpen: boolean;
@@ -54,6 +56,9 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
 
   // Particle of the Week
   const { potw, isLoading: potwLoading } = useParticleOfWeek();
+
+  // Weekly Narrative
+  const { narrative: weeklyNarrative, stats: narrativeStats, isLoading: narrativeLoading, weekLabel: narrativeWeekLabel } = useWeeklyNarrative();
 
   // Determine if chat is available
   const isChatDisabled = isStreaming || !context || !quota;
@@ -158,6 +163,14 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* Scrollable area */}
                   <div className="flex-1 overflow-y-auto px-5 py-4">
+                    {/* Weekly Narrative */}
+                    <WeeklyNarrative
+                      narrative={weeklyNarrative}
+                      stats={narrativeStats}
+                      weekLabel={narrativeWeekLabel}
+                      isLoading={narrativeLoading}
+                    />
+
                     {/* Particle of the Week */}
                     {potw && (
                       <motion.div

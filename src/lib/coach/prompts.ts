@@ -64,6 +64,31 @@ export const INSIGHT_PROMPTS = {
 };
 
 /**
+ * Prompt for weekly narrative generation (used by /api/coach/narrative)
+ */
+export const WEEKLY_NARRATIVE_PROMPT = `Write a 3-sentence story about someone's work week.
+
+Week data:
+{weekData}
+
+Rules:
+- Exactly 3 sentences
+- First sentence: The overall arc or theme of the week
+- Second sentence: A specific detail, contrast, or turning point
+- Third sentence: The highlight or a forward-looking closing thought
+- Use specific data: project names, day names, particle counts, durations
+- Write like a thoughtful journal entry, not a productivity report
+- No advice, no "you should", no "keep it up"
+- No emojis, no exclamation marks
+- Warm but not cheesy. Dieter Rams, not Tony Robbins.
+- Maximum 60 words total
+
+Respond in JSON format:
+{
+  "narrative": "Your 3-sentence narrative here."
+}`;
+
+/**
  * Get the insight-specific prompt addition
  */
 export function getInsightPrompt(
