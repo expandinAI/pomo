@@ -7,6 +7,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Coach Briefing Redesign (POMO-385, 3 SP)**:
+  - Unified `CoachBriefing` component replaces 3 stacked cards (~430px → ~170px compact)
+  - Stats ticker shows current week: particles, focused time, projects (full words, no abbreviations)
+  - Particle of the Week as accordion with gold left border, expand-on-click for full narrative
+  - Insight as accordion with subtle bg, expand-on-click for full content + highlights
+  - Only one section expanded at a time (accordion behavior)
+  - Current week stats filter work sessions only (consistent with Statistics Dashboard)
+  - Empty state for no insight, zero-particle state for new week
+  - Reduced motion support, aria-expanded/aria-controls accessibility
+  - Old `WeeklyNarrative` and `InsightCard` deprecated (kept for reference)
 - **Intention-Coach Bridge (POMO-382, 3 SP)**:
   - Morning Context: Historical insight while typing intention (project/task match, peak hours)
   - Evening Insight: Reflective sentence after day's work (AI for Flow, local templates for Free)
@@ -498,6 +508,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-385-coach-briefing-redesign]]
 - [[stories/done/POMO-380-session-start-nudge]]
 - [[stories/done/POMO-373-timeline-context]]
 - [[stories/done/POMO-370-particle-age-account]]

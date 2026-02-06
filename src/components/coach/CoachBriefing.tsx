@@ -88,12 +88,12 @@ export function CoachBriefing({
           <div className="h-3 w-36 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse" />
         </div>
         {/* POTW skeleton */}
-        <div className="border-l-2 border-[#FFD700]/40 pl-3 py-2">
+        <div className="border-l-2 border-[#FFD700]/40 rounded-r-lg pl-3 pr-3 py-2.5">
           <div className="h-4 w-3/4 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse mb-1.5" />
           <div className="h-3 w-5/6 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse" />
         </div>
         {/* Insight skeleton */}
-        <div className="bg-tertiary/[0.03] rounded-lg p-3">
+        <div className="border-l-2 border-tertiary/20 light:border-tertiary-dark/20 rounded-r-lg pl-3 pr-3 py-2.5">
           <div className="h-4 w-2/3 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse mb-1.5" />
           <div className="h-3 w-5/6 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse" />
         </div>
@@ -143,7 +143,7 @@ export function CoachBriefing({
           initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={prefersReducedMotion ? { duration: 0 } : { delay: STAGGER_DELAY }}
-          className="border-l-2 border-[#FFD700]/40"
+          className="border-l-2 border-[#FFD700]/40 rounded-r-lg"
         >
           <button
             type="button"
@@ -151,22 +151,22 @@ export function CoachBriefing({
             aria-expanded={expanded === 'potw'}
             aria-controls="potw-content"
             id="potw-trigger"
-            className="w-full text-left pl-3 pr-1 py-2 rounded-r-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 transition-colors"
+            className="w-full text-left pl-3 pr-3 py-2.5 rounded-r-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 transition-colors"
           >
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 text-sm text-primary light:text-primary-dark">
                   <span className="text-[#FFD700] flex-shrink-0">{'\u2727'}</span>
                   <span className="truncate">{formatPotwCompact(potw).line1}</span>
                 </div>
-                <p className="text-xs text-secondary light:text-secondary-dark italic mt-0.5 truncate">
+                <p className="text-xs text-secondary light:text-secondary-dark italic mt-0.5 truncate pl-5">
                   {formatPotwCompact(potw).line2}
                 </p>
               </div>
               <motion.div
                 animate={{ rotate: expanded === 'potw' ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex-shrink-0 mt-0.5"
+                className="flex-shrink-0"
                 {...animateProps}
               >
                 <ChevronDown className="w-3.5 h-3.5 text-tertiary light:text-tertiary-dark" />
@@ -186,7 +186,7 @@ export function CoachBriefing({
                 transition={expandTransition}
                 className="overflow-hidden"
               >
-                <div className="pl-3 pr-1 pb-3 space-y-2">
+                <div className="pl-3 pr-3 pb-3 space-y-2">
                   <p className="text-sm text-secondary light:text-secondary-dark">
                     {potw.narrative.opening}
                   </p>
@@ -216,10 +216,10 @@ export function CoachBriefing({
           initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={prefersReducedMotion ? { duration: 0 } : { delay: STAGGER_DELAY * 2 }}
-          className="bg-tertiary/[0.03] rounded-lg"
+          className="border-l-2 border-tertiary/20 light:border-tertiary-dark/20 rounded-r-lg"
         >
           {insightLoading ? (
-            <div className="p-3">
+            <div className="pl-3 pr-3 py-2.5">
               <div className="h-4 w-2/3 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse mb-1.5" />
               <div className="h-3 w-5/6 bg-tertiary/10 light:bg-tertiary-dark/10 rounded animate-pulse" />
             </div>
@@ -231,22 +231,22 @@ export function CoachBriefing({
                 aria-expanded={expanded === 'insight'}
                 aria-controls="insight-content"
                 id="insight-trigger"
-                className="w-full text-left p-3 rounded-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 transition-colors"
+                className="w-full text-left pl-3 pr-3 py-2.5 rounded-r-lg hover:bg-tertiary/5 light:hover:bg-tertiary-dark/5 transition-colors"
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-sm text-primary light:text-primary-dark">
                       <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="truncate">{insight.title}</span>
                     </div>
-                    <p className="text-xs text-secondary light:text-secondary-dark mt-0.5 truncate">
+                    <p className="text-xs text-secondary light:text-secondary-dark mt-0.5 truncate pl-5">
                       {getFirstSentence(insight.content)}
                     </p>
                   </div>
                   <motion.div
                     animate={{ rotate: expanded === 'insight' ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex-shrink-0 mt-0.5"
+                    className="flex-shrink-0"
                     {...animateProps}
                   >
                     <ChevronDown className="w-3.5 h-3.5 text-tertiary light:text-tertiary-dark" />
@@ -266,7 +266,7 @@ export function CoachBriefing({
                     transition={expandTransition}
                     className="overflow-hidden"
                   >
-                    <div className="px-3 pb-3 space-y-2">
+                    <div className="pl-3 pr-3 pb-3 space-y-2">
                       <p className="text-sm text-secondary light:text-secondary-dark leading-relaxed">
                         {insight.content}
                       </p>
@@ -289,7 +289,7 @@ export function CoachBriefing({
               </AnimatePresence>
             </>
           ) : (
-            <p className="p-3 text-xs text-tertiary light:text-tertiary-dark">
+            <p className="pl-3 pr-3 py-2.5 text-xs text-tertiary light:text-tertiary-dark">
               Complete a few sessions for your first insight
             </p>
           )}

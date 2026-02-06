@@ -1,6 +1,7 @@
 # POMO-385: Coach Briefing Redesign — Unified, Compact, Beautiful
 
-**Status:** Backlog
+**Status:** Done
+**Done Date:** 2026-02-06
 **Priority:** High
 **Epic:** AI Coach UX
 **Estimated Effort:** M (1-2 Tage)
