@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Intention-Coach Bridge (POMO-382, 3 SP)**:
+  - Morning Context: Historical insight while typing intention (project/task match, peak hours)
+  - Evening Insight: Reflective sentence after day's work (AI for Flow, local templates for Free)
+  - Coach Context: Intention + alignment data injected into AI Coach system prompt
+  - Pure local functions in `src/lib/coach/intention-insights.ts`
+  - API endpoint `/api/coach/evening` for AI-generated evening reflections
+  - 25 unit tests covering morning context, peak hours, and evening insight templates
 - **Session Start Nudge (POMO-380, 2 SP)**:
   - Personalized one-liner in StatusMessage when timer is idle
   - 6 nudge types in priority chain: Intention > Time Peak > Project Strength > Progress Context > Task Continuity > Gentle Reminder

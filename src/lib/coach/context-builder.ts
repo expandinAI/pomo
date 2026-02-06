@@ -11,7 +11,8 @@ import {
   getTodaySessions,
 } from '@/lib/db/sessions';
 import { loadProjects } from '@/lib/db/projects';
-import type { DBSession, DBProject } from '@/lib/db/types';
+import { getTodayIntention } from '@/lib/intentions/storage';
+import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 import { detectAllPatterns } from './patterns';
 import type {
   CoachContext,
@@ -22,6 +23,7 @@ import type {
   WeeklySummary,
   DailySummary,
   TaskFrequency,
+  IntentionContext,
 } from './types';
 
 /**
@@ -48,12 +50,13 @@ const DAILY_TREND_DAYS = 14;
  */
 export async function buildCoachContext(): Promise<CoachContext> {
   // Load all required data
-  const [allSessions, recentSessions, todaySessions, projects] =
+  const [allSessions, recentSessions, todaySessions, projects, todayIntention] =
     await Promise.all([
       loadSessions(),
       getSessionsFromDays(CONTEXT_DAYS),
       getTodaySessions(),
       loadProjects(),
+      getTodayIntention(),
     ]);
 
   // Build each part of the context
@@ -69,6 +72,12 @@ export async function buildCoachContext(): Promise<CoachContext> {
   const dailyTrend = buildDailyTrend(recentSessions);
   const taskFrequency = buildTaskFrequency(recentSessions, projects);
 
+  // Build intention context if set
+  const intentionContext = buildIntentionContext(
+    todayIntention ?? null,
+    todaySessions
+  );
+
   return {
     sessionSummary,
     projectBreakdown,
@@ -77,6 +86,7 @@ export async function buildCoachContext(): Promise<CoachContext> {
     weeklyTrend,
     dailyTrend,
     taskFrequency,
+    ...(intentionContext ? { todayIntention: intentionContext } : {}),
   };
 }
 
@@ -261,6 +271,37 @@ function buildRecentActivity(
 }
 
 /**
+ * Build intention context from today's intention and sessions
+ */
+function buildIntentionContext(
+  intention: DBIntention | null,
+  todaySessions: DBSession[]
+): IntentionContext | undefined {
+  if (!intention) return undefined;
+
+  const workSessions = todaySessions.filter((s) => s.type === 'work');
+  const aligned = workSessions.filter(
+    (s) => s.intentionAlignment === 'aligned'
+  ).length;
+  const reactive = workSessions.filter(
+    (s) => s.intentionAlignment === 'reactive'
+  ).length;
+  const total = workSessions.length;
+
+  return {
+    text: intention.text,
+    particleGoal: intention.particleGoal ?? null,
+    status: intention.status,
+    alignment: {
+      totalParticles: total,
+      alignedCount: aligned,
+      reactiveCount: reactive,
+      percentage: total > 0 ? Math.round((aligned / total) * 100) : 0,
+    },
+  };
+}
+
+/**
  * Format context as a string for the prompt
  *
  * This creates a human-readable summary of the user's data
@@ -347,6 +388,19 @@ export function formatContextForPrompt(context: CoachContext): string {
     const projectInfo = lastSession.projectName ? ` on "${lastSession.projectName}"` : '';
     const taskInfo = lastSession.task ? `: "${lastSession.task}"` : '';
     lines.push(`## Last Session: ${lastSession.durationMinutes}min${projectInfo}${taskInfo}`);
+  }
+
+  // Today's intention
+  if (context.todayIntention) {
+    const { todayIntention: ti } = context;
+    lines.push('');
+    lines.push('## Today\'s Intention');
+    const goalInfo = ti.particleGoal ? ` (goal: ${ti.particleGoal} particles)` : '';
+    lines.push(`"${ti.text}"${goalInfo}`);
+    const { alignment: a } = ti;
+    if (a.totalParticles > 0) {
+      lines.push(`Progress: ${a.totalParticles}p (${a.alignedCount} aligned, ${a.reactiveCount} reactive) — ${a.percentage}% aligned`);
+    }
   }
 
   return lines.join('\n');

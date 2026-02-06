@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, Check } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { useIntentionInsight } from '@/hooks/useIntentionInsight';
 
 interface IntentionOverlayProps {
   isOpen: boolean;
@@ -48,6 +49,9 @@ export function IntentionOverlay({
   // Local state for preview (before saving)
   const [intentionText, setIntentionText] = useState('');
   const [previewGoal, setPreviewGoal] = useState<number | null>(null);
+
+  // Morning context insight
+  const { insight: morningInsight } = useIntentionInsight(intentionText);
 
   // Sync state with current intention when opening
   useEffect(() => {
@@ -232,6 +236,21 @@ export function IntentionOverlay({
                       className="w-full px-4 py-3 rounded-xl bg-tertiary/10 light:bg-tertiary-dark/10 text-primary light:text-primary-dark placeholder:text-tertiary light:placeholder:text-tertiary-dark border border-transparent focus:border-accent/50 focus:outline-none resize-none transition-colors"
                     />
                   </div>
+
+                  {/* Morning Context */}
+                  <AnimatePresence>
+                    {morningInsight && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-xs text-tertiary light:text-tertiary-dark mb-4 px-1 -mt-4"
+                      >
+                        {morningInsight}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
 
                   {/* Particle Goal Section */}
                   <div className="mb-6">

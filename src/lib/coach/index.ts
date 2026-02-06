@@ -18,6 +18,7 @@ export type {
   RecentActivity,
   ChatRequest,
   InsightRequest,
+  IntentionContext,
 } from './types';
 
 // Context Builder
@@ -29,6 +30,7 @@ export {
   buildSystemPrompt,
   getInsightPrompt,
   INSIGHT_PROMPTS,
+  EVENING_INSIGHT_PROMPT,
   EXAMPLE_INTERACTIONS,
 } from './prompts';
 

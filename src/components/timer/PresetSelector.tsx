@@ -326,11 +326,13 @@ export function PresetSelector({ disabled, onPresetChange, isSessionActive, curr
                       isActive
                         ? 'text-primary light:text-primary-dark'
                         : 'text-secondary light:text-secondary-dark hover:text-primary light:hover:text-primary-dark',
-                      !isActive && smartPreset.presetId === presetId &&
-                        'ring-1 ring-tertiary/20 light:ring-tertiary-dark/20'
                     )}
                   >
                     {getPresetLabel(preset)}
+                    {/* Smart recommendation dot — only when not already active */}
+                    {!isActive && smartPreset.presetId === presetId && (
+                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary/40 light:bg-primary-dark/40" />
+                    )}
                   </button>
                 );
               })}

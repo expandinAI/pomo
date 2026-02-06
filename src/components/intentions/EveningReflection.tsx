@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useSessionStore } from '@/contexts/SessionContext';
 import { useIntention } from '@/hooks/useIntention';
+import { useEveningInsight } from '@/hooks/useEveningInsight';
 import type { IntentionStatus, IntentionAlignment } from '@/lib/db/types';
+import type { EveningInsightContext } from '@/lib/coach/intention-insights';
 import { getParticleHexColor } from '@/lib/intentions';
 import { formatDuration } from '@/lib/session-storage';
 
@@ -90,6 +92,48 @@ export function EveningReflection({
       particles,
     };
   })();
+
+  // Build evening insight context
+  const eveningContext: EveningInsightContext | null = useMemo(() => {
+    if (!todayIntention) return null;
+
+    const sessions = getTodaySessions();
+    const workSessions = sessions.filter(s => s.type === 'work');
+
+    // Calculate aligned/reactive minutes
+    let alignedSeconds = 0;
+    let reactiveSeconds = 0;
+    const reactiveTasks: string[] = [];
+    const seenTasks = new Set<string>();
+
+    for (const s of workSessions) {
+      const alignment = ('intentionAlignment' in s)
+        ? (s.intentionAlignment as IntentionAlignment | undefined)
+        : undefined;
+
+      if (alignment === 'aligned') {
+        alignedSeconds += s.duration;
+      } else if (alignment === 'reactive') {
+        reactiveSeconds += s.duration;
+        if (s.task && !seenTasks.has(s.task)) {
+          seenTasks.add(s.task);
+          reactiveTasks.push(s.task);
+        }
+      }
+    }
+
+    return {
+      intentionText: todayIntention.text,
+      totalParticles: summary.totalParticles,
+      alignedCount: summary.alignedCount,
+      reactiveCount: summary.reactiveCount,
+      alignedMinutes: Math.round(alignedSeconds / 60),
+      reactiveMinutes: Math.round(reactiveSeconds / 60),
+      reactiveTasks,
+    };
+  }, [todayIntention, getTodaySessions, summary]);
+
+  const { insight: eveningInsight } = useEveningInsight(eveningContext);
 
   // Handle status selection
   const handleSelect = useCallback((status: IntentionStatus) => {
@@ -243,6 +287,18 @@ export function EveningReflection({
               >
                 {summaryText}
               </motion.p>
+
+              {/* Evening Insight */}
+              {eveningInsight && (
+                <motion.p
+                  className="text-sm italic text-secondary light:text-secondary-dark text-center mt-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.4 }}
+                >
+                  {eveningInsight}
+                </motion.p>
+              )}
 
               {/* Skip hint */}
               <motion.p

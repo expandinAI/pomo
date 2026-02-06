@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: intelligent-particles
 created: 2026-02-05
-updated: 2026-02-05
-done_date: null
+updated: 2026-02-06
+done_date: 2026-02-06
 tags: [ai, coach, memory, storytelling, 10x]
 depends_on: []
 blocks: []

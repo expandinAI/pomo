@@ -142,6 +142,28 @@ export interface CoachContext {
   dailyTrend: DailySummary[];
   /** Task frequency analysis */
   taskFrequency: TaskFrequency[];
+  /** Today's intention and alignment data (if set) */
+  todayIntention?: IntentionContext;
+}
+
+/**
+ * Context about today's daily intention
+ */
+export interface IntentionContext {
+  /** Intention text */
+  text: string;
+  /** Particle goal (1-9, or null if no goal) */
+  particleGoal: number | null;
+  /** Current status */
+  status: string;
+  /** Alignment breakdown */
+  alignment: {
+    totalParticles: number;
+    alignedCount: number;
+    reactiveCount: number;
+    /** Alignment percentage (0-100) */
+    percentage: number;
+  };
 }
 
 /**

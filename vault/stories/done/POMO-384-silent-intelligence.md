@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p2
 effort: 3
 feature: intelligent-particles
 created: 2026-02-05
 updated: 2026-02-05
-done_date: null
+done_date: 2026-02-06
 tags: [ai, coach, ux, personalization, subtle, 10x]
 depends_on: []
 blocks: []
