@@ -10,6 +10,8 @@ interface InsightCardProps {
 }
 
 /**
+ * @deprecated Use CoachBriefing instead. Will be removed in a future cleanup.
+ *
  * InsightCard - Displays the current AI Coach insight
  *
  * States:

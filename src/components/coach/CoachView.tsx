@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
@@ -9,11 +9,11 @@ import { useCoach } from '@/hooks/useCoach';
 import { useCoachChat } from '@/hooks/useCoachChat';
 import { useAIQuota } from '@/lib/ai-quota/hooks';
 import { useParticleOfWeek } from '@/hooks/useParticleOfWeek';
-import { useWeeklyNarrative } from '@/hooks/useWeeklyNarrative';
+import { useSessionStore } from '@/contexts/SessionContext';
+import { getWeekBoundaries } from '@/lib/session-analytics';
 import { QuotaRing } from './QuotaRing';
-import { InsightCard } from './InsightCard';
+import { CoachBriefing } from './CoachBriefing';
 import { ChatHistory } from './ChatHistory';
-import { WeeklyNarrative } from './WeeklyNarrative';
 
 interface CoachViewProps {
   isOpen: boolean;
@@ -57,8 +57,24 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
   // Particle of the Week
   const { potw, isLoading: potwLoading } = useParticleOfWeek();
 
-  // Weekly Narrative
-  const { narrative: weeklyNarrative, stats: narrativeStats, isLoading: narrativeLoading, weekLabel: narrativeWeekLabel } = useWeeklyNarrative();
+  // Current week stats for the briefing ticker
+  const { sessions } = useSessionStore();
+  const currentWeekStats = useMemo(() => {
+    if (sessions.length === 0) return null;
+    const { start, end } = getWeekBoundaries(0);
+    const weekSessions = sessions.filter((s) => {
+      const d = new Date(s.completedAt);
+      return d >= start && d <= end && s.type === 'work';
+    });
+    const totalParticles = weekSessions.length;
+    const totalMinutes = Math.round(
+      weekSessions.reduce((sum, s) => sum + s.duration, 0) / 60
+    );
+    const projectIds = new Set(
+      weekSessions.map((s) => s.projectId).filter(Boolean)
+    );
+    return { totalParticles, totalMinutes, projectCount: projectIds.size };
+  }, [sessions]);
 
   // Determine if chat is available
   const isChatDisabled = isStreaming || !context || !quota;
@@ -163,57 +179,15 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
                 <div className="flex-1 flex flex-col min-h-0">
                   {/* Scrollable area */}
                   <div className="flex-1 overflow-y-auto px-5 py-4">
-                    {/* Weekly Narrative */}
-                    <WeeklyNarrative
-                      narrative={weeklyNarrative}
-                      stats={narrativeStats}
-                      weekLabel={narrativeWeekLabel}
-                      isLoading={narrativeLoading}
-                    />
-
-                    {/* Particle of the Week */}
-                    {potw && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-6 p-5 rounded-xl bg-gradient-to-br from-[#FFD700]/10 to-[#FFA500]/5 border border-[#FFD700]/20"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-[#FFD700]">✧</span>
-                          <h3 className="text-sm font-medium text-primary light:text-primary-dark">
-                            Particle of the Week
-                          </h3>
-                        </div>
-
-                        <div className="space-y-2 text-secondary light:text-secondary-dark">
-                          <p className="text-sm">{potw.narrative.opening}</p>
-                          <p className="text-sm">{potw.narrative.body}</p>
-                          <p className="text-sm italic">{potw.narrative.meaning}</p>
-                        </div>
-
-                        {/* Session Info */}
-                        <div className="mt-4 p-3 rounded-lg bg-surface/50 light:bg-surface-dark/50 border border-tertiary/10 light:border-tertiary-dark/10">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[#FFD700]">✧</span>
-                            <span className="text-sm text-primary light:text-primary-dark">
-                              {Math.round(potw.session.duration / 60)} min
-                              {potw.session.task && ` · ${potw.session.task}`}
-                            </span>
-                          </div>
-                          <div className="text-xs text-tertiary light:text-tertiary-dark mt-1">
-                            {new Date(potw.session.completedAt).toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* Insight Card */}
-                    <div className="mb-6">
-                      <InsightCard insight={insight} isLoading={isLoading || isLoadingInsight} />
+                    {/* Unified Coach Briefing */}
+                    <div className="mb-4">
+                      <CoachBriefing
+                        currentWeekStats={currentWeekStats}
+                        potw={potw}
+                        potwLoading={potwLoading}
+                        insight={insight}
+                        insightLoading={isLoading || isLoadingInsight}
+                      />
                     </div>
 
                     {/* Chat History */}

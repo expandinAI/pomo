@@ -12,6 +12,8 @@ interface WeeklyNarrativeProps {
 }
 
 /**
+ * @deprecated Use CoachBriefing instead. Will be removed in a future cleanup.
+ *
  * WeeklyNarrative — 3-sentence story about the last completed week
  *
  * Displayed in CoachView above the Particle of the Week.
