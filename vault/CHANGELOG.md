@@ -7,6 +7,14 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Coach Intention Intelligence (POMO-362+364, 3 SP)**:
+  - Weekly intention context for AI Coach: this week + last week daily breakdown
+  - Per-day alignment stats (particles, aligned, reactive, percentage)
+  - Deferral chain tracing (detects intentions deferred across days)
+  - Top recurring reactive tasks per week
+  - Enhanced system prompt with richer intention awareness guidance
+  - Timezone fix: local date formatting instead of UTC conversion
+  - 19 unit tests for all pure builder functions
 - **Coach Briefing Redesign (POMO-385, 3 SP)**:
   - Unified `CoachBriefing` component replaces 3 stacked cards (~430px → ~170px compact)
   - Stats ticker shows current week: particles, focused time, projects (full words, no abbreviations)
