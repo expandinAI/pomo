@@ -132,7 +132,7 @@ function buildSessionSummary(
   const todayMinutes =
     todaySessions.reduce((sum, s) => sum + s.duration, 0) / 60;
 
-  // This week (last 7 days)
+  // Last 7 days (rolling window, not calendar week)
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - 7);
   weekStart.setHours(0, 0, 0, 0);
@@ -345,7 +345,7 @@ export function formatContextForPrompt(context: CoachContext): string {
   lines.push('## Summary');
   lines.push(
     `Total: ${sessionSummary.totalParticles} particles, ${formatHours(sessionSummary.totalMinutes)} | ` +
-    `Week: ${sessionSummary.weekParticles} particles | ` +
+    `Last 7 days: ${sessionSummary.weekParticles} particles | ` +
     `Today: ${sessionSummary.todayParticles} particles`
   );
 
