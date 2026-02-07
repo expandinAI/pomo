@@ -7,6 +7,15 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Intention Cloud Sync (POMO-390, 5 SP)**:
+  - Supabase `intentions` table with RLS, indexes, and `updated_at` trigger
+  - Bidirectional sync: push on create/update/delete, pull every 30s
+  - Soft delete pattern (`deleted_at`) consistent with sessions/projects
+  - Offline queue support: changes queued when offline, synced on reconnect
+  - Initial upload: intentions included in upgrade flow with count in DataSummary
+  - Project ID mapping between local and server UUIDs
+  - `completedAt` timestamp conversion (Unix ms ↔ ISO string)
+  - 12 unit tests covering sync events, field mapping, and pull logic
 - **Coach Intention Intelligence (POMO-362+364, 3 SP)**:
   - Weekly intention context for AI Coach: this week + last week daily breakdown
   - Per-day alignment stats (particles, aligned, reactive, percentage)

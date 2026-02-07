@@ -1,12 +1,12 @@
 ---
 type: story
-status: backlog
+status: done
 priority: p1
 effort: 5
 feature: "[[features/cloud-sync-accounts]]"
 created: 2026-02-06
-updated: 2026-02-06
-done_date: null
+updated: 2026-02-07
+done_date: 2026-02-07
 tags: [sync, intentions, supabase, infrastructure]
 depends_on: [POMO-305]
 blocks: []
