@@ -7,6 +7,12 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Session Quality Indicator (POMO-401, 2 SP)**:
+  - Pure function `getSessionQuality()` with 3 quality types: Deep Work (≥45 min), Quick Focus (<15 min), Overflow Champion (>150% of planned)
+  - Quality label appended to completion feedback (StatusMessage)
+  - Quality icon+text in timeline tooltip (Flame/Zap/Trophy, monochrome)
+  - Quality badge in ParticleDetailOverlay between duration and overflow
+  - 11 unit tests covering all types, boundaries, and priority rules
 - **Chat Persistence (POMO-400, 3 SP)**:
   - Coach chat messages persisted in IndexedDB (local-only, no sync)
   - Auto-resume: Last conversation loads on modal open
