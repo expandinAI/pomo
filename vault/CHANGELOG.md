@@ -7,6 +7,13 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Chat Persistence (POMO-400, 3 SP)**:
+  - Coach chat messages persisted in IndexedDB (local-only, no sync)
+  - Auto-resume: Last conversation loads on modal open
+  - "New Chat" button in Coach header to start fresh conversations
+  - DB Schema v6 with `chatMessages` table (id, conversationId, createdAt indexes)
+  - Coach messages saved only after streaming completes (no partial saves)
+  - `chat-storage.ts` CRUD layer for conversation management
 - **Intention Cloud Sync (POMO-390, 5 SP)**:
   - Supabase `intentions` table with RLS, indexes, and `updated_at` trigger
   - Bidirectional sync: push on create/update/delete, pull every 30s
@@ -16,6 +23,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
   - Project ID mapping between local and server UUIDs
   - `completedAt` timestamp conversion (Unix ms ↔ ISO string)
   - 12 unit tests covering sync events, field mapping, and pull logic
+- **Auto-Alignment Detection (POMO-363, 5 SP)**: Automatic detection of session-intention alignment
 - **Coach Intention Intelligence (POMO-362+364, 3 SP)**:
   - Weekly intention context for AI Coach: this week + last week daily breakdown
   - Per-day alignment stats (particles, aligned, reactive, percentage)
@@ -525,6 +533,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-400-chat-persistence]]
 - [[stories/done/POMO-385-coach-briefing-redesign]]
 - [[stories/done/POMO-380-session-start-nudge]]
 - [[stories/done/POMO-373-timeline-context]]

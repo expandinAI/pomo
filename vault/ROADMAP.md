@@ -6,111 +6,104 @@ High-level overview of features and milestones.
 
 ## Current Focus
 
-> **Intelligent Particles** - AI Woven Into Every Moment
+> **v3.0 — Essential Particle** — Von "love to use" zu "can't live without"
 
-**Goal:** Transform AI from "a feature" to "the soul of the app"
-**Status:** Stories refined, ready for development
+**Goal:** Make Particle essential, not just enjoyable
+**Status:** 10x Review complete, stories ready
 
 ---
 
-## Next: Intelligent Particles (10x AI)
+## Next: v3.0 — Essential Particle (10x)
+
+> "The 10x leap is making Particle something you CAN'T live without."
+
+### Quick Wins (Ship Now)
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-400 | Chat Persistence | 3 | ✅ Done |
+| POMO-401 | Session Quality Indicator | 2 | 📋 Backlog |
+| POMO-402 | Monthly Recap Card | 3 | 📋 Backlog |
+| POMO-403 | Task Intelligence Surface | 2 | 📋 Backlog |
+
+### Core Features
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-410 | Deep Work Insights | 5 | 📋 Backlog |
+| POMO-411 | Burnout Detection | 5 | 📋 Backlog |
+| POMO-412 | Focus Blocks | 8 | 📋 Backlog |
+
+### Strategic (Explore)
+
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-420 | Particle Invoicing | 13 | 📋 Later |
+| POMO-421 | Particle Wrapped | 13 | 📋 Later |
+| POMO-422 | Particle Co-Focus | 13 | 📋 Later |
+| POMO-423 | Particle Legacy (3D) | 21 | 📋 Later |
+
+**Quick Wins: 10 SP | Core: 18 SP | Strategic: 60 SP**
+
+### Empfohlene Reihenfolge
+
+```
+1. POMO-400 Chat Persistence     (3 SP) — Coach feels broken without it
+2. POMO-401 Session Quality      (2 SP) — Subtle delight, zero risk
+3. POMO-403 Task Intelligence    (2 SP) — Data exists, just surface it
+4. POMO-402 Monthly Recap        (3 SP) — Reuse POTW infra, viral
+5. POMO-410 Deep Work Insights   (5 SP) — Overflow data → user-facing
+6. POMO-411 Burnout Detection    (5 SP) — Anti-gamification perfected
+7. POMO-412 Focus Blocks         (8 SP) — Chain particles, plan mornings
+```
+
+---
+
+## Done: Intelligent Particles (v2.3) ✅
 
 > "The best AI is the one you don't notice. It manifests not as a feature, but as a feeling: this app understands me."
 
-### Layer 1: Silent Intelligence (No API, rein lokal)
+### Layer 1: Silent Intelligence ✅
 
-Lokale Pattern-Auswertung ohne API-Calls. Funktioniert offline, instant, fuer alle Tiers.
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-380 | Session Start Nudge | 2 | ✅ Done |
+| POMO-384 | Silent Intelligence | 3 | ✅ Done |
 
-| Story | Feature | Points | Status | Details |
-|-------|---------|--------|--------|---------|
-| POMO-380 | Session Start Nudge | 2 | 📋 Backlog | Personalisierter Einzeiler unter Start-Button basierend auf Patterns |
-| POMO-384 | Silent Intelligence | 3 | 📋 Backlog | Smart Preset Highlighting, Task Prediction, Intelligent Empty States |
+### Layer 2: Contextual Moments ✅
 
-**POMO-380 — "The Whisper Before You Begin"**
-- Nudge unter Start-Button (und unter IntentionDisplay wenn vorhanden)
-- 6 Nudge-Typen mit klarer Prioritaet: Intention > Time Peak > Project > Progress > Task > Reminder
-- Mindestens 10 Work-Sessions noetig, sonst keine Nudge
-- Nutzt bestehende `detectAllPatterns()`, `useIntention()`, `useSessionStore()`
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-381 | Particle Memory | 5 | ✅ Done |
+| POMO-382 | Intention-Coach Bridge | 3 | ✅ Done |
+| POMO-383 | Weekly Narrative | 3 | ✅ Done |
 
-**POMO-384 — "The App Thinks With You"**
-- A) Smart Preset Highlighting: Subtiler Ring (`ring-1 ring-tertiary/20`) auf empfohlenem Preset
-- B) Task Prediction: Wiederkehrende Tasks als Placeholder mit `?`-Suffix (Tab = accept)
-- C) Intelligent Empty States: "Welcome back" / "Your most productive day" / "Peak focus window"
-- ~~D) Smart Default Duration~~ — entfernt (zu invasiv, widerspricht User-Kontrolle)
+### Infrastructure
 
-### Layer 2: Contextual Moments (API-enhanced fuer Flow, lokal fuer Free)
+| Story | Feature | Points | Status |
+|-------|---------|--------|--------|
+| POMO-385 | Coach Briefing Redesign | 3 | ✅ Done |
+| POMO-390 | Intention Cloud Sync | 5 | ✅ Done |
 
-AI-generierte Momente an Schluesselpunkten. Flow-Tier nutzt API, Free-Tier bekommt lokale Templates.
-
-| Story | Feature | Points | Status | Details |
-|-------|---------|--------|--------|---------|
-| POMO-381 | Particle Memory | 5 | 📋 Backlog | Jedes Particle erhaelt einen einzigartigen Memory-Satz |
-| POMO-382 | Intention-Coach Bridge | 3 | 📋 Backlog | Intention verknuepft mit Morning Context + Evening Insight + Coach |
-| POMO-383 | Weekly Narrative | 3 | 📋 Backlog | 3-Satz-Geschichte ueber die Woche im Coach |
-
-**POMO-381 — "Every Particle Remembers"**
-- Neues `memory?: string` Feld auf `DBSession` (Dexie v4→v5)
-- Nur Work-Sessions nach COMPLETE (nicht SKIP, nicht Break)
-- Fire-and-forget: Session wird sofort gespeichert, Memory asynchron nachgeliefert
-- ~40-60% der Sessions bekommen ein Memory (nicht jede ist bemerkenswert)
-- 10 Memory-Typen: Duration Milestone, Daily Record, Return After Break, Deep Work, etc.
-- Anzeige in ParticleDetailOverlay (Quote-Style) + Timeline-Tooltip
-
-**POMO-382 — "The Compass Speaks"**
-- A) Morning Context: Beim Tippen in IntentionOverlay → historische Stats zum Thema zeigen
-- B) Evening Insight: AI-Satz in EveningReflection ueber Alignment-Split ("3 of 5 aligned...")
-- C) Coach Awareness: `CoachContext` um `todayIntention` erweitern
-- Morning = rein lokal ($0), Evening = 1 API-Query/Tag (Flow), Coach = Teil des System-Prompts
-
-**POMO-383 — "The Story of Your Week"**
-- 3-Satz-Narrative ueber die abgeschlossene Woche im CoachView (ueber POTW)
-- Lokaler Fallback: 3 variable Saetze (Arc/Detail/Highlight) mit ~27 Kombinationen
-- Caching: localStorage, 1 Generierung pro Woche, automatische Invalidierung am Montag
-- < 3 Particles → "A quiet week. Sometimes rest is the work."
-
-**Total: 16 Story Points**
+**Total: 24 Story Points ✅**
 
 ### The 3-Layer AI Architecture
 
 ```
-Layer 3: Coach Modal (G C)        ← EXISTS (POMO-319-326)
+Layer 3: Coach Modal (G C)        ✅ (POMO-319-326)
          Deep analysis, chat, export
          300 queries/month (Flow)
 
-Layer 2: Contextual Moments       ← NEW (POMO-381, 382, 383)
+Layer 2: Contextual Moments       ✅ (POMO-381, 382, 383)
          Particle Memory, Evening Insight,
          Intention Bridge, Weekly Narrative
          API-enhanced (Flow) + local fallback (Free)
 
-Layer 1: Silent Intelligence      ← NEW (POMO-380, 384)
+Layer 1: Silent Intelligence      ✅ (POMO-380, 384)
          Start Nudge, Smart Presets,
          Task Prediction, Empty States
          100% local, no API, all tiers
 ```
-
-### Alle Stories sind unabhaengig
-
-Keine Story blockt eine andere. Empfohlene Reihenfolge nach Impact:
-
-```
-1. POMO-380 (2 SP) — Highest impact/effort ratio, sofort spuerbar
-2. POMO-384 (3 SP) — Subtile Verbesserungen ueberall
-3. POMO-381 (5 SP) — Groesstes Feature, braucht DB-Migration
-4. POMO-382 (3 SP) — Verknuepft bestehende Features
-5. POMO-383 (3 SP) — Wochenrhythmus, am wenigsten dringend
-```
-
-### API-Quota Impact (Flow Tier: 300/Monat)
-
-| Story | Queries/Event | Frequency | ~Queries/Monat |
-|-------|--------------|-----------|----------------|
-| POMO-381 Memory | 1 per session | ~5/Tag | ~150 |
-| POMO-382 Evening | 1 per day | ~1/Tag | ~30 |
-| POMO-383 Narrative | 1 per week | ~1/Woche | ~4 |
-| Coach Chat/Insights | varies | varies | ~116 (remaining) |
-| **Total** | | | **~300** |
-
-**Hinweis:** Bei 5 Sessions/Tag wird das Quota knapp. Alternative: Memories rein lokal generieren (auch fuer Flow) und API-Budget fuer Chat/Insights reservieren.
 
 ---
 
@@ -149,27 +142,26 @@ Keine Story blockt eine andere. Empfohlene Reihenfolge nach Impact:
 
 **Total Phase 3: 15 SP (✅ Complete)**
 
-### Phase 4: Intelligence (Future)
+### Phase 4: Intelligence ✅
 
 | Story | Feature | Points | Status | Note |
 |-------|---------|--------|--------|------|
-| POMO-362 | Coach prompt integration | 3 | 📋 Future | Teilweise abgedeckt durch POMO-382 |
-| POMO-363 | Auto-alignment detection | 5 | 📋 Future | |
-| POMO-364 | Alignment statistics for Coach | 5 | 📋 Future | |
-| POMO-365 | Supabase sync for intentions | 3 | 📋 Future | |
+| POMO-362+364 | Coach Intention Intelligence | 3 | ✅ Done | Weekly context, alignment trends, deferral chains |
+| POMO-363 | Auto-alignment detection | 5 | ✅ Done | Automatic alignment in all 3 COMPLETE paths |
+| POMO-390 | Intention Cloud Sync | 5 | ✅ Done | Replaces POMO-365, full bidirectional sync |
 
-**Total Phase 4: 16 SP**
+**Total Phase 4: 13 SP ✅**
 
-**Daily Intentions Done: 35 SP (Phase 1-3 complete)**
+**Daily Intentions Complete: 48 SP (all 4 phases done)**
 
 ---
 
-## Later: Phase 3 - Native Apps
+## Later: Native Apps
 
 > Mac & iOS
 
 **Goal:** Native desktop and mobile experience
-**Status:** After Intelligent Particles
+**Status:** After Essential Particle
 
 | Feature | Stories | Points | Status |
 |---------|---------|--------|--------|
@@ -327,19 +319,30 @@ Documented in [[decisions/]]:
 │  ─────────────────────────────────────                          │
 │  ✅ Core + Visual Language + Reflection        35 SP  DONE        │
 │                                                                  │
-│  PHASE 2.6: Intelligent Particles             16 SP              │
+│  PHASE 2.6: Intelligent Particles             24 SP              │
 │  ─────────────────────────────────────                          │
-│  ☐ Silent Intelligence (local patterns)        5 SP  ← CURRENT  │
-│  ☐ Contextual Moments (API-enhanced)          11 SP              │
+│  ✅ Silent Intelligence + Contextual Moments   24 SP  DONE        │
 │                                                                  │
-│  PHASE 3: Native Apps                         ~80 SP             │
+│  PHASE 2.7: Daily Intentions Phase 4          13 SP              │
+│  ─────────────────────────────────────                          │
+│  ✅ Coach Intelligence + Auto-Alignment + Sync 13 SP  DONE        │
+│                                                                  │
+│  PHASE 3: Essential Particle (10x)             ~28 SP             │
+│  ─────────────────────────────────────                          │
+│  ☐ Quick Wins (Chat, Quality, Recap, Tasks)   10 SP  ← CURRENT   │
+│  ☐ Core (Deep Work, Burnout, Focus Blocks)    18 SP              │
+│                                                                  │
+│  PHASE 3b: Strategic Bets                     ~60 SP             │
+│  ─────────────────────────────────────                          │
+│  ☐ Invoicing, Wrapped, Co-Focus, Legacy      ~60 SP  EXPLORE     │
+│                                                                  │
+│  PHASE 4: Native Apps                         ~80 SP             │
 │  ─────────────────────────────────────                          │
 │  ☐ Native Mac App (Swift/SwiftUI)            ~50 SP  LATER       │
 │  ☐ Native iOS App (SwiftUI, reduced scope)   ~30 SP              │
 │                                                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  REMAINING: ~96 Story Points                                     │
-│  At ~5 SP/week: ~19 weeks (~5 months)                           │
+│  REMAINING: ~80 Story Points (Native Apps) + Next 10x TBD       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -363,8 +366,11 @@ Payment ✅  AI Coach ✅
   Daily Intentions ✅
          │
          ▼
-  Intelligent Particles ← CURRENT
-   (all 5 stories independent)
+  Intelligent Particles ✅
+         │
+         ▼
+  Essential Particle (10x) ← CURRENT
+   (Quick Wins → Core → Strategic)
          │
          ▼
    Native Mac App
@@ -528,21 +534,34 @@ Payment ✅  AI Coach ✅
 - [x] Aligned/Reactive colors + alignment toggle + counter + timeline (Phase 2)
 - [x] Evening reflection + intention status + week view + tomorrow suggestion (Phase 3)
 
-### v2.3 - Intelligent Particles ← CURRENT
-- [ ] Session Start Nudge (POMO-380)
-- [ ] Silent Intelligence: Smart Presets, Task Prediction, Empty States (POMO-384)
-- [ ] Particle Memory (POMO-381)
-- [ ] Intention-Coach Bridge: Morning Context + Evening Insight (POMO-382)
-- [ ] Weekly Narrative (POMO-383)
+### v2.3 - Intelligent Particles ✅
+- [x] Session Start Nudge (POMO-380)
+- [x] Silent Intelligence: Smart Presets, Task Prediction, Empty States (POMO-384)
+- [x] Particle Memory (POMO-381)
+- [x] Intention-Coach Bridge: Morning Context + Evening Insight (POMO-382)
+- [x] Weekly Narrative (POMO-383)
+- [x] Coach Briefing Redesign (POMO-385)
+- [x] Coach Intention Intelligence (POMO-362+364)
+- [x] Auto-Alignment Detection (POMO-363)
+- [x] Intention Cloud Sync (POMO-390)
 
-### v3.0 - Native Mac App
+### v3.0 - Essential Particle (10x) ← CURRENT
+- [x] Chat Persistence (POMO-400)
+- [ ] Session Quality Indicator (POMO-401)
+- [ ] Monthly Recap Card (POMO-402)
+- [ ] Task Intelligence Surface (POMO-403)
+- [ ] Deep Work Insights (POMO-410)
+- [ ] Burnout Detection (POMO-411)
+- [ ] Focus Blocks (POMO-412)
+
+### v4.0 - Native Mac App
 - [ ] SwiftUI App
 - [ ] Menubar Integration
 - [ ] Focus Mode Integration
 - [ ] AppleScript Support
 - [ ] Shared Swift Package
 
-### v3.1 - Native iOS App
+### v4.1 - Native iOS App
 - [ ] SwiftUI App (reduced scope)
 - [ ] Widgets
 - [ ] Live Activities
@@ -566,4 +585,4 @@ Parked ideas:
 
 ---
 
-*Last updated: 2026-02-05 (Stories refined, Daily Intentions Phase 1-3 complete, Intelligent Particles current focus)*
+*Last updated: 2026-02-07 (v2.3 complete, v3.0 Essential Particle roadmap set from 10x Session 2)*
