@@ -19,6 +19,7 @@ export type SessionMode = 'work' | 'break' | 'longBreak';
 export type Theme = 'light' | 'dark' | 'system';
 export type AutoStartMode = 'all' | 'breaks-only';
 export type AutoStartDelay = 3 | 5 | 10;
+export type IntentionStatusSupabase = 'active' | 'completed' | 'partial' | 'deferred' | 'skipped';
 
 export interface Database {
   public: {
@@ -238,6 +239,53 @@ export interface Database {
           updated_at?: string;
         };
       };
+      intentions: {
+        Row: {
+          id: string;
+          user_id: string;
+          local_id: string;
+          date: string;
+          text: string;
+          status: IntentionStatusSupabase;
+          project_id: string | null;
+          deferred_from: string | null;
+          particle_goal: number | null;
+          completed_at: string | null;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          local_id: string;
+          date: string;
+          text: string;
+          status?: IntentionStatusSupabase;
+          project_id?: string | null;
+          deferred_from?: string | null;
+          particle_goal?: number | null;
+          completed_at?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          local_id?: string;
+          date?: string;
+          text?: string;
+          status?: IntentionStatusSupabase;
+          project_id?: string | null;
+          deferred_from?: string | null;
+          particle_goal?: number | null;
+          completed_at?: string | null;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -274,3 +322,7 @@ export type ProjectUpdate = Database['public']['Tables']['projects']['Update'];
 export type UserSettings = Database['public']['Tables']['user_settings']['Row'];
 export type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert'];
 export type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];
+
+export type Intention = Database['public']['Tables']['intentions']['Row'];
+export type IntentionInsert = Database['public']['Tables']['intentions']['Insert'];
+export type IntentionUpdate = Database['public']['Tables']['intentions']['Update'];

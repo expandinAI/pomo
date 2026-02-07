@@ -56,7 +56,7 @@ export function UpgradeModal({ isOpen, userId, onComplete, onSkip }: UpgradeModa
       } catch (err) {
         console.error('[UpgradeModal] Failed to load summary:', err);
         setPhase('summary');
-        setSummary({ sessionCount: 0, projectCount: 0, hasSettings: false, totalItems: 0 });
+        setSummary({ sessionCount: 0, projectCount: 0, intentionCount: 0, hasSettings: false, totalItems: 0 });
       }
     }
 

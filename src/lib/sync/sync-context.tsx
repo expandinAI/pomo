@@ -18,7 +18,7 @@ import {
 } from 'react';
 import { useParticleAuth, useSupabaseToken } from '@/lib/auth';
 import { createSupabaseClient, isSupabaseConfigured } from '@/lib/supabase/client';
-import type { DBSession, DBProject } from '@/lib/db/types';
+import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 import { SyncService } from './sync-service';
 import {
   SYNC_EVENTS,
@@ -29,6 +29,9 @@ import {
   type ProjectAddedEvent,
   type ProjectUpdatedEvent,
   type ProjectDeletedEvent,
+  type IntentionAddedEvent,
+  type IntentionUpdatedEvent,
+  type IntentionDeletedEvent,
 } from './sync-events';
 import type { SyncState, SyncEventType } from './types';
 import { useSettingsSync } from './use-settings-sync';
@@ -208,6 +211,22 @@ export function SyncProvider({ children }: SyncProviderProps) {
       syncService.pushProjectDelete(event.detail.projectId);
     }
 
+    // Intention events
+    function handleIntentionAdded(e: Event) {
+      const event = e as CustomEvent<IntentionAddedEvent>;
+      syncService.pushIntention(event.detail.intention);
+    }
+
+    function handleIntentionUpdated(e: Event) {
+      const event = e as CustomEvent<IntentionUpdatedEvent>;
+      syncService.pushIntention(event.detail.intention);
+    }
+
+    function handleIntentionDeleted(e: Event) {
+      const event = e as CustomEvent<IntentionDeletedEvent>;
+      syncService.pushIntentionDelete(event.detail.intentionId);
+    }
+
     // Add listeners
     window.addEventListener(SYNC_EVENTS.SESSION_ADDED, handleSessionAdded);
     window.addEventListener(SYNC_EVENTS.SESSION_UPDATED, handleSessionUpdated);
@@ -215,6 +234,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
     window.addEventListener(SYNC_EVENTS.PROJECT_ADDED, handleProjectAdded);
     window.addEventListener(SYNC_EVENTS.PROJECT_UPDATED, handleProjectUpdated);
     window.addEventListener(SYNC_EVENTS.PROJECT_DELETED, handleProjectDeleted);
+    window.addEventListener(SYNC_EVENTS.INTENTION_ADDED, handleIntentionAdded);
+    window.addEventListener(SYNC_EVENTS.INTENTION_UPDATED, handleIntentionUpdated);
+    window.addEventListener(SYNC_EVENTS.INTENTION_DELETED, handleIntentionDeleted);
 
     return () => {
       window.removeEventListener(SYNC_EVENTS.SESSION_ADDED, handleSessionAdded);
@@ -223,6 +245,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
       window.removeEventListener(SYNC_EVENTS.PROJECT_ADDED, handleProjectAdded);
       window.removeEventListener(SYNC_EVENTS.PROJECT_UPDATED, handleProjectUpdated);
       window.removeEventListener(SYNC_EVENTS.PROJECT_DELETED, handleProjectDeleted);
+      window.removeEventListener(SYNC_EVENTS.INTENTION_ADDED, handleIntentionAdded);
+      window.removeEventListener(SYNC_EVENTS.INTENTION_UPDATED, handleIntentionUpdated);
+      window.removeEventListener(SYNC_EVENTS.INTENTION_DELETED, handleIntentionDeleted);
     };
   }, [service]);
 

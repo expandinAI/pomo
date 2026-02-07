@@ -9,6 +9,11 @@ import {
   deleteIntention,
   getTodayDateString,
 } from '@/lib/intentions';
+import {
+  dispatchIntentionAdded,
+  dispatchIntentionUpdated,
+  dispatchIntentionDeleted,
+} from '@/lib/sync/sync-events';
 
 interface UseIntentionReturn {
   /** Today's intention (null if not set) */
@@ -112,6 +117,7 @@ export function useIntention(): UseIntentionReturn {
       // If there's already an intention for today, delete it first
       if (todayIntention) {
         await deleteIntention(todayIntention.id);
+        dispatchIntentionDeleted(todayIntention.id);
       }
 
       const newIntention = await saveIntention({
@@ -122,6 +128,7 @@ export function useIntention(): UseIntentionReturn {
         deferredFrom,
       });
 
+      dispatchIntentionAdded(newIntention);
       setTodayIntention(newIntention);
       return newIntention;
     },
@@ -143,6 +150,7 @@ export function useIntention(): UseIntentionReturn {
       const updated = await updateIntention(todayIntention.id, updates);
 
       if (updated) {
+        dispatchIntentionUpdated(updated);
         setTodayIntention(updated);
       }
 
@@ -159,6 +167,7 @@ export function useIntention(): UseIntentionReturn {
       const updated = await updateIntention(todayIntention.id, { text });
 
       if (updated) {
+        dispatchIntentionUpdated(updated);
         setTodayIntention(updated);
       }
 
@@ -175,6 +184,7 @@ export function useIntention(): UseIntentionReturn {
       const updated = await updateIntention(todayIntention.id, { projectId });
 
       if (updated) {
+        dispatchIntentionUpdated(updated);
         setTodayIntention(updated);
       }
 
@@ -191,6 +201,7 @@ export function useIntention(): UseIntentionReturn {
       const updated = await updateIntention(todayIntention.id, { particleGoal });
 
       if (updated) {
+        dispatchIntentionUpdated(updated);
         setTodayIntention(updated);
       }
 
@@ -203,9 +214,11 @@ export function useIntention(): UseIntentionReturn {
   const clearIntention = useCallback(async (): Promise<boolean> => {
     if (!todayIntention) return false;
 
-    const success = await deleteIntention(todayIntention.id);
+    const intentionId = todayIntention.id;
+    const success = await deleteIntention(intentionId);
 
     if (success) {
+      dispatchIntentionDeleted(intentionId);
       setTodayIntention(null);
     }
 

@@ -9,13 +9,15 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getDB } from '@/lib/db/database';
-import type { DBSession, DBProject } from '@/lib/db/types';
+import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 import { markAsSynced } from '@/lib/db/types';
+import { getIntentionById } from '@/lib/intentions/storage';
 import type {
   Database,
   SessionMode,
   Session as SupabaseSession,
   Project as SupabaseProject,
+  Intention as SupabaseIntention,
 } from '@/lib/supabase/types';
 import {
   enqueue,
@@ -466,11 +468,134 @@ export class SyncService {
   }
 
   /**
+   * Push an intention to Supabase
+   */
+  async pushIntention(intention: DBIntention): Promise<boolean> {
+    if (!this.state.isOnline) {
+      await this.queueChange('intentions', intention.id, 'upsert', intention);
+      return false;
+    }
+
+    this.emit('push-start');
+    this.updateState({ status: 'syncing' });
+
+    try {
+      const supabase = await this.getClient();
+      if (!supabase) {
+        throw new Error('Failed to get Supabase client');
+      }
+
+      let serverProjectId: string | null = null;
+      if (intention.projectId) {
+        serverProjectId = this.projectIdMap.get(intention.projectId) || null;
+      }
+
+      const intentionData = {
+        id: intention.serverId || crypto.randomUUID(),
+        user_id: this.userId,
+        local_id: intention.id,
+        date: intention.date,
+        text: intention.text,
+        status: intention.status,
+        project_id: serverProjectId,
+        deferred_from: intention.deferredFrom || null,
+        particle_goal: intention.particleGoal || null,
+        completed_at: intention.completedAt
+          ? new Date(intention.completedAt).toISOString()
+          : null,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from('intentions')
+        .upsert(intentionData as never, { onConflict: 'local_id,user_id' });
+
+      if (error) {
+        throw error;
+      }
+
+      const db = getDB();
+      const synced = markAsSynced(intention, intentionData.id);
+      await db.intentions.put(synced);
+
+      await removeEntriesForEntity('intentions', intention.id);
+
+      this.emit('push-success');
+      this.updateState({
+        status: 'idle',
+        lastSyncAt: new Date().toISOString(),
+      });
+      await this.updatePendingCount();
+
+      return true;
+    } catch (err) {
+      console.error('[SyncService] Push intention failed:', err);
+      await this.queueChange('intentions', intention.id, 'upsert', intention);
+      this.emit('push-error', err);
+      this.updateState({
+        status: 'error',
+        lastError: err instanceof Error ? err.message : 'Push failed',
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Push an intention delete to Supabase
+   */
+  async pushIntentionDelete(intentionId: string): Promise<boolean> {
+    if (!this.state.isOnline) {
+      await this.queueChange('intentions', intentionId, 'delete', {});
+      return false;
+    }
+
+    this.emit('push-start');
+    this.updateState({ status: 'syncing' });
+
+    try {
+      const supabase = await this.getClient();
+      if (!supabase) {
+        throw new Error('Failed to get Supabase client');
+      }
+
+      const { error } = await supabase
+        .from('intentions')
+        .update({ deleted_at: new Date().toISOString() } as never)
+        .eq('local_id', intentionId)
+        .eq('user_id', this.userId);
+
+      if (error) {
+        throw error;
+      }
+
+      await removeEntriesForEntity('intentions', intentionId);
+
+      this.emit('push-success');
+      this.updateState({
+        status: 'idle',
+        lastSyncAt: new Date().toISOString(),
+      });
+      await this.updatePendingCount();
+
+      return true;
+    } catch (err) {
+      console.error('[SyncService] Push intention delete failed:', err);
+      await this.queueChange('intentions', intentionId, 'delete', {});
+      this.emit('push-error', err);
+      this.updateState({
+        status: 'error',
+        lastError: err instanceof Error ? err.message : 'Delete failed',
+      });
+      return false;
+    }
+  }
+
+  /**
    * Pull changes from Supabase since last pull
    */
   async pull(): Promise<PullResult> {
     if (!this.state.isOnline) {
-      return { sessionsUpdated: 0, sessionsDeleted: 0, projectsUpdated: 0, projectsDeleted: 0 };
+      return { sessionsUpdated: 0, sessionsDeleted: 0, projectsUpdated: 0, projectsDeleted: 0, intentionsUpdated: 0, intentionsDeleted: 0 };
     }
 
     this.emit('pull-start');
@@ -481,6 +606,8 @@ export class SyncService {
       sessionsDeleted: 0,
       projectsUpdated: 0,
       projectsDeleted: 0,
+      intentionsUpdated: 0,
+      intentionsDeleted: 0,
     };
 
     try {
@@ -639,6 +766,86 @@ export class SyncService {
         }
       }
 
+      // Pull intentions
+      const { data: serverIntentionsData, error: intentionError } = await supabase
+        .from('intentions')
+        .select('*')
+        .eq('user_id', this.userId)
+        .gte('updated_at', lastPullAt);
+
+      if (intentionError) {
+        throw intentionError;
+      }
+
+      const serverIntentions = serverIntentionsData as SupabaseIntention[] | null;
+
+      if (serverIntentions) {
+        for (const serverIntention of serverIntentions) {
+          if (isDeleted(serverIntention)) {
+            const local = await db.intentions
+              .where('id')
+              .equals(serverIntention.local_id)
+              .first();
+            if (local) {
+              await db.intentions.delete(local.id);
+              result.intentionsDeleted++;
+            }
+            continue;
+          }
+
+          // Map project server ID back to local ID
+          let localProjectId: string | undefined;
+          if (serverIntention.project_id) {
+            this.projectIdMap.forEach((serverId, localId) => {
+              if (serverId === serverIntention.project_id) {
+                localProjectId = localId;
+              }
+            });
+          }
+
+          const existing = await db.intentions.get(serverIntention.local_id);
+
+          if (existing) {
+            if (isRemoteNewerOrEqual(existing.localUpdatedAt, serverIntention.updated_at)) {
+              await db.intentions.update(serverIntention.local_id, {
+                date: serverIntention.date,
+                text: serverIntention.text,
+                status: serverIntention.status,
+                projectId: localProjectId,
+                deferredFrom: serverIntention.deferred_from || undefined,
+                particleGoal: serverIntention.particle_goal || undefined,
+                completedAt: serverIntention.completed_at
+                  ? new Date(serverIntention.completed_at).getTime()
+                  : undefined,
+                syncStatus: 'synced',
+                syncedAt: new Date().toISOString(),
+                serverId: serverIntention.id,
+              });
+              result.intentionsUpdated++;
+            }
+          } else {
+            const newIntention: DBIntention = {
+              id: serverIntention.local_id,
+              date: serverIntention.date,
+              text: serverIntention.text,
+              status: serverIntention.status,
+              projectId: localProjectId,
+              deferredFrom: serverIntention.deferred_from || undefined,
+              particleGoal: serverIntention.particle_goal || undefined,
+              completedAt: serverIntention.completed_at
+                ? new Date(serverIntention.completed_at).getTime()
+                : undefined,
+              syncStatus: 'synced',
+              localUpdatedAt: serverIntention.updated_at,
+              syncedAt: new Date().toISOString(),
+              serverId: serverIntention.id,
+            };
+            await db.intentions.add(newIntention);
+            result.intentionsUpdated++;
+          }
+        }
+      }
+
       // Update last pull timestamp
       localStorage.setItem(LAST_PULL_KEY, new Date().toISOString());
 
@@ -691,6 +898,14 @@ export class SyncService {
               const project = entry.payload as unknown as DBProject;
               success = await this.pushProjectDirect(project);
             }
+          } else if (entry.entityType === 'intentions') {
+            if (entry.operation === 'delete') {
+              success = await this.pushIntentionDeleteDirect(entry.entityId);
+            } else {
+              // Try to get fresh data from IndexedDB first, fall back to payload
+              const intention = await getIntentionById(entry.entityId) || entry.payload as unknown as DBIntention;
+              success = await this.pushIntentionDirect(intention);
+            }
           }
 
           if (success) {
@@ -729,7 +944,7 @@ export class SyncService {
     entityType: SyncEntityType,
     entityId: string,
     operation: 'upsert' | 'delete',
-    payload: DBSession | DBProject | Record<string, unknown>
+    payload: DBSession | DBProject | DBIntention | Record<string, unknown>
   ): Promise<void> {
     // Convert entity to Record for storage
     await enqueue(entityType, entityId, operation, payload as Record<string, unknown>);
@@ -872,6 +1087,67 @@ export class SyncService {
 
     // Remove from project ID map
     this.projectIdMap.delete(projectId);
+
+    return true;
+  }
+
+  private async pushIntentionDirect(intention: DBIntention): Promise<boolean> {
+    const supabase = await this.getClient();
+    if (!supabase) {
+      throw new Error('Failed to get Supabase client');
+    }
+
+    let serverProjectId: string | null = null;
+    if (intention.projectId) {
+      serverProjectId = this.projectIdMap.get(intention.projectId) || null;
+    }
+
+    const intentionData = {
+      id: intention.serverId || crypto.randomUUID(),
+      user_id: this.userId,
+      local_id: intention.id,
+      date: intention.date,
+      text: intention.text,
+      status: intention.status,
+      project_id: serverProjectId,
+      deferred_from: intention.deferredFrom || null,
+      particle_goal: intention.particleGoal || null,
+      completed_at: intention.completedAt
+        ? new Date(intention.completedAt).toISOString()
+        : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('intentions')
+      .upsert(intentionData as never, { onConflict: 'local_id,user_id' });
+
+    if (error) {
+      throw error;
+    }
+
+    const db = getDB();
+    const synced = markAsSynced(intention, intentionData.id);
+    await db.intentions.put(synced);
+
+    return true;
+  }
+
+  private async pushIntentionDeleteDirect(intentionId: string): Promise<boolean> {
+    const supabase = await this.getClient();
+    if (!supabase) {
+      throw new Error('Failed to get Supabase client');
+    }
+
+    const { error } = await supabase
+      .from('intentions')
+      .update({ deleted_at: new Date().toISOString() } as never)
+      .eq('local_id', intentionId)
+      .eq('user_id', this.userId);
+
+    if (error) {
+      throw error;
+    }
 
     return true;
   }

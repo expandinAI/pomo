@@ -5,7 +5,7 @@
  * Uses CustomEvents for decoupled sync triggering.
  */
 
-import type { DBSession, DBProject } from '@/lib/db/types';
+import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 
 // Event names
 export const SYNC_EVENTS = {
@@ -15,6 +15,9 @@ export const SYNC_EVENTS = {
   PROJECT_ADDED: 'particle:sync:project-added',
   PROJECT_UPDATED: 'particle:sync:project-updated',
   PROJECT_DELETED: 'particle:sync:project-deleted',
+  INTENTION_ADDED: 'particle:sync:intention-added',
+  INTENTION_UPDATED: 'particle:sync:intention-updated',
+  INTENTION_DELETED: 'particle:sync:intention-deleted',
   PULL_COMPLETED: 'particle:sync:pull-completed',
 } as const;
 
@@ -111,6 +114,55 @@ export function dispatchProjectDeleted(projectId: string): void {
   window.dispatchEvent(
     new CustomEvent<ProjectDeletedEvent>(SYNC_EVENTS.PROJECT_DELETED, {
       detail: { projectId },
+    })
+  );
+}
+
+// Intention event detail types
+export interface IntentionAddedEvent {
+  intention: DBIntention;
+}
+
+export interface IntentionUpdatedEvent {
+  intention: DBIntention;
+}
+
+export interface IntentionDeletedEvent {
+  intentionId: string;
+}
+
+/**
+ * Dispatch intention added event
+ */
+export function dispatchIntentionAdded(intention: DBIntention): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent<IntentionAddedEvent>(SYNC_EVENTS.INTENTION_ADDED, {
+      detail: { intention },
+    })
+  );
+}
+
+/**
+ * Dispatch intention updated event
+ */
+export function dispatchIntentionUpdated(intention: DBIntention): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent<IntentionUpdatedEvent>(SYNC_EVENTS.INTENTION_UPDATED, {
+      detail: { intention },
+    })
+  );
+}
+
+/**
+ * Dispatch intention deleted event
+ */
+export function dispatchIntentionDeleted(intentionId: string): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent<IntentionDeletedEvent>(SYNC_EVENTS.INTENTION_DELETED, {
+      detail: { intentionId },
     })
   );
 }

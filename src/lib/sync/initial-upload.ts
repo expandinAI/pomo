@@ -15,8 +15,9 @@ import { getDB } from '@/lib/db/database';
 import { loadProjects } from '@/lib/db/projects';
 import { loadSessions } from '@/lib/db/sessions';
 import { getAllSettings } from '@/lib/db/settings';
+import { loadIntentions } from '@/lib/intentions/storage';
 import { markAsSynced } from '@/lib/db/types';
-import type { DBSession, DBProject } from '@/lib/db/types';
+import type { DBSession, DBProject, DBIntention } from '@/lib/db/types';
 import type { Database, Json } from '@/lib/supabase/types';
 
 /**
@@ -25,6 +26,7 @@ import type { Database, Json } from '@/lib/supabase/types';
 export interface LocalDataSummary {
   sessionCount: number;
   projectCount: number;
+  intentionCount: number;
   hasSettings: boolean;
   totalItems: number;
 }
@@ -33,7 +35,7 @@ export interface LocalDataSummary {
  * Progress callback for upload status
  */
 export interface UploadProgress {
-  phase: 'projects' | 'sessions' | 'settings' | 'done';
+  phase: 'projects' | 'sessions' | 'intentions' | 'settings' | 'done';
   current: number;
   total: number;
   message: string;
@@ -46,6 +48,7 @@ export interface UploadResult {
   success: boolean;
   projectsUploaded: number;
   sessionsUploaded: number;
+  intentionsUploaded: number;
   settingsUploaded: boolean;
   errors: string[];
 }
@@ -54,9 +57,10 @@ export interface UploadResult {
  * Get a summary of local data that can be uploaded
  */
 export async function getLocalDataSummary(): Promise<LocalDataSummary> {
-  const [sessions, projects, settings] = await Promise.all([
+  const [sessions, projects, intentions, settings] = await Promise.all([
     loadSessions(),
     loadProjects(),
+    loadIntentions(),
     getAllSettings(),
   ]);
 
@@ -67,8 +71,9 @@ export async function getLocalDataSummary(): Promise<LocalDataSummary> {
   return {
     sessionCount: workSessions.length,
     projectCount: projects.length,
+    intentionCount: intentions.length,
     hasSettings: settingsCount > 0,
-    totalItems: workSessions.length + projects.length + (settingsCount > 0 ? 1 : 0),
+    totalItems: workSessions.length + projects.length + intentions.length + (settingsCount > 0 ? 1 : 0),
   };
 }
 
@@ -134,19 +139,22 @@ export async function performInitialUpload(
   const errors: string[] = [];
   let projectsUploaded = 0;
   let sessionsUploaded = 0;
+  let intentionsUploaded = 0;
   let settingsUploaded = false;
 
   // Load all local data
-  const [localProjects, localSessions, localSettings] = await Promise.all([
+  const [localProjects, localSessions, localIntentions, localSettings] = await Promise.all([
     loadProjects(),
     loadSessions(),
+    loadIntentions(),
     getAllSettings(),
   ]);
 
   const totalProjects = localProjects.length;
   const totalSessions = localSessions.length;
+  const totalIntentions = localIntentions.length;
   const hasSettings = Object.keys(localSettings).length > 0;
-  const totalItems = totalProjects + totalSessions + (hasSettings ? 1 : 0);
+  const totalItems = totalProjects + totalSessions + totalIntentions + (hasSettings ? 1 : 0);
 
   // Map local project IDs to server project IDs
   const projectIdMap = new Map<string, string>();
@@ -290,11 +298,67 @@ export async function performInitialUpload(
     });
   }
 
-  // Phase 3: Upload settings
+  // Phase 3: Upload intentions
+  onProgress?.({
+    phase: 'intentions',
+    current: totalProjects + totalSessions,
+    total: totalItems,
+    message: 'Uploading intentions...',
+  });
+
+  for (let i = 0; i < localIntentions.length; i++) {
+    const intention = localIntentions[i];
+
+    try {
+      const serverIntentionId = crypto.randomUUID();
+
+      let serverProjectId: string | null = null;
+      if (intention.projectId) {
+        serverProjectId = projectIdMap.get(intention.projectId) || null;
+      }
+
+      const intentionData = {
+        id: serverIntentionId,
+        user_id: userId,
+        local_id: intention.id,
+        date: intention.date,
+        text: intention.text,
+        status: intention.status,
+        project_id: serverProjectId,
+        deferred_from: intention.deferredFrom || null,
+        particle_goal: intention.particleGoal || null,
+        completed_at: intention.completedAt
+          ? new Date(intention.completedAt).toISOString()
+          : null,
+      };
+
+      const { error } = await supabase.from('intentions').insert(intentionData as never);
+
+      if (error) {
+        errors.push(`Intention "${intention.text.substring(0, 30)}": ${error.message}`);
+      } else {
+        intentionsUploaded++;
+
+        const synced = markAsSynced(intention, serverIntentionId);
+        await db.intentions.put(synced);
+      }
+    } catch (err) {
+      errors.push(`Intention: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+
+    onProgress?.({
+      phase: 'intentions',
+      current: totalProjects + totalSessions + i + 1,
+      total: totalItems,
+      message: `Uploading intentions (${i + 1}/${totalIntentions})...`,
+    });
+  }
+
+  // Phase 4: Upload settings
   if (hasSettings) {
     onProgress?.({
       phase: 'settings',
-      current: totalProjects + totalSessions,
+      current: totalProjects + totalSessions + totalIntentions,
       total: totalItems,
       message: 'Uploading settings...',
     });
@@ -386,6 +450,7 @@ export async function performInitialUpload(
     success: errors.length === 0,
     projectsUploaded,
     sessionsUploaded,
+    intentionsUploaded,
     settingsUploaded,
     errors,
   };

@@ -26,6 +26,11 @@ export function DataSummary({ summary }: DataSummaryProps) {
       show: summary.projectCount > 0,
     },
     {
+      label: 'Intentions',
+      value: summary.intentionCount,
+      show: summary.intentionCount > 0,
+    },
+    {
       label: 'Settings',
       value: '\u2713', // Checkmark
       show: summary.hasSettings,

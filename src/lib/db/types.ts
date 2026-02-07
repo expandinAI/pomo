@@ -103,7 +103,7 @@ export interface DBSettings {
 /**
  * Entity types that can be synced
  */
-export type SyncEntityType = 'sessions' | 'projects';
+export type SyncEntityType = 'sessions' | 'projects' | 'intentions';
 
 /**
  * Operation type for queued changes

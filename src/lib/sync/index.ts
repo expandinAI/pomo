@@ -66,6 +66,9 @@ export {
   dispatchProjectAdded,
   dispatchProjectUpdated,
   dispatchProjectDeleted,
+  dispatchIntentionAdded,
+  dispatchIntentionUpdated,
+  dispatchIntentionDeleted,
   dispatchPullCompleted,
 } from './sync-events';
 

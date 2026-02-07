@@ -83,6 +83,10 @@ export interface PullResult {
   projectsUpdated: number;
   /** Number of projects deleted */
   projectsDeleted: number;
+  /** Number of intentions updated */
+  intentionsUpdated: number;
+  /** Number of intentions deleted */
+  intentionsDeleted: number;
 }
 
 /**
