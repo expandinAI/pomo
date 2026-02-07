@@ -177,7 +177,7 @@ export function TimelineBlock({
 
       {/* Block */}
       <motion.div
-        className="w-full rounded-sm"
+        className="w-full rounded-sm border-r border-background light:border-background-dark"
         style={{
           height: `${height}px`,
           backgroundColor: hexToRgba(blockColor, opacity),
