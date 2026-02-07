@@ -30,6 +30,7 @@ import { formatTime, formatEndTime } from '@/lib/utils';
 import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
 import { formatDuration, formatTime24h, formatSessionInfo } from '@/lib/session-storage';
 import { calculateSessionFeedback, type SessionFeedback } from '@/lib/session-feedback';
+import { getSessionQuality } from '@/lib/session-quality';
 import { addRecentTasksFromInput } from '@/lib/task-storage';
 import { formatTasksForStorage, parseMultiLineInput } from '@/lib/smart-input-parser';
 import { UnifiedTaskInput } from '@/components/task';
@@ -808,6 +809,8 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         state.currentTask || undefined,
         dailyGoal
       );
+      const quality = getSessionQuality(sessionDuration, sessionDuration, 0);
+      feedback.qualityLabel = quality?.label;
       setSessionFeedback(feedback);
     }
 
@@ -1379,6 +1382,8 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         state.currentTask || undefined,
         dailyGoal
       );
+      const quality = getSessionQuality(totalDuration, fullDuration, currentOverflowSeconds);
+      feedback.qualityLabel = quality?.label;
       setSessionFeedback(feedback);
     }
 
@@ -1674,6 +1679,8 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         state.currentTask || undefined,
         dailyGoal
       );
+      const quality = getSessionQuality(elapsedTime, fullDuration, 0);
+      feedback.qualityLabel = quality?.label;
       setSessionFeedback(feedback);
     }
 

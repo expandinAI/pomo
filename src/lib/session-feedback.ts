@@ -19,6 +19,7 @@ export interface SessionFeedback {
   duration: number; // in minutes
   overflowMinutes?: number;
   taskName?: string;
+  qualityLabel?: string;
 }
 
 // Milestones that trigger special messages
@@ -101,31 +102,34 @@ export function calculateSessionFeedback(
  * English text, minimalist, one line.
  */
 export function formatFeedbackMessage(feedback: SessionFeedback): string {
+  const suffix = feedback.qualityLabel ? ` · ${feedback.qualityLabel}` : '';
+
   switch (feedback.type) {
     case 'milestone':
       return getMilestoneMessage(feedback.particleCount!);
 
     case 'goal-reached':
-      return `Daily goal reached · ${feedback.dailyCount} particles`;
+      return `Daily goal reached · ${feedback.dailyCount} particles${suffix}`;
 
-    case 'task':
+    case 'task': {
       // Truncate task name if too long
       const task = feedback.taskName!.length > 25
         ? feedback.taskName!.slice(0, 22) + '...'
         : feedback.taskName!;
-      return `${task} · One particle`;
+      return `${task} · One particle${suffix}`;
+    }
 
     case 'first-today':
-      return 'Your first particle today.';
+      return `Your first particle today.${suffix}`;
 
     case 'overflow':
-      return `${feedback.duration} min · +${feedback.overflowMinutes} in flow`;
+      return `${feedback.duration} min · +${feedback.overflowMinutes} in flow${suffix}`;
 
     case 'standard':
-      return `A new particle · ${feedback.duration} min focused`;
+      return `A new particle · ${feedback.duration} min focused${suffix}`;
 
     default:
-      return `A new particle · ${feedback.duration} min focused`;
+      return `A new particle · ${feedback.duration} min focused${suffix}`;
   }
 }
 

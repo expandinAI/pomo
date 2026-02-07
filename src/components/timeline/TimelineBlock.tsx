@@ -2,10 +2,18 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Flame, Zap, Trophy } from 'lucide-react';
 import { SPRING, SESSION_LABELS } from '@/styles/design-tokens';
 import type { TimelineSession } from '@/hooks/useTimelineData';
 import { formatDuration, formatTime24h } from '@/lib/session-storage';
 import { getParticleHexColor } from '@/lib/intentions';
+import { getSessionQuality, type SessionQuality } from '@/lib/session-quality';
+
+const QUALITY_ICONS: Record<SessionQuality, typeof Flame> = {
+  deep_work: Flame,
+  quick_focus: Zap,
+  overflow_champion: Trophy,
+};
 
 /**
  * Convert hex color to rgba string
@@ -42,6 +50,8 @@ export function TimelineBlock({
   const [isHovered, setIsHovered] = useState(false);
 
   const isWork = session.type === 'work';
+  const quality = isWork ? getSessionQuality(session.duration, session.estimatedDuration, session.overflowDuration) : null;
+  const QualityIcon = quality ? QUALITY_ICONS[quality.type] : null;
   const height = isWork ? 48 : 24;
 
   // Work blocks use project brightness, breaks use fixed low opacity
@@ -146,6 +156,13 @@ export function TimelineBlock({
                 <>
                   <span className="opacity-50">·</span>
                   <span>Reactive</span>
+                </>
+              )}
+              {isWork && quality && QualityIcon && (
+                <>
+                  <span className="opacity-50">·</span>
+                  <QualityIcon className="w-3 h-3" />
+                  <span>{quality.label}</span>
                 </>
               )}
             </div>

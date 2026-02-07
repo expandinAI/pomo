@@ -23,6 +23,8 @@ export interface TimelineSession {
   brightness: number;
   intentionAlignment?: IntentionAlignment;
   memory?: string;
+  estimatedDuration?: number;
+  overflowDuration?: number;
 }
 
 /**
@@ -159,6 +161,14 @@ export function useTimelineData(): UseTimelineDataReturn {
         ? (session.memory as string | undefined)
         : undefined;
 
+      // Extract estimatedDuration and overflowDuration
+      const estimatedDuration = ('estimatedDuration' in session)
+        ? (session.estimatedDuration as number | undefined)
+        : undefined;
+      const overflowDuration = ('overflowDuration' in session)
+        ? (session.overflowDuration as number | undefined)
+        : undefined;
+
       return {
         id: session.id,
         type: session.type,
@@ -171,6 +181,8 @@ export function useTimelineData(): UseTimelineDataReturn {
         brightness,
         intentionAlignment,
         memory,
+        estimatedDuration,
+        overflowDuration,
       };
     });
 

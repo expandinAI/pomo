@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, X, Trash2, Zap } from 'lucide-react';
+import { Minus, Plus, X, Trash2, Zap, Flame, Trophy } from 'lucide-react';
 import { SPRING } from '@/styles/design-tokens';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useSessionStore, type UnifiedSession } from '@/contexts/SessionContext';
@@ -16,6 +16,7 @@ import {
 import { ProjectDropdown } from '@/components/task/ProjectDropdown';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/lib/projects';
+import { getSessionQuality, type SessionQuality } from '@/lib/session-quality';
 
 interface ParticleDetailOverlayProps {
   isOpen: boolean;
@@ -30,6 +31,12 @@ interface ParticleDetailOverlayProps {
 
 const MIN_DURATION = 60; // 1 minute
 const MAX_DURATION = 180 * 60; // 180 minutes
+
+const QUALITY_ICONS: Record<SessionQuality, typeof Flame> = {
+  deep_work: Flame,
+  quick_focus: Zap,
+  overflow_champion: Trophy,
+};
 
 // Stagger animation variants
 const containerVariants = {
@@ -274,6 +281,12 @@ export function ParticleDetailOverlay({
   // Format duration as minutes
   const durationMinutes = Math.round(duration / 60);
 
+  // Calculate quality badge
+  const quality = session?.type === 'work'
+    ? getSessionQuality(duration, session?.estimatedDuration, session?.overflowDuration)
+    : null;
+  const QualityIcon = quality ? QUALITY_ICONS[quality.type] : null;
+
   // Calculate overflow info
   const hasOverflow = session?.overflowDuration && session.overflowDuration > 0;
   const plannedDuration = hasOverflow
@@ -482,6 +495,14 @@ export function ParticleDetailOverlay({
                       </div>
                     </div>
                   </motion.div>
+
+                  {/* Quality badge */}
+                  {quality && QualityIcon && session?.type === 'work' && (
+                    <motion.div variants={itemVariants} className="flex items-center justify-center gap-2 text-sm text-tertiary light:text-tertiary-dark">
+                      <QualityIcon className="w-4 h-4" />
+                      <span>{quality.label}</span>
+                    </motion.div>
+                  )}
 
                   {/* Overflow Badge - prominent */}
                   <AnimatePresence>
