@@ -1,14 +1,46 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { CoachMessage } from '@/components/coach/types';
 import type { CoachContext } from '@/lib/coach/types';
+import type { DBChatMessage } from '@/lib/db/types';
+import {
+  saveChatMessage,
+  loadConversation,
+  getLatestConversationId,
+  newConversationId,
+} from '@/lib/db/chat-storage';
 
 /**
  * Generate a unique ID for messages
  */
 function generateId(): string {
   return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Convert a CoachMessage to a DBChatMessage for persistence
+ */
+function toDBMessage(msg: CoachMessage, conversationId: string): DBChatMessage {
+  return {
+    id: msg.id,
+    conversationId,
+    role: msg.role,
+    content: msg.content,
+    createdAt: msg.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Convert a DBChatMessage back to a CoachMessage for display
+ */
+function fromDBMessage(msg: DBChatMessage): CoachMessage {
+  return {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    createdAt: new Date(msg.createdAt),
+  };
 }
 
 interface UseCoachChatResult {
@@ -20,8 +52,10 @@ interface UseCoachChatResult {
   isStreaming: boolean;
   /** Error message if something went wrong */
   error: string | null;
-  /** Clear the chat history */
-  clearHistory: () => void;
+  /** Start a new chat conversation */
+  startNewChat: () => void;
+  /** Whether messages have been loaded from IndexedDB */
+  isLoaded: boolean;
 }
 
 /**
@@ -31,15 +65,58 @@ interface UseCoachChatResult {
  * - Message state management
  * - Streaming responses from the API
  * - Error handling
- * - History management
+ * - Persistence to IndexedDB
+ * - Conversation management (resume / new chat)
  */
 export function useCoachChat(): UseCoachChatResult {
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Current conversation ID
+  const conversationIdRef = useRef<string | null>(null);
 
   // Keep track of the current streaming message ID for updates
   const streamingMessageIdRef = useRef<string | null>(null);
+
+  // Load the latest conversation on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadLastConversation(): Promise<void> {
+      try {
+        const latestId = await getLatestConversationId();
+        if (cancelled) return;
+
+        if (latestId) {
+          const dbMessages = await loadConversation(latestId);
+          if (cancelled) return;
+          conversationIdRef.current = latestId;
+          setMessages(dbMessages.map(fromDBMessage));
+        }
+      } catch (err) {
+        console.error('[useCoachChat] Failed to load conversation:', err);
+      } finally {
+        if (!cancelled) {
+          setIsLoaded(true);
+        }
+      }
+    }
+
+    loadLastConversation();
+    return () => { cancelled = true; };
+  }, []);
+
+  /**
+   * Ensure we have a conversation ID (create one if needed)
+   */
+  function ensureConversationId(): string {
+    if (!conversationIdRef.current) {
+      conversationIdRef.current = newConversationId();
+    }
+    return conversationIdRef.current;
+  }
 
   /**
    * Send a message to the coach and handle streaming response
@@ -49,6 +126,8 @@ export function useCoachChat(): UseCoachChatResult {
       if (!text.trim() || isStreaming) return;
 
       setError(null);
+
+      const convId = ensureConversationId();
 
       // Create user message
       const userMessage: CoachMessage = {
@@ -60,6 +139,11 @@ export function useCoachChat(): UseCoachChatResult {
 
       // Add user message immediately (optimistic update)
       setMessages((prev) => [...prev, userMessage]);
+
+      // Persist user message
+      saveChatMessage(toDBMessage(userMessage, convId)).catch((err) =>
+        console.error('[useCoachChat] Failed to save user message:', err)
+      );
 
       // Create placeholder for coach response
       const coachMessageId = generateId();
@@ -145,6 +229,15 @@ export function useCoachChat(): UseCoachChatResult {
         if (!accumulatedContent.trim()) {
           throw new Error('No response from coach');
         }
+
+        // Persist the completed coach message
+        const finalCoachMessage: CoachMessage = {
+          ...coachMessage,
+          content: accumulatedContent,
+        };
+        saveChatMessage(toDBMessage(finalCoachMessage, convId)).catch((err) =>
+          console.error('[useCoachChat] Failed to save coach message:', err)
+        );
       } catch (err) {
         console.error('[useCoachChat] Error:', err);
 
@@ -166,9 +259,10 @@ export function useCoachChat(): UseCoachChatResult {
   );
 
   /**
-   * Clear all messages from the chat
+   * Start a new chat conversation
    */
-  const clearHistory = useCallback(() => {
+  const startNewChat = useCallback(() => {
+    conversationIdRef.current = newConversationId();
     setMessages([]);
     setError(null);
   }, []);
@@ -178,6 +272,7 @@ export function useCoachChat(): UseCoachChatResult {
     sendMessage,
     isStreaming,
     error,
-    clearHistory,
+    startNewChat,
+    isLoaded,
   };
 }

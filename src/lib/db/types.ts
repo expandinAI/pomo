@@ -134,6 +134,17 @@ export interface DBQueuedChange {
   nextRetryAt?: string;
 }
 
+/**
+ * Chat message persisted in IndexedDB (local-only, no sync)
+ */
+export interface DBChatMessage {
+  id: string;
+  conversationId: string;
+  role: 'user' | 'coach';
+  content: string;
+  createdAt: string; // ISO timestamp
+}
+
 // ============================================
 // Sync Metadata Helper Functions
 // ============================================

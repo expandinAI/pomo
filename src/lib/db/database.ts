@@ -1,7 +1,7 @@
 // src/lib/db/database.ts
 
 import Dexie, { type Table } from 'dexie';
-import type { DBSession, DBProject, DBRecentTask, DBSettings, DBQueuedChange, DBIntention } from './types';
+import type { DBSession, DBProject, DBRecentTask, DBSettings, DBQueuedChange, DBIntention, DBChatMessage } from './types';
 
 export class ParticleDB extends Dexie {
   sessions!: Table<DBSession, string>;
@@ -10,6 +10,7 @@ export class ParticleDB extends Dexie {
   settings!: Table<DBSettings, string>;
   syncQueue!: Table<DBQueuedChange, string>;
   intentions!: Table<DBIntention, string>;
+  chatMessages!: Table<DBChatMessage, string>;
 
   constructor() {
     super('ParticleDB');
@@ -70,6 +71,17 @@ export class ParticleDB extends Dexie {
       settings: 'key',
       syncQueue: 'id, entityType, createdAt, nextRetryAt',
       intentions: 'id, date, status',
+    });
+
+    // Schema v6 - Add chatMessages table for coach chat persistence
+    this.version(6).stores({
+      sessions: 'id, completedAt, projectId, syncStatus, type, serverId',
+      projects: 'id, archived, syncStatus, serverId',
+      recentTasks: 'text, lastUsed',
+      settings: 'key',
+      syncQueue: 'id, entityType, createdAt, nextRetryAt',
+      intentions: 'id, date, status',
+      chatMessages: 'id, conversationId, createdAt',
     });
   }
 }

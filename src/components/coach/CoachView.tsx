@@ -49,7 +49,7 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
   }, [isOpen, refreshContext]);
 
   // Chat functionality
-  const { messages, sendMessage, isStreaming, error: chatError } = useCoachChat();
+  const { messages, sendMessage, isStreaming, error: chatError, startNewChat, isLoaded } = useCoachChat();
 
   // Quota management
   const { quota } = useAIQuota();
@@ -166,6 +166,16 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
                     </h2>
                     <QuotaRing />
                   </div>
+                  <div className="flex items-center gap-2">
+                    {messages.length > 0 && (
+                      <button
+                        onClick={startNewChat}
+                        className="text-xs text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark transition-colors"
+                        title="Start new conversation"
+                      >
+                        New Chat
+                      </button>
+                    )}
                   <button
                     onClick={onClose}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary light:text-tertiary-dark hover:text-secondary light:hover:text-secondary-dark hover:bg-tertiary/10 light:hover:bg-tertiary-dark/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -173,6 +183,7 @@ export function CoachView({ isOpen, onClose }: CoachViewProps) {
                   >
                     <X className="w-4 h-4" />
                   </button>
+                  </div>
                 </div>
 
                 {/* Scrollable content wrapper - CRITICAL: min-h-0 for flexbox scroll */}
