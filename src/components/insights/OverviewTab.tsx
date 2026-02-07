@@ -14,6 +14,7 @@ import { DashboardHeroMetrics } from './DashboardHeroMetrics';
 import { DashboardHeatmap } from './DashboardHeatmap';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { StatsProjectBreakdown } from './StatsProjectBreakdown';
+import { TaskIntelligenceCard } from './TaskIntelligenceCard';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { ExportButton } from './ExportButton';
 
@@ -112,6 +113,9 @@ export function OverviewTab({
           </div>
         </motion.section>
       )}
+
+      {/* Task Intelligence */}
+      <TaskIntelligenceCard sessions={filteredSessions} />
 
       {/* Projects Breakdown */}
       {projectBreakdown.length > 0 && (
