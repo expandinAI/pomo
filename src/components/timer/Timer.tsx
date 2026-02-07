@@ -236,6 +236,15 @@ const initialState: TimerState = {
   autoStartCountdown: null,
 };
 
+/** Auto-detect intention alignment when session project matches intention project */
+function detectIntentionAlignment(
+  intentionProjectId: string | null | undefined,
+  sessionProjectId: string | null | undefined,
+): 'aligned' | undefined {
+  if (!intentionProjectId || !sessionProjectId) return undefined;
+  return intentionProjectId === sessionProjectId ? 'aligned' : undefined;
+}
+
 export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerProps = {}) {
   const [state, dispatch] = useReducer(timerReducer, initialState);
 
@@ -469,6 +478,12 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
     selectedProjectIdRef.current = selectedProjectId;
   }, [selectedProjectId]);
 
+  // Keep ref in sync with todayIntention (for use in callbacks)
+  const todayIntentionRef = useRef(todayIntention);
+  useEffect(() => {
+    todayIntentionRef.current = todayIntention;
+  }, [todayIntention]);
+
   // Build project name map for particle hover info
   const projectNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -700,6 +715,12 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
       presetId: activePresetIdRef.current,
       ...(selectedProjectIdRef.current && { projectId: selectedProjectIdRef.current }),
       estimatedDuration: sessionDuration, // Planned duration (for rhythm tracking)
+      ...(wasWorkSession && {
+        intentionAlignment: detectIntentionAlignment(
+          todayIntentionRef.current?.projectId,
+          selectedProjectIdRef.current,
+        ),
+      }),
     };
 
     // Fire and forget - state is updated by SessionProvider
@@ -1260,6 +1281,12 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
       // Track overflow separately
       ...(currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
       estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
+      ...(wasWorkSession && {
+        intentionAlignment: detectIntentionAlignment(
+          todayIntentionRef.current?.projectId,
+          selectedProjectIdRef.current,
+        ),
+      }),
     };
 
     // Fire and forget - state is updated by SessionProvider
@@ -1416,6 +1443,12 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
       // Track overflow separately
       ...(currentOverflowSeconds > 0 && { overflowDuration: currentOverflowSeconds }),
       estimatedDuration: fullDuration, // Planned duration (for rhythm tracking)
+      ...(wasWorkSession && {
+        intentionAlignment: detectIntentionAlignment(
+          todayIntentionRef.current?.projectId,
+          selectedProjectIdRef.current,
+        ),
+      }),
     };
 
     // Fire and forget - state is updated by SessionProvider
@@ -2144,7 +2177,7 @@ export function Timer({ onTimelineOpen, onBeforeStart, exportMessage }: TimerPro
         deferredSuggestion={deferredSuggestion}
         onSave={async (text, particleGoal) => {
           const deferredFrom = deferredSuggestion?.date;
-          await setIntention(text, undefined, particleGoal ?? undefined, deferredFrom);
+          await setIntention(text, selectedProjectId ?? undefined, particleGoal ?? undefined, deferredFrom);
           // Also update the dailyGoal in context for backwards compat with existing UI
           if (particleGoal !== null) {
             setDailyGoal(particleGoal);

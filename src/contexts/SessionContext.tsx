@@ -112,6 +112,9 @@ function toCreateInput(
     ...(taskData?.estimatedDuration && {
       estimatedDuration: taskData.estimatedDuration,
     }),
+    ...(taskData?.intentionAlignment && {
+      intentionAlignment: taskData.intentionAlignment,
+    }),
   };
 }
 

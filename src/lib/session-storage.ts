@@ -76,6 +76,7 @@ export interface TaskData {
   projectId?: string;
   overflowDuration?: number;
   estimatedDuration?: number;
+  intentionAlignment?: 'aligned' | 'reactive' | 'none';
 }
 
 /**
