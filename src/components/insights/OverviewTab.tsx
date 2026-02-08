@@ -16,6 +16,7 @@ import { WeeklyBarChart } from './WeeklyBarChart';
 import { StatsProjectBreakdown } from './StatsProjectBreakdown';
 import { TaskIntelligenceCard } from './TaskIntelligenceCard';
 import { MonthlyRecapCard } from './MonthlyRecapCard';
+import { DeepWorkInsightsCard } from './DeepWorkInsightsCard';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { ExportButton } from './ExportButton';
 
@@ -122,6 +123,9 @@ export function OverviewTab({
 
       {/* Monthly Recap */}
       <MonthlyRecapCard sessions={sessions} />
+
+      {/* Deep Work Insights */}
+      <DeepWorkInsightsCard sessions={filteredSessions} />
 
       {/* Projects Breakdown */}
       {projectBreakdown.length > 0 && (

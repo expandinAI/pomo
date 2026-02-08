@@ -7,6 +7,16 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 ## [Unreleased]
 
 ### Added
+- **Deep Work Insights (POMO-410, 5 SP)**:
+  - Pure function `buildDeepWorkInsights()` aggregates session quality data
+  - Deep Work Ratio: percentage of work sessions >= 45 min
+  - Avg Session Duration and Flow Sessions metrics
+  - Total Overflow Time from all sessions with overflow
+  - Quality Breakdown as monochrome Stacked Bar (Deep Work / Normal / Quick Focus)
+  - `DeepWorkInsightsCard` in Dashboard Overview between MonthlyRecap and Projects
+  - Respects TimeRange filter, hidden when no work sessions
+  - No colors -- black/white gradations, Particle-consistent
+  - Unit tests for all pure functions
 - **Session Quality Indicator (POMO-401, 2 SP)**:
   - Pure function `getSessionQuality()` with 3 quality types: Deep Work (≥45 min), Quick Focus (<15 min), Overflow Champion (>150% of planned)
   - Quality label appended to completion feedback (StatusMessage)
@@ -539,6 +549,7 @@ Dokumentation aller abgeschlossenen Stories und Releases.
 -
 
 ### Stories completed
+- [[stories/done/POMO-410-deep-work-insights]]
 - [[stories/done/POMO-400-chat-persistence]]
 - [[stories/done/POMO-385-coach-briefing-redesign]]
 - [[stories/done/POMO-380-session-start-nudge]]
