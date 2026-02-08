@@ -15,6 +15,7 @@ import { DashboardHeatmap } from './DashboardHeatmap';
 import { WeeklyBarChart } from './WeeklyBarChart';
 import { StatsProjectBreakdown } from './StatsProjectBreakdown';
 import { TaskIntelligenceCard } from './TaskIntelligenceCard';
+import { MonthlyRecapCard } from './MonthlyRecapCard';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { ExportButton } from './ExportButton';
 
@@ -24,6 +25,7 @@ interface OverviewTabProps {
   onTimeRangeChange: (range: TimeRange) => void;
   refreshTrigger?: number;
   filteredSessions: CompletedSession[];
+  sessions: CompletedSession[];
 
   // Computed metrics
   totalHours: string;
@@ -45,6 +47,7 @@ export function OverviewTab({
   onTimeRangeChange,
   refreshTrigger,
   filteredSessions,
+  sessions,
   totalHours,
   particleCount,
   focusScore,
@@ -116,6 +119,9 @@ export function OverviewTab({
 
       {/* Task Intelligence */}
       <TaskIntelligenceCard sessions={filteredSessions} />
+
+      {/* Monthly Recap */}
+      <MonthlyRecapCard sessions={sessions} />
 
       {/* Projects Breakdown */}
       {projectBreakdown.length > 0 && (

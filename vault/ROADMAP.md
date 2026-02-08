@@ -22,9 +22,9 @@ High-level overview of features and milestones.
 | Story | Feature | Points | Status |
 |-------|---------|--------|--------|
 | POMO-400 | Chat Persistence | 3 | ✅ Done |
-| POMO-401 | Session Quality Indicator | 2 | 📋 Backlog |
-| POMO-402 | Monthly Recap Card | 3 | 📋 Backlog |
-| POMO-403 | Task Intelligence Surface | 2 | 📋 Backlog |
+| POMO-401 | Session Quality Indicator | 2 | ✅ Done |
+| POMO-402 | Monthly Recap Card | 3 | ✅ Done |
+| POMO-403 | Task Intelligence Surface | 2 | ✅ Done |
 
 ### Core Features
 
@@ -547,9 +547,9 @@ Payment ✅  AI Coach ✅
 
 ### v3.0 - Essential Particle (10x) ← CURRENT
 - [x] Chat Persistence (POMO-400)
-- [ ] Session Quality Indicator (POMO-401)
-- [ ] Monthly Recap Card (POMO-402)
-- [ ] Task Intelligence Surface (POMO-403)
+- [x] Session Quality Indicator (POMO-401)
+- [x] Monthly Recap Card (POMO-402)
+- [x] Task Intelligence Surface (POMO-403)
 - [ ] Deep Work Insights (POMO-410)
 - [ ] Burnout Detection (POMO-411)
 - [ ] Focus Blocks (POMO-412)
